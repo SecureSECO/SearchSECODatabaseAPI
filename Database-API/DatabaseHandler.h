@@ -5,8 +5,8 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
-#include "Method.h"
-#include "Project.h"
+#include "Types.h"
+#include <string>
 
 /// <summary>
 /// Handles interaction with database.
@@ -21,7 +21,7 @@ public:
 	void AddMethod(Method method);
 
 	// Given a hash, return all methods with that hash
-	std::array<Method> HashToMethods(String hash);
+	Method* HashToMethods(std::string hash);
 private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
 	bool Equivalent(Method method1, Method method2);

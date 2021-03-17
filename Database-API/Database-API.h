@@ -9,5 +9,5 @@ Utrecht University within the Software Project course.
 class Database_API
 {
 public:
-	main();
+	int main();
 };

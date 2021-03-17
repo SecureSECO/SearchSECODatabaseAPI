@@ -4,18 +4,15 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-
-#include "Method.h"
-#include "Project.h"
-#include "Handler.h"
+#include <iostream>
+#include "Types.h"
+#include "DatabaseHandler.h"
+#include "Database-API.h"
 
 using namespace std;
 
-class Database_API
+int main()
 {
-	int main()
-	{
-		cout << "Hello CMake." << endl;
-		return 0;
-	}
+	cout << "Hello CMake." << endl;
+	return 0;
 }
