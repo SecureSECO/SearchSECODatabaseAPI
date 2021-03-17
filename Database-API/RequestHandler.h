@@ -5,13 +5,16 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
-
 /// <summary>
 /// Handles requests towards database.
 /// </summary>
 class RequestHandler
 {
 public:
-	// Listen for requests
-	void Listen();
+	static void Initialise();
+	static void HandleRequests(DatabaseHandler db);
+	static void HandleAddProjectRequest(DatabaseHandler db, std::string request);
+	static void HandleAddMethodRequest(DatabaseHandler db, std::string request);
+	static void HandleQueryRequest(DatabaseHandler db, std::string request);
+	static void HandleUnknownRequest();
 };
