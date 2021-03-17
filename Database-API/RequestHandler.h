@@ -5,16 +5,34 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "DatabaseHandler.h"
+
+
+enum eRequestType
+{
+    eAddProject,
+    eAddMethod,
+    eQuery,
+    eUnknown
+};
+
+
+
 /// <summary>
 /// Handles requests towards database.
 /// </summary>
 class RequestHandler
 {
 public:
-	static void Initialise();
-	static void HandleRequests(DatabaseHandler db);
-	static void HandleAddProjectRequest(DatabaseHandler db, std::string request);
-	static void HandleAddMethodRequest(DatabaseHandler db, std::string request);
-	static void HandleQueryRequest(DatabaseHandler db, std::string request);
-	static void HandleUnknownRequest();
+	void Initialize();
+	std::string HandleRequest(std::string request);
+private:
+	DatabaseHandler database;
+	void HandleAddProjectRequest(std::string request);
+	void HandleAddMethodRequest(std::string request);
+	std::string HandleQueryRequest(std::string request);
+	void HandleUnknownRequest();
+	Project JsonToProject(std::string request);
+	Method JsonToMethod(std::string request);
+	eRequestType RequestToRequestType(std::string request);
 };

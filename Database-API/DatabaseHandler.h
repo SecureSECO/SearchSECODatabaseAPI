@@ -9,6 +9,8 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <cassandra.h>
 
+using namespace types;
+
 /// <summary>
 /// Handles interaction with database.
 /// </summary>

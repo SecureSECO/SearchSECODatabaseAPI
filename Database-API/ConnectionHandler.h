@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "RequestHandler.h"
 
 /// <summary>
 /// Handles connections with database.
@@ -12,5 +13,7 @@ Utrecht University within the Software Project course.
 class ConnectionHandler
 {
 public:
-	void SetUpConnection();
+	void StartListen();
+private:
+	RequestHandler handler;
 };

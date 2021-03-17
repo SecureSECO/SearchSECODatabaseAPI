@@ -8,7 +8,9 @@ Utrecht University within the Software Project course.
 #include <ctime>
 #include <string>
 #include <vector>
+#include <json.hpp>
 
+namespace types {
 /// <summary>
 /// Represents the data of an author.
 /// </summary>
@@ -32,7 +34,10 @@ public:
 	std::vector<Author> authors;
 };
 
-/// <summary>
+//void to_json(nlohmann::json& j, const Method& m);
+
+
+// <summary>
 /// Represents the relevant data of a project.
 /// </summary>
 struct Project
@@ -47,3 +52,4 @@ public:
 	int stars;
 	std::vector<std::string> hashes;
 };
+}
