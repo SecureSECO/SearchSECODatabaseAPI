@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "DatabaseHandler.h"
 
 class Database_API
 {

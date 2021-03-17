@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #pragma once
 #include <ctime>
 #include <string>
+#include <vector>
 
 /// <summary>
 /// Represents the data of an author.
@@ -26,10 +27,9 @@ struct Method
 {
 public:
 	std::string hash;
-	std::string projectID;
 	std::string methodName;
 	std::string fileLocation;
-	Author authors[];
+	std::vector<Author> authors;
 };
 
 /// <summary>
@@ -39,11 +39,11 @@ struct Project
 {
 public:
 	std::string projectID;
-	tm version;
+	time_t version;
 	std::string license;
 	std::string name;
 	std::string url;
 	Author owner;
 	int stars;
-	std::string hashes[];
+	std::vector<std::string> hashes;
 };

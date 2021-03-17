@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #pragma once
 #include "Types.h"
 #include <string>
+#include <cassandra.h>
 
 /// <summary>
 /// Handles interaction with database.
@@ -14,15 +15,24 @@ Utrecht University within the Software Project course.
 class DatabaseHandler
 {
 public:
+	// Connect to the database
+	void Connect();
+
 	// Add a project to database.
 	void AddProject(Project project);
 
 	// Add a method to the tables methods and method_by_author.
-	void AddMethod(Method method);
+	void AddMethod(Method method, Project project);
 
 	// Given a hash, return all methods with that hash
-	Method* HashToMethods(std::string hash);
+	std::vector<Method> HashToMethods(std::string hash);
 private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
 	bool Equivalent(Method method1, Method method2);
+
+	// Parses a row into a method.
+	Method GetMethod(const CassRow* row);
+
+	// The connection with the database.
+	CassSession* connection;
 };
