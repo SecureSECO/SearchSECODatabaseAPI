@@ -73,7 +73,10 @@ using namespace std;
 		vector<Method> methods = database.HashToMethods(hash);
 		if(methods.size() == 0)
 			return "No results found";
-		nlohmann::json result = nlohmann::json{{"hash", methods[0].hash}};
+		nlohmann::json result;
+		for(int i = 0; i < methods.size(); i++){
+		result["Method " + i] = nlohmann::json{{"hash", methods[i].hash}, {"name", methods[i].methodName}, {"file", methods[i].fileLocation}};
+		}
 		return result.dump();
 	}
 

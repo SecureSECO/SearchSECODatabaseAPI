@@ -206,5 +206,17 @@ Method DatabaseHandler::GetMethod(const CassRow* row)
 	cass_uuid_string(hash_uuid, method_hash);
 	method.hash = method_hash;
 
+	const char* method_name;
+	size_t len;
+	const CassValue* name = cass_row_get_column(row, 6);
+	cass_value_get_string(name, &method_name, &len);
+	method.methodName = string(method_name, len);
+
+	const char* method_file;
+    //size_t len;
+    const CassValue* file = cass_row_get_column(row, 5);
+    cass_value_get_string(file, &method_file, &len);
+    method.fileLocation = string(method_file, len);
+
 	return method;
 }
