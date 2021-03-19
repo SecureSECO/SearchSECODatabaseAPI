@@ -33,6 +33,7 @@ private:
 	std::string HandleQueryRequest(std::string request);
 	void HandleUnknownRequest();
 	Project JsonToProject(std::string request);
-	MethodIn JsonToMethod(std::string request);
+	std::tuple <MethodIn, ProjectID, Version> JsonToTuple(std::string request);
+	std::string ToString(std::vector<std::string> values);
 	eRequestType RequestToRequestType(std::string request);
 };

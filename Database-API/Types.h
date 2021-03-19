@@ -34,7 +34,7 @@ public:
 struct MethodIn
 {
 public:
-	std::string hash;
+	Hash hash;
 	std::string methodName;
 	std::string fileLocation;
 	std::vector<Author> authors;
@@ -43,7 +43,7 @@ public:
 struct MethodOut
 {
 public:
-	std::string hash;
+	Hash hash;
 	std::string methodName;
 	std::string fileLocation;
 	std::vector<AuthorID> authorIDs;

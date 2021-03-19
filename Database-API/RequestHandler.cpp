@@ -58,13 +58,13 @@ using namespace std;
 		MethodIn method;
 		ProjectID projectID;
 		Version version;
-		(method, projectID, version) = JsonToTuple(request);
+		tuple <MethodIn, ProjectID, Version> result = JsonToTuple(request);
 
 		Project project;
-		project.projectID = projectID;
-		project.version = version;
+		project.projectID = get<1>(result);
+		project.version = get<2>(result);
 
-		database.AddMethod(method, project);
+		database.AddMethod(get<0>(result), project);
 		return;
 	}
 
@@ -95,7 +95,7 @@ using namespace std;
 	Project RequestHandler::JsonToProject(string request)
 	{
 		// Parse the request to an array containing the data intuitively.
-		nlohmann::json json = nlohmann::json::parse(request); 
+		nlohmann::json json = nlohmann::json::parse(request);
 
 		Project project;
 		project.projectID = json["projectID"];
@@ -124,7 +124,7 @@ using namespace std;
 		ProjectID projectID = json["projectID"];
 		Version version = json["version"];
 
-		return (method, projectID, version);
+		return make_tuple(method, projectID, version);
 	}
 
 	// Converts a vector of strings to a string with list formatting.

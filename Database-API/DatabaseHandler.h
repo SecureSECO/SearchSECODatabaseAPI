@@ -24,16 +24,18 @@ public:
 	void AddProject(Project project);
 
 	// Add a method to the tables methods and method_by_author.
-	void AddMethod(Method method, Project project);
+	void AddMethod(MethodIn method, Project project);
 
 	// Given a hash, return all methods with that hash
-	std::vector<Method> HashToMethods(std::string hash);
+	std::vector<MethodOut> HashToMethods(std::string hash);
 private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
-	bool Equivalent(Method method1, Method method2);
+	bool Equivalent(MethodIn method1, MethodIn method2);
 
 	// Parses a row into a method.
-	Method GetMethod(const CassRow* row);
+	MethodOut GetMethod(const CassRow* row);
+
+	CassUuid GetAuthorID(Author author);
 
 	// The connection with the database.
 	CassSession* connection;
