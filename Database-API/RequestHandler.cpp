@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <json.hpp>
 
 #include "RequestHandler.h"
@@ -18,20 +19,12 @@ using namespace std;
 	// Initialise the RequestHandler
 	void RequestHandler::Initialize()
 	{
-		// Set up a connection with the database using the ConnectionHandler.
-		//DatabaseHandler database;
+		// Set up a connection with the database.
 	    database.Connect();
-
-		// Handle interaction with user using the DatabaseHandler.
-		//HandleRequests(database);
 	}
 
 	string RequestHandler::HandleRequest(string request)
 	{
-		// We listen for a request from the user.
-		//string request;
-		//getline(cin, request);
-
 		// We handle the request based on its type.
 		eRequestType eRequestType = RequestToRequestType(request);
 		request = request.substr(request.find(" ") + 1); // The type of the request is now removed from the string.
@@ -49,9 +42,9 @@ using namespace std;
 		}
 
 		return result;
-
 	}
 
+	// Handles "add <Project>"-requests.
 	void RequestHandler::HandleAddProjectRequest(string request)
 	{
 		Project project = JsonToProject(request);
@@ -59,27 +52,40 @@ using namespace std;
 		return;
 	}
 
+	// Handles "add <Method>"-requests.
 	void RequestHandler::HandleAddMethodRequest(string request)
 	{
-		Method method = JsonToMethod(request);
+		MethodIn method;
+		ProjectID projectID;
+		Version version;
+		(method, projectID, version) = JsonToTuple(request);
+
 		Project project;
+		project.projectID = projectID;
+		project.version = version;
+
 		database.AddMethod(method, project);
 		return;
 	}
 
+	// Handles query requests.
 	string RequestHandler::HandleQueryRequest(string request)
 	{
 		string hash = request.substr(request.find(" ") + 1);
-		vector<Method> methods = database.HashToMethods(hash);
+		vector<MethodOut> methods = database.HashToMethods(hash);
 		if(methods.size() == 0)
 			return "No results found";
-		nlohmann::json result;
-		for(int i = 0; i < methods.size(); i++){
-		result["Method " + i] = nlohmann::json{{"hash", methods[i].hash}, {"name", methods[i].methodName}, {"file", methods[i].fileLocation}};
+		else
+		{
+			nlohmann::json result;
+			for (int i = 0; i < methods.size(); i++) {
+				result["Method " + to_string(i)] = nlohmann::json{ {"hash", methods[i].hash}, {"name", methods[i].methodName}, {"file", methods[i].fileLocation}, {"authors", ToString(methods[i].authorIDs)} };
+			}
+			return result.dump();
 		}
-		return result.dump();
 	}
 
+	// Handles unknown requests.
 	void RequestHandler::HandleUnknownRequest()
 	{
 		cout << "Your request is not recognised." << endl;
@@ -88,22 +94,59 @@ using namespace std;
 
 	Project RequestHandler::JsonToProject(string request)
 	{
-		// Todo: convert the project which is given in json format in the request to an actual project.
+		// Parse the request to an array containing the data intuitively.
+		nlohmann::json json = nlohmann::json::parse(request); 
+
 		Project project;
+		project.projectID = json["projectID"];
+		project.version = json["version"];
+		project.license = json["license"];
+		project.name = json["name"];
+		project.url = json["url"];
+		project.owner = json["owner"];
+		project.stars = json["stars"];
+		project.hashes = json["hashes"];
 		return project;
 	}
 
-	Method RequestHandler::JsonToMethod(string request)
+	tuple <MethodIn, ProjectID, Version> RequestHandler::JsonToTuple(string request)
 	{
-		// Todo: convert the method which is given in json format in the request to an actual method.
-		Method method;
-		return method;
+		// Parse the request to an array containing the data intuitively.
+		nlohmann::json json = nlohmann::json::parse(request);
+
+		// Get the relevant data of the array.
+		MethodIn method;
+		method.hash = json["hash"];
+		method.methodName = json["methodName"];
+		method.fileLocation = json["fileLocation"];
+		method.authors = json["authors"];
+
+		ProjectID projectID = json["projectID"];
+		Version version = json["version"];
+
+		return (method, projectID, version);
+	}
+
+	// Converts a vector of strings to a string with list formatting.
+	string RequestHandler::ToString(vector<string> values)
+	{
+		if (values.empty())
+			return "[]";
+		else
+		{
+			string output = "[" + values[0];
+			for (int i = 1; i < values.size(); i++)
+				output += ", " + values[i];
+			return output + "]";
+		}
 	}
 
 	// Determines the type of the request.
 	eRequestType RequestHandler::RequestToRequestType(string request)
 	{
-		string requestType = request.substr(0, request.find(" ")); // Gets first word of request, which determines its type.
+		// Get first word of request, which determines its type.
+		string requestType = request.substr(0, request.find(" "));
+
 		if (requestType == "addp")
 			return eAddProject;
 		else if (requestType == "addm")
@@ -112,11 +155,3 @@ using namespace std;
 			return eQuery;
 		else return eUnknown;
 	}
-
-/*enum eRequestType
-{
-	eAddProject,
-	eAddMethod,
-	eQuery,
-	eUnknown
-};*/

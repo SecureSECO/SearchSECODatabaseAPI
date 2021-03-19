@@ -33,6 +33,6 @@ private:
 	std::string HandleQueryRequest(std::string request);
 	void HandleUnknownRequest();
 	Project JsonToProject(std::string request);
-	Method JsonToMethod(std::string request);
+	MethodIn JsonToMethod(std::string request);
 	eRequestType RequestToRequestType(std::string request);
 };
