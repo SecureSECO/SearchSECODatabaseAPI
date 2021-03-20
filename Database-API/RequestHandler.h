@@ -6,7 +6,7 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
-
+#include <json.hpp>
 
 enum eRequestType
 {
@@ -32,8 +32,10 @@ private:
 	void HandleAddMethodRequest(std::string request);
 	std::string HandleQueryRequest(std::string request);
 	void HandleUnknownRequest();
-	Project JsonToProject(std::string request);
-	std::tuple <MethodIn, ProjectID, Version> JsonToTuple(std::string request);
+	Project JsonToProject(nlohmann::json json);
+	Author JsonToAuthor(nlohmann::json json);
+	vector<Author> MapJsonToAuthor(vector<nlohmann::json> jsons);
+	std::tuple <MethodIn, ProjectID, Version> JsonToTuple(nlohmann::json json);
 	std::string ToString(std::vector<std::string> values);
 	eRequestType RequestToRequestType(std::string request);
 };
