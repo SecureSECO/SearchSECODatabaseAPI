@@ -247,5 +247,18 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
     cass_value_get_string(file, &method_file, &len);
     method.fileLocation = string(method_file, len);
 
+	char project_id[CASS_UUID_STRING_LENGTH];
+    CassUuid id_uuid;
+    const CassValue* projectID = cass_row_get_column(row, 2);
+    cass_value_get_uuid(projectID, &id_uuid);
+    cass_uuid_string(id_uuid, project_id);
+    method.projectID = project_id;
+
+	time_t project_version;
+	cass_int64_t version;
+	const CassValue* projectVersion = cass_row_get_column(row, 1);
+	cass_value_get_int64(projectVersion, &version);
+	method.version = version;
+
 	return method;
 }

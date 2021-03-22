@@ -9,7 +9,7 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <vector>
 #include <json.hpp>
- 
+
 namespace types {
 /// <summary>
 /// Represents the data of an author.
@@ -44,6 +44,8 @@ struct MethodOut
 {
 public:
 	Hash hash;
+	ProjectID projectID;
+	Version version;
 	std::string methodName;
 	std::string fileLocation;
 	std::vector<AuthorID> authorIDs;
