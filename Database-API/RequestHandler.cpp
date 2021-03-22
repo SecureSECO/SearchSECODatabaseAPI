@@ -7,7 +7,6 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <string>
 #include <tuple>
-//#include <json.hpp>
 
 #include "RequestHandler.h"
 
@@ -23,11 +22,15 @@ void RequestHandler::Initialize()
     database.Connect();
 }
 
-string RequestHandler::HandleRequest(string request)
+string RequestHandler::HandleRequest(string requestType, string request)
 {
+	// We determine the type of the request.
+	eRequestType eRequestType = GetERequestType(requestType);
+
+	request = request.substr(request.find(" ") + 1);
+	//vector<vector<string>> data = requestToData(request);
+
 	// We handle the request based on its type.
-	eRequestType eRequestType = RequestToRequestType(request);
-	request = request.substr(request.find(" ") + 1); // The type of the request is now removed from the string.
 	string result;
 	switch (eRequestType)
 	{
@@ -44,43 +47,108 @@ string RequestHandler::HandleRequest(string request)
 }
 
 // Handles "add <Project>"-requests.
-void RequestHandler::HandleAddProjectRequest(string request)
+void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
-	nlohmann::json json = nlohmann::json::parse(request);
-	Project project = JsonToProject(json);
-	database.AddProject(project);
+	Project project = RequestToProject(request);
+	MethodIn method;
+
+	vector<string> dataEntries = SplitStringOn(request, '\n');
+	for (int i = 1; i < data.size(); i++)
+	{
+		method = DataEntryToMethod(dataEntries[i]);
+		database.AddMethod(method, project);
+	}
 	return;
 }
 
-// Handles "add <Method>"-requests.
-void RequestHandler::HandleAddMethodRequest(string request)
+Project RequestHandler::RequestToProject(string request) // project = projectID|version|license|project_name|url|author_name|author_mail|stars
 {
-	nlohmann::json json = nlohmann::json::parse(request);
-	tuple <MethodIn, ProjectID, Version> result = JsonToTuple(json);
+	// Convert request to projectData
+	string project = request.substr(0, request.find('\n'));
+	vector<string> projectData = SplitStringOn(project, '\0');
 
 	Project project;
-	project.projectID = get<1>(result);
-	project.version = get<2>(result);
+	project.projectID  = projectData[0];
+	project.version    = projectData[1];
+	project.license    = projectData[2];
+	project.name       = projectData[3];
+	project.url        = projectData[4];
+	project.owner.name = projectData[5];
+	project.owner.mail = projectData[6];
+	project.stars = stoi(projectData[7]); // std::stoi converts a string to an int.
+	project.hashes = RequestToHashes(request);
+	return project;
+}
 
-	database.AddMethod(get<0>(result), project);
-	return;
+MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = method_hash|method_name|method_fileLocation|number_of_authors|method_author1_name|method_author1_mail|method_author2_name|method_author2_mail|...
+{
+	vector<string> methodData = SplitStringOn(dataEntry, '\0');
+
+	MethodIn method;
+	method.hash = methodData[0];
+	method.methodName = methodData[1];
+	method.fileLocation = methodData[2];
+
+	vector<Author> authors;
+	Author author;
+	int numberOfAuthors = stoi(methodData[3]);
+	for (int i = 0; i < numberOfAuthors; i++)
+	{
+		author.name = methodData[4 + 2 * i];
+		author.mail = methodData[5 + 2 * i];
+
+		authors.push_back(author);
+	}
+	method.authors = authors;
+	return method;
+}
+
+vector<Hash> RequestHandler::RequestToHashes(string request)
+{
+	// TODO: Find all the hashes inside the request.
+	return {};
 }
 
 // Handles query requests.
-string RequestHandler::HandleQueryRequest(string request)
+string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
 {
-	string hash = request.substr(request.find(" ") + 1);
+	string hash = request.substr(0, request.find(" "));
 	vector<MethodOut> methods = database.HashToMethods(hash);
-	if(methods.size() == 0)
-		return "No results found";
-	else
+	if(!methods.empty())
 	{
-		nlohmann::json result;
-		for (int i = 0; i < methods.size(); i++) {
-			result["Method " + to_string(i)] = nlohmann::json{ {"hash", methods[i].hash}, {"name", methods[i].methodName}, {"file", methods[i].fileLocation}, {"authors", ToString(methods[i].authorIDs)} };
+		string result;
+		for (int i = 0; i < methods.size(); i++) 
+		{
+			result += MethodToString(methods[i]) + "\n"; // TODO: Get result efficiently, probably with use of vector<char> instead of string.
 		}
-		return result.dump();
+		return result;
 	}
+	else return "No results found";
+}
+
+string RequestHandler::MethodToString(MethodOut method)
+{
+	string result;
+	string hash = method.hash;
+	string name = method.methodName;
+	string fileLocation = method.fileLocation;
+	vector<string> authorids = method.authorIDs;
+	string authorTotal = authorids.size();
+
+	result = ""; // TODO: Get result efficiently, maybe with use of vector<char> instead of string.
+	return result;
+}
+
+vector<string> RequestHandler::SplitStringOn(string str, char delimiter)
+{
+	stringstream strstream(str);
+	string item;
+	vector<string> substrings;
+	while (getline(strstream, item, delimiter))
+	{
+		substrings.push_back(item);
+	}
+	return substrings;
 }
 
 // Handles unknown requests.
@@ -90,76 +158,34 @@ void RequestHandler::HandleUnknownRequest()
 	return;
 }
 
-Project RequestHandler::JsonToProject(nlohmann::json json)
-{
-	Project project;
-	project.projectID = json["projectID"];
-	project.version = json["version"];
-	project.license = json["license"];
-	project.name = json["name"];
-	project.url = json["url"];
-	project.owner = JsonToAuthor(json["owner"]);
-	project.stars = json["stars"];
-	project.hashes = json["hashes"].get<vector<string>>();
-	return project;
-}
-
-Author RequestHandler::JsonToAuthor(nlohmann::json json)
-{
-	Author author;
-	author.name = json["name"];
-	author.mail = json["mail"];
-	return author;
-}
-
-vector<Author> RequestHandler::MapJsonToAuthor(vector<nlohmann::json> jsons)
-{
-	vector<Author> authors;
-	for (int i = 0; i < jsons.size(); i++)
-		authors.push_back(JsonToAuthor(jsons[i]));
-
-	return authors;
-}
-
-tuple <MethodIn, ProjectID, Version> RequestHandler::JsonToTuple(nlohmann::json json)
-{
-	MethodIn method;
-	method.hash = json["hash"];
-	method.methodName = json["methodName"];
-	method.fileLocation = json["fileLocation"];
-	method.authors = MapJsonToAuthor(json["authors"]);
-	
-	ProjectID projectID = json["projectID"];
-	Version version = json["version"];
-
-	return make_tuple(method, projectID, version);
-}
-
-// Converts a vector of strings to a string with list formatting.
+// Converts a vector of strings to a string with spaces between entries
+// Example: ["abc", "def", "ghi"] -> "abc def ghi". 
 string RequestHandler::ToString(vector<string> values)
 {
-	if (values.empty())
-		return "[]";
-	else
+	if (!values.empty())
 	{
-		string output = "[" + values[0];
+		string result = values[0];
 		for (int i = 1; i < values.size(); i++)
-			output += ", " + values[i];
-		return output + "]";
+			result += " " + values[i];
+		return result;
 	}
+	else return "";
+}
+
+// Returns a vector which splits with respect to spaces.
+// Example: "abc def ghi" -> ["abc", "def", "ghi"]
+vector<string> RequestHandler::ToVector(string values)
+{
+	vector<string> result = splitStringOn(values, ' ');
+	return result;
 }
 
 // Determines the type of the request.
-eRequestType RequestHandler::RequestToRequestType(string request)
-{
-	// Get first word of request, which determines its type.
-	string requestType = request.substr(0, request.find(" "));
-	
+eRequestType RequestHandler::GetERequestType(string requestType)
+{	
 	if (requestType == "addp")
 		return eAddProject;
-	else if (requestType == "addm")
-		return eAddMethod;
-	else if (requestType == "query")
+	else if (requestType == "quer")
 		return eQuery;
 	else return eUnknown;
 }

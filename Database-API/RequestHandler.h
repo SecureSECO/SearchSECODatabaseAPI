@@ -11,7 +11,6 @@ Utrecht University within the Software Project course.
 enum eRequestType
 {
     eAddProject,
-    eAddMethod,
     eQuery,
     eUnknown
 };
@@ -25,17 +24,18 @@ class RequestHandler
 {
 public:
 	void Initialize();
-	std::string HandleRequest(std::string request);
+	std::string HandleRequest(std::string requestType, std::string request);
 private:
 	DatabaseHandler database;
 	void HandleAddProjectRequest(std::string request);
-	void HandleAddMethodRequest(std::string request);
+	Project RequestToProject(std::string request);
+	MethodIn DataEntryToMethod(std::string dataEntry);
+	std::vector<Hash> RequestToHashes(std::string request);
+	std::string MethodToString(MethodOut method);
+	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
 	std::string HandleQueryRequest(std::string request);
 	void HandleUnknownRequest();
-	Project JsonToProject(nlohmann::json json);
-	Author JsonToAuthor(nlohmann::json json);
-	std::vector<Author> MapJsonToAuthor(std::vector<nlohmann::json> jsons);
-	std::tuple <MethodIn, ProjectID, Version> JsonToTuple(nlohmann::json json);
 	std::string ToString(std::vector<std::string> values);
-	eRequestType RequestToRequestType(std::string request);
+	std::vector<std::string> ToVector(std::string values);
+	eRequestType GetERequestType(std::string requestType);
 };
