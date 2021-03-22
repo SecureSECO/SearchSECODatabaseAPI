@@ -41,7 +41,22 @@ public:
 
 	std::string r(request.begin(), request.end());
 
-	std::string result = handler.HandleRequest(r);
+	//size_t* length;
+	//sscanf(r.c_str(), "%zu", length);
+
+	//std::vector<int>::size_type size = length;
+
+	std::string length = r.substr(4);
+
+	int size = stoi(length);
+
+	std::vector<char> data(size);
+
+	socket_.read_some(boost::asio::buffer(data), error);
+
+	std::string d(data.begin(), data.end());
+
+	std::string result = handler.HandleRequest(r.substr(0, 3), d);
 
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 
