@@ -34,7 +34,7 @@ private:
 	void HandleUnknownRequest();
 	Project JsonToProject(nlohmann::json json);
 	Author JsonToAuthor(nlohmann::json json);
-	vector<Author> MapJsonToAuthor(vector<nlohmann::json> jsons);
+	std::vector<Author> MapJsonToAuthor(std::vector<nlohmann::json> jsons);
 	std::tuple <MethodIn, ProjectID, Version> JsonToTuple(nlohmann::json json);
 	std::string ToString(std::vector<std::string> values);
 	eRequestType RequestToRequestType(std::string request);

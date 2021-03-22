@@ -61,7 +61,7 @@ void RequestHandler::HandleAddMethodRequest(string request)
 	Project project;
 	project.projectID = get<1>(result);
 	project.version = get<2>(result);
-	
+
 	database.AddMethod(get<0>(result), project);
 	return;
 }
@@ -100,7 +100,7 @@ Project RequestHandler::JsonToProject(nlohmann::json json)
 	project.url = json["url"];
 	project.owner = JsonToAuthor(json["owner"]);
 	project.stars = json["stars"];
-	project.hashes = json["hashes"];
+	project.hashes = json["hashes"].get<vector<string>>();
 	return project;
 }
 
