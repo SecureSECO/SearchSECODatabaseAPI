@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <sstream>
 
 #include "RequestHandler.h"
 
@@ -36,8 +37,6 @@ string RequestHandler::HandleRequest(string requestType, string request)
 	{
 		case eAddProject:
 			HandleAddProjectRequest(request);
-		case eAddMethod:
-			HandleAddMethodRequest(request);
 		case eQuery:
 			result = HandleQueryRequest(request);
 		case eUnknown:
@@ -53,7 +52,7 @@ void RequestHandler::HandleAddProjectRequest(string request) // request = projec
 	MethodIn method;
 
 	vector<string> dataEntries = SplitStringOn(request, '\n');
-	for (int i = 1; i < data.size(); i++)
+	for (int i = 1; i < dataEntries.size(); i++)
 	{
 		method = DataEntryToMethod(dataEntries[i]);
 		database.AddMethod(method, project);
@@ -64,8 +63,8 @@ void RequestHandler::HandleAddProjectRequest(string request) // request = projec
 Project RequestHandler::RequestToProject(string request) // project = projectID|version|license|project_name|url|author_name|author_mail|stars
 {
 	// Convert request to projectData
-	string project = request.substr(0, request.find('\n'));
-	vector<string> projectData = SplitStringOn(project, '\0');
+	string project_string = request.substr(0, request.find('\n'));
+	vector<string> projectData = SplitStringOn(project_string, '\0');
 
 	Project project;
 	project.projectID  = projectData[0];
@@ -133,7 +132,7 @@ string RequestHandler::MethodToString(MethodOut method)
 	string name = method.methodName;
 	string fileLocation = method.fileLocation;
 	vector<string> authorids = method.authorIDs;
-	string authorTotal = authorids.size();
+	string authorTotal = to_string(authorids.size());
 
 	result = ""; // TODO: Get result efficiently, maybe with use of vector<char> instead of string.
 	return result;
@@ -176,13 +175,13 @@ string RequestHandler::ToString(vector<string> values)
 // Example: "abc def ghi" -> ["abc", "def", "ghi"]
 vector<string> RequestHandler::ToVector(string values)
 {
-	vector<string> result = splitStringOn(values, ' ');
+	vector<string> result = SplitStringOn(values, ' ');
 	return result;
 }
 
 // Determines the type of the request.
 eRequestType RequestHandler::GetERequestType(string requestType)
-{	
+{
 	if (requestType == "addp")
 		return eAddProject;
 	else if (requestType == "quer")
