@@ -31,11 +31,10 @@ private:
 	Project RequestToProject(std::string request);
 	MethodIn DataEntryToMethod(std::string dataEntry);
 	std::vector<Hash> RequestToHashes(std::string request);
-	std::string MethodToString(MethodOut method);
+	std::vector<char> MethodToChars(MethodOut method, char dataDelimiter, char methodDelimiter);
+	void AppendBy(std::vector<std::string> words, char wordDelimiter, char endDelimiter, std::vector<char> result);
 	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
 	std::string HandleQueryRequest(std::string request);
 	void HandleUnknownRequest();
-	std::string ToString(std::vector<std::string> values);
-	std::vector<std::string> ToVector(std::string values);
 	eRequestType GetERequestType(std::string requestType);
 };

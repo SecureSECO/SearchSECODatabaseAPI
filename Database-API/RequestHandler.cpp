@@ -6,8 +6,9 @@ Utrecht University within the Software Project course.
 
 #include <iostream>
 #include <string>
-#include <tuple>
+#include <vector>
 #include <sstream>
+#include <ctime>
 
 #include "RequestHandler.h"
 
@@ -37,10 +38,13 @@ string RequestHandler::HandleRequest(string requestType, string request)
 	{
 		case eAddProject:
 			HandleAddProjectRequest(request);
+			break;
 		case eQuery:
 			result = HandleQueryRequest(request);
+			break;
 		case eUnknown:
 			HandleUnknownRequest();
+			break;
 	}
 	return result;
 }
@@ -68,7 +72,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 
 	Project project;
 	project.projectID  = projectData[0];
-	project.version    = projectData[1];
+	project.version	   = projectData[1];
 	project.license    = projectData[2];
 	project.name       = projectData[3];
 	project.url        = projectData[4];
@@ -109,33 +113,50 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 }
 
 // Handles query requests.
-string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
+vector<char> RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
 {
 	string hash = request.substr(0, request.find(" "));
 	vector<MethodOut> methods = database.HashToMethods(hash);
-	if(!methods.empty())
-	{
-		string result;
-		for (int i = 0; i < methods.size(); i++) 
-		{
-			result += MethodToString(methods[i]) + "\n"; // TODO: Get result efficiently, probably with use of vector<char> instead of string.
-		}
-		return result;
-	}
-	else return "No results found";
+	vector<char> methodsToChars = MethodsToChars(methods, '\0', '\n')
+	return "No results found";
 }
 
-string RequestHandler::MethodToString(MethodOut method)
+// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
+vector<char> RequestHandler::MethodsToChars(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
-	string result;
-	string hash = method.hash;
-	string name = method.methodName;
-	string fileLocation = method.fileLocation;
-	vector<string> authorids = method.authorIDs;
-	string authorTotal = to_string(authorids.size());
+	vector<char> result = {};
+	while (!methods.empty())
+	{
+		MethodOut lastMethod = methods.back();
+		string hash = lastMethod.hash;
+		string name = lastMethod.methodName;
+		string fileLocation = lastMethod.fileLocation;
+		vector<string> authorids = lastMethod.authorIDs;
+		string authorTotal = to_string(authorids.size());
 
-	result = ""; // TODO: Get result efficiently, maybe with use of vector<char> instead of string.
+		for (string data : { hash, name, fileLocation, authorTotal})
+		{
+			AppendBy(&result, data, dataDelimiter);
+		}
+		for (string authorid : authorids)
+		{
+			AppendBy(&result, authorid, dataDelimiter);
+		}
+
+		result.push_back(methodDelimiter);
+		methods.pop_back();
+	}
 	return result;
+}
+
+// Appends result-string by a string, and adds a delimiter at the end.
+void RequestHandler::AppendBy(vector<char>& result, string word, char delimiter)
+{
+	for (int i = 0; i < word.size(); i++)
+	{
+		result.push_back(word[i]);
+	}
+	result.push_back(delimiter);
 }
 
 vector<string> RequestHandler::SplitStringOn(string str, char delimiter)
@@ -155,28 +176,6 @@ void RequestHandler::HandleUnknownRequest()
 {
 	cout << "Your request is not recognised." << endl;
 	return;
-}
-
-// Converts a vector of strings to a string with spaces between entries
-// Example: ["abc", "def", "ghi"] -> "abc def ghi". 
-string RequestHandler::ToString(vector<string> values)
-{
-	if (!values.empty())
-	{
-		string result = values[0];
-		for (int i = 1; i < values.size(); i++)
-			result += " " + values[i];
-		return result;
-	}
-	else return "";
-}
-
-// Returns a vector which splits with respect to spaces.
-// Example: "abc def ghi" -> ["abc", "def", "ghi"]
-vector<string> RequestHandler::ToVector(string values)
-{
-	vector<string> result = SplitStringOn(values, ' ');
-	return result;
 }
 
 // Determines the type of the request.
