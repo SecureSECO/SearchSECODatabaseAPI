@@ -116,7 +116,7 @@ void DatabaseHandler::AddProject(Project project)
 
 void DatabaseHandler::AddMethod(MethodIn method, Project project)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO projectdata.methods (method_hash, version, projectID, name, file, authors) VALUES (?, ?, ?, ?, ?, ?)", 6);
+	CassStatement* query = cass_statement_new("INSERT INTO projectdata.methods (method_hash, version, projectID, name, file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
 
 	CassUuid hash;
 	cass_uuid_from_string(method.hash.c_str(), &hash);
@@ -132,6 +132,8 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 
 	cass_statement_bind_string(query, 4, method.fileLocation.c_str());
 
+	cass_statement_bind_int32(query, 5, method.lineNumber);
+
 	int size = method.authors.size();
 
 	CassCollection* authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
@@ -140,7 +142,7 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 		cass_collection_append_uuid(authors, GetAuthorID(method.authors[i]));
 	}
 
-	cass_statement_bind_collection(query, 5, authors);
+	cass_statement_bind_collection(query, 6, authors);
 
 	cass_collection_free(authors);
 
@@ -237,7 +239,7 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 
 	const char* method_name;
 	size_t len;
-	const CassValue* name = cass_row_get_column(row, 6);
+	const CassValue* name = cass_row_get_column(row, 7);
 	cass_value_get_string(name, &method_name, &len);
 	method.methodName = string(method_name, len);
 
@@ -246,6 +248,11 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
     const CassValue* file = cass_row_get_column(row, 5);
     cass_value_get_string(file, &method_file, &len);
     method.fileLocation = string(method_file, len);
+
+	cass_int32_t lineNumber;
+	const CassValue* number = cass_row_get_column(row, 6);
+	cass_value_get_int32(number, &lineNumber);
+	method.lineNumber = lineNumber;
 
 	char project_id[CASS_UUID_STRING_LENGTH];
     CassUuid id_uuid;

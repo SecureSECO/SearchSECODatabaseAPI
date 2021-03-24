@@ -37,6 +37,7 @@ public:
 	Hash hash;
 	std::string methodName;
 	std::string fileLocation;
+	int lineNumber;
 	std::vector<Author> authors;
 };
 
@@ -48,6 +49,7 @@ public:
 	Version version;
 	std::string methodName;
 	std::string fileLocation;
+	int lineNumber;
 	std::vector<AuthorID> authorIDs;
 };
 
