@@ -260,5 +260,18 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 	cass_value_get_int64(projectVersion, &version);
 	method.version = version;
 
+	const CassValue* set = cass_row_get_column(row, 3);
+	CassIterator* iterator = cass_iterator_from_collection(set);
+	while(cass_iterator_next(iterator)){
+		char author_id[CASS_UUID_STRING_LENGTH];
+		CassUuid authorID;
+		const CassValue* id = cass_iterator_get_value(iterator);
+		cass_value_get_uuid(id, &authorID);
+		cass_uuid_string(authorID, author_id);
+		method.authorIDs.push_back(author_id);
+	}
+
+	cass_iterator_free(iterator);
+
 	return method;
 }
