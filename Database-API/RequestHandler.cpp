@@ -121,7 +121,7 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 // Handles query requests.
 string RequestHandler::HandleQueryRequest(string request) // request = hash1 \n hash2 \n ...;  output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
 {
-	vector<Hash> hashes = SplitStringOn(hashes, '\n');
+	vector<Hash> hashes = SplitStringOn(request, '\n');
 	vector<MethodOut> methods = GetMethods(hashes);
 
 	string methodsToString = MethodsToString(methods, '\0', '\n');
@@ -132,7 +132,7 @@ string RequestHandler::HandleQueryRequest(string request) // request = hash1 \n 
 	else return "No results found";
 }
 
-void RequestHandler::GetMethods(vector<Hash> hashes)
+vector<MethodOut> RequestHandler::GetMethods(vector<Hash> hashes)
 {
 	vector<MethodOut> methods = { };
 	for (int i = 0; i < hashes.size(); i++)
@@ -159,7 +159,7 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 		string fileLocation      = lastMethod.fileLocation;
 		string lineNumber        = to_string(lastMethod.lineNumber);
 		vector<string> authorIDs = lastMethod.authorIDs;
-		string authorTotal  = to_string(authorids.size());
+		string authorTotal = to_string(authorIDs.size());
 
 		for (string data : { hash, projectID, version, name, fileLocation, lineNumber, authorTotal})
 		{
