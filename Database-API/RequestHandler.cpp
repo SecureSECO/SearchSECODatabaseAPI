@@ -137,21 +137,23 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 	vector<char> chars = {};
 	while (!methods.empty())
 	{
-		MethodOut lastMethod = methods.back();
-		string hash = lastMethod.hash;
-		string name = lastMethod.methodName;
-		string fileLocation = lastMethod.fileLocation;
-		string lineNumber = to_string(lastMethod.lineNumber);
-		vector<string> authorids = lastMethod.authorIDs;
-		string authorTotal = to_string(authorids.size());
+		MethodOut lastMethod     = methods.back();
+		string hash              = lastMethod.hash;
+		string projectID         = lastMethod.projectID;
+		string version           = to_string(lastMethod.version);
+		string name              = lastMethod.methodName;
+		string fileLocation      = lastMethod.fileLocation;
+		string lineNumber        = to_string(lastMethod.lineNumber);
+		vector<string> authorIDs = lastMethod.authorIDs;
+		string authorTotal  = to_string(authorids.size());
 
-		for (string data : { hash, name, fileLocation, lineNumber, authorTotal})
+		for (string data : { hash, projectID, version, name, fileLocation, lineNumber, authorTotal})
 		{
 			AppendBy(chars, data, dataDelimiter);
 		}
-		for (string authorid : authorids)
+		for (string authorID : authorIDs)
 		{
-			AppendBy(chars, authorid, dataDelimiter);
+			AppendBy(chars, authorID, dataDelimiter);
 		}
 
 		if (!chars.empty()) // We still should get rid of the last dataDelimiter.
@@ -165,7 +167,6 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 	string result(chars.begin(), chars.end());
 	return result;
 }
-
 // Appends result-string by a string, and adds a delimiter at the end.
 void RequestHandler::AppendBy(vector<char>& result, string word, char delimiter)
 {
@@ -200,7 +201,7 @@ eRequestType RequestHandler::GetERequestType(string requestType)
 {
 	if (requestType == "addp")
 		return eAddProject;
-	else if (requestType == "quer")
+	else if (requestType == "find")
 		return eQuery;
 	else return eUnknown;
 }
