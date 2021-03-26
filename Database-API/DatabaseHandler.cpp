@@ -31,9 +31,11 @@ vector<MethodOut> DatabaseHandler::HashToMethods(string hash)
 {
 	CassStatement* query = cass_statement_new("SELECT * FROM projectdata.methods WHERE method_hash = ?", 1);
 
-	CassUuid method_hash;
-	cass_uuid_from_string(hash.c_str(), &method_hash);
-	cass_statement_bind_uuid(query, 0, method_hash);
+	//CassUuid method_hash;
+	//cass_uuid_from_string(hash.c_str(), &method_hash);
+	//cass_statement_bind_uuid(query, 0, method_hash);
+
+	cass_statement_bind_string(query, 0, hash.c_str());
 
 	CassFuture* result_future = cass_session_execute(connection, query);
 
@@ -92,9 +94,10 @@ void DatabaseHandler::AddProject(Project project)
 	CassCollection* hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
 
 	for(int i = 0; i < size; i++){
-		CassUuid hash;
-		cass_uuid_from_string(project.hashes[i].c_str(), &hash);
-		cass_collection_append_uuid(hashes, hash);
+		//CassUuid hash;
+		//cass_uuid_from_string(project.hashes[i].c_str(), &hash);
+		//cass_collection_append_uuid(hashes, hash);
+		cass_collection_append_string(hashes, project.hashes[i].c_str());
 	}
 
 	cass_statement_bind_collection(query, 7, hashes);
@@ -118,9 +121,11 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 {
 	CassStatement* query = cass_statement_new("INSERT INTO projectdata.methods (method_hash, version, projectID, name, file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
 
-	CassUuid hash;
-	cass_uuid_from_string(method.hash.c_str(), &hash);
-	cass_statement_bind_uuid(query, 0, hash);
+	//CassUuid hash;
+	//cass_uuid_from_string(method.hash.c_str(), &hash);
+	//cass_statement_bind_uuid(query, 0, hash);
+
+	cass_statement_bind_string(query, 0, method.hash.c_str());
 
     cass_statement_bind_int64(query, 1, project.version);
 
@@ -230,15 +235,20 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 {
 	MethodOut method;
 
-	char method_hash[CASS_UUID_STRING_LENGTH];
+	/*char method_hash[CASS_UUID_STRING_LENGTH];
 	CassUuid hash_uuid;
 	const CassValue* hash = cass_row_get_column(row, 0);
 	cass_value_get_uuid(hash, &hash_uuid);
 	cass_uuid_string(hash_uuid, method_hash);
-	method.hash = method_hash;
+	method.hash = method_hash;*/
+
+	const char* method_hash;
+	size_t len;
+	const CassValue* hash = cass_row_get_column(row,0);
+	cass_value_get_string(hash, &method_hash, &len);
+	method.hash = string(method_hash, len);
 
 	const char* method_name;
-	size_t len;
 	const CassValue* name = cass_row_get_column(row, 7);
 	cass_value_get_string(name, &method_name, &len);
 	method.methodName = string(method_name, len);
