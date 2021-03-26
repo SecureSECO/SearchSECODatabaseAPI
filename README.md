@@ -19,4 +19,4 @@ This can be done using the following commands in the projects main folder:
 * `cmake ..`
 * `cmake --build .`
 
-After this the program can be run using `./Database-API`.
+After this the program can be run using `./Database-API/Database-API`.
