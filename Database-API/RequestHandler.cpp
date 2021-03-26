@@ -128,7 +128,7 @@ string RequestHandler::HandleQueryRequest(string request) // request = hash; out
 // Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
 string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
-	vector<char> result = {};
+	vector<char> chars = {};
 	while (!methods.empty())
 	{
 		MethodOut lastMethod = methods.back();
@@ -140,18 +140,23 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 
 		for (string data : { hash, name, fileLocation, authorTotal})
 		{
-			AppendBy(&result, data, dataDelimiter);
+			AppendBy(chars, data, dataDelimiter);
 		}
 		for (string authorid : authorids)
 		{
-			AppendBy(&result, authorid, dataDelimiter);
+			AppendBy(chars, authorid, dataDelimiter);
 		}
 
-		result.push_back(methodDelimiter);
+		if (!chars.empty()) // We still should get rid of the last dataDelimiter.
+		{
+			chars.pop_back();
+		}
+
+		chars.push_back(methodDelimiter);
 		methods.pop_back();
 	}
-	string result2(result.begin(), result.end());
-	return result2;
+	string result(chars.begin(), chars.end());
+	return result;
 }
 
 // Appends result-string by a string, and adds a delimiter at the end.
