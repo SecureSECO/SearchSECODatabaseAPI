@@ -12,3 +12,11 @@ You will then have to perform the following commands in a folder that can contai
 This will install all the dependencies.
 After this you will need to clone the desired branch.
 You can then use `cmake` and `cmake --build` to run the program.
+
+This can be done using the following commands in the projects main folder:
+* `mkdir build`
+* `cd build`
+* `cmake ..`
+* `cmake --build .`
+
+After this the program can be run using `./Database-API`.
