@@ -119,10 +119,11 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 }
 
 // Handles query requests.
-string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
+string RequestHandler::HandleQueryRequest(string request) // request = hash1 \n hash2 \n ...;  output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
 {
-	string hash = request.substr(0, request.find(" "));
-	vector<MethodOut> methods = database.HashToMethods(hash);
+	vector<Hash> hashes = SplitStringOn(hashes, '\n');
+	vector<MethodOut> methods = GetMethods(hashes);
+
 	string methodsToString = MethodsToString(methods, '\0', '\n');
 	if (!(methodsToString == ""))
 	{
@@ -131,6 +132,19 @@ string RequestHandler::HandleQueryRequest(string request) // request = hash; out
 	else return "No results found";
 }
 
+void RequestHandler::GetMethods(vector<Hash> hashes)
+{
+	vector<MethodOut> methods = { };
+	for (int i = 0; i < hashes.size(); i++)
+	{
+		vector<MethodOut> newMethods = database.HashToMethods(hash);
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(newMethods[j]);
+		}
+	}
+	return methods;
+}
 // Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
 string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
