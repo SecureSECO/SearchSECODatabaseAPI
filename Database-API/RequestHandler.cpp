@@ -112,7 +112,7 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 	vector<Hash> hashes = {};
 	for (int i = 1; i < data.size(); i++)
 	{
-		hash = data[i].substr(0, data[i].find('\0'));
+		Hash hash = data[i].substr(0, data[i].find('\0'));
 		hashes.push_back(hash);
 	}
 	return hashes;
