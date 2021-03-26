@@ -11,7 +11,7 @@ Utrecht University within the Software Project course.
 enum eRequestType
 {
     eAddProject,
-    eQuery,
+    eFindHash,
     eUnknown
 };
 

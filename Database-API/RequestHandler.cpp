@@ -26,11 +26,8 @@ void RequestHandler::Initialize()
 
 string RequestHandler::HandleRequest(string requestType, string request)
 {
-	// We determine the type of the request.
+	// We convert the requestType to a eRequestType (for the switch below).
 	eRequestType eRequestType = GetERequestType(requestType);
-
-	request = request.substr(request.find(" ") + 1);
-	//vector<vector<string>> data = requestToData(request);
 
 	// We handle the request based on its type.
 	string result;
@@ -39,7 +36,7 @@ string RequestHandler::HandleRequest(string requestType, string request)
 		case eAddProject:
 			HandleAddProjectRequest(request);
 			break;
-		case eQuery:
+		case eFindHash:
 			result = HandleQueryRequest(request);
 			break;
 		case eUnknown:
@@ -64,6 +61,7 @@ void RequestHandler::HandleAddProjectRequest(string request) // request = projec
 	return;
 }
 
+// Retrieves the project given a request.
 Project RequestHandler::RequestToProject(string request) // project = projectID|version|license|project_name|url|author_name|author_mail|stars
 {
 	// Convert request to projectData
@@ -83,6 +81,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 	return project;
 }
 
+// Converts a data entry to a Method.
 MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = method_hash|method_name|method_fileLocation|number_of_authors|method_author1_name|method_author1_mail|method_author2_name|method_author2_mail|...
 {
 	vector<string> methodData = SplitStringOn(dataEntry, '\0');
@@ -106,6 +105,7 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 	return method;
 }
 
+// Retrieves the hashes within a request.
 vector<Hash> RequestHandler::RequestToHashes(string request)
 {
 	vector<string> data = SplitStringOn(request, '\n');
@@ -132,12 +132,13 @@ string RequestHandler::HandleQueryRequest(string request) // request = hash1 \n 
 	else return "No results found";
 }
 
+// Retrieves the methods corresponding to the hashes given as input using the database.
 vector<MethodOut> RequestHandler::GetMethods(vector<Hash> hashes)
 {
 	vector<MethodOut> methods = { };
 	for (int i = 0; i < hashes.size(); i++)
 	{
-		vector<MethodOut> newMethods = database.HashToMethods(hash);
+		vector<MethodOut> newMethods = database.HashToMethods(hashes[i]);
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(newMethods[j]);
@@ -145,6 +146,7 @@ vector<MethodOut> RequestHandler::GetMethods(vector<Hash> hashes)
 	}
 	return methods;
 }
+
 // Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
 string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
@@ -159,38 +161,42 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 		string fileLocation      = lastMethod.fileLocation;
 		string lineNumber        = to_string(lastMethod.lineNumber);
 		vector<string> authorIDs = lastMethod.authorIDs;
-		string authorTotal = to_string(authorIDs.size());
+		string authorTotal       = to_string(authorIDs.size());
 
-		for (string data : { hash, projectID, version, name, fileLocation, lineNumber, authorTotal})
+		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber, authorTotal and all the authorIDs.
+		vector<string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
+		dataElements.insert(end(dataElements), begin(authorIDs), end(authorIDs));
+
+		for (string data : dataElements)
 		{
 			AppendBy(chars, data, dataDelimiter);
 		}
-		for (string authorID : authorIDs)
-		{
-			AppendBy(chars, authorID, dataDelimiter);
-		}
 
-		if (!chars.empty()) // We still should get rid of the last dataDelimiter.
+		// We should get rid of the last dataDelimiter if something is appended to 'chars' (which is only the case if it is non-empty).
+		if (!chars.empty())
 		{
 			chars.pop_back();
 		}
 
+		// We end 'chars' with the methodDelimiter and indicate that we are done with 'method'.
 		chars.push_back(methodDelimiter);
 		methods.pop_back();
 	}
-	string result(chars.begin(), chars.end());
+	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
 }
-// Appends result-string by a string, and adds a delimiter at the end.
-void RequestHandler::AppendBy(vector<char>& result, string word, char delimiter)
+
+// Appends result-string by a string, and adds a special character at the end.
+void RequestHandler::AppendBy(vector<char>& result, string word, char endCharacter)
 {
 	for (int i = 0; i < word.size(); i++)
 	{
 		result.push_back(word[i]);
 	}
-	result.push_back(delimiter);
+	result.push_back(endCharacter);
 }
 
+// Splits a string on a special character and returns the vectors consisting of the substrings.
 vector<string> RequestHandler::SplitStringOn(string str, char delimiter)
 {
 	stringstream strstream(str);
@@ -216,6 +222,6 @@ eRequestType RequestHandler::GetERequestType(string requestType)
 	if (requestType == "addp")
 		return eAddProject;
 	else if (requestType == "find")
-		return eQuery;
+		return eFindHash;
 	else return eUnknown;
 }
