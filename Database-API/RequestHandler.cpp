@@ -108,8 +108,14 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 
 vector<Hash> RequestHandler::RequestToHashes(string request)
 {
-	// TODO: Find all the hashes inside the request.
-	return {};
+	vector<string> data = SplitStringOn(request, '\n');
+	vector<Hash> hashes = {};
+	for (int i = 1; i < data.size(); i++)
+	{
+		hash = data[i].substr(0, data[i].find('\0'));
+		hashes.push_back(hash);
+	}
+	return hashes;
 }
 
 // Handles query requests.
