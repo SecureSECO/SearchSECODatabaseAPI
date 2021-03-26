@@ -20,3 +20,4 @@ This can be done using the following commands in the projects main folder:
 * `cmake --build .`
 
 After this the program can be run using `./Database-API/Database-API`.
+This will only work when you also have a Cassandra database running on your computer.
