@@ -50,7 +50,7 @@ string RequestHandler::HandleRequest(string requestType, string request)
 }
 
 // Handles "add <Project>"-requests.
-void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
+void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
 	Project project = RequestToProject(request);
 	MethodIn method;
@@ -91,14 +91,14 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 	method.hash = methodData[0];
 	method.methodName = methodData[1];
 	method.fileLocation = methodData[2];
-
+	method.lineNumber = stoi(methodData[3]);
 	vector<Author> authors;
 	Author author;
-	int numberOfAuthors = stoi(methodData[3]);
+	int numberOfAuthors = stoi(methodData[4]);
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
-		author.name = methodData[4 + 2 * i];
-		author.mail = methodData[5 + 2 * i];
+		author.name = methodData[5 + 2 * i];
+		author.mail = methodData[6 + 2 * i];
 
 		authors.push_back(author);
 	}
@@ -113,7 +113,7 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 }
 
 // Handles query requests.
-string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
+string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
 {
 	string hash = request.substr(0, request.find(" "));
 	vector<MethodOut> methods = database.HashToMethods(hash);
@@ -135,10 +135,11 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 		string hash = lastMethod.hash;
 		string name = lastMethod.methodName;
 		string fileLocation = lastMethod.fileLocation;
+		string lineNumber = to_string(lastMethod.lineNumber);
 		vector<string> authorids = lastMethod.authorIDs;
 		string authorTotal = to_string(authorids.size());
 
-		for (string data : { hash, name, fileLocation, authorTotal})
+		for (string data : { hash, name, fileLocation, lineNumber, authorTotal})
 		{
 			AppendBy(chars, data, dataDelimiter);
 		}
