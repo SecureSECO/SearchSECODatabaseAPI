@@ -113,16 +113,20 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 }
 
 // Handles query requests.
-vector<char> RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
+string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
 {
 	string hash = request.substr(0, request.find(" "));
 	vector<MethodOut> methods = database.HashToMethods(hash);
-	vector<char> methodsToChars = MethodsToChars(methods, '\0', '\n')
-	return "No results found";
+	string methodsToString = MethodsToString(methods, '\0', '\n');
+	if (!(methodsToString == ""))
+	{
+		return methodsToString;
+	}
+	else return "No results found";
 }
 
 // Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
-vector<char> RequestHandler::MethodsToChars(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
+string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
 	vector<char> result = {};
 	while (!methods.empty())
@@ -146,7 +150,8 @@ vector<char> RequestHandler::MethodsToChars(vector<MethodOut> methods, char data
 		result.push_back(methodDelimiter);
 		methods.pop_back();
 	}
-	return result;
+	string result2(result.begin(), result.end());
+	return result2;
 }
 
 // Appends result-string by a string, and adds a delimiter at the end.
