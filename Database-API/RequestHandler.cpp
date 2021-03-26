@@ -40,7 +40,7 @@ string RequestHandler::HandleRequest(string requestType, string request)
 			result = HandleQueryRequest(request);
 			break;
 		case eUnknown:
-			HandleUnknownRequest();
+			result = HandleUnknownRequest();
 			break;
 	}
 	return result;
@@ -210,10 +210,9 @@ vector<string> RequestHandler::SplitStringOn(string str, char delimiter)
 }
 
 // Handles unknown requests.
-void RequestHandler::HandleUnknownRequest()
+string RequestHandler::HandleUnknownRequest()
 {
-	cout << "Your request is not recognised." << endl;
-	return;
+	return "Your input is not recognised.";
 }
 
 // Determines the type of the request.

@@ -36,6 +36,6 @@ private:
 	void AppendBy(std::vector<char>& result, std::string word, char delimiter);
 	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
 	std::string HandleQueryRequest(std::string request);
-	void HandleUnknownRequest();
+	std::string HandleUnknownRequest();
 	eRequestType GetERequestType(std::string requestType);
 };
