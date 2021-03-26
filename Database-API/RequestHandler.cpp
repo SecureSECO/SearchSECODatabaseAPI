@@ -50,7 +50,7 @@ string RequestHandler::HandleRequest(string requestType, string request)
 }
 
 // Handles "add <Project>"-requests.
-void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
+void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
 	Project project = RequestToProject(request);
 	MethodIn method;
@@ -91,14 +91,14 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 	method.hash = methodData[0];
 	method.methodName = methodData[1];
 	method.fileLocation = methodData[2];
-
+	method.lineNumber = stoi(methodData[3]);
 	vector<Author> authors;
 	Author author;
-	int numberOfAuthors = stoi(methodData[3]);
+	int numberOfAuthors = stoi(methodData[4]);
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
-		author.name = methodData[4 + 2 * i];
-		author.mail = methodData[5 + 2 * i];
+		author.name = methodData[5 + 2 * i];
+		author.mail = methodData[6 + 2 * i];
 
 		authors.push_back(author);
 	}
@@ -108,12 +108,18 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 
 vector<Hash> RequestHandler::RequestToHashes(string request)
 {
-	// TODO: Find all the hashes inside the request.
-	return {};
+	vector<string> data = SplitStringOn(request, '\n');
+	vector<Hash> hashes = {};
+	for (int i = 1; i < data.size(); i++)
+	{
+		hash = data[i].substr(0, data[i].find('\0'));
+		hashes.push_back(hash);
+	}
+	return hashes;
 }
 
 // Handles query requests.
-string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|number_of_authors|method1_author1_name|method1_author1_mail|method1_author2_name|method1_author2_mail|... \n <method2_data> \n ...
+string RequestHandler::HandleQueryRequest(string request) // request = hash; output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
 {
 	string hash = request.substr(0, request.find(" "));
 	vector<MethodOut> methods = database.HashToMethods(hash);
@@ -128,30 +134,36 @@ string RequestHandler::HandleQueryRequest(string request) // request = hash; out
 // Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
 string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
-	vector<char> result = {};
+	vector<char> chars = {};
 	while (!methods.empty())
 	{
 		MethodOut lastMethod = methods.back();
 		string hash = lastMethod.hash;
 		string name = lastMethod.methodName;
 		string fileLocation = lastMethod.fileLocation;
+		string lineNumber = to_string(lastMethod.lineNumber);
 		vector<string> authorids = lastMethod.authorIDs;
 		string authorTotal = to_string(authorids.size());
 
-		for (string data : { hash, name, fileLocation, authorTotal})
+		for (string data : { hash, name, fileLocation, lineNumber, authorTotal})
 		{
-			AppendBy(&result, data, dataDelimiter);
+			AppendBy(chars, data, dataDelimiter);
 		}
 		for (string authorid : authorids)
 		{
-			AppendBy(&result, authorid, dataDelimiter);
+			AppendBy(chars, authorid, dataDelimiter);
 		}
 
-		result.push_back(methodDelimiter);
+		if (!chars.empty()) // We still should get rid of the last dataDelimiter.
+		{
+			chars.pop_back();
+		}
+
+		chars.push_back(methodDelimiter);
 		methods.pop_back();
 	}
-	string result2(result.begin(), result.end());
-	return result2;
+	string result(chars.begin(), chars.end());
+	return result;
 }
 
 // Appends result-string by a string, and adds a delimiter at the end.
