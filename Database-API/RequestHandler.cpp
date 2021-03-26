@@ -41,6 +41,7 @@ string RequestHandler::HandleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = HandleCheckUploadRequest(request);
+			break;
 		case eUnknown:
 			result = HandleUnknownRequest();
 			break;
