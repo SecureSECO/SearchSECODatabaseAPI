@@ -31,7 +31,7 @@ private:
 	Project RequestToProject(std::string request);
 	MethodIn DataEntryToMethod(std::string dataEntry);
 	std::vector<Hash> RequestToHashes(std::string request);
-	std::string MethodsToString(MethodOut method, char dataDelimiter, char methodDelimiter);
+	std::string MethodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter);
 	void AppendBy(std::vector<char>& result, std::string word, char delimiter);
 	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
 	std::string HandleQueryRequest(std::string request);
