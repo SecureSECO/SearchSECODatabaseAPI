@@ -72,14 +72,14 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 
 	Project project;
 	project.projectID  = projectData[0];
-	project.version	   = projectData[1];
+	project.version    = stoll(projectData[1]); // std::stoll converts a string to a long int.
 	project.license    = projectData[2];
 	project.name       = projectData[3];
 	project.url        = projectData[4];
 	project.owner.name = projectData[5];
 	project.owner.mail = projectData[6];
-	project.stars = stoi(projectData[7]); // std::stoi converts a string to an int.
-	project.hashes = RequestToHashes(request);
+	project.stars      = stoi(projectData[7]); // std::stoi converts a string to an int.
+	project.hashes     = RequestToHashes(request);
 	return project;
 }
 

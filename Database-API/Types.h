@@ -18,7 +18,7 @@ namespace types {
 typedef std::string AuthorID;
 typedef std::string ProjectID;
 typedef std::string Hash;
-typedef __int64 Version;
+typedef time_t Version;
 
 struct Author
 {
