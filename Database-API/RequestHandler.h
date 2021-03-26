@@ -10,8 +10,9 @@ Utrecht University within the Software Project course.
 
 enum eRequestType
 {
-    eAddProject,
-    eFindHash,
+    eUpload,
+    eCheck,
+	eCheckUpload,
     eUnknown
 };
 
@@ -27,7 +28,7 @@ public:
 	std::string HandleRequest(std::string requestType, std::string request);
 private:
 	DatabaseHandler database;
-	void HandleAddProjectRequest(std::string request);
+	std::string HandleUploadRequest(std::string request);
 	Project RequestToProject(std::string request);
 	MethodIn DataEntryToMethod(std::string dataEntry);
 	std::vector<Hash> RequestToHashes(std::string request);
@@ -35,7 +36,9 @@ private:
 	std::vector<MethodOut> GetMethods(std::vector<Hash> hashes);
 	void AppendBy(std::vector<char>& result, std::string word, char delimiter);
 	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
-	std::string HandleQueryRequest(std::string request);
+	std::string HandleCheckRequest(std::string request);
+	std::string HandleCheckRequest(std::vector<Hash> hashes);
+	std::string HandleCheckUploadRequest(std::string request);
 	std::string HandleUnknownRequest();
 	eRequestType GetERequestType(std::string requestType);
 };

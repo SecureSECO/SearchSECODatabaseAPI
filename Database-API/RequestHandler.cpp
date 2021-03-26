@@ -33,12 +33,14 @@ string RequestHandler::HandleRequest(string requestType, string request)
 	string result;
 	switch (eRequestType)
 	{
-		case eAddProject:
-			HandleAddProjectRequest(request);
+		case eUpload:
+			result = HandleUploadRequest(request);
 			break;
-		case eFindHash:
-			result = HandleQueryRequest(request);
+		case eCheck:
+			result = HandleCheckRequest(request);
 			break;
+		case eCheckUpload:
+			result = HandleCheckUploadRequest(request);
 		case eUnknown:
 			result = HandleUnknownRequest();
 			break;
@@ -46,8 +48,16 @@ string RequestHandler::HandleRequest(string requestType, string request)
 	return result;
 }
 
+string RequestHandler::HandleCheckUploadRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
+{
+	vector<Hash> hashes = RequestToHashes(request);
+	string result = HandleCheckRequest(hashes);
+	HandleUploadRequest(request);
+	return result;
+}
+
 // Handles "add <Project>"-requests.
-void RequestHandler::HandleAddProjectRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
+string RequestHandler::HandleUploadRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
 	Project project = RequestToProject(request);
 	MethodIn method;
@@ -58,7 +68,7 @@ void RequestHandler::HandleAddProjectRequest(string request) // request = projec
 		method = DataEntryToMethod(dataEntries[i]);
 		database.AddMethod(method, project);
 	}
-	return;
+	return "Your project is successfully added to the database.";
 }
 
 // Retrieves the project given a request.
@@ -66,7 +76,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 {
 	// Convert request to projectData
 	string project_string = request.substr(0, request.find('\n'));
-	vector<string> projectData = SplitStringOn(project_string, '\0');
+	vector<string> projectData = SplitStringOn(project_string, '?');
 
 	Project project;
 	project.projectID  = projectData[0];
@@ -84,7 +94,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 // Converts a data entry to a Method.
 MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = method_hash|method_name|method_fileLocation|number_of_authors|method_author1_name|method_author1_mail|method_author2_name|method_author2_mail|...
 {
-	vector<string> methodData = SplitStringOn(dataEntry, '\0');
+	vector<string> methodData = SplitStringOn(dataEntry, '?');
 
 	MethodIn method;
 	method.hash = methodData[0];
@@ -112,19 +122,24 @@ vector<Hash> RequestHandler::RequestToHashes(string request)
 	vector<Hash> hashes = {};
 	for (int i = 1; i < data.size(); i++)
 	{
-		Hash hash = data[i].substr(0, data[i].find('\0'));
+		Hash hash = data[i].substr(0, data[i].find('?'));
 		hashes.push_back(hash);
 	}
 	return hashes;
 }
 
-// Handles query requests.
-string RequestHandler::HandleQueryRequest(string request) // request = hash1 \n hash2 \n ...;  output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
+// Handles requests (consisting of hashes separated by newline characters) by returning methods (in string format) with the same hash.
+string RequestHandler::HandleCheckRequest(string request) // request = hash1 \n hash2 \n ...;  output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
 {
 	vector<Hash> hashes = SplitStringOn(request, '\n');
+	return HandleCheckRequest(hashes);
+}
+
+string RequestHandler::HandleCheckRequest(vector<Hash> hashes)
+{
 	vector<MethodOut> methods = GetMethods(hashes);
 
-	string methodsToString = MethodsToString(methods, '\0', '\n');
+	string methodsToString = MethodsToString(methods, '?', '\n');
 	if (!(methodsToString == ""))
 	{
 		return methodsToString;
@@ -218,9 +233,11 @@ string RequestHandler::HandleUnknownRequest()
 // Determines the type of the request.
 eRequestType RequestHandler::GetERequestType(string requestType)
 {
-	if (requestType == "addp")
-		return eAddProject;
-	else if (requestType == "find")
-		return eFindHash;
+	if (requestType == "upld")
+		return eUpload;
+	else if (requestType == "chck")
+		return eCheck;
+	else if (requestType == "chup")
+		return eCheckUpload;
 	else return eUnknown;
 }
