@@ -32,6 +32,8 @@ private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
 	bool Equivalent(MethodIn method1, MethodIn method2);
 
+	void AddMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
+
 	// Parses a row into a method.
 	MethodOut GetMethod(const CassRow* row);
 

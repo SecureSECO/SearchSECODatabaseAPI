@@ -159,7 +159,38 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
     /* This will block until the query has finished */
     CassError rc = cass_future_error_code(query_future);
 
-    printf("Query result: %s\n", cass_error_desc(rc));
+	if(rc != 0){
+    	printf("Query result: %s\n", cass_error_desc(rc));
+	}
+
+    cass_future_free(query_future);
+}
+
+void DatabaseHandler::AddMethodByAuthor(CassUuid authorID, MethodIn method, Project project)
+{
+	CassStatement* query = cass_statement_new("INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)", 4);
+
+	cass_statement_bind_uuid(query, 0, authorID);
+
+	cass_statement_bind_string(query, 1, method.hash.c_str());
+
+	cass_statement_bind_int64(query, 2, project.version);
+
+	CassUuid projectID;
+    cass_uuid_from_string(project.projectID.c_str(), &projectID);
+    cass_statement_bind_uuid(query, 3, projectID);
+
+	CassFuture* query_future = cass_session_execute(connection, query);
+
+    /* Statement objects can be freed immediately after being executed */
+    cass_statement_free(query);
+
+    /* This will block until the query has finished */
+    CassError rc = cass_future_error_code(query_future);
+
+	if(rc != 0){
+    	printf("Query result: %s\n", cass_error_desc(rc));
+	}
 
     cass_future_free(query_future);
 }

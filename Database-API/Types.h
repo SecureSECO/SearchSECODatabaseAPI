@@ -8,7 +8,6 @@ Utrecht University within the Software Project course.
 #include <ctime>
 #include <string>
 #include <vector>
-#include <json.hpp>
 
 namespace types {
 /// <summary>
