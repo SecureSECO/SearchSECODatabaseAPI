@@ -20,7 +20,7 @@ void ConnectionHandler::StartListen()
 }
 
 
-// TCP Connection Methods 
+// TCP Connection Methods
 tcp_connection::pointer tcp_connection::create(boost::asio::io_context& io_context)
 {
 	return pointer(new tcp_connection(io_context));
@@ -71,7 +71,7 @@ void tcp_connection::start(RequestHandler handler)
 
 tcp_server::tcp_server(boost::asio::io_context& io_context)
 	: io_context_(io_context),
-	acceptor_(io_context, tcp::endpoint(tcp::v4(), 13))
+	acceptor_(io_context, tcp::endpoint(tcp::v4(), 8003))
 {
 	handler.Initialize();
 	start_accept();
