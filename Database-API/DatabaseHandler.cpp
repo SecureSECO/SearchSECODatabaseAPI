@@ -73,9 +73,11 @@ void DatabaseHandler::AddProject(Project project)
 {
 	CassStatement* query = cass_statement_new("INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
 
-	CassUuid projectID;
-	cass_uuid_from_string(project.projectID.c_str(), &projectID);
-	cass_statement_bind_uuid(query, 0, projectID);
+	//CassUuid projectID;
+	//cass_uuid_from_string(project.projectID.c_str(), &projectID);
+	//cass_statement_bind_uuid(query, 0, projectID);
+
+	cass_statement_bind_int64(query, 0, project.projectID);
 
 	cass_statement_bind_int64(query, 1, project.version);
 
@@ -129,9 +131,11 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 
     cass_statement_bind_int64(query, 1, project.version);
 
-	CassUuid projectID;
-	cass_uuid_from_string(project.projectID.c_str(), &projectID);
- 	cass_statement_bind_uuid(query, 2, projectID);
+	//CassUuid projectID;
+	//cass_uuid_from_string(project.projectID.c_str(), &projectID);
+ 	//cass_statement_bind_uuid(query, 2, projectID);
+
+	cass_statement_bind_int64(query, 2, project.projectID);
 
 	cass_statement_bind_string(query, 3, method.methodName.c_str());
 
@@ -176,9 +180,11 @@ void DatabaseHandler::AddMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	cass_statement_bind_int64(query, 2, project.version);
 
-	CassUuid projectID;
-    cass_uuid_from_string(project.projectID.c_str(), &projectID);
-    cass_statement_bind_uuid(query, 3, projectID);
+	//CassUuid projectID;
+    //cass_uuid_from_string(project.projectID.c_str(), &projectID);
+    //cass_statement_bind_uuid(query, 3, projectID);
+
+	cass_statement_bind_int64(query, 3, project.projectID);
 
 	CassFuture* query_future = cass_session_execute(connection, query);
 
@@ -295,12 +301,17 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 	cass_value_get_int32(number, &lineNumber);
 	method.lineNumber = lineNumber;
 
-	char project_id[CASS_UUID_STRING_LENGTH];
+	/*char project_id[CASS_UUID_STRING_LENGTH];
     CassUuid id_uuid;
     const CassValue* projectID = cass_row_get_column(row, 2);
     cass_value_get_uuid(projectID, &id_uuid);
     cass_uuid_string(id_uuid, project_id);
-    method.projectID = project_id;
+    method.projectID = project_id;*/
+
+	cass_int64_t project_id;
+	const CassValue* projectID = cass_row_get_column(row, 2);
+	cass_value_get_int64(projectID, &project_id);
+	method.projectID = project_id;
 
 	time_t project_version;
 	cass_int64_t version;

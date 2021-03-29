@@ -80,7 +80,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 	vector<string> projectData = SplitStringOn(project_string, '?');
 
 	Project project;
-	project.projectID  = projectData[0];
+	project.projectID  = stoll(projectData[0]);
 	project.version    = stoll(projectData[1]); // std::stoll converts a string to a long int.
 	project.license    = projectData[2];
 	project.name       = projectData[3];
@@ -171,7 +171,7 @@ string RequestHandler::MethodsToString(vector<MethodOut> methods, char dataDelim
 	{
 		MethodOut lastMethod     = methods.back();
 		string hash              = lastMethod.hash;
-		string projectID         = lastMethod.projectID;
+		string projectID         = to_string(lastMethod.projectID);
 		string version           = to_string(lastMethod.version);
 		string name              = lastMethod.methodName;
 		string fileLocation      = lastMethod.fileLocation;

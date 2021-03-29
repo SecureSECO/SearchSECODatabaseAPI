@@ -15,7 +15,7 @@ namespace types {
 /// </summary>
 
 typedef std::string AuthorID;
-typedef std::string ProjectID;
+typedef long long ProjectID;
 typedef std::string Hash;
 typedef time_t Version;
 
