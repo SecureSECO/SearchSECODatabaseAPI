@@ -71,7 +71,7 @@ vector<MethodOut> DatabaseHandler::HashToMethods(string hash)
 
 void DatabaseHandler::AddProject(Project project)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, stars, hashes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 8);
+	CassStatement* query = cass_statement_new("INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
 
 	CassUuid projectID;
 	cass_uuid_from_string(project.projectID.c_str(), &projectID);
@@ -87,7 +87,7 @@ void DatabaseHandler::AddProject(Project project)
 
 	cass_statement_bind_uuid(query, 5, GetAuthorID(project.owner));
 
-	cass_statement_bind_int32(query, 6, project.stars);
+	//cass_statement_bind_int32(query, 6, project.stars);
 
 	int size = project.hashes.size();
 

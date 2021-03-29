@@ -87,7 +87,7 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 	project.url        = projectData[4];
 	project.owner.name = projectData[5];
 	project.owner.mail = projectData[6];
-	project.stars      = stoi(projectData[7]); // std::stoi converts a string to an int.
+	//project.stars      = stoi(projectData[7]); // std::stoi converts a string to an int.
 	project.hashes     = RequestToHashes(request);
 	return project;
 }
