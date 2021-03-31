@@ -51,13 +51,13 @@ string RequestHandler::handleRequest(string requestType, string request)
     return result;
 }
 
-// Handles requests wanting to first check for matches with existing entries, 
+// Handles requests wanting to first check for matches with existing entries,
 // after which it adds the project itself to the database.
 // In this case, the request has the following format:
-// "projectID?version?license?project_name?url?author_name?author_mail?stars \n 
+// "projectID?version?license?project_name?url?author_name?author_mail?stars \n
 //  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
 //  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ..."
-string RequestHandler::handleCheckUploadRequest(string request) 
+string RequestHandler::handleCheckUploadRequest(string request)
 {
     vector<Hash> hashes = requestToHashes(request);
     string result = handleCheckRequest(hashes);
@@ -73,7 +73,7 @@ string RequestHandler::handleUploadRequest(string request)
     //database.AddProject(project);
     MethodIn method;
 
-    vector<string> dataEntries = dplitStringOn(request, '\n');
+    vector<string> dataEntries = splitStringOn(request, '\n');
 
     for (int i = 1; i < dataEntries.size(); i++)
     {
@@ -152,10 +152,10 @@ string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 {
     vector<MethodOut> methods = getMethods(hashes);
 
-    string methodsToString = methodsToString(methods, '?', '\n');
-    if (!(methodsToString == ""))
+    string methodsStringFormat = methodsToString(methods, '?', '\n');
+    if (!(methodsStringFormat == ""))
     {
-        return methodsToString;
+        return methodsStringFormat;
     }
     else
     {

@@ -12,7 +12,7 @@ enum eRequestType
 {
     eUpload,
     eCheck,
-	eCheckUpload,
+    eCheckUpload,
     eUnknown
 };
 
@@ -24,21 +24,21 @@ enum eRequestType
 class RequestHandler
 {
 public:
-	void Initialize();
-	std::string HandleRequest(std::string requestType, std::string request);
+	void initialize();
+	std::string handleRequest(std::string requestType, std::string request);
 private:
 	DatabaseHandler database;
-	std::string HandleUploadRequest(std::string request);
-	Project RequestToProject(std::string request);
-	MethodIn DataEntryToMethod(std::string dataEntry);
-	std::vector<Hash> RequestToHashes(std::string request);
-	std::string MethodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter);
-	std::vector<MethodOut> GetMethods(std::vector<Hash> hashes);
-	void AppendBy(std::vector<char>& result, std::string word, char delimiter);
-	std::vector<std::string> SplitStringOn(std::string str, char delimiter);
-	std::string HandleCheckRequest(std::string request);
-	std::string HandleCheckRequest(std::vector<Hash> hashes);
-	std::string HandleCheckUploadRequest(std::string request);
-	std::string HandleUnknownRequest();
-	eRequestType GetERequestType(std::string requestType);
+	std::string handleUploadRequest(std::string request);
+	Project requestToProject(std::string request);
+	MethodIn dataEntryToMethod(std::string dataEntry);
+	std::vector<Hash> requestToHashes(std::string request);
+	std::string methodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter);
+	std::vector<MethodOut> getMethods(std::vector<Hash> hashes);
+	void appendBy(std::vector<char>& result, std::string word, char delimiter);
+	std::vector<std::string> splitStringOn(std::string str, char delimiter);
+	std::string handleCheckRequest(std::string request);
+	std::string handleCheckRequest(std::vector<Hash> hashes);
+	std::string handleCheckUploadRequest(std::string request);
+	std::string handleUnknownRequest();
+	eRequestType getERequestType(std::string requestType);
 };
