@@ -102,21 +102,23 @@ void DatabaseHandler::AddProject(Project project)
 		cass_collection_append_string(hashes, project.hashes[i].c_str());
 	}
 
-	cass_statement_bind_collection(query, 7, hashes);
+	cass_statement_bind_collection(query, 6, hashes);
 
 	cass_collection_free(hashes);
 
 	CassFuture* query_future = cass_session_execute(connection, query);
 
 	/* Statement objects can be freed immediately after being executed */
-  cass_statement_free(query);
+	cass_statement_free(query);
 
   /* This will block until the query has finished */
-  CassError rc = cass_future_error_code(query_future);
+	CassError rc = cass_future_error_code(query_future);
 
-  printf("Query result: %s\n", cass_error_desc(rc));
+	if(rc != 0){
+		printf("Query result: %s\n", cass_error_desc(rc));
+	}
 
-  cass_future_free(query_future);
+	cass_future_free(query_future);
 }
 
 void DatabaseHandler::AddMethod(MethodIn method, Project project)
@@ -129,7 +131,7 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 
 	cass_statement_bind_string(query, 0, method.hash.c_str());
 
-    cass_statement_bind_int64(query, 1, project.version);
+	cass_statement_bind_int64(query, 1, project.version);
 
 	//CassUuid projectID;
 	//cass_uuid_from_string(project.projectID.c_str(), &projectID);
@@ -157,17 +159,17 @@ void DatabaseHandler::AddMethod(MethodIn method, Project project)
 
 	CassFuture* query_future = cass_session_execute(connection, query);
 
-      /* Statement objects can be freed immediately after being executed */
-    cass_statement_free(query);
+	/* Statement objects can be freed immediately after being executed */
+	cass_statement_free(query);
 
-    /* This will block until the query has finished */
-    CassError rc = cass_future_error_code(query_future);
+	/* This will block until the query has finished */
+    	CassError rc = cass_future_error_code(query_future);
 
 	if(rc != 0){
-    	printf("Query result: %s\n", cass_error_desc(rc));
+    		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
-    cass_future_free(query_future);
+	cass_future_free(query_future);
 }
 
 void DatabaseHandler::AddMethodByAuthor(CassUuid authorID, MethodIn method, Project project)
@@ -195,7 +197,7 @@ void DatabaseHandler::AddMethodByAuthor(CassUuid authorID, MethodIn method, Proj
     CassError rc = cass_future_error_code(query_future);
 
 	if(rc != 0){
-    	printf("Query result: %s\n", cass_error_desc(rc));
+    		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
     cass_future_free(query_future);
@@ -238,8 +240,6 @@ CassUuid DatabaseHandler::GetAuthorID(Author author)
 			cass_statement_free(insertQuery);
 
 			cass_future_free(future);
-
-			cout << "Getting id" << endl;
 
 			authorID = GetAuthorID(author);
 
@@ -319,7 +319,7 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 	cass_value_get_int64(projectVersion, &version);
 	method.version = version;
 
-	const CassValue* set = cass_row_get_column(row, 3);
+	/*const CassValue* set = cass_row_get_column(row, 3);
 	CassIterator* iterator = cass_iterator_from_collection(set);
 	while(cass_iterator_next(iterator)){
 		char author_id[CASS_UUID_STRING_LENGTH];
@@ -330,7 +330,7 @@ MethodOut DatabaseHandler::GetMethod(const CassRow* row)
 		method.authorIDs.push_back(author_id);
 	}
 
-	cass_iterator_free(iterator);
+	cass_iterator_free(iterator);*/
 
 	return method;
 }

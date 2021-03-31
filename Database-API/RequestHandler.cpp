@@ -61,12 +61,15 @@ string RequestHandler::HandleCheckUploadRequest(string request) // request = pro
 string RequestHandler::HandleUploadRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
 	Project project = RequestToProject(request);
+	//database.AddProject(project);
 	MethodIn method;
 
 	vector<string> dataEntries = SplitStringOn(request, '\n');
+
 	for (int i = 1; i < dataEntries.size(); i++)
 	{
 		method = DataEntryToMethod(dataEntries[i]);
+
 		database.AddMethod(method, project);
 	}
 	return "Your project is successfully added to the database.";
@@ -82,13 +85,17 @@ Project RequestHandler::RequestToProject(string request) // project = projectID|
 	Project project;
 	project.projectID  = stoll(projectData[0]);
 	project.version    = stoll(projectData[1]); // std::stoll converts a string to a long int.
+
 	project.license    = projectData[2];
+
 	project.name       = projectData[3];
 	project.url        = projectData[4];
+
 	project.owner.name = projectData[5];
 	project.owner.mail = projectData[6];
+
 	//project.stars      = stoi(projectData[7]); // std::stoi converts a string to an int.
-	project.hashes     = RequestToHashes(request);
+	//project.hashes     = RequestToHashes(request);
 	return project;
 }
 
@@ -99,12 +106,15 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 
 	MethodIn method;
 	method.hash = methodData[0];
+
 	method.methodName = methodData[1];
 	method.fileLocation = methodData[2];
 	method.lineNumber = stoi(methodData[3]);
+
 	vector<Author> authors;
 	Author author;
-	int numberOfAuthors = stoi(methodData[4]);
+	int numberOfAuthors = 0;//stoi(methodData[4]);
+
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
 		author.name = methodData[5 + 2 * i];
@@ -113,6 +123,7 @@ MethodIn RequestHandler::DataEntryToMethod(string dataEntry) // methodData = met
 		authors.push_back(author);
 	}
 	method.authors = authors;
+
 	return method;
 }
 
@@ -155,6 +166,7 @@ vector<MethodOut> RequestHandler::GetMethods(vector<Hash> hashes)
 	for (int i = 0; i < hashes.size(); i++)
 	{
 		vector<MethodOut> newMethods = database.HashToMethods(hashes[i]);
+
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(newMethods[j]);

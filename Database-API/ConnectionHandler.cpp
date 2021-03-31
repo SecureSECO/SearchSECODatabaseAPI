@@ -40,23 +40,23 @@ void tcp_connection::start(RequestHandler handler)
 
 	std::string r(request.begin(), request.begin() + len - 1);
 
-	//size_t* length;
-	//sscanf(r.c_str(), "%zu", length);
-
-	//std::vector<int>::size_type size = length;
+	std::cout << r << std::endl;
 
 	std::string length = r.substr(4);
 
+	std::string totalData(request.begin() + len, request.end());
+
 	int size = stoi(length) - (request.size() - len);
 	std::vector<char> data(size);
-	if (size > 0)
+	while (size > 0)
 	{
-		socket_.read_some(boost::asio::buffer(data), error);
+		int prevSize = size;
+
+		size -= socket_.read_some(boost::asio::buffer(data), error);
+		totalData.append(std::string(data.begin(), data.begin() + prevSize - size));
 	}
 
-	std::string d(data.begin(), data.end());
-
-	std::string result = handler.HandleRequest(r.substr(0, 4), std::string(request.begin() + len, request.end()) + d);
+	std::string result = handler.HandleRequest(r.substr(0, 4), totalData);
 
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 
