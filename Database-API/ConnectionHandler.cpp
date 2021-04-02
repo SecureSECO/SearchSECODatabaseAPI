@@ -56,7 +56,7 @@ void tcp_connection::start(RequestHandler handler)
 		totalData.append(std::string(data.begin(), data.begin() + prevSize - size));
 	}
 
-	std::string result = handler.HandleRequest(r.substr(0, 4), totalData);
+	std::string result = handler.handleRequest(r.substr(0, 4), totalData);
 
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 
@@ -73,7 +73,7 @@ tcp_server::tcp_server(boost::asio::io_context& io_context)
 	: io_context_(io_context),
 	acceptor_(io_context, tcp::endpoint(tcp::v4(), 8003))
 {
-	handler.Initialize();
+	handler.initialize();
 	start_accept();
 }
 
