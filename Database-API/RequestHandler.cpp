@@ -61,7 +61,7 @@ string RequestHandler::HandleCheckUploadRequest(string request) // request = pro
 string RequestHandler::HandleUploadRequest(string request) // request = projectID|version|license|project_name|url|author_name|author_mail|stars \n method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_number_of_authors|method1_author1_name|method1_author1_mail|... \n ...
 {
 	Project project = RequestToProject(request);
-	//database.AddProject(project);
+	database.AddProject(project);
 	MethodIn method;
 
 	vector<string> dataEntries = SplitStringOn(request, '\n');
