@@ -69,15 +69,15 @@ string RequestHandler::handleCheckUploadRequest(string request)
 // The request has the same format as mentioned previously.
 string RequestHandler::handleUploadRequest(string request)
 {
-	Project project = RequestToProject(request);
+	Project project = requestToProject(request);
 	database.AddProject(project);
 	MethodIn method;
 
-	vector<string> dataEntries = SplitStringOn(request, '\n');
+	vector<string> dataEntries = splitStringOn(request, '\n');
 
 	for (int i = 1; i < dataEntries.size(); i++)
 	{
-		method = DataEntryToMethod(dataEntries[i]);
+		method = dataEntryToMethod(dataEntries[i]);
 
 		database.AddMethod(method, project);
 	}
