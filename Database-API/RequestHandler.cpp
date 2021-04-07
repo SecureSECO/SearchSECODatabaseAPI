@@ -19,9 +19,10 @@ using namespace std;
 /// </summary>
 
 // Initialise the RequestHandler
-void RequestHandler::initialize()
+void RequestHandler::initialize(DatabaseHandler databaseHandler)
 {
     // Set up a connection with the database.
+	database = databaseHandler;
     database.Connect();
 }
 

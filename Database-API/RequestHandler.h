@@ -24,7 +24,7 @@ enum eRequestType
 class RequestHandler
 {
 public:
-	void initialize();
+	void initialize(DatabaseHandler databaseHandler);
 	std::string handleRequest(std::string requestType, std::string request);
 private:
 	DatabaseHandler database;

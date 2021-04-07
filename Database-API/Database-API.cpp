@@ -15,7 +15,8 @@ using namespace std;
 int main()
 {
 	ConnectionHandler listen;
-	listen.StartListen();
+	DatabaseHandler databaseHandler;
+	listen.StartListen(databaseHandler);
 
 	return 0;
 }
