@@ -21,6 +21,7 @@ enable_testing()
 add_executable(
   tests
   RequestHandler_test.cpp
+  UploadRequest_tests.cpp
 )
 target_link_libraries(
   tests
