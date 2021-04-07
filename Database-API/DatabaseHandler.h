@@ -18,16 +18,16 @@ class DatabaseHandler
 {
 public:
 	// Connect to the database
-	void Connect();
+	virtual void Connect();
 
 	// Add a project to database.
-	void AddProject(Project project);
+	virtual void AddProject(Project project);
 
 	// Add a method to the tables methods and method_by_author.
-	void AddMethod(MethodIn method, Project project);
+	virtual void AddMethod(MethodIn method, Project project);
 
 	// Given a hash, return all methods with that hash
-	std::vector<MethodOut> HashToMethods(std::string hash);
+	virtual std::vector<MethodOut> HashToMethods(std::string hash);
 private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
 	bool Equivalent(MethodIn method1, MethodIn method2);

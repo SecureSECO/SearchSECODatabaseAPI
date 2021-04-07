@@ -19,11 +19,11 @@ using namespace std;
 /// </summary>
 
 // Initialise the RequestHandler
-void RequestHandler::initialize(DatabaseHandler databaseHandler)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler)
 {
     // Set up a connection with the database.
 	database = databaseHandler;
-    database.Connect();
+    database -> Connect();
 }
 
 // Handles all requests send to the database.
@@ -71,7 +71,7 @@ string RequestHandler::handleCheckUploadRequest(string request)
 string RequestHandler::handleUploadRequest(string request)
 {
 	Project project = requestToProject(request);
-	database.AddProject(project);
+	database -> AddProject(project);
 	MethodIn method;
 
 	vector<string> dataEntries = splitStringOn(request, '\n');
@@ -80,7 +80,7 @@ string RequestHandler::handleUploadRequest(string request)
 	{
 		method = dataEntryToMethod(dataEntries[i]);
 
-		database.AddMethod(method, project);
+		database -> AddMethod(method, project);
 	}
 	return "Your project is successfully added to the database.";
 }
@@ -171,7 +171,7 @@ vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
     vector<MethodOut> methods = { };
     for (int i = 0; i < hashes.size(); i++)
     {
-        vector<MethodOut> newMethods = database.HashToMethods(hashes[i]);
+        vector<MethodOut> newMethods = database -> HashToMethods(hashes[i]);
 
         for (int j = 0; j < newMethods.size(); j++)
         {
