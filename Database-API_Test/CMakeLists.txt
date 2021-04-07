@@ -25,6 +25,7 @@ add_executable(
 target_link_libraries(
   tests
   gtest_main
+  gmock
   "Database-API-library"
 )
 target_link_libraries(tests /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
