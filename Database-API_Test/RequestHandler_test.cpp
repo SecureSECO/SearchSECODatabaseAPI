@@ -3,5 +3,5 @@
 
 TEST(SimpleTest, BasicAssertions){
 	RequestHandler handler;
-	EXPECT_EQ(handler.handleUnknownRequest(), "Your input is not recognised.");
+	EXPECT_EQ(handler.handleRequest("kill", ""), "Your input is not recognised.");
 }
