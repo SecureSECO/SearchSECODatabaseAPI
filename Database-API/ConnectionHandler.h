@@ -22,7 +22,7 @@ using boost::asio::ip::tcp;
 class ConnectionHandler
 {
 public:
-	void StartListen();
+	void StartListen(DatabaseHandler* databaseHandler);
 private:
 	RequestHandler handler;
 };
@@ -60,7 +60,7 @@ private:
 class tcp_server
 {
 public:
-	tcp_server(boost::asio::io_context& io_context);
+	tcp_server(boost::asio::io_context& io_context, DatabaseHandler* databaseHandler);
 
 private:
 	void start_accept();

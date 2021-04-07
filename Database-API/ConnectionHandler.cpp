@@ -4,13 +4,13 @@
 
 
 // Connection Handler Methods
-void ConnectionHandler::StartListen()
+void ConnectionHandler::StartListen(DatabaseHandler* databaseHandler)
 {
 
 	try
 	{
 		boost::asio::io_context io_context;
-		tcp_server server(io_context);
+		tcp_server server(io_context, databaseHandler);
 		io_context.run();
 	}
 	catch (std::exception& e)
@@ -69,11 +69,11 @@ void tcp_connection::start(RequestHandler handler)
 
 // TCP server Methods
 
-tcp_server::tcp_server(boost::asio::io_context& io_context)
+tcp_server::tcp_server(boost::asio::io_context& io_context, DatabaseHandler* databaseHandler)
 	: io_context_(io_context),
 	acceptor_(io_context, tcp::endpoint(tcp::v4(), 8003))
 {
-	handler.initialize();
+	handler.initialize(databaseHandler);
 	start_accept();
 }
 

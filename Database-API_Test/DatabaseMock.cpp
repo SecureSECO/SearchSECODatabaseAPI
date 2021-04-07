@@ -13,14 +13,11 @@ using namespace types;
 /// <summary>
 /// Handles interaction with database.
 /// </summary>
-class MockDatabase :: public DatabaseHandler
+class MockDatabase : public DatabaseHandler
 {
 public:
     MOCK_METHOD(void, Connect, (), ());
     MOCK_METHOD(void, AddProject, (Project project), ());
     MOCK_METHOD(void, AddMethod, (MethodIn method, Project project), ());
     MOCK_METHOD(std::vector<MethodOut>, HashToMethods, (std::string hash), ());
-    MOCK_METHOD(bool, AddMethodByAuthor, (CassUuid authorID, MethodIn method, Project project), ());
-    MOCK_METHOD(MethodOut, GetMethod, (const CassRow* row), ());
-    MOCK_METHOD(CassUuid, GetAuthorID, (Author author), ());
 };
