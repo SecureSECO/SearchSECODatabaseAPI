@@ -4,7 +4,7 @@
 
 
 // Connection Handler Methods
-void ConnectionHandler::StartListen(DatabaseHandler databaseHandler)
+void ConnectionHandler::StartListen(DatabaseHandler* databaseHandler)
 {
 
 	try
@@ -69,7 +69,7 @@ void tcp_connection::start(RequestHandler handler)
 
 // TCP server Methods
 
-tcp_server::tcp_server(boost::asio::io_context& io_context, DatabaseHandler databaseHandler)
+tcp_server::tcp_server(boost::asio::io_context& io_context, DatabaseHandler* databaseHandler)
 	: io_context_(io_context),
 	acceptor_(io_context, tcp::endpoint(tcp::v4(), 8003))
 {

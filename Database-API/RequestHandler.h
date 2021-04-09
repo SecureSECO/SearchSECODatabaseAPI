@@ -24,10 +24,10 @@ enum eRequestType
 class RequestHandler
 {
 public:
-	void initialize(DatabaseHandler databaseHandler);
+	void initialize(DatabaseHandler* databaseHandler);
 	std::string handleRequest(std::string requestType, std::string request);
 private:
-	DatabaseHandler database;
+	DatabaseHandler* database;
 	std::string handleUploadRequest(std::string request);
 	Project requestToProject(std::string request);
 	MethodIn dataEntryToMethod(std::string dataEntry);
