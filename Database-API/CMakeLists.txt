@@ -9,6 +9,7 @@ add_library(Database-API-library "Database-API.cpp" "Database-API.h" "DatabaseHa
 
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 
 include_directories(../Resources/include)
 target_link_libraries(Database-API /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
