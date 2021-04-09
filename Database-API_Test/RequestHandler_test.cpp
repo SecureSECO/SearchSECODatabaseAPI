@@ -5,7 +5,7 @@
 TEST(GeneralTest, InitializeTest){
 	RequestHandler handler;
 	MockDatabase database;
-	EXPECT_CALL(database, Connect())
+	EXPECT_CALL(database, connect())
 		.Times(1);
 	handler.initialize(&database);
 }

@@ -18,26 +18,26 @@ class DatabaseHandler
 {
 public:
 	// Connect to the database
-	virtual void Connect();
+	virtual void connect();
 
 	// Add a project to database.
-	virtual void AddProject(Project project);
+	virtual void addProject(Project project);
 
 	// Add a method to the tables methods and method_by_author.
-	virtual void AddMethod(MethodIn method, Project project);
+	virtual void addMethod(MethodIn method, Project project);
 
 	// Given a hash, return all methods with that hash
-	virtual std::vector<MethodOut> HashToMethods(std::string hash);
+	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 private:
 	// Check if two methods are equivalent, i.e. contain the same hash.
-	bool Equivalent(MethodIn method1, MethodIn method2);
+	bool equivalent(MethodIn method1, MethodIn method2);
 
-	void AddMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
+	void addMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
 
 	// Parses a row into a method.
-	MethodOut GetMethod(const CassRow* row);
+	MethodOut getMethod(const CassRow* row);
 
-	CassUuid GetAuthorID(Author author);
+	CassUuid getAuthorID(Author author);
 
 	// The connection with the database.
 	CassSession* connection;

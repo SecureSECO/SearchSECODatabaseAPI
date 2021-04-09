@@ -23,7 +23,7 @@ void RequestHandler::initialize(DatabaseHandler *databaseHandler)
 {
     // Set up a connection with the database.
 	database = databaseHandler;
-    database -> Connect();
+    database -> connect();
 }
 
 // Handles all requests send to the database.
@@ -71,7 +71,7 @@ string RequestHandler::handleCheckUploadRequest(string request)
 string RequestHandler::handleUploadRequest(string request)
 {
 	Project project = requestToProject(request);
-	database -> AddProject(project);
+	database -> addProject(project);
 	MethodIn method;
 
 	vector<string> dataEntries = splitStringOn(request, '\n');
@@ -80,7 +80,7 @@ string RequestHandler::handleUploadRequest(string request)
 	{
 		method = dataEntryToMethod(dataEntries[i]);
 
-		database -> AddMethod(method, project);
+		database -> addMethod(method, project);
 	}
 	return "Your project is successfully added to the database.";
 }
@@ -89,8 +89,8 @@ string RequestHandler::handleUploadRequest(string request)
 Project RequestHandler::requestToProject(string request) // project = projectID|version|license|project_name|url|author_name|author_mail|stars
 {
     // We retrieve the project information (projectData).
-    string project_string = request.substr(0, request.find('\n'));
-    vector<string> projectData = splitStringOn(project_string, '?');
+    string projectString = request.substr(0, request.find('\n'));
+    vector<string> projectData = splitStringOn(projectString, '?');
 
     // We return the project information in the form of a Project.
     Project project;
@@ -171,7 +171,7 @@ vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
     vector<MethodOut> methods = { };
     for (int i = 0; i < hashes.size(); i++)
     {
-        vector<MethodOut> newMethods = database -> HashToMethods(hashes[i]);
+        vector<MethodOut> newMethods = database -> hashToMethods(hashes[i]);
 
         for (int j = 0; j < newMethods.size(); j++)
         {
