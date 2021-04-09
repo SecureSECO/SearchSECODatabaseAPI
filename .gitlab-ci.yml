@@ -1,0 +1,33 @@
+image: gcc
+
+google-tests:
+  stage: test
+  before_script:
+    - apt-get update
+    - apt-get -y install cmake autoconf
+    - apt-get install libboost-all-dev
+    - wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
+    - dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
+    - apt-get install libssl-dev libkrb5-dev zlib1g
+    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
+    - dpkg -i libuv1_1.35.0-1_amd64.deb
+    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
+    - dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
+  script:
+    - mkdir database_build
+    - cd database_build
+    - cmake ..
+    - cmake --build .
+    - ./Database-API_Test/tests --gtest_output="xml:report.xml"
+
+
+linting:
+  stage: test
+  before_script:
+    - apt-get update
+    - apt-get -y install cmake autoconf
+    - apt-get -y install clang clang-tidy clang-format
+  script:
+    - cd Parser
+    - clang-tidy *.cpp --
+    - clang *.cpp -fsyntax-only
