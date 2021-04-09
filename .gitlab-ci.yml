@@ -4,7 +4,9 @@ google-tests:
   stage: test
   before_script:
     - apt-get update
-    - apt-get -y install cmake autoconf dpkg wget
+    - apt-get -y install autoconf dpkg wget snap
+    - snap install cmake --classic 
+    - update-alternatives --install /usr/bin/gfortran gfortran /usr/local/bin/gfortran 999
     - apt-get -y install libboost-all-dev
     - wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
     - dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
