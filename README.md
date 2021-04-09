@@ -21,3 +21,7 @@ This can be done using the following commands in the projects main folder:
 
 After this the program can be run using `./Database-API/Database-API`.
 This will only work when you also have a Cassandra database running on your computer.
+
+For testing you can run the tests after building by using `./Database-API_Test/tests`.
+
+To generate the code coverage you van use `make coverage`. After this there will be an `.html` file inside the coverage folder with detailed information about the code coverage.
