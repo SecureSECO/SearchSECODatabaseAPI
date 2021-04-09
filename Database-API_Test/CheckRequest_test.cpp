@@ -10,7 +10,8 @@ TEST(CheckRequestTests, Verify_HandleRequest)
 {
 	MockDatabase database;
 	RequestHandler handler;
-	std::string output = "2c7f46d4f57cf9e66b03213358c7ddb5|TestMethod|Test1/Test2/TestFile.cpp|69|1|f1a028d7-3845-41df-bec1-2e16c49e4c35";
+	handler.initialize(&database);
+	std::string output = "2c7f46d4f57cf9e66b03213358c7ddb5?1?2?TestMethod?Test1/Test2/TestFile.cpp?69?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
 	MethodOut testMethod;
 	testMethod.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	testMethod.projectID = 1;
@@ -23,6 +24,6 @@ TEST(CheckRequestTests, Verify_HandleRequest)
 	v.push_back(testMethod);
 
 	EXPECT_CALL(database,HashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5 \n");
-	ASSERT_EQ(handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5 \n"), output);
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
+	ASSERT_EQ(result, output);
 }
