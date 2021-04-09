@@ -68,7 +68,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	project.owner.name = "Owner";
  	project.owner.mail = "owner@mail.com";
 	project.stars = 0;
-	project.hashes = {"a6aa62503e2ca3310e3a837502b80df5", "f3a258ba6cd26c1b7d553a493c614104"};
+	project.hashes = {};//{"a6aa62503e2ca3310e3a837502b80df5", "f3a258ba6cd26c1b7d553a493c614104"};
 
 	Author author;
 	author.name = "Owner";
@@ -96,16 +96,16 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	method3.authors = {author};
 
 	//EXPECT_CALL(database, AddProject(FieldsAre(0, 0, Eq("MyLicense"), Eq("MyProject"), "MyUrl", FieldsAre("Owner", "owner@mail.com"), 0, {"a6aa62503e2ca3310e3a837502b80df5", "f3a258ba6cd26c1b7d553a493c614104"})))
-	EXPECT_CALL(database, AddProject(projectEqual(project)))
+	EXPECT_CALL(database, addProject(projectEqual(project)))
 		.Times(1);
-	EXPECT_CALL(database, AddMethod(methodEqual(method1), projectEqual(project)));
-	EXPECT_CALL(database, AddMethod(ownersEqual(method1.authors), testing::_))
+	EXPECT_CALL(database, addMethod(methodEqual(method1), projectEqual(project)));
+	EXPECT_CALL(database, addMethod(ownersEqual(method1.authors), testing::_))
 		.Times(1);
-	EXPECT_CALL(database, AddMethod(methodEqual(method2), projectEqual(project)));
-	EXPECT_CALL(database, AddMethod(ownersEqual(method2.authors), testing::_))
+	EXPECT_CALL(database, addMethod(methodEqual(method2), projectEqual(project)));
+	EXPECT_CALL(database, addMethod(ownersEqual(method2.authors), testing::_))
 		.Times(1);
-	EXPECT_CALL(database, AddMethod(methodEqual(method3), projectEqual(project)));
-	EXPECT_CALL(database, AddMethod(ownersEqual(method3.authors), testing::_))
+	EXPECT_CALL(database, addMethod(methodEqual(method3), projectEqual(project)));
+	EXPECT_CALL(database, addMethod(ownersEqual(method3.authors), testing::_))
 		.Times(1);
 
 	string result = handler.handleRequest(requestType, request);

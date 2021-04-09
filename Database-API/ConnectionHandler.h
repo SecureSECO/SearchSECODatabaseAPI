@@ -22,7 +22,7 @@ using boost::asio::ip::tcp;
 class ConnectionHandler
 {
 public:
-	void StartListen(DatabaseHandler* databaseHandler);
+	void startListen(DatabaseHandler* databaseHandler);
 private:
 	RequestHandler handler;
 };
@@ -33,7 +33,7 @@ class tcp_connection
 public:
 	typedef boost::shared_ptr<tcp_connection> pointer;
 
-	static pointer create(boost::asio::io_context& io_context);
+	static pointer create(boost::asio::io_context& ioContext);
 
 	tcp::socket& socket()
 	{
@@ -43,8 +43,8 @@ public:
 	void start(RequestHandler handler);
 
 private:
-	tcp_connection(boost::asio::io_context& io_context)
-		: socket_(io_context)
+	tcp_connection(boost::asio::io_context& ioContext)
+		: socket_(ioContext)
 	{
 	}
 
@@ -60,12 +60,12 @@ private:
 class tcp_server
 {
 public:
-	tcp_server(boost::asio::io_context& io_context, DatabaseHandler* databaseHandler);
+	tcp_server(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler);
 
 private:
-	void start_accept();
+	void startAccept();
 
-	void handle_accept(tcp_connection::pointer new_connection,
+	void handleAccept(tcp_connection::pointer newConnection,
 		const boost::system::error_code& error);
 
 	boost::asio::io_context& io_context_;

@@ -4,14 +4,14 @@
 
 
 // Connection Handler Methods
-void ConnectionHandler::StartListen(DatabaseHandler* databaseHandler)
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler)
 {
 
 	try
 	{
-		boost::asio::io_context io_context;
-		tcp_server server(io_context, databaseHandler);
-		io_context.run();
+		boost::asio::io_context ioContext;
+		tcp_server server(ioContext, databaseHandler);
+		ioContext.run();
 	}
 	catch (std::exception& e)
 	{
@@ -21,9 +21,9 @@ void ConnectionHandler::StartListen(DatabaseHandler* databaseHandler)
 
 
 // TCP Connection Methods
-tcp_connection::pointer tcp_connection::create(boost::asio::io_context& io_context)
+tcp_connection::pointer tcp_connection::create(boost::asio::io_context& ioContext)
 {
-	return pointer(new tcp_connection(io_context));
+	return pointer(new tcp_connection(ioContext));
 }
 
 void tcp_connection::start(RequestHandler handler)
@@ -69,31 +69,31 @@ void tcp_connection::start(RequestHandler handler)
 
 // TCP server Methods
 
-tcp_server::tcp_server(boost::asio::io_context& io_context, DatabaseHandler* databaseHandler)
-	: io_context_(io_context),
-	acceptor_(io_context, tcp::endpoint(tcp::v4(), 8003))
+tcp_server::tcp_server(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler)
+	: io_context_(ioContext),
+	acceptor_(ioContext, tcp::endpoint(tcp::v4(), 8003))
 {
 	handler.initialize(databaseHandler);
-	start_accept();
+	startAccept();
 }
 
-void tcp_server::start_accept()
+void tcp_server::startAccept()
 {
-	tcp_connection::pointer new_connection =
+	tcp_connection::pointer newConnection =
 		tcp_connection::create(io_context_);
 
-	acceptor_.async_accept(new_connection->socket(),
-		boost::bind(&tcp_server::handle_accept, this, new_connection,
+	acceptor_.async_accept(newConnection->socket(),
+		boost::bind(&tcp_server::handleAccept, this, newConnection,
 			boost::asio::placeholders::error));
 }
 
-void tcp_server::handle_accept(tcp_connection::pointer new_connection,
+void tcp_server::handleAccept(tcp_connection::pointer newConnection,
 	const boost::system::error_code& error)
 {
-	start_accept();
+	startAccept();
 	if (!error)
 	{
-		new_connection->start(handler);
+		newConnection->start(handler);
 	}
 
 }

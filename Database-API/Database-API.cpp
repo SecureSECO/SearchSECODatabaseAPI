@@ -16,7 +16,7 @@ int main()
 {
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
-	listen.StartListen(&databaseHandler);
+	listen.startListen(&databaseHandler);
 
 	return 0;
 }
