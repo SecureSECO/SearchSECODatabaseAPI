@@ -13,7 +13,7 @@ append_coverage_compiler_flags()
 setup_target_for_coverage_lcov(
           NAME coverage
           EXECUTABLE tests
-		  EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}/Database-API_Test/*" "${PROJECT_SOURCE_DIR}/_deps/*")
+		  EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}/Database-API_Test/*" "${PROJECT_SOURCE_DIR}/build/_deps/*" "${PROJECT_SOURCE_DIR}/_deps/*")
 
 # Include sub-projects.
 add_subdirectory ("Database-API")
