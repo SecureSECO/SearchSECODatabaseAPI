@@ -26,17 +26,16 @@ public:
 	// Add a method to the tables methods and method_by_author.
 	virtual void addMethod(MethodIn method, Project project);
 
-	// Given a hash, return all methods with that hash
+	// Given a hash, return all methods with that hash.
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 private:
-	// Check if two methods are equivalent, i.e. contain the same hash.
-	bool equivalent(MethodIn method1, MethodIn method2);
-
+	// Add a method to the method_by_author table.
 	void addMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
 
 	// Parses a row into a method.
 	MethodOut getMethod(const CassRow* row);
 
+	// Retrieves the author ID corresponding to the given author.
 	CassUuid getAuthorID(Author author);
 
 	// The connection with the database.
