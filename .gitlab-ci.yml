@@ -40,4 +40,4 @@ linting:
   script:
     - cd Database-API
     - clang-tidy *.cpp -- -I../Resources/include/
-    - clang *.cpp -fsyntax-only
+    - clang *.cpp -I../Resources/include/ -fsyntax-only
