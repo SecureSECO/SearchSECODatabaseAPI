@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseMock.cpp"
 #include <gtest/gtest.h>
 
+// Checks if two projects are equal. I.e., they have the same contents.
 MATCHER_P(projectEqual, project, "")
 {
 	return arg.projectID  == project.projectID
@@ -19,6 +20,7 @@ MATCHER_P(projectEqual, project, "")
 	    && arg.hashes     == project.hashes;*/
 }
 
+// Checks if two methods are equal. I.e., they have the same contents.
 MATCHER_P(methodEqual, method, "")
 {
 	/*if (arg.authors.size() != method.authors.size())
@@ -41,19 +43,30 @@ MATCHER_P(methodEqual, method, "")
 	//}
 }
 
+// Tests if program works correctly with one request and one (hard-coded) match.
 TEST(CheckUploadRequest, OneRequestOneMatch)
 {
 	MockDatabase database;
 	RequestHandler handler;
 	handler.initialize(&database);
 
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\na6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
-	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?MyProject/Method1.cpp?1?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+			      "a6aa62503e2ca3310e3a837502b80df5?Method1?"
+			      "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"
+			     "MyProject/Method1.cpp?1?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
 	std::string authorID = "f1a028d7-3845-41df-bec1-2e16c49e4c35";
-	MethodOut method1out = { .hash = "a6aa62503e2ca3310e3a837502b80df5", .projectID = 0, .version = 0, .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp", .lineNumber = 1, .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" }};
+	MethodOut method1out = { .hash = "a6aa62503e2ca3310e3a837502b80df5", .projectID = 0,
+				 .version = 0, .methodName = "Method1",
+				 .fileLocation = "MyProject/Method1.cpp", .lineNumber = 1,
+				 .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
 	Author author = { .name = "Owner", .mail = "owner@mail.com" };
-	Project project = { .projectID = 0, .version = 0, .license = "MyLicense", .name = "MyProject", .url = "MyUrl", .owner = author, .stars = 0, .hashes = {} };
-	MethodIn method1in = { .hash = "a6aa62503e2ca3310e3a837502b80df5", .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp" , .lineNumber = 1, .authors = {author} };
+	Project project = { .projectID = 0, .version = 0, .license = "MyLicense",
+			    .name = "MyProject", .url = "MyUrl", .owner = author,
+			    .stars = 0, .hashes = { } };
+	MethodIn method1in = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
+			       .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp",
+			       .lineNumber = 1, .authors = { author } };
 	std::vector<MethodOut> v;
 	v.push_back(method1out);
 
