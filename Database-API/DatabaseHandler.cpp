@@ -148,7 +148,7 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 
 	if (rc != 0)
 	{
-			printf("Query result: %s\n", cass_error_desc(rc));
+		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
 	cass_future_free(queryFuture);
@@ -176,7 +176,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	if (rc != 0)
 	{
-			printf("Query result: %s\n", cass_error_desc(rc));
+		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
 	cass_future_free(queryFuture);

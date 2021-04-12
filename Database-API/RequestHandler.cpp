@@ -46,12 +46,6 @@ string RequestHandler::handleRequest(string requestType, string request)
 	return result;
 }
 
-// Handles requests wanting to first check for matches with existing entries,
-// after which it adds the project itself to the database.
-// In this case, the request has the following format:
-// "projectID?version?license?project_name?url?author_name?author_mail?stars \n
-//  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-//  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ... <methodN_data>".
 string RequestHandler::handleCheckUploadRequest(string request)
 {
 	vector<Hash> hashes = requestToHashes(request);
@@ -72,8 +66,6 @@ vector<Hash> RequestHandler::requestToHashes(string request)
 	return hashes;
 }
 
-// Handles requests which simply want to add a project to the database.
-// The request has the same format as mentioned previously.
 string RequestHandler::handleUploadRequest(string request)
 {
 	Project project = requestToProject(request);
@@ -134,12 +126,6 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 	return method;
 }
 
-// Handles requests (consisting of hashes separated by newline characters) by returning methods (in string format) with
-// the same hash. In this case, the request has the following format:
-// "hash_1\nhash_2\n...\nhash_N".
-// The output has the following format:
-// "method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|...|
-//  method1_authoridM\n<method2_data>\n ... \n<methodN_data>".
 string RequestHandler::handleCheckRequest(string request)
 {
 	vector<Hash> hashes = splitStringOn(request, '\n');
@@ -161,7 +147,6 @@ string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 	}
 }
 
-// Retrieves the methods corresponding to the hashes given as input using the database.
 vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
 {
 	vector<MethodOut> methods = { };
@@ -177,8 +162,6 @@ vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
-// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates
-// different methods and different method data elements by special characters.
 string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
 	vector<char> chars = {};
@@ -219,7 +202,6 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
 	return result;
 }
 
-// Appends result-string by a string, and adds a special character at the end.
 void RequestHandler::appendBy(vector<char>& result, string word, char endCharacter)
 {
 	for (int i = 0; i < word.size(); i++)
@@ -241,13 +223,11 @@ vector<string> RequestHandler::splitStringOn(string str, char delimiter)
 	return substrings;
 }
 
-// Handles unknown requests.
 string RequestHandler::handleUnknownRequest()
 {
 	return "Your input is not recognised.";
 }
 
-// Converts a requestType into an eRequestType which can be used inside a switch-statement.
 eRequestType RequestHandler::getERequestType(string requestType)
 {
 	if (requestType == "upld")
