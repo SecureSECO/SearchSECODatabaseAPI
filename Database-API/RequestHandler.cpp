@@ -118,10 +118,10 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry) // methodData = met
     method.lineNumber = stoi(methodData[3]);
 
     vector<Author> authors;
-    Author author;
-    int numberOfAuthors = 0;//stoi(methodData[4]);
+    int numberOfAuthors = stoi(methodData[4]);
     for (int i = 0; i < numberOfAuthors; i++)
     {
+    	Author author;
         author.name = methodData[5 + 2 * i];
         author.mail = methodData[6 + 2 * i];
         authors.push_back(author);
