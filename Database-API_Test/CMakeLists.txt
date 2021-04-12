@@ -27,7 +27,7 @@ add_executable(
   tests
   RequestHandler_test.cpp
   CheckRequest_test.cpp
-  #UploadRequest_tests.cpp
+  UploadRequest_tests.cpp
 )
 target_link_libraries(
   tests
