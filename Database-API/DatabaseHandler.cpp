@@ -26,12 +26,12 @@ void DatabaseHandler::connect()
 
 	if (rc != CASS_OK)
 	{
-    	/* Display connection error message. */
-    	const char* message;
-    	size_t messageLength;
-    	cass_future_error_message(connectFuture, &message, &messageLength);
-    	fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
-  	}
+		/* Display connection error message. */
+		const char* message;
+		size_t messageLength;
+		cass_future_error_message(connectFuture, &message, &messageLength);
+		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+	}
 }
 
 vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
@@ -64,11 +64,11 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 	}
 	else
 	{
-    	/* Handle error. */
-    	const char* message;
-    	size_t messageLength;
-    	cass_future_error_message(resultFuture, &message, &messageLength);
-    	fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		/* Handle error. */
+		const char* message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
 	}
 
 	cass_statement_free(query);
@@ -147,7 +147,7 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 
 	if (rc != 0)
 	{
-    		printf("Query result: %s\n", cass_error_desc(rc));
+			printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
 	cass_future_free(queryFuture);
@@ -175,7 +175,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	if(rc != 0)
 	{
-    		printf("Query result: %s\n", cass_error_desc(rc));
+			printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
 	cass_future_free(queryFuture);

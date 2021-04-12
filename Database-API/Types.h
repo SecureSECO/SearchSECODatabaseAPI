@@ -10,15 +10,15 @@ Utrecht University within the Software Project course.
 #include <vector>
 
 namespace types {
-/// <summary>
-/// Represents the data of an author.
-/// </summary>
 
 typedef std::string AuthorID;
 typedef long long ProjectID;
 typedef std::string Hash;
 typedef time_t Version;
 
+/// <summary>
+/// Represents the data of an author.
+/// </summary>
 struct Author
 {
 public:
@@ -28,7 +28,7 @@ public:
 
 
 /// <summary>
-/// Represents the relevant data of a method.
+/// Represents the relevant data of a method to be put in the database.
 /// </summary>
 struct MethodIn
 {
@@ -40,6 +40,10 @@ public:
 	std::vector<Author> authors;
 };
 
+/// <summary>
+/// Represents the data of a method to be returned to the user.
+/// Difference with MethodIn: authorIDs instead of authors.
+/// </summary>
 struct MethodOut
 {
 public:
@@ -51,9 +55,6 @@ public:
 	int lineNumber;
 	std::vector<AuthorID> authorIDs;
 };
-
-//void to_json(nlohmann::json& j, const Method& m);
-
 
 // <summary>
 /// Represents the relevant data of a project.

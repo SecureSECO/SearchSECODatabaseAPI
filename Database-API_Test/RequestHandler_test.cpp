@@ -1,3 +1,7 @@
+/*This program has been developed by students from the bachelor Computer Science at
+Utrecht University within the Software Project course.
+ Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
 #include <gtest/gtest.h>
@@ -12,7 +16,7 @@ TEST(GeneralTest, InitializeTest){
 }
 
 // Tests if the RequestHandler correctly responds to an unknown request.
-TEST(SimpleTest, BasicAssertions){
+TEST(GeneralTest, UnknownRequest){
 	RequestHandler handler;
 	EXPECT_EQ(handler.handleRequest("kill", ""), "Your input is not recognised.");
 }
