@@ -14,6 +14,7 @@ Utrecht University within the Software Project course.
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <iostream>
+
 using boost::asio::ip::tcp;
 
 /// <summary>
@@ -22,17 +23,23 @@ using boost::asio::ip::tcp;
 class ConnectionHandler
 {
 public:
+	/// <summary>
+	/// Starts listening for requests. Takes in a pointer to the database handler.
+	/// </summary>
 	void startListen(DatabaseHandler* databaseHandler);
 private:
 	RequestHandler handler;
 };
 
-class tcp_connection
-	: public boost::enable_shared_from_this<tcp_connection>
+class TcpConnection
+	: public boost::enable_shared_from_this<TcpConnection>
 {
 public:
-	typedef boost::shared_ptr<tcp_connection> pointer;
+	typedef boost::shared_ptr<TcpConnection> pointer;
 
+	/// <summary>
+	/// Creates the pointer to the tcp connection. Takes in the io context.
+	/// </summary>
 	static pointer create(boost::asio::io_context& ioContext);
 
 	tcp::socket& socket()
@@ -40,16 +47,14 @@ public:
 		return socket_;
 	}
 
+
+	/// <summary>
+	/// Starts the handeling of a request. Takes in the request handler to call.
 	void start(RequestHandler handler);
 
 private:
-	tcp_connection(boost::asio::io_context& ioContext)
+	TcpConnection(boost::asio::io_context& ioContext)
 		: socket_(ioContext)
-	{
-	}
-
-	void handle_read(const boost::system::error_code& /*error*/,
-		size_t /*bytes_transferred*/)
 	{
 	}
 
@@ -57,18 +62,25 @@ private:
 	std::string message_;
 };
 
-class tcp_server
+class TcpServer
 {
 public:
-	tcp_server(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler);
+	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler);
 
 private:
+
+	/// <summary>
+	/// Starts accepting incoming requests.
+	/// </summary>
 	void startAccept();
 
-	void handleAccept(tcp_connection::pointer newConnection,
-		const boost::system::error_code& error);
+	/// <summary>
+	/// Handles the accepting of an incoming request.
+	/// Takes in the pointer to the tcp connection and a pointer to an error to write to.
+	/// </summary>
+	void handleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& error);
 
-	boost::asio::io_context& io_context_;
+	boost::asio::io_context& ioContext_;
 	tcp::acceptor acceptor_;
 	RequestHandler handler;
 };
