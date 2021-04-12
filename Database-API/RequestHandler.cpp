@@ -148,12 +148,12 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
     return method;
 }
 
-// Handles requests (consisting of hashes separated by newline characters) by returning methods (in string format) with the same hash.
-// In this case, the request has the following format:
+// Handles requests (consisting of hashes separated by newline characters) by returning methods (in string format) with
+// the same hash. In this case, the request has the following format:
 // "hash_1\nhash_2\n...\nhash_N".
 // The output has the following format:
-// "method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|...|method1_authoridM
-//  \n <method2_data> \n ... \n <methodN_data>".
+// "method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|...|
+//  method1_authoridM\n<method2_data>\n ... \n<methodN_data>".
 string RequestHandler::handleCheckRequest(string request)
 {
     vector<Hash> hashes = splitStringOn(request, '\n');
@@ -191,7 +191,8 @@ vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
     return methods;
 }
 
-// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates different methods and different method data elements by special characters.
+// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. Also separates
+// different methods and different method data elements by special characters.
 string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
     vector<char> chars = {};
@@ -207,7 +208,8 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
         vector<string> authorIDs = lastMethod.authorIDs;
         string authorTotal       = to_string(authorIDs.size());
 
-        // We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber, authorTotal and all the authorIDs.
+        // We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+        // authorTotal and all the authorIDs.
         vector<string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
         dataElements.insert(end(dataElements), begin(authorIDs), end(authorIDs));
 
@@ -216,7 +218,8 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
             appendBy(chars, data, dataDelimiter);
         }
 
-        // We should get rid of the last dataDelimiter if something is appended to 'chars' (which is precisely the case when it is non-empty).
+        // We should get rid of the last dataDelimiter if something is appended to 'chars',
+        // which is precisely the case when it is non-empty.
         if (!chars.empty())
         {
             chars.pop_back();
