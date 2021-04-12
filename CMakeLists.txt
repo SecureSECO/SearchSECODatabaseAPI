@@ -7,7 +7,7 @@ project ("Database-API")
 
 include_directories("Database-API")
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
-include(CodeCoverage.cmake)
+include(Resources/CodeCoverage.cmake)
 append_coverage_compiler_flags()
 
 setup_target_for_coverage_lcov(

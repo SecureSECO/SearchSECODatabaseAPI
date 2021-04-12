@@ -69,7 +69,7 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
     	size_t messageLength;
     	cass_future_error_message(resultFuture, &message, &messageLength);
     	fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
-	 }
+	}
 
 	cass_statement_free(query);
 	cass_future_free(resultFuture);
@@ -167,10 +167,10 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
 
-	/* Statement objects can be freed immediately after being executed */
+	/* Statement objects can be freed immediately after being executed. */
 	cass_statement_free(query);
 
-	/* This will block until the query has finished */
+	/* This will block until the query has finished. */
 	CassError rc = cass_future_error_code(queryFuture);
 
 	if(rc != 0)
@@ -196,18 +196,17 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
 		const CassResult* result = cass_future_get_result(queryFuture);
-
 		cout << cass_result_row_count(result) << endl;
 
 		if (cass_result_row_count(result) >= 1)
 		{
-
+		if (cass_result_row_count(result) >= 1) 
+		{
 			const CassRow* row = cass_result_first_row(result);
 
 			const CassValue* id = cass_row_get_column(row, 0);
 
 			cass_value_get_uuid(id, &authorID);
-
 		}
 		else
 		{
@@ -239,7 +238,7 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 	}
 	else
 	{
-	/* Handle error */
+	/* Handle error. */
 	const char* message;
 	size_t messageLength;
 	cass_future_error_message(queryFuture, &message, &messageLength);
