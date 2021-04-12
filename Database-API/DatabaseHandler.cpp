@@ -196,8 +196,6 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 	if (cass_future_error_code(queryFuture) == CASS_OK) {
 		const CassResult* result = cass_future_get_result(queryFuture);
 
-		cout << cass_result_row_count(result) << endl;
-
 		if (cass_result_row_count(result) >= 1) {
 
 		const CassRow* row = cass_result_first_row(result);
