@@ -38,6 +38,24 @@ private:
 	// Retrieves the author ID corresponding to the given author.
 	CassUuid getAuthorID(Author author);
 
+	// Creates a new author and adds it to the database.
+	CassUuid createAuthor(Author author);
+
+	/// <summary>
+	/// Retrieves a string from a row. Takes in the row and the name of the column.
+	/// </summary>
+	std::string getString(const CassRow* row, const char* column);
+
+	/// <summary>
+	/// Retrieves a 32 bit integer from a row. Takes in the row and the name of the column.
+	/// </summary>
+	int getInt32(const CassRow* row, const char* column);
+
+	/// <summary>
+	/// Retrieves a 64 bit integer from a row. Takes in the row and the name of the column.
+	/// </summary>
+	long long getInt64(const CassRow* row, const char* column);
+
 	// The connection with the database.
 	CassSession* connection;
 };
