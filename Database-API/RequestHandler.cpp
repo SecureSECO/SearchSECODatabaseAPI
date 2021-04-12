@@ -57,13 +57,27 @@ string RequestHandler::handleRequest(string requestType, string request)
 // In this case, the request has the following format:
 // "projectID?version?license?project_name?url?author_name?author_mail?stars \n
 //  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-//  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ..."
+//  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ... <methodN_data>".
 string RequestHandler::handleCheckUploadRequest(string request)
 {
     vector<Hash> hashes = requestToHashes(request);
     string result = handleCheckRequest(hashes);
     handleUploadRequest(request);
     return result;
+}
+
+// Retrieves the hashes within a request.
+// The request has the same formatting as before.
+vector<Hash> RequestHandler::requestToHashes(string request)
+{
+    vector<string> data = splitStringOn(request, '\n');
+    vector<Hash> hashes = {};
+    for (int i = 1; i < data.size(); i++)
+    {
+        Hash hash = data[i].substr(0, data[i].find('?'));
+        hashes.push_back(hash);
+    }
+    return hashes;
 }
 
 // Handles requests which simply want to add a project to the database.
@@ -86,7 +100,9 @@ string RequestHandler::handleUploadRequest(string request)
 }
 
 // Given a request, retrieves the project information and returns it as a Project-object.
-Project RequestHandler::requestToProject(string request) // project = projectID|version|license|project_name|url|author_name|author_mail|stars
+// In this case, the request has the following format:
+// "projectID|version|license|project_name|url|author_name|author_mail|stars".
+Project RequestHandler::requestToProject(string request)
 {
     // We retrieve the project information (projectData).
     string projectString = request.substr(0, request.find('\n'));
@@ -106,8 +122,10 @@ Project RequestHandler::requestToProject(string request) // project = projectID|
     return project;
 }
 
-// Converts a data entry to a Method.
-MethodIn RequestHandler::dataEntryToMethod(string dataEntry) // methodData = method_hash|method_name|method_fileLocation|number_of_authors|method_author1_name|method_author1_mail|method_author2_name|method_author2_mail|...
+// Converts a data entry to a Method. Here the data entry has the following format:
+// "method_hash|method_name|method_fileLocation|number_of_authors|
+//  method_author1_name|method_author1_mail|...|method_authorN_name|method_authorN_mail|".
+MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 {
     vector<string> methodData = splitStringOn(dataEntry, '?');
 
@@ -130,21 +148,13 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry) // methodData = met
     return method;
 }
 
-// Retrieves the hashes within a request.
-vector<Hash> RequestHandler::requestToHashes(string request)
-{
-    vector<string> data = splitStringOn(request, '\n');
-    vector<Hash> hashes = {};
-    for (int i = 1; i < data.size(); i++)
-    {
-        Hash hash = data[i].substr(0, data[i].find('?'));
-        hashes.push_back(hash);
-    }
-    return hashes;
-}
-
 // Handles requests (consisting of hashes separated by newline characters) by returning methods (in string format) with the same hash.
-string RequestHandler::handleCheckRequest(string request) // request = hash1 \n hash2 \n ...;  output = method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|method1_authorid2|... \n <method2_data> \n ...
+// In this case, the request has the following format:
+// "hash_1\nhash_2\n...\nhash_N".
+// The output has the following format:
+// "method1_hash|method1_name|method1_fileLocation|method1_lineNumber|number_of_authors|method1_authorid1|...|method1_authoridM
+//  \n <method2_data> \n ... \n <methodN_data>".
+string RequestHandler::handleCheckRequest(string request)
 {
     vector<Hash> hashes = splitStringOn(request, '\n');
     return handleCheckRequest(hashes);
@@ -206,13 +216,13 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
             appendBy(chars, data, dataDelimiter);
         }
 
-        // We should get rid of the last dataDelimiter if something is appended to 'chars' (which is only the case if it is non-empty).
+        // We should get rid of the last dataDelimiter if something is appended to 'chars' (which is precisely the case when it is non-empty).
         if (!chars.empty())
         {
             chars.pop_back();
         }
 
-        // We end 'chars' with the methodDelimiter and indicate that we are done with 'method'.
+        // We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
         chars.push_back(methodDelimiter);
         methods.pop_back();
     }
@@ -249,7 +259,7 @@ string RequestHandler::handleUnknownRequest()
     return "Your input is not recognised.";
 }
 
-// Determines the type of the request.
+// Converts a requestType into an eRequestType which can be used inside a switch-statement.
 eRequestType RequestHandler::getERequestType(string requestType)
 {
     if (requestType == "upld")
