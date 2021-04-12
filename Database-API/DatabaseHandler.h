@@ -17,27 +17,43 @@ using namespace types;
 class DatabaseHandler
 {
 public:
-	// Connect to the database
+	/// <summary>
+	/// Connect to the database.
+	/// </summary>
 	virtual void connect();
-
-	// Add a project to database.
+	
+	/// <summary>
+	/// Add a project to database. Takes a project as input and adds it to the database.
+	/// </summary>
 	virtual void addProject(Project project);
 
-	// Add a method to the tables methods and method_by_author.
+	/// <summary>
+	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to the database with information of the project.
+	/// </summary>
 	virtual void addMethod(MethodIn method, Project project);
 
-	// Given a hash, return all methods with that hash.
+	/// <summary>
+	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match the hash.
+	/// </summary>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 private:
-	// Add a method to the method_by_author table.
+	/// <summary>
+	/// Add a method to the method_by_author table. 
+	/// </summary>
 	void addMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
 
-	// Parses a row into a method.
+	/// <summary>
+	/// Parses a row into a method. Takes a row as input and outputs a method.
+	/// </summary>
 	MethodOut getMethod(const CassRow* row);
 
-	// Retrieves the author ID corresponding to the given author.
+	/// <summary>
+	/// Retrieves the author ID corresponding to the given author.
+	/// <summary>
 	CassUuid getAuthorID(Author author);
 
-	// The connection with the database.
+	/// <summary>
+	/// The connection with the database.
+	/// <summary>
 	CassSession* connection;
 };
