@@ -101,7 +101,8 @@ void DatabaseHandler::addProject(Project project)
 	/* This will block until the query has finished. */
 	CassError rc = cass_future_error_code(queryFuture);
 
-	if(rc != 0){
+	if (rc != 0)
+	{
 		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
@@ -173,7 +174,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 	/* This will block until the query has finished. */
 	CassError rc = cass_future_error_code(queryFuture);
 
-	if(rc != 0)
+	if (rc != 0)
 	{
     		printf("Query result: %s\n", cass_error_desc(rc));
 	}
@@ -198,8 +199,6 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 		const CassResult* result = cass_future_get_result(queryFuture);
 		cout << cass_result_row_count(result) << endl;
 
-		if (cass_result_row_count(result) >= 1)
-		{
 		if (cass_result_row_count(result) >= 1) 
 		{
 			const CassRow* row = cass_result_first_row(result);
