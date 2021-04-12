@@ -287,24 +287,24 @@ MethodOut DatabaseHandler::getMethod(const CassRow* row)
 string DatabaseHandler::getString(const CassRow* row, const char* column)
 {
 	const char* result;
-    size_t len;
-    const CassValue* value = cass_row_get_column_by_name(row, column);
-    cass_value_get_string(value, &result, &len);
-    return string(result, len);
+	size_t len;
+	const CassValue* value = cass_row_get_column_by_name(row, column);
+	cass_value_get_string(value, &result, &len);
+	return string(result, len);
 }
 
 int DatabaseHandler::getInt32(const CassRow* row, const char* column)
 {
 	cass_int32_t result;
-    const CassValue* value = cass_row_get_column_by_name(row, column);
-    cass_value_get_int32(value, &result);
-    return result;
+	const CassValue* value = cass_row_get_column_by_name(row, column);
+	cass_value_get_int32(value, &result);
+	return result;
 }
 
 long long DatabaseHandler::getInt64(const CassRow* row, const char* column)
 {
 	cass_int64_t result;
-    const CassValue* value = cass_row_get_column_by_name(row, column);
-    cass_value_get_int64(value, &result);
-    return result;
+	const CassValue* value = cass_row_get_column_by_name(row, column);
+	cass_value_get_int64(value, &result);
+	return result;
 }
