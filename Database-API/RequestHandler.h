@@ -6,7 +6,6 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
-#include <json.hpp>
 
 enum eRequestType
 {
