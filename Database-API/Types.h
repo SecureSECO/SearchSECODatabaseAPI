@@ -56,7 +56,7 @@ public:
 	std::vector<AuthorID> authorIDs;
 };
 
-// <summary>
+/// <summary>
 /// Represents the relevant data of a project.
 /// </summary>
 struct Project
