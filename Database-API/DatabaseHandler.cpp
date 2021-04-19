@@ -16,7 +16,7 @@ void DatabaseHandler::connect()
 	connection = cass_session_new();
 
 	// Add contact points.
-	cass_cluster_set_contact_points(cluster, "127.0.0.1");
+	cass_cluster_set_contact_points(cluster, "cassandra");
 	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
 
 	// Provide the cluster object as configuration to connect the session.
@@ -194,7 +194,6 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
 		const CassResult* result = cass_future_get_result(queryFuture);
-		cout << cass_result_row_count(result) << endl;
 
 		if (cass_result_row_count(result) >= 1)
 		{
