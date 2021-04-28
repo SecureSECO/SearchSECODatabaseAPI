@@ -17,6 +17,7 @@ void DatabaseHandler::connect()
 
 	// Add contact points.
 	cass_cluster_set_contact_points(cluster, "cassandra");
+	cass_cluster_set_port(cluster, 8002);
 	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
 
 	// Provide the cluster object as configuration to connect the session.
