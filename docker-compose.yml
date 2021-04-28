@@ -5,18 +5,16 @@ services:
       image: cassandra:3.11
       container_name: cassandra
       restart: always
+      ports:
+        - "8001:8001"
+        - "8002:8002"
+      environment:
+        - CASSANDRA_BROADCAST_ADDRESS=${IP}
+        - CASSANDRA_SEEDS=131.211.31.153,${IP}
+        - CASSANDRA_DC=dc${IP}
       volumes:
         - ${LOC}:/var/lib/cassandra
         - ./cassandra.yaml:/etc/cassandra/cassandra.yaml
-
-  cassandra-load-keyspace:
-      container_name: cassandra-load-keyspace
-      image: cassandra:3.11
-      depends_on:
-        - cassandra
-      volumes:
-        - ./schema.cql:/schema.cql 
-      command: /bin/bash -c "sleep 30 && echo loading cassandra keyspace && cqlsh cassandra -f /schema.cql"
       
   database-api:
       container_name: api
