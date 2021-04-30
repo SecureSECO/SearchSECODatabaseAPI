@@ -18,6 +18,7 @@ services:
       
   database-api:
       container_name: api
+      restart: always
       build: .
       ports:
         - "8003:8003"
