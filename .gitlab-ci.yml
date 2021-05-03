@@ -2,6 +2,8 @@ image: ubuntu:latest
 
 google-tests:
   stage: test
+  variables:
+    DEBIAN_FRONTEND: noninteractive
   before_script:
     - apt-get -y update
     - apt-get -y dist-upgrade
@@ -24,6 +26,8 @@ google-tests:
 
 linting:
   stage: test
+  variables:
+    DEBIAN_FRONTEND: noninteractive
   before_script:
     - apt-get update
     - apt-get -y dist-upgrade
