@@ -9,15 +9,15 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-void DatabaseHandler::connect()
+void DatabaseHandler::connect(string ip, int port)
 {
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
 	connection = cass_session_new();
 
 	// Add contact points.
-	cass_cluster_set_contact_points(cluster, "cassandra");
-	cass_cluster_set_port(cluster, 8002);
+	cass_cluster_set_contact_points(cluster, ip.c_str());
+	cass_cluster_set_port(cluster, port);
 	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
 
 	// Provide the cluster object as configuration to connect the session.

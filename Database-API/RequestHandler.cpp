@@ -14,11 +14,11 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
 {
 	// Set up a connection with the database.
 	database = databaseHandler;
-	database -> connect();
+	database -> connect(ip, port);
 }
 
 string RequestHandler::handleRequest(string requestType, string request)

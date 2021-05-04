@@ -30,7 +30,7 @@ public:
 	/// <param name="databaseHandler">
 	/// Handler for interactions with the database.
 	/// </param>
-	void initialize(DatabaseHandler* databaseHandler);
+	void initialize(DatabaseHandler* databaseHandler, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
