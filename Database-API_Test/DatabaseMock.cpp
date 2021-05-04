@@ -16,7 +16,7 @@ using namespace types;
 class MockDatabase : public DatabaseHandler
 {
 public:
-	MOCK_METHOD(void, connect, (), ());
+	MOCK_METHOD(void, connect, (std::string ip, int port), ());
 	MOCK_METHOD(void, addProject, (Project project), ());
 	MOCK_METHOD(void, addMethod, (MethodIn method, Project project), ());
 	MOCK_METHOD(std::vector<MethodOut>, hashToMethods, (std::string hash), ());
