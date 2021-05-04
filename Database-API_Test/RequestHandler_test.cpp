@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 TEST(GeneralTest, InitializeTest){
 	RequestHandler handler;
 	MockDatabase database;
-	EXPECT_CALL(database, connect())
+	EXPECT_CALL(database, connect("cassandra", 8002))
 		.Times(1);
 	handler.initialize(&database);
 }
