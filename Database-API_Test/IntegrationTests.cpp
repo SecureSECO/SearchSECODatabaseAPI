@@ -36,3 +36,138 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	std::string result = handler.handleRequest("chck", "a6aa62503e2ca3310e3a837502b80df5");
 	ASSERT_EQ(result[0], 'a');
 }
+
+class RequestHandlerTest : public ::testing::Test
+{
+  protected:
+	static void SetUp() override
+	{
+		// We first wait 30 seconds to make sure the database container is ready to be used.
+		const int waittime = 30000;
+		sleep(waittime);
+
+		handler.initialize(&database);
+	}
+
+	DatabaseHandler database;
+	RequestHandler handler;
+};
+
+// Tests check request functionality with a single known hash as input.
+TEST_F(RequestHandlerTest, CheckRequestSingleHash)
+{
+	// Set up:
+	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
+	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
+										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+
+	// Test:
+	const std::string output1 = handler.handleRequest("chck", input1);
+	ASSERT_EQ(output1, expectedOutput1);
+}
+
+// Tests check request functionality with unknown hash as input.
+TEST_F(RequestHandlerTest, CheckRequestUnknownHash)
+{
+	// Set up:
+	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
+	const std::string expectedOutput2 = "No results found";
+
+	// Test:
+	const std::string output2 = handler.handleRequest("chck", input2);
+	ASSERT_EQ(output2, expectedOutput2);
+}
+
+// Tests check request functionality with multiple hashes as input.
+TEST_F(RequestHandlerTest, CheckRequestMultipleHashes)
+{
+	// Set up:
+	const std::string input3 = "06f73d7ab46184c55bf4742b9428a4c0";
+	const std::string expectedOutput3_1 = "06f73d7ab46184c55bf4742b9428a4c0?2?5000000001000?M2?P2/M2.cpp?1?3?"
+										  "68bd2db6-fe91-47d2-a134-cf82b104f547?b2217c08-06eb-4a57-b977-7c6d72299301?"
+										  "5a10bb4d-97b6-44d8-a135-f1432424a61c\n";
+	const std::string expectedOutput3_2 = "06f73d7ab46184c55bf4742b9428a4c0?4?5000000005000?M6?P4/M6.cpp?3?1?"
+										  "e39e0872-6856-4fa0-8d9a-278728362f43\n";
+
+	// Test:
+	std::string output3 = handler.handleRequest("chck", input3);
+	ASSERT_TRUE(output3 == expectedOutput3_1 + expectedOutput3_2 || output3 == expectedOutput3_2 + expectedOutput3_1);
+}
+
+// Tests check request functionality completely.
+TEST_F(RequestHandlerTest, CheckRequestComplete)
+{
+	// Set up:
+	const std::string input4 =
+		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
+	const std::string expectedOutput4_1 = "06f73d7ab46184c55bf4742b9428a4c0?3?5000000003000?M4?P3/M4.cpp?21?2?"
+										  "68bd2db6-fe91-47d2-a134-cf82b104f547?b2217c08-06eb-4a57-b977-7c6d72299301\n";
+	const std::string expectedOutput4_2 = "06f73d7ab46184c55bf4742b9428a4c0?5?5000000007000?M8?P5/M8.cpp?1?2?"
+										  "e39e0872-6856-4fa0-8d9a-278728362f43?f95ffc6c-aa97-40d6-b709-cb4823955213\n";
+	const std::string expectedOutput4_3 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
+										  "b2217c08-06eb-4a57-b977-7c6d72299301\n";
+
+	// Test:
+	std::string output4 = handler.handleRequest("chck", input4);
+	ASSERT_TRUE(output4 == expectedOutput4_1 + expectedOutput4_2 + expectedOutput4_3 ||
+				output4 == expectedOutput4_2 + expectedOutput4_1 + expectedOutput4_3);
+}
+
+// Tests upload request functionality with one method as input.
+TEST_F(RequestHandlerTest, UploadRequestOneMethod)
+{
+	// Set up:
+	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
+								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
+	const std::string input5_2 = "a6aa62503e2ca3310e3a837502b80df5";
+	const std::string expectedOutput5_1 = "Your project is successfully added to the database.";
+	const std::string unexpectedOutput5_2 = "No results found";
+
+	// Test if output is correct:
+	const std::string output5_1 = handler.handleRequest("upld", input5_1);
+	ASSERT_EQ(output5_1, expectedOutput5_1);
+
+	// Test if the method from the project is actually in the database:
+	const std::string output5_2 = handler.handleRequest("chck", input5_2);
+	ASSERT_NEQ(output5_2, unexpectedOutput5_2);
+}
+
+// Tests upload request functionality with multiple methods as input.
+TEST_F(RequestHandlerTest, UploadRequestMultipleMethods)
+{
+	// Set up:
+	const std::string input6_1 = "7?5000000011000?L6?P7?www.github.com/p7?Author 9?author9@mail.com\n"
+								 "88e1ad43ee7b716b7d19e5e65ee40da8?M12?P7/M12.cpp?1?2?"
+								 "Author 7?author7@mail.com?Author 8?author8@mail.com\n"
+								 "f3a258ba6cd26c1b7d553a493c614104?M13?P7/M13.cpp?41?1?"
+								 "Author 8?author8@mail.com\n"
+								 "59bf62494932580165af0451f76be3e9?M14?P7/M14.cpp?81?1?"
+								 "Author 7?author7@mail.com";
+	const std::string input6_2 =
+		"88e1ad43ee7b716b7d19e5e65ee40da8\nf3a258ba6cd26c1b7d553a493c614104\n59bf62494932580165af0451f76be3e9";
+	const std::string expectedOutput6 = "Your project is succesfully added to the database.";
+
+	// Test if output is correct:
+	const std::string output6_1 = handler.handleRequest("upld", input6_1);
+	ASSERT_EQ(output6_1, expectedOutput6);
+
+	// Test if the methods are actually in the database, by checking if the program
+	// returns exactly 3 entries when performing a check request on the 3 hashes:
+	const std::string output6_2 = handler.handleRequest("chck", input6_2);
+	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
+}
+
+// Tests checkupload request functionality with a known hash as input.
+TEST_F(RequestHandlerTest, CheckUploadRequestKnownHash)
+{
+	// Set up:
+	const std::string input7 = "8?5000000012000?L7?P8?www.github.com/p8?Author 10?author10@mail.com\n"
+							   "2c7f46d4f57cf9e66b03213358c7ddb5?M14?P8/M14.cpp?1?1?Author 10?author10@mail.com\n"
+							   "d0b33728458eec4279cb91ee865414d5?M15?P8/M15.cpp?41?1?Author 10?author10@mail.com\n";
+	const std::string expectedOutput7 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
+										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+
+	// Test:
+	const std::string output7 = handler.handleRequest("chup", input7);
+	ASSERT_EQ(output7, expectedOutput7);
+}
