@@ -142,3 +142,96 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	string result = handler.handleRequest(requestType, request);
 	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
+
+// Tests if the program can handle an upload request with invalid project data, too many arguments.
+TEST(UploadRequest, InvalidProjectSize)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+// Tests if the program can handle an upload request with invalid project data, non-integer id.
+TEST(UploadRequest, InvalidProjectID)
+{
+	string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+
+// Tests if the program can handle an upload request with invalid project data, non-integer version.
+TEST(UploadRequest, InvalidProjectVersion)
+{
+	string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, too few arguments.
+TEST(UploadRequest, InvalidMethodSizeSmall)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, too many arguments.
+TEST(UploadRequest, InvalidMethodSizeLarge)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?2?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, invalid method hash.
+TEST(UploadRequest, InvalidMethodHash)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5xx?Method1?MyProject/Method1.cpp?1?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 2.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, non-integer line number.
+TEST(UploadRequest, InvalidMethodLine)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?not_an_integer?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+
+// Tests if the program can handle an upload request with invalid method data, non-integer number of authors.
+TEST(UploadRequest, InvalidMethodAuthorLines)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?not_an_integer?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}

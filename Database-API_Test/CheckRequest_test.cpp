@@ -154,3 +154,13 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_TRUE(result.find(output5) != std::string::npos);
 }
+
+// Checks if the program correctly identifies an invalid hash in the input.
+TEST(CheckRequestTests, InvalidHash)
+{
+	RequestHandler handler;
+	std::string request = "hello_I'm_an_invalid_hash";
+
+	std::string output = handler.handleRequest("chck", request);
+	ASSERT_EQ(output, "Invalid hash presented.");
+}

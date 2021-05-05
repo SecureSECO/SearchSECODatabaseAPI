@@ -197,7 +197,7 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 
 	if (methodData.size() != METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
 	{
-		errno = 34;
+		errno = EILSEQ;
 		return MethodIn();
 	}
 
