@@ -9,57 +9,59 @@ Utrecht University within the Software Project course.
 
 int Utility::safeStoi(std::string str)
 {
-        errno = 0;
-        int res = 0;
-        try
-        {
+	errno = 0;
+	int res = 0;
+	try
+	{
 		res = stoi(str);
-        }
-        catch(const std::exception& e)
-        {
-                if (errno != ERANGE)
-                {
-                        errno = EDOM;
-                }
-        }
-        return res;
+	}
+	catch(const std::out_of_range& e)
+	{
+		errno = ERANGE;
+	}
+	catch(const std::exception& e)
+	{
+                errno = EDOM;
+	}
+	return res;
 }
 
 long long Utility::safeStoll(std::string str)
 {
-        errno = 0;
-        long long res = 0;
-        try
-        {
-                res = stoll(str);
-        }
-        catch(const std::exception& e)
-        {
-                if (errno != ERANGE)
-                {
-                        errno = EDOM;
-                }
-        }
-        return res;
+	errno = 0;
+	long long res = 0;
+	try
+	{
+		res = stoll(str);
+	}
+	catch(const std::out_of_range& e)
+	{
+		errno = ERANGE;
+	}
+	catch(const std::exception& e)
+	{
+		errno = EDOM;
+	}
+	return res;
 }
 
 void Utility::appendBy(std::vector<char>& result, std::string word, char endCharacter)
 {
-        for (int i = 0; i < word.size(); i++)
-        {
-                result.push_back(word[i]);
-        }
-        result.push_back(endCharacter);
+	for (int i = 0; i < word.size(); i++)
+	{
+		result.push_back(word[i]);
+	}
+	result.push_back(endCharacter);
 }
 
 std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 {
-        std::stringstream strStream(str);
-        std::string item;
-        std::vector<std::string> substrings;
-        while (getline(strStream, item, delimiter))
-        {
-                substrings.push_back(item);
-        }
-        return substrings;
+	std::stringstream strStream(str);
+	std::string item;
+	std::vector<std::string> substrings;
+	while (getline(strStream, item, delimiter))
+	{
+		substrings.push_back(item);
+	}
+	return substrings;
 }

@@ -24,7 +24,9 @@ public:
         /// <returns>
         /// int corresponding to string on success, or 0 when the string cannot be converted.
         /// If the string cannot be converted, errno is set to EDOM. If the converted string would fall
-        /// out of the range of an int, errno is set to ERANGE.
+        /// out of the range of an int, errno is set to ERANGE. Strings of the form "123AAA" are parsed
+	/// to 123.
+	/// </returns>
         static int safeStoi(std::string str);
 
         /// <summary>
@@ -36,7 +38,9 @@ public:
         /// <returns>
         /// long long corresponding to string on success, or 0 when the string cannot be converted.
         /// If the string cannot be converted, errno is set to EDOM. If the converted string would fall
-        /// out of the range of a long long, errno is set to ERANGE.
+        /// out of the range of a long long, errno is set to ERANGE. Strings of the form "123AAA" are
+	/// parsed to 123.
+	/// </returns>
         static long long safeStoll(std::string str);
 
         /// <summary>
@@ -48,7 +52,7 @@ public:
         /// Splits a string ('str') on a special character ('delimiter').
         /// </summary>
         /// <returns>
-        /// The vector consisting of the substrings.
+        /// The vector consisting of the substrings. A delimiter at the end of the string is ignored.
         /// </returns>
         static std::vector<std::string> splitStringOn(std::string str, char delimiter);
 };
