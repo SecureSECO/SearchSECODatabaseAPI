@@ -34,7 +34,6 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 
 void TcpConnection::start(RequestHandler handler)
 {
-	// TODO: Implement a timeout.
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
 	size_t len;
@@ -42,7 +41,6 @@ void TcpConnection::start(RequestHandler handler)
 	if (error == boost::asio::error::eof)
 	{
 		// Socket was closed before receiving \n.
-		// boost::asio::write(socket_, boost::asio::buffer(std::string("No newline after command.")), error);
 		return;
 	}
 	std::string r(request.begin(), request.begin() + len - 1);
@@ -70,7 +68,6 @@ void TcpConnection::start(RequestHandler handler)
 		if (error == boost::asio::error::eof)
 		{
 			// Socket was closed before receiving all data..
-			// boost::asio::write(socket_, boost::asio::buffer(std::string("Request body is smaller than expected.")), error);
 			return;
 		}
 		if (size < 0)

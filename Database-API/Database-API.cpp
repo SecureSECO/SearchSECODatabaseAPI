@@ -17,6 +17,7 @@ int main()
 {
 	usleep(45000000);
 	cout << "Connecting now" << endl;
+
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
 	listen.startListen(&databaseHandler);

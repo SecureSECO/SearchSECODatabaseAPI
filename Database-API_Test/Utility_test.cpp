@@ -1,10 +1,11 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
- Copyright Utrecht University(Department of Information and Computing Sciences)*/
+© Copyright Utrecht University(Department of Information and Computing Sciences)*/
 
 #include "Utility.h"
 #include <gtest/gtest.h>
 
+// Checks if parseable string is converted correctly by safeStoi.
 TEST(CheckSafeStoi, CorrectInput)
 {
 	std::string input = "123";
@@ -14,6 +15,7 @@ TEST(CheckSafeStoi, CorrectInput)
 	ASSERT_EQ(errno, 0);
 }
 
+// Checks if input that is bigger than int range gives the correct response for safeStoi.
 TEST(CheckSafeStoi, LongSizeInput)
 {
 	std::string input = "9876543210";
@@ -23,6 +25,7 @@ TEST(CheckSafeStoi, LongSizeInput)
 	ASSERT_EQ(errno, ERANGE);
 }
 
+// Checks if the partial parsing functions as desired for safeStoi.
 TEST(CheckSafeStoi, PartiallyParseable)
 {
 	std::string input = "123Hallo";
@@ -32,6 +35,7 @@ TEST(CheckSafeStoi, PartiallyParseable)
 	ASSERT_EQ(errno, 0);
 }
 
+// Checks if non-parseable input gives the correct response for safeStoi.
 TEST(CheckSafeStoi, NonParseable)
 {
 	std::string input = "Hallo123";
@@ -41,6 +45,7 @@ TEST(CheckSafeStoi, NonParseable)
 	ASSERT_EQ(errno, EDOM);
 }
 
+// Checks if parseable string is converted correctly by safeStoll.
 TEST(CheckSafeStoll, CorrectInput)
 {
 	std::string input = "9876543210";
@@ -50,6 +55,7 @@ TEST(CheckSafeStoll, CorrectInput)
 	ASSERT_EQ(errno, 0);
 }
 
+// Checks if input that is bigger than long long range gives the correct response for safeStoll.
 TEST(CheckSafeStoll, OutOfRange)
 {
 	std::string input = "123456789012345678901234567890";
@@ -59,6 +65,7 @@ TEST(CheckSafeStoll, OutOfRange)
 	ASSERT_EQ(errno, ERANGE);
 }
 
+// Checks if the partial parsing functions as desired for safeStoll.
 TEST(CheckSafeStoll, PartiallyParseable)
 {
 	std::string input = "9876543210Bonjour";
@@ -68,6 +75,7 @@ TEST(CheckSafeStoll, PartiallyParseable)
 	ASSERT_EQ(errno, 0);
 }
 
+// Checks if non-parseable input gives the correct response for safeStoll.
 TEST(CheckSafeStoll, NonParseable)
 {
 	std::string input = "Bonjour9876543210";
@@ -77,6 +85,7 @@ TEST(CheckSafeStoll, NonParseable)
 	ASSERT_EQ(errno, EDOM);
 }
 
+// Checks if appendBy functions as desired.
 TEST(CheckAppendBy, SmallTest)
 {
 	std::vector<char> input = {'a', 'b', 'c', 'd'};
@@ -93,6 +102,7 @@ TEST(CheckAppendBy, SmallTest)
 	}
 }
 
+// Checks if splitStringOn works if no delimiter is present.
 TEST(CheckStringSplit, NoSplit)
 {
 	std::string input = "1234567890987654321234567890987654321234567890987654321234567890";
@@ -102,6 +112,7 @@ TEST(CheckStringSplit, NoSplit)
 	ASSERT_EQ(output[0], "1234567890987654321234567890987654321234567890987654321234567890");
 }
 
+// Checks if splitStringOn works with a single delimiter.
 TEST(CheckStringSplit, SingleSplit)
 {
 	std::string input = "line1\nline2";
@@ -112,6 +123,7 @@ TEST(CheckStringSplit, SingleSplit)
 	ASSERT_EQ(output[1], "line2");
 }
 
+// Checks if splitStringOn works with back-to-back delimiters.
 TEST(CheckStringSplit, BackToBackSplit)
 {
 	std::string input = "line1\n\nline2";
@@ -123,6 +135,7 @@ TEST(CheckStringSplit, BackToBackSplit)
 	ASSERT_EQ(output[2], "line2");
 }
 
+// Checks if splitStringOn works with a delimiter at the front of the input.
 TEST(CheckStringSplit, FrontSplit)
 {
 	std::string input = "\nline2";
@@ -133,6 +146,7 @@ TEST(CheckStringSplit, FrontSplit)
 	ASSERT_EQ(output[1], "line2");
 }
 
+// Checks if splitStringOn ignores a delimiter at the end of the input.
 TEST(CheckStringSplit, EndSplit)
 {
 	std::string input = "line1\n";

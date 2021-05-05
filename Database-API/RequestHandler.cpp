@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+Â© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include <iostream>
@@ -56,6 +56,7 @@ string RequestHandler::handleCheckUploadRequest(string request)
 	vector<Hash> hashes = requestToHashes(request);
 	if (errno != 0)
 	{
+		// Hashes could not be parsed.
 		return "Error parsing hashes.";
 	}
 	string result = handleCheckRequest(hashes);
@@ -78,6 +79,7 @@ vector<Hash> RequestHandler::requestToHashes(string request)
 		}
 		else
 		{
+			// Invalid hash in sequence.
 			errno = EILSEQ;
 			return vector<Hash>();
 		}
@@ -87,23 +89,25 @@ vector<Hash> RequestHandler::requestToHashes(string request)
 
 bool RequestHandler::isValidHash(Hash hash)
 {
-	//return std::regex_search(hash, std::regex(MD5_REGEX));
 	// Inspired by: https://stackoverflow.com/questions/19737727/c-check-if-string-is-a-valid-md5-hex-hash.
 	return hash.size() == 32 && hash.find_first_not_of(HEX_CHARS) == -1;
 }
 
 string RequestHandler::handleUploadRequest(string request)
 {
+	// Check if project is valid.
 	Project project = requestToProject(request);
 	if (errno != 0)
 	{
+		// Project could not be parsed.
 		return "Error parsing project data.";
 	}
-	//database -> addProject(project);
+
 	vector<MethodIn> methods;
 
 	vector<string> dataEntries = Utility::splitStringOn(request, '\n');
 
+	// Check if all methods are valid.
 	for (int i = 1; i < dataEntries.size(); i++)
 	{
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
@@ -111,8 +115,10 @@ string RequestHandler::handleUploadRequest(string request)
 		{
 			return "Error parsing method " + std::to_string(i) + ".";
 		}
-		methods.push_back(method);//database -> addMethod(method, project);
+		methods.push_back(method);
 	}
+
+	// Only upload if project and all methods are valid to prevent partial uploads.
 	database -> addProject(project);
 	for (MethodIn method : methods)
 	{
@@ -169,6 +175,7 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 
 	if (methodData.size() < METHOD_DATA_MIN_SIZE)
 	{
+		// Too few parameters.
 		errno = EILSEQ;
 		return MethodIn();
 	}
@@ -176,6 +183,7 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 	MethodIn method;
 	if (!isValidHash(methodData[0]))
 	{
+		// Invalid method hash.
 		errno = EILSEQ;
 		return MethodIn();
 	}
@@ -185,6 +193,7 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 	method.lineNumber = Utility::safeStoi(methodData[3]);
 	if (errno != 0)
 	{
+		// Non-integer line number.
 		return MethodIn();
 	}
 
@@ -192,11 +201,13 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 	int numberOfAuthors = Utility::safeStoi(methodData[4]);
 	if (errno != 0)
 	{
+		// Non-integer number of authors.
 		return MethodIn();
 	}
 
 	if (methodData.size() != METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
 	{
+		// Incorrect amount of parameters.
 		errno = EILSEQ;
 		return MethodIn();
 	}
@@ -221,6 +232,7 @@ string RequestHandler::handleCheckRequest(string request)
 
 string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 {
+	// Check if all requested hashes are invalid.
 	for (int i = 0; i < hashes.size(); i++)
 	{
 		if (!isValidHash(hashes[i]))
@@ -229,8 +241,10 @@ string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 		}
 	}
 
+	// Request the specified hashes.
 	vector<MethodOut> methods = getMethods(hashes);
 
+	// Return retrieved data.
 	string methodsStringFormat = methodsToString(methods, '?', '\n');
 	if (!(methodsStringFormat == ""))
 	{
