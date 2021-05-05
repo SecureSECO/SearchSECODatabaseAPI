@@ -109,7 +109,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	for (int i = 0; i < entries.size() - 1; i++)
 	{
-		remove(expectedOutputs.begin(), expectedOutputs.end(), entries[i])
+		remove(expectedOutputs.begin(), expectedOutputs.end(), entries[i]);
 	}
 
 	// After removal of the 3 entries, we expect only 2 to be left.
