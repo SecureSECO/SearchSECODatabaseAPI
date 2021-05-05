@@ -63,13 +63,27 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	const std::string input3 = "8811e6bedb87e90cef39de1179f3bd2e\n137fed017b6159acc0af30d2c6b403a5";
 	const std::string expectedOutput3_1 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
-										  "b2217c08-06eb-4a57-b977-7c6d72299301\n";
-	const std::string expectedOutput3_2 = "8811e6bedb87e90cef39de1179f3bd2e?5?5000000009000?M10?P5/M10.cpp?61?1?"
-										  "2a84cf5a-9554-4800-bb87-6dda6715fa12\n";
+										  "b2217c08-06eb-4a57-b977-7c6d72299301";
+	const std::string expectedOutput3_2 = "8811e6bedb87e90cef39de1179f3bd2e?4?5000000006000?M7?P4/M7.cpp?23?1?"
+										  "f95ffc6c-aa97-40d6-b709-cb4823955213";
+	const std::string expectedOutput3_3 = "8811e6bedb87e90cef39de1179f3bd2e?5?5000000009000?M10?P5/M10.cpp?61?1?"
+										  "2a84cf5a-9554-4800-bb87-6dda6715fa12";
+	std::vector<std::string> expectedOutputs3 = {expectedOutput3_1, expectedOutput3_2, expectedOutput3_3};
 
 	// Test:
 	std::string output3 = handler.handleRequest("chck", input3);
-	ASSERT_EQ(output3, expectedOutput3_1 + expectedOutput3_2);
+	std::vector<std::string> entries = splitStringOn(output3, '\n');
+
+	// The number of entries should be equal to 3.
+	ASSERT_EQ(entries.size(), 3);
+
+	for (int i = 0; i < entries.size(); i++)
+	{
+		remove(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+	}
+
+	// After removal of the 3 entries, we expect that none are left.
+	ASSERT_EQ(expectedOutputs4.size(), 0);
 }
 
 // Tests check request functionality completely.
@@ -82,38 +96,37 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	const std::string input4 =
 		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
-	const std::string expectedOutput4_11 =
+	const std::string expectedOutput4_1_1 =
 		"23920776594c85fdc30cd96f928487f1?3?5000000003000?M4?P3/M4.cpp?21?2?"
 		"68bd2db6-fe91-47d2-a134-cf82b104f547?b2217c08-06eb-4a57-b977-7c6d72299301";
-	const std::string expectedOutput4_12 =
+	const std::string expectedOutput4_1_2 =
 		"23920776594c85fdc30cd96f928487f1?3?5000000003000?M4?P3/M4.cpp?21?2?"
 		"b2217c08-06eb-4a57-b977-7c6d72299301?68bd2db6-fe91-47d2-a134-cf82b104f547";
-	const std::string expectedOutput4_21 =
+	const std::string expectedOutput4_2_1 =
 		"23920776594c85fdc30cd96f928487f1?5?5000000007000?M8?P5/M8.cpp?1?2?"
 		"e39e0872-6856-4fa0-8d9a-278728362f43?f95ffc6c-aa97-40d6-b709-cb4823955213";
-	const std::string expectedOutput4_22 =
+	const std::string expectedOutput4_2_2 =
 		"23920776594c85fdc30cd96f928487f1?5?5000000007000?M8?P5/M8.cpp?1?2?"
 		"f95ffc6c-aa97-40d6-b709-cb4823955213?e39e0872-6856-4fa0-8d9a-278728362f43";
 	const std::string expectedOutput4_3 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
 										  "b2217c08-06eb-4a57-b977-7c6d72299301\n";
-	std::vector<std::string> expectedOutputs = {expectedOutput4_11, expectedOutput4_12, expectedOutput4_21,
-												expectedOutput4_12, expectedOutput4_3};
+	std::vector<std::string> expectedOutputs4 = {expectedOutput4_1_1, expectedOutput4_1_2, expectedOutput4_2_1,
+												expectedOutput4_1_2, expectedOutput4_3};
 
 	// Test:
 	std::string output4 = handler.handleRequest("chck", input4);
 	std::vector<std::string> entries = splitStringOn(output4, '\n');
 
-	// As of now, each entry gets an '\n' character glued to it afterwards,
-	// as a result, the number of entries is equal to 3 + 1 = 4, as there are 3 entries.
-	ASSERT_EQ(entries.size(), 4);
+	// The number of entries should be equal to 3.
+	ASSERT_EQ(entries.size(), 3);
 
-	for (int i = 0; i < entries.size() - 1; i++)
+	for (int i = 0; i < entries.size(); i++)
 	{
-		remove(expectedOutputs.begin(), expectedOutputs.end(), entries[i]);
+		remove(expectedOutputs4.begin(), expectedOutputs4.end(), entries[i]);
 	}
 
 	// After removal of the 3 entries, we expect only 2 to be left.
-	ASSERT_EQ(expectedOutputs.size(), 2);
+	ASSERT_EQ(expectedOutputs4.size(), 2);
 }
 
 // Tests upload request functionality with one method as input.
@@ -127,7 +140,7 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
 	const std::string input5_2 = "a6aa62503e2ca3310e3a837502b80df5";
-	const std::string expectedOutput5_1 = "Your project is succesfully added to the database.";
+	const std::string expectedOutput5_1 = "Your project is successfully added to the database.";
 	const std::string unexpectedOutput5_2 = "No results found";
 
 	// Test if output is correct:
@@ -156,7 +169,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 								 "Author 7?author7@mail.com";
 	const std::string input6_2 =
 		"88e1ad43ee7b716b7d19e5e65ee40da8\nf3a258ba6cd26c1b7d553a493c614104\n59bf62494932580165af0451f76be3e9";
-	const std::string expectedOutput6 = "Your project is succesfully added to the database.";
+	const std::string expectedOutput6 = "Your project is successfully added to the database.";
 
 	// Test if output is correct:
 	const std::string output6_1 = handler.handleRequest("upld", input6_1);
