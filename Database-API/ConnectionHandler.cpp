@@ -61,6 +61,13 @@ void TcpConnection::start(RequestHandler handler)
 		return;
 	}
 	std::vector<char> data(size);
+	readExpectedData(size, data, totalData, error);
+	std::string result = handler.handleRequest(r.substr(0, 4), totalData);
+	boost::asio::write(socket_, boost::asio::buffer(result), error);
+}
+
+void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::string& totalData, boost::system::error_code& error)
+{
 	while (size > 0)
 	{
 		int prevSize = size;
@@ -77,8 +84,6 @@ void TcpConnection::start(RequestHandler handler)
 		}
 		totalData.append(std::string(data.begin(), data.begin() + prevSize - size));
 	}
-	std::string result = handler.handleRequest(r.substr(0, 4), totalData);
-	boost::asio::write(socket_, boost::asio::buffer(result), error);
 }
 
 // TCP server Methods.
