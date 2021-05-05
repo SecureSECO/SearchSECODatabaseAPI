@@ -6,57 +6,15 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <gtest/gtest.h>
 
-// Tests if program works correctly with one request and one (hard-coded) match.
-TEST(CheckUploadRequest, OneRequestOneMatch)
+
+// Tests check request functionality with a single known hash as input.
+TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
+	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
 	handler.initialize(&database, "127.0.0.1", 9042);
 
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
-						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
-	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"
-						 "MyProject/Method1.cpp?1?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
-	std::string authorID = "f1a028d7-3845-41df-bec1-2e16c49e4c35";
-	MethodOut method1out = { .hash = "a6aa62503e2ca3310e3a837502b80df5", .projectID = 0,
-							 .version = 0, .methodName = "Method1",
-							 .fileLocation = "MyProject/Method1.cpp", .lineNumber = 1,
-							 .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
-	Author author = { .name = "Owner", .mail = "owner@mail.com" };
-	Project project = { .projectID = 0, .version = 0, .license = "MyLicense",
-						.name = "MyProject", .url = "MyUrl", .owner = author,
-						.stars = 0, .hashes = { } };
-	MethodIn method1in = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
-						   .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp",
-						   .lineNumber = 1, .authors = { author } };
-	std::vector<MethodOut> v;
-	v.push_back(method1out);
-	handler.handleRequest("upld", request);
-	std::string result = handler.handleRequest("chck", "a6aa62503e2ca3310e3a837502b80df5");
-	ASSERT_EQ(result[0], 'a');
-}
-
-class RequestHandlerTest : public ::testing::Test
-{
-  protected:
-	static void SetUp() override
-	{
-		// We first wait 30 seconds to make sure the database container is ready to be used.
-		const int waittime = 30000;
-		sleep(waittime);
-
-		handler.initialize(&database);
-	}
-
-	DatabaseHandler database;
-	RequestHandler handler;
-};
-
-// Tests check request functionality with a single known hash as input.
-TEST_F(RequestHandlerTest, CheckRequestSingleHash)
-{
-	// Set up:
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
@@ -67,9 +25,13 @@ TEST_F(RequestHandlerTest, CheckRequestSingleHash)
 }
 
 // Tests check request functionality with unknown hash as input.
-TEST_F(RequestHandlerTest, CheckRequestUnknownHash)
+TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	const std::string expectedOutput2 = "No results found";
 
@@ -79,9 +41,13 @@ TEST_F(RequestHandlerTest, CheckRequestUnknownHash)
 }
 
 // Tests check request functionality with multiple hashes as input.
-TEST_F(RequestHandlerTest, CheckRequestMultipleHashes)
+TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input3 = "06f73d7ab46184c55bf4742b9428a4c0";
 	const std::string expectedOutput3_1 = "06f73d7ab46184c55bf4742b9428a4c0?2?5000000001000?M2?P2/M2.cpp?1?3?"
 										  "68bd2db6-fe91-47d2-a134-cf82b104f547?b2217c08-06eb-4a57-b977-7c6d72299301?"
@@ -95,9 +61,13 @@ TEST_F(RequestHandlerTest, CheckRequestMultipleHashes)
 }
 
 // Tests check request functionality completely.
-TEST_F(RequestHandlerTest, CheckRequestComplete)
+TEST(DatabaseIntegrationTest, CheckRequestComplete)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input4 =
 		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
 	const std::string expectedOutput4_1 = "06f73d7ab46184c55bf4742b9428a4c0?3?5000000003000?M4?P3/M4.cpp?21?2?"
@@ -114,9 +84,13 @@ TEST_F(RequestHandlerTest, CheckRequestComplete)
 }
 
 // Tests upload request functionality with one method as input.
-TEST_F(RequestHandlerTest, UploadRequestOneMethod)
+TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
 	const std::string input5_2 = "a6aa62503e2ca3310e3a837502b80df5";
@@ -133,9 +107,13 @@ TEST_F(RequestHandlerTest, UploadRequestOneMethod)
 }
 
 // Tests upload request functionality with multiple methods as input.
-TEST_F(RequestHandlerTest, UploadRequestMultipleMethods)
+TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input6_1 = "7?5000000011000?L6?P7?www.github.com/p7?Author 9?author9@mail.com\n"
 								 "88e1ad43ee7b716b7d19e5e65ee40da8?M12?P7/M12.cpp?1?2?"
 								 "Author 7?author7@mail.com?Author 8?author8@mail.com\n"
@@ -158,9 +136,13 @@ TEST_F(RequestHandlerTest, UploadRequestMultipleMethods)
 }
 
 // Tests checkupload request functionality with a known hash as input.
-TEST_F(RequestHandlerTest, CheckUploadRequestKnownHash)
+TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 {
 	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
 	const std::string input7 = "8?5000000012000?L7?P8?www.github.com/p8?Author 10?author10@mail.com\n"
 							   "2c7f46d4f57cf9e66b03213358c7ddb5?M14?P8/M14.cpp?1?1?Author 10?author10@mail.com\n"
 							   "d0b33728458eec4279cb91ee865414d5?M15?P8/M15.cpp?41?1?Author 10?author10@mail.com\n";

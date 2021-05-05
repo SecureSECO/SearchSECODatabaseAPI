@@ -22,7 +22,7 @@ google-tests:
   script:
     - apache-cassandra-3.11.10/bin/cassandra -R
     - sleep 30
-    - apache-cassandra-3.11.10/bin/cqlsh -f ./schema.cql
+    - apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql
     - mkdir database_build
     - cd database_build
     - cmake ..
