@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+Â© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include <iostream>
@@ -9,8 +9,10 @@ Utrecht University within the Software Project course.
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <regex>
 
 #include "RequestHandler.h"
+#include "Utility.h"
 
 using namespace std;
 
@@ -42,6 +44,9 @@ string RequestHandler::handleRequest(string requestType, string request)
 		case eUnknown:
 			result = handleUnknownRequest();
 			break;
+		default:
+			result = handleNotImplementedRequest();
+			break;
 	}
 	return result;
 }
@@ -49,6 +54,11 @@ string RequestHandler::handleRequest(string requestType, string request)
 string RequestHandler::handleCheckUploadRequest(string request)
 {
 	vector<Hash> hashes = requestToHashes(request);
+	if (errno != 0)
+	{
+		// Hashes could not be parsed.
+		return "Error parsing hashes.";
+	}
 	string result = handleCheckRequest(hashes);
 	handleUploadRequest(request);
 	return result;
@@ -56,43 +66,99 @@ string RequestHandler::handleCheckUploadRequest(string request)
 
 vector<Hash> RequestHandler::requestToHashes(string request)
 {
-	vector<string> data = splitStringOn(request, '\n');
+	errno = 0;
+	vector<string> data = Utility::splitStringOn(request, '\n');
 	vector<Hash> hashes = {};
 	for (int i = 1; i < data.size(); i++)
 	{
+		// Data before first delimiter.
 		Hash hash = data[i].substr(0, data[i].find('?'));
-		hashes.push_back(hash);
+		if (isValidHash(hash))
+		{
+			hashes.push_back(hash);
+		}
+		else
+		{
+			// Invalid hash in sequence.
+			errno = EILSEQ;
+			return vector<Hash>();
+		}
 	}
 	return hashes;
 }
 
+bool RequestHandler::isValidHash(Hash hash)
+{
+	// Inspired by: https://stackoverflow.com/questions/19737727/c-check-if-string-is-a-valid-md5-hex-hash.
+	return hash.size() == 32 && hash.find_first_not_of(HEX_CHARS) == -1;
+}
+
 string RequestHandler::handleUploadRequest(string request)
 {
+	// Check if project is valid.
 	Project project = requestToProject(request);
-	database -> addProject(project);
-	MethodIn method;
+	if (errno != 0)
+	{
+		// Project could not be parsed.
+		return "Error parsing project data.";
+	}
 
-	vector<string> dataEntries = splitStringOn(request, '\n');
+	vector<MethodIn> methods;
 
+	vector<string> dataEntries = Utility::splitStringOn(request, '\n');
+
+	// Check if all methods are valid.
 	for (int i = 1; i < dataEntries.size(); i++)
 	{
-		method = dataEntryToMethod(dataEntries[i]);
+		MethodIn method = dataEntryToMethod(dataEntries[i]);
+		if (errno != 0)
+		{
+			return "Error parsing method " + std::to_string(i) + ".";
+		}
+		methods.push_back(method);
+	}
 
+	// Only upload if project and all methods are valid to prevent partial uploads.
+	database -> addProject(project);
+	for (MethodIn method : methods)
+	{
 		database -> addMethod(method, project);
 	}
-	return "Your project is successfully added to the database.";
+	if (errno == 0)
+	{
+		return "Your project has been successfully added to the database.";
+	}
+	else
+	{
+		return "An unexpected error occurred.";
+	}
 }
 
 Project RequestHandler::requestToProject(string request)
 {
+	errno = 0;
 	// We retrieve the project information (projectData).
 	string projectString = request.substr(0, request.find('\n'));
-	vector<string> projectData = splitStringOn(projectString, '?');
+	vector<string> projectData = Utility::splitStringOn(projectString, '?');
+
+	if (projectData.size() != PROJECT_DATA_SIZE)
+	{
+		errno = EILSEQ;
+		return Project();
+	}
 
 	// We return the project information in the form of a Project.
 	Project project;
-	project.projectID  = stoll(projectData[0]);
-	project.version    = stoll(projectData[1]); // std::stoll converts a string to a long int.
+	project.projectID  = Utility::safeStoll(projectData[0]);	// Converts string to long long.
+	if (errno != 0)
+	{
+		return Project();
+	}
+	project.version    = Utility::safeStoll(projectData[1]);
+	if (errno != 0)
+	{
+		return Project();
+	}
 	project.license    = projectData[2];
 	project.name       = projectData[3];
 	project.url        = projectData[4];
@@ -104,16 +170,48 @@ Project RequestHandler::requestToProject(string request)
 
 MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 {
-	vector<string> methodData = splitStringOn(dataEntry, '?');
+	errno = 0;
+	vector<string> methodData = Utility::splitStringOn(dataEntry, '?');
+
+	if (methodData.size() < METHOD_DATA_MIN_SIZE)
+	{
+		// Too few parameters.
+		errno = EILSEQ;
+		return MethodIn();
+	}
 
 	MethodIn method;
+	if (!isValidHash(methodData[0]))
+	{
+		// Invalid method hash.
+		errno = EILSEQ;
+		return MethodIn();
+	}
 	method.hash = methodData[0];
 	method.methodName = methodData[1];
 	method.fileLocation = methodData[2];
-	method.lineNumber = stoi(methodData[3]);
+	method.lineNumber = Utility::safeStoi(methodData[3]);
+	if (errno != 0)
+	{
+		// Non-integer line number.
+		return MethodIn();
+	}
 
 	vector<Author> authors;
-	int numberOfAuthors = stoi(methodData[4]);
+	int numberOfAuthors = Utility::safeStoi(methodData[4]);
+	if (errno != 0)
+	{
+		// Non-integer number of authors.
+		return MethodIn();
+	}
+
+	if (methodData.size() != METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
+	{
+		// Incorrect amount of parameters.
+		errno = EILSEQ;
+		return MethodIn();
+	}
+
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
 		Author author;
@@ -128,14 +226,25 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 
 string RequestHandler::handleCheckRequest(string request)
 {
-	vector<Hash> hashes = splitStringOn(request, '\n');
+	vector<Hash> hashes = Utility::splitStringOn(request, '\n');
 	return handleCheckRequest(hashes);
 }
 
 string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 {
+	// Check if all requested hashes are invalid.
+	for (int i = 0; i < hashes.size(); i++)
+	{
+		if (!isValidHash(hashes[i]))
+		{
+			return "Invalid hash presented.";
+		}
+	}
+
+	// Request the specified hashes.
 	vector<MethodOut> methods = getMethods(hashes);
 
+	// Return retrieved data.
 	string methodsStringFormat = methodsToString(methods, '?', '\n');
 	if (!(methodsStringFormat == ""))
 	{
@@ -143,7 +252,7 @@ string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 	}
 	else
 	{
-		return "No results found";
+		return "No results found.";
 	}
 }
 
@@ -184,7 +293,7 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
 
 		for (string data : dataElements)
 		{
-			appendBy(chars, data, dataDelimiter);
+			Utility::appendBy(chars, data, dataDelimiter);
 		}
 
 		// We should get rid of the last dataDelimiter if something is appended to 'chars',
@@ -202,30 +311,14 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
 	return result;
 }
 
-void RequestHandler::appendBy(vector<char>& result, string word, char endCharacter)
-{
-	for (int i = 0; i < word.size(); i++)
-	{
-		result.push_back(word[i]);
-	}
-	result.push_back(endCharacter);
-}
-
-vector<string> RequestHandler::splitStringOn(string str, char delimiter)
-{
-	stringstream strStream(str);
-	string item;
-	vector<string> substrings;
-	while (getline(strStream, item, delimiter))
-	{
-		substrings.push_back(item);
-	}
-	return substrings;
-}
-
 string RequestHandler::handleUnknownRequest()
 {
-	return "Your input is not recognised.";
+	return "Unknown request type.";
+}
+
+string RequestHandler::handleNotImplementedRequest()
+{
+	return "Request not implemented yet.";
 }
 
 eRequestType RequestHandler::getERequestType(string requestType)

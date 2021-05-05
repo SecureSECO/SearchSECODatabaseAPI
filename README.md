@@ -17,7 +17,7 @@ To stop the program you should first tell it to leave the database by using `doc
 
 ### Not joining cluster
 
-In order for you computer to not automatically jopin the database cluster you can remove the IP-address from the _CASSANDRA_SEEDS_ cariable in `docker-compose.yml`.
+In order for you computer to not automatically join the database cluster you can remove the IP-address from the _SEEDS_ variable in `.env`.
 
 # Running seperately
 
@@ -51,7 +51,7 @@ This can be done using the following commands in the projects main folder:
 ### Running
 
 After this the program can be run using `./Database-API/Database-API`.
-This will only work when you also have a Cassandra database running on your computer.
+This will only work when you also have a [Cassandra](https://cassandra.apache.org/doc/latest/getting_started/installing.html) database running on your computer.
 
 For testing you can run the tests after building by using `./Database-API_Test/tests`.
 
