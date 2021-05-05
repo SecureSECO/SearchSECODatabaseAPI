@@ -6,8 +6,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <gtest/gtest.h>
 #include <vector>
-#include <sstream> 
-#include
+#include <sstream>
 
 std::vector<std::string> splitStringOn(std::string str, char delimiter)
 {
@@ -123,7 +122,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	// Check if the entries are inside expectedOutputs4.
 	for (int i = 0; i < entries.size(); i++)
 	{
-		int index = std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+		int index = std::find(expectedOutputs4.begin(), expectedOutputs4.end(), entries[i]);
 		ASSERT_LT(index, entries.size());
 	}
 }
