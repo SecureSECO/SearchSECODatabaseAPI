@@ -35,7 +35,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	RequestHandler handler;
 	handler.initialize(&database);
 
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
 						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"

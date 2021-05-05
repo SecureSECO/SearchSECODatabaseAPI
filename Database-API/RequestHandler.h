@@ -7,6 +7,10 @@ Utrecht University within the Software Project course.
 #pragma once
 #include "DatabaseHandler.h"
 
+#define PROJECT_DATA_SIZE	7
+#define METHOD_DATA_MIN_SIZE	5
+#define MD5_REGEX		"/^[a-f|0-9]{32}$/"
+#define HEX_CHARS		"0123456789abcdef"
 /// <summary>
 /// The different types of requests which are supported.
 /// </summary>
@@ -101,6 +105,17 @@ private:
 	std::vector<Hash> requestToHashes(std::string request);
 
 	/// <summary>
+	/// Checks if a hash is valid.
+	/// </summary>
+	/// <param name = "hash">
+	/// The hash to be checked.
+	/// </param>
+	/// <returns>
+	/// Boolean indicating the validity of the given hash.
+	/// </returns>
+	bool isValidHash(Hash hash);
+
+	/// <summary>
 	/// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars. 
 	/// Also separates different methods and different method data elements by special characters,
 	/// 'dataDelimiter' and 'methodDelimiters' respectively.
@@ -120,19 +135,6 @@ private:
 	/// All methods in the database with a hash equal to one in 'hashes'.
 	/// </returns>
 	std::vector<MethodOut> getMethods(std::vector<Hash> hashes);
-
-	/// <summary>
-	/// Appends 'result' by a string, and adds a special character ('delimiter') at the end.
-	/// </summary>
-	void appendBy(std::vector<char>& result, std::string word, char delimiter);
-
-	/// <summary>
-	/// Splits a string ('str') on a special character ('delimiter').
-	/// </summary>
-	/// <returns>
-	/// The vector consisting of the substrings.
-	/// </returns>
-	std::vector<std::string> splitStringOn(std::string str, char delimiter);
 
 	/// <summary>
 	/// Handles requests wanting to obtain methods with certain hashes.
@@ -181,6 +183,14 @@ private:
 	/// A message telling the user that their input is not recognised.
 	/// </returns>
 	std::string handleUnknownRequest();
+
+        /// <summary>
+        /// Handles not implemented requests.
+        /// </summary>
+        /// <returns>
+        /// A message telling the user that their input is not implemented yet.
+        /// </returns>
+        std::string handleNotImplementedRequest();
 
 	/// <summary>
 	/// Converts a requestType into an eRequestType.
