@@ -83,7 +83,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	}
 
 	// After removal of the 3 entries, we expect that none are left.
-	ASSERT_EQ(expectedOutputs4.size(), 0);
+	ASSERT_EQ(expectedOutputs3.size(), 0);
 }
 
 // Tests check request functionality completely.
