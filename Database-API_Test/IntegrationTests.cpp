@@ -80,9 +80,9 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	// Check if the entries are inside expectedOutputs3.
 	for (int i = 0; i < entries.size(); i++)
 	{
-		std::vector<std::string>::iterator index =
+		std::vector<std::string>::iterator index3 =
 			std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
-		ASSERT_NE(index, expectedOutputs3.end());
+		ASSERT_NE(index3, expectedOutputs3.end());
 	}
 }
 
@@ -123,9 +123,9 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	// Check if the entries are inside expectedOutputs4.
 	for (int i = 0; i < entries.size(); i++)
 	{
-		std::vector<std::string>::iterator index =
+		std::vector<std::string>::iterator index4 =
 			std::find(expectedOutputs4.begin(), expectedOutputs4.end(), entries[i]);
-		ASSERT_NE(index, expectedOutputs4.end());
+		ASSERT_NE(index4, expectedOutputs4.end());
 	}
 }
 
