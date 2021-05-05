@@ -185,14 +185,14 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	// Test if authorID generation works correctly by checking if there are exactly two authorIDs with frequency 2:
 	std::vector<std::string> entries = splitStringOn(output6_2, '\n');
 	std::vector<std::string> authorIDs = {};
-	const int numberofAuthorsIndex = 4;
+	const int numberOfAuthorsIndex = 4;
 	for (int i = 0; i < entries.size(); i++)
 	{
 		std::vector<std::string> entry = splitStringOn(entries[i], '?');
 		int numberOfAuthors = std::stoi(entry[numberOfAuthorsIndex]);
 		for (int j = 1; j <= numberOfAuthors; j++)
 		{
-			authorIDs.push_back(entry[numberOfAuthors + j]);
+			authorIDs.push_back(entry[numberOfAuthorsIndex + j]);
 		}
 	}
 	ASSERT_EQ(authorIDs.size(), 4);
