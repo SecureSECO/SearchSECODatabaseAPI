@@ -102,7 +102,7 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 
 	// Test if the method from the project is actually in the database:
 	const std::string output5_2 = handler.handleRequest("chck", input5_2);
-	ASSERT_NEQ(output5_2, unexpectedOutput5_2);
+	ASSERT_NE(output5_2, unexpectedOutput5_2);
 }
 
 // Tests upload request functionality with multiple methods as input.
