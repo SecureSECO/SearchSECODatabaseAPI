@@ -85,7 +85,7 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
-		EXPECT_EQ(result, "No results found");
+		EXPECT_EQ(result, "No results found.");
 }
 
 // Checks if the program can successfully handle a check request with multiple hashes, all with one match.

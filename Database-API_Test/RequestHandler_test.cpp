@@ -18,5 +18,5 @@ TEST(GeneralTest, InitializeTest){
 // Tests if the RequestHandler correctly responds to an unknown request.
 TEST(GeneralTest, UnknownRequest){
 	RequestHandler handler;
-	EXPECT_EQ(handler.handleRequest("kill", ""), "Your input is not recognised.");
+	EXPECT_EQ(handler.handleRequest("kill", ""), "Unknown request type.");
 }
