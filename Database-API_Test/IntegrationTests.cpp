@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include <gtest/gtest.h>
 #include <vector>
 #include <sstream> 
+#include
 
 std::vector<std::string> splitStringOn(std::string str, char delimiter)
 {
@@ -77,13 +78,12 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries.size(), 3);
 
+	// Check if the entries are inside expectedOutputs3.
 	for (int i = 0; i < entries.size(); i++)
 	{
-		remove(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+		int index = std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+		ASSERT_LT(index, entries.size());
 	}
-
-	// After removal of the 3 entries, we expect that none are left.
-	ASSERT_EQ(expectedOutputs3.size(), 0);
 }
 
 // Tests check request functionality completely.
@@ -120,13 +120,12 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries.size(), 3);
 
+	// Check if the entries are inside expectedOutputs4.
 	for (int i = 0; i < entries.size(); i++)
 	{
-		remove(expectedOutputs4.begin(), expectedOutputs4.end(), entries[i]);
+		int index = std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+		ASSERT_LT(index, entries.size());
 	}
-
-	// After removal of the 3 entries, we expect only 2 to be left.
-	ASSERT_EQ(expectedOutputs4.size(), 2);
 }
 
 // Tests upload request functionality with one method as input.
