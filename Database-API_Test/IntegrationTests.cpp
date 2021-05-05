@@ -179,10 +179,10 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	// Test properties the data in the database should satisfy by doing a check request:
 	std::string output6_2 = handler.handleRequest("chck", input6_2);
 
-	// Test if the output has the right number of entries (which should be 3).
+	// Test if the output has the right number of entries (which should be 3):
 	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
 
-	// Test if authorID generation works correctly by checking if there are two authorIDs with frequency 2.
+	// Test if authorID generation works correctly by checking if there are exactly two authorIDs with frequency 2:
 	std::vector<std::string> entries = splitStringOn(output6_2, '\n');
 	std::vector<std::string> authorIDs = {};
 	const int numberofAuthorsIndex = 4;
@@ -199,6 +199,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 
 	std::sort(authorIDs.begin(), authorIDs.end());
 	ASSERT_EQ(authorIDs[0], authorIDs[1]);
+	ASSERT_NE(authorIDs[1], authorIDs[2]);
 	ASSERT_EQ(authorIDs[2], authorIDs[3]);
 }
 
