@@ -109,7 +109,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 		"23920776594c85fdc30cd96f928487f1?5?5000000007000?M8?P5/M8.cpp?1?2?"
 		"f95ffc6c-aa97-40d6-b709-cb4823955213?e39e0872-6856-4fa0-8d9a-278728362f43";
 	const std::string expectedOutput4_3 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
-										  "b2217c08-06eb-4a57-b977-7c6d72299301\n";
+										  "b2217c08-06eb-4a57-b977-7c6d72299301";
 	std::vector<std::string> expectedOutputs4 = {expectedOutput4_1_1, expectedOutput4_1_2, expectedOutput4_2_1,
 												 expectedOutput4_1_2, expectedOutput4_3};
 
