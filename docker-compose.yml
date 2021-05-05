@@ -10,7 +10,7 @@ services:
         - "8002:8002"
       environment:
         - CASSANDRA_BROADCAST_ADDRESS=${IP}
-        - CASSANDRA_SEEDS=131.211.31.153,${IP}
+        - CASSANDRA_SEEDS=${IP},${SEEDS}
         - CASSANDRA_DC=dc${IP}
       volumes:
         - ${LOC}:/var/lib/cassandra
