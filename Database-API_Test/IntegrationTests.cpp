@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <gtest/gtest.h>
 #include <vector>
+#include <algorithm>
 #include <sstream>
 
 std::vector<std::string> splitStringOn(std::string str, char delimiter)
@@ -172,13 +173,33 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	const std::string expectedOutput6 = "Your project is successfully added to the database.";
 
 	// Test if output is correct:
-	const std::string output6_1 = handler.handleRequest("upld", input6_1);
+	std::string output6_1 = handler.handleRequest("upld", input6_1);
 	ASSERT_EQ(output6_1, expectedOutput6);
 
-	// Test if the methods are actually in the database, by checking if the program
-	// returns exactly 3 entries when performing a check request on the 3 hashes:
-	const std::string output6_2 = handler.handleRequest("chck", input6_2);
+	// Test properties the data in the database should satisfy by doing a check request:
+	std::string output6_2 = handler.handleRequest("chck", input6_2);
+
+	// Test if the output has the right number of entries (which should be 3).
 	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
+
+	// Test if authorID generation works correctly by checking if there are two authorIDs with frequency 2.
+	std::vector<std::string> entries = splitStringOn(output6_2, '\n');
+	std::vector<std::string> authorIDs = {};
+	const int numberofAuthorsIndex = 4;
+	for (int i = 0; i < entries.size(); i++)
+	{
+		std::vector<std::string> entry = splitStringOn(entries[i], '?');
+		int numberOfAuthors = std::stoi(entry[numberOfAuthorsIndex]);
+		for (int j = 1; j <= numberOfAuthors; j++)
+		{
+			authorIDs.push_back(entry[numberOfAuthors + j]);
+		}
+	}
+	ASSERT_EQ(authorIDs.size(), 4);
+
+	std::sort(authorIDs.begin(), authorIDs.end());
+	ASSERT_EQ(authorIDs[0], authorIDs[1]);
+	ASSERT_EQ(authorIDs[2], authorIDs[3]);
 }
 
 // Tests checkupload request functionality with a known hash as input.
