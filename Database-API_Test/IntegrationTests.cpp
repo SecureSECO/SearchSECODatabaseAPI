@@ -8,6 +8,18 @@ Utrecht University within the Software Project course.
 #include <vector>
 #include <sstream> 
 
+std::vector<std::string> splitStringOn(std::string str, char delimiter)
+{
+	std::stringstream strStream(str);
+	std::string item;
+	std::vector<std::string> substrings;
+	while (std::getline(strStream, item, delimiter))
+	{
+		substrings.push_back(item);
+	}
+	return substrings;
+}
+
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
@@ -101,7 +113,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	}
 
 	// After removal of the 3 entries, we expect only 2 to be left.
-	ASSERT_TRUE(expectedOutputs.size(), 2);
+	ASSERT_EQ(expectedOutputs.size(), 2);
 }
 
 // Tests upload request functionality with one method as input.
@@ -173,16 +185,4 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	// Test:
 	const std::string output7 = handler.handleRequest("chup", input7);
 	ASSERT_EQ(output7, expectedOutput7);
-}
-
-std::vector<std::string> splitStringOn(std::string str, char delimiter)
-{
-	std::stringstream strStream(str);
-	std::string item;
-	std::vector<std::string> substrings;
-	while (std::getline(strStream, item, delimiter))
-	{
-		substrings.push_back(item);
-	}
-	return substrings;
 }
