@@ -54,6 +54,11 @@ public:
 	void start(RequestHandler handler);
 
 private:
+	/// <summary>
+	/// Loops until expected amount of data is received.
+	/// </summary>
+	void readExpectedData(int& size, std::vector<char>& data, std::string& totalData, boost::system::error_code& error);
+
 	TcpConnection(boost::asio::io_context& ioContext)
 		: socket_(ioContext)
 	{

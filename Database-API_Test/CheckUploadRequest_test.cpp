@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
- Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+© Copyright Utrecht University(Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
@@ -35,7 +35,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	RequestHandler handler;
 	handler.initialize(&database);
 
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
 						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"
@@ -60,4 +60,17 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request);
 	ASSERT_EQ(result, output);
+}
+
+// Tests if program correctly handles a checkupload which cannot be converted to hashes.
+TEST(CheckUploadRequest, HashConversionError)
+{
+	RequestHandler handler;
+
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+                                                  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?"
+                                                  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+
+	std::string result = handler.handleRequest("chup", request);
+	ASSERT_EQ(result, "Error parsing hashes.");
 }
