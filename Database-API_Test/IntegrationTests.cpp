@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
 #include <gtest/gtest.h>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <sstream>
