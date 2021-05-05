@@ -72,16 +72,16 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	// Test:
 	std::string output3 = handler.handleRequest("chck", input3);
-	std::vector<std::string> entries = splitStringOn(output3, '\n');
+	std::vector<std::string> entries3 = splitStringOn(output3, '\n');
 
 	// The number of entries should be equal to 3.
-	ASSERT_EQ(entries.size(), 3);
+	ASSERT_EQ(entries3.size(), 3);
 
 	// Check if the entries are inside expectedOutputs3.
-	for (int i = 0; i < entries.size(); i++)
+	for (int i = 0; i < entries3.size(); i++)
 	{
 		std::vector<std::string>::iterator index3 =
-			std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries[i]);
+			std::find(expectedOutputs3.begin(), expectedOutputs3.end(), entries3[i]);
 		ASSERT_NE(index3, expectedOutputs3.end());
 	}
 }
@@ -115,16 +115,16 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	// Test:
 	std::string output4 = handler.handleRequest("chck", input4);
-	std::vector<std::string> entries = splitStringOn(output4, '\n');
+	std::vector<std::string> entries4 = splitStringOn(output4, '\n');
 
 	// The number of entries should be equal to 3.
-	ASSERT_EQ(entries.size(), 3);
+	ASSERT_EQ(entries4.size(), 3);
 
 	// Check if the entries are inside expectedOutputs4.
-	for (int i = 0; i < entries.size(); i++)
+	for (int i = 0; i < entries4.size(); i++)
 	{
 		std::vector<std::string>::iterator index4 =
-			std::find(expectedOutputs4.begin(), expectedOutputs4.end(), entries[i]);
+			std::find(expectedOutputs4.begin(), expectedOutputs4.end(), entries4[i]);
 		ASSERT_NE(index4, expectedOutputs4.end());
 	}
 }
