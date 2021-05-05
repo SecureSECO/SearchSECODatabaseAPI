@@ -6,7 +6,6 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <gtest/gtest.h>
 
-
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
