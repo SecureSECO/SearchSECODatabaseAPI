@@ -10,6 +10,8 @@ Utrecht University within the Software Project course.
 #include <algorithm>
 #include <sstream>
 
+// Standard method to split string on a special character ('delimiter').
+// Will be included in Utility class shortly so is unneeded in the near future.
 std::vector<std::string> splitStringOn(std::string str, char delimiter)
 {
 	std::stringstream strStream(str);
