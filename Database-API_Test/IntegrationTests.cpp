@@ -4,25 +4,12 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
+#include "Utility.h"
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <sstream>
-
-// Standard method to split string on a special character ('delimiter').
-// Will be included in Utility class shortly so is unneeded in the near future.
-std::vector<std::string> splitStringOn(std::string str, char delimiter)
-{
-	std::stringstream strStream(str);
-	std::string item;
-	std::vector<std::string> substrings;
-	while (std::getline(strStream, item, delimiter))
-	{
-		substrings.push_back(item);
-	}
-	return substrings;
-}
 
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
@@ -50,7 +37,7 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 	handler.initialize(&database, "127.0.0.1", 9042);
 
 	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
-	const std::string expectedOutput2 = "No results found";
+	const std::string expectedOutput2 = "No results found.";
 
 	// Test:
 	const std::string output2 = handler.handleRequest("chck", input2);
@@ -76,7 +63,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	// Test:
 	std::string output3 = handler.handleRequest("chck", input3);
-	std::vector<std::string> entries3 = splitStringOn(output3, '\n');
+	std::vector<std::string> entries3 = Utility::splitStringOn(output3, '\n');
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries3.size(), 3);
@@ -119,7 +106,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	// Test:
 	std::string output4 = handler.handleRequest("chck", input4);
-	std::vector<std::string> entries4 = splitStringOn(output4, '\n');
+	std::vector<std::string> entries4 = Utility::splitStringOn(output4, '\n');
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries4.size(), 3);
@@ -144,8 +131,8 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
 	const std::string input5_2 = "a6aa62503e2ca3310e3a837502b80df5";
-	const std::string expectedOutput5_1 = "Your project is successfully added to the database.";
-	const std::string unexpectedOutput5_2 = "No results found";
+	const std::string expectedOutput5_1 = "Your project has been successfully added to the database.";
+	const std::string unexpectedOutput5_2 = "No results found.";
 
 	// Test if output is correct:
 	const std::string output5_1 = handler.handleRequest("upld", input5_1);
@@ -173,7 +160,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 								 "Author 7?author7@mail.com";
 	const std::string input6_2 =
 		"88e1ad43ee7b716b7d19e5e65ee40da8\nf3a258ba6cd26c1b7d553a493c614104\n59bf62494932580165af0451f76be3e9";
-	const std::string expectedOutput6 = "Your project is successfully added to the database.";
+	const std::string expectedOutput6 = "Your project has been successfully added to the database.";
 
 	// Test if output is correct:
 	std::string output6_1 = handler.handleRequest("upld", input6_1);
@@ -186,12 +173,12 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
 
 	// Test if authorID generation works correctly by checking if there are exactly two authorIDs with frequency 2:
-	std::vector<std::string> entries = splitStringOn(output6_2, '\n');
+	std::vector<std::string> entries = Utility::splitStringOn(output6_2, '\n');
 	std::vector<std::string> authorIDs = {};
 	const int numberOfAuthorsIndex = 6;
 	for (int i = 0; i < entries.size(); i++)
 	{
-		std::vector<std::string> entry = splitStringOn(entries[i], '?');
+		std::vector<std::string> entry = Utility::splitStringOn(entries[i], '?');
 		int numberOfAuthors = std::stoi(entry[numberOfAuthorsIndex]);
 		for (int j = 1; j <= numberOfAuthors; j++)
 		{
