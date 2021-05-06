@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+© Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
@@ -9,7 +9,6 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <sstream>
 
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
