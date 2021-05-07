@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+© Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 TEST(GeneralTest, InitializeTest){
 	RequestHandler handler;
 	MockDatabase database;
-	EXPECT_CALL(database, connect())
+	EXPECT_CALL(database, connect("cassandra", 8002))
 		.Times(1);
 	handler.initialize(&database);
 }
