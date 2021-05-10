@@ -33,15 +33,60 @@ void DatabaseHandler::connect(string ip, int port)
     	cass_future_error_message(connectFuture, &message, &messageLength);
     	fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
   	}
+	
+	setPreparedStatements();
+}
+
+void DatabaseHandler::setPreparedStatements()
+{
+	CassFuture *prepareFuture =
+		cass_session_prepare(connection, "SELECT * FROM projectdata.methods WHERE method_hash = ?");
+	CassError rc = cass_future_error_code(prepareFuture);
+	selectMethod = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(
+		connection,
+		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)");
+	rc = cass_future_error_code(prepareFuture);
+	insertProject = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture =
+		cass_session_prepare(connection, "INSERT INTO projectdata.methods (method_hash, version, projectID, name, "
+										 "file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)");
+	rc = cass_future_error_code(prepareFuture);
+	insertMethod = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(
+		connection,
+		"INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)");
+	rc = cass_future_error_code(prepareFuture);
+	insertMethodByAuthor = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture =
+		cass_session_prepare(connection, "SELECT authorID FROM projectdata.id_by_author WHERE name = ? AND mail = ?");
+	rc = cass_future_error_code(prepareFuture);
+	selectIdByAuthor = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(
+		connection, "INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)");
+	rc = cass_future_error_code(prepareFuture);
+	insertIdByAuthor = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(
+		connection, "INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?)");
+	rc = cass_future_error_code(prepareFuture);
+	insertAuthorById = cass_future_get_prepared(prepareFuture);
+
+	cass_future_free(prepareFuture);
 }
 
 vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 {
-	CassStatement* query = cass_statement_new("SELECT * FROM projectdata.methods WHERE method_hash = ?", 1);
-
+	CassStatement* query = cass_prepared_bind(selectMethod);
+	
 	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
-	cass_statement_bind_string(query, 0, hash.c_str());
+	cass_statement_bind_string_by_name(query, "method_hash", hash.c_str());
 
 	CassFuture* resultFuture = cass_session_execute(connection, query);
 
@@ -82,7 +127,7 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 
 void DatabaseHandler::addProject(Project project)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)", 6);
+	CassStatement *query = cass_prepared_bind(insertProject);
 
 	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
@@ -116,7 +161,7 @@ void DatabaseHandler::addProject(Project project)
 
 void DatabaseHandler::addMethod(MethodIn method, Project project)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO projectdata.methods (method_hash, version, projectID, name, file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
+	CassStatement *query = cass_prepared_bind(insertMethod);
 
 	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
@@ -165,7 +210,7 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Project project)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)", 4);
+	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
 	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
@@ -195,7 +240,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 CassUuid DatabaseHandler::getAuthorID(Author author)
 {
-	CassStatement* query = cass_statement_new("SELECT authorID FROM projectdata.id_by_author WHERE name = ? AND mail = ?", 2);
+	CassStatement *query = cass_prepared_bind(selectIdByAuthor);
 
 	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
@@ -239,7 +284,7 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 
 CassUuid DatabaseHandler::createAuthor(Author author)
 {
-	CassStatement* insertQuery = cass_statement_new("INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)", 2);
+	CassStatement *insertQuery = cass_prepared_bind(insertIdByAuthor);
 
 	cass_statement_set_consistency(insertQuery, CASS_CONSISTENCY_QUORUM);
 
@@ -256,7 +301,7 @@ CassUuid DatabaseHandler::createAuthor(Author author)
 
 	CassUuid authorID = getAuthorID(author);
 
-	CassStatement* insertQuery2 = cass_statement_new("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?)", 3);
+	CassStatement *insertQuery2 = cass_prepared_bind(insertAuthorById);
 
 	cass_statement_set_consistency(insertQuery2, CASS_CONSISTENCY_QUORUM);
 
@@ -320,10 +365,10 @@ int DatabaseHandler::getInt32(const CassRow* row, const char* column)
 	return result;
 }
 
-long long DatabaseHandler::getInt64(const CassRow* row, const char* column)
+long long DatabaseHandler::getInt64(const CassRow *row, const char *column)
 {
 	cass_int64_t result;
-	const CassValue* value = cass_row_get_column_by_name(row, column);
+	const CassValue *value = cass_row_get_column_by_name(row, column);
 	cass_value_get_int64(value, &result);
 	return result;
 }
