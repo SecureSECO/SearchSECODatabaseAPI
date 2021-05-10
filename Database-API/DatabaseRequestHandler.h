@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+Â© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #pragma once
@@ -10,46 +10,16 @@ Utrecht University within the Software Project course.
 #define PROJECT_DATA_SIZE	7
 #define METHOD_DATA_MIN_SIZE	5
 #define HEX_CHARS		"0123456789abcdef"
-/// <summary>
-/// The different types of requests which are supported.
-/// </summary>
-enum eRequestType
-{
-	eUpload,
-	eCheck,
-	eCheckUpload,
-	eUnknown
-};
 
 /// <summary>
 /// Handles requests towards database.
 /// </summary>
-class RequestHandler
+class DatabaseRequestHandler
 {
 public:
-	/// <summary>
-	/// Makes the RequestHandler ready for later usage.
-	/// </summary>
-	/// <param name="databaseHandler">
-	/// Handler for interactions with the database.
-	/// </param>
-	void initialize(DatabaseHandler* databaseHandler, std::string ip = IP, int port = DBPORT);
+	DatabaseRequestHandler(DatabaseHandler *database);
 
-	/// <summary>
-	/// Handles all requests send to the database.
-	/// </summary>
-	/// <param name="requestType">
-	/// Type of the request, a string of exactly 4 characters.
-	/// </param>
-	/// <param name="request">
-	/// The request made by the user, a string containing all
-	/// relevant data in a specific order to be able to do the request.
-	/// </param>
-	/// <returns>
-	/// Response towards user after processing the request successfully.
-	/// </returns>
-	std::string handleRequest(std::string requestType, std::string request);
-private:
+
 	/// <summary>
 	/// Handles requests which want to add one project with their corresponding methods to the database.
 	/// </summary>
@@ -64,6 +34,46 @@ private:
 	/// </returns>
 	std::string handleUploadRequest(std::string request);
 
+	/// <summary>
+	/// Handles requests wanting to obtain methods with certain hashes.
+	/// </summary>
+	/// <param name="request">
+	/// The request made by the user, having the following format:
+	/// "hash_1\nhash_2\n...\nhash_N".
+	/// </param>
+	/// <returns>
+	/// The methods which contain hashes equal to one within the request, in string format.
+	/// </returns>
+	std::string handleCheckRequest(std::string request);
+
+	/// <summary>
+	/// Handles requests wanting to obtain methods with certain hashes.
+	/// </summary>
+	/// <param name="hashes">
+	/// The list of hashes we want to check for.
+	/// </param>
+	/// <returns>
+	/// The methods which contain hashes equal to one within the request, in string format.
+	/// </returns>
+	std::string handleCheckRequest(std::vector<Hash> hashes);
+
+	/// <summary>
+	/// Handles requests wanting to first check for matches with existing methods in other projects,
+	/// after which it adds the project itself to the database.
+	/// </summary>
+	/// <param name="request">
+	/// The request made by the user, having the following format:
+	/// "projectID?version?license?project_name?url?author_name?author_mail?stars\n
+	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
+	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail\n
+	///  <method2_data>\n...\n<methodN_data>".
+	/// </param>
+	/// <returns>
+	/// The methods which contain hashes equal to the one of the hashes
+	/// of the methods within the request, in string format.
+	/// </returns>
+	std::string handleCheckUploadRequest(std::string request);
+private:
 	/// <summary>
 	/// Converts a request to a Project (defined in Types.h).
 	/// </summary>
@@ -134,73 +144,6 @@ private:
 	/// All methods in the database with a hash equal to one in 'hashes'.
 	/// </returns>
 	std::vector<MethodOut> getMethods(std::vector<Hash> hashes);
-
-	/// <summary>
-	/// Handles requests wanting to obtain methods with certain hashes.
-	/// </summary>
-	/// <param name="request">
-	/// The request made by the user, having the following format:
-	/// "hash_1\nhash_2\n...\nhash_N".
-	/// </param>
-	/// <returns>
-	/// The methods which contain hashes equal to one within the request, in string format.
-	/// </returns>
-	std::string handleCheckRequest(std::string request);
-
-	/// <summary>
-	/// Handles requests wanting to obtain methods with certain hashes.
-	/// </summary>
-	/// <param name="hashes">
-	/// The list of hashes we want to check for.
-	/// </param>
-	/// <returns>
-	/// The methods which contain hashes equal to one within the request, in string format.
-	/// </returns>
-	std::string handleCheckRequest(std::vector<Hash> hashes);
-
-	/// <summary>
-	/// Handles requests wanting to first check for matches with existing methods in other projects,
-	/// after which it adds the project itself to the database.
-	/// </summary>
-	/// <param name="request">
-	/// The request made by the user, having the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail?stars\n
-	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail\n
-	///  <method2_data>\n...\n<methodN_data>".
-	/// </param>
-	/// <returns>
-	/// The methods which contain hashes equal to the one of the hashes
-	/// of the methods within the request, in string format.
-	/// </returns>
-	std::string handleCheckUploadRequest(std::string request);
-
-	/// <summary>
-	/// Handles unknown requests.
-	/// </summary>
-	/// <returns>
-	/// A message telling the user that their input is not recognised.
-	/// </returns>
-	std::string handleUnknownRequest();
-
-        /// <summary>
-        /// Handles not implemented requests.
-        /// </summary>
-        /// <returns>
-        /// A message telling the user that their input is not implemented yet.
-        /// </returns>
-        std::string handleNotImplementedRequest();
-
-	/// <summary>
-	/// Converts a requestType into an eRequestType.
-	/// </summary>
-	/// <param name="requestType">
-	/// The type of the request, which is a string of exactly 4 characters.
-	/// </param>
-	/// <returns>
-	/// A corresponding eRequestType.
-	/// </returns>
-	eRequestType getERequestType(std::string requestType);
 
 	DatabaseHandler *database;
 };
