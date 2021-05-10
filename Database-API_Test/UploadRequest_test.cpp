@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
- Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+© Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
@@ -80,7 +80,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	handler.initialize(&database);
 
 	string requestType = "upld";
-	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 					 "a6aa62503e2ca3310e3a837502b80df5?Method1?"
 					 "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 
@@ -88,7 +88,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 
 	string result = handler.handleRequest(requestType, request);
-		ASSERT_EQ(result, "Your project is successfully added to the database.");
+		ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
 // Tests if the program can successfully handle an upload request of a project with multiple methods,
@@ -96,7 +96,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 TEST(UploadRequest, MultipleMethodsSingleAuthor)
 {
 	string requestType = "upld";
-	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 					 "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?"
 					 "1?1?Owner?owner@mail.com\nf3a258ba6cd26c1b7d553a493c614104?"
 					 "Method2?MyProject/Method2.cpp?11?1?Owner?owner@mail.com\n"
@@ -113,7 +113,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1))).Times(1);
 
 	string result = handler.handleRequest(requestType, request);
-	ASSERT_EQ(result, "Your project is successfully added to the database.");
+	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
 // Tests if program can successfully handle an upload request with multiple methods
@@ -121,12 +121,12 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 {
 	string requestType = "upld";
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com?0\n"
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 					 "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
 					 "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
 					 "f3a258ba6cd26c1b7d553a493c614104?Method2?MyProject/Method2.cpp?999?2?"
 					 "Author 2?author2@mail.com?Owner?owner@mail.com\n"
-					 "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?9999999?3?"
+					 "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?9999999?4?"
 					 "Owner?owner@mail.com?Author 2?author2@mail.com?"
 					 "Author 1?author1@mail.com?Author 3?author3@mail.com";
 
@@ -140,5 +140,98 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2))).Times(1);
 
 	string result = handler.handleRequest(requestType, request);
-	ASSERT_EQ(result, "Your project is successfully added to the database.");
+	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+}
+
+// Tests if the program can handle an upload request with invalid project data, too many arguments.
+TEST(UploadRequest, InvalidProjectSize)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+// Tests if the program can handle an upload request with invalid project data, non-integer id.
+TEST(UploadRequest, InvalidProjectID)
+{
+	string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+
+// Tests if the program can handle an upload request with invalid project data, non-integer version.
+TEST(UploadRequest, InvalidProjectVersion)
+{
+	string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing project data.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, too few arguments.
+TEST(UploadRequest, InvalidMethodSizeSmall)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, too many arguments.
+TEST(UploadRequest, InvalidMethodSizeLarge)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?2?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, invalid method hash.
+TEST(UploadRequest, InvalidMethodHash)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5xx?Method1?MyProject/Method1.cpp?1?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 2.");
+}
+
+// Tests if the program can handle an upload request with invalid method data, non-integer line number.
+TEST(UploadRequest, InvalidMethodLine)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?not_an_integer?3?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
+}
+
+
+// Tests if the program can handle an upload request with invalid method data, non-integer number of authors.
+TEST(UploadRequest, InvalidMethodAuthorLines)
+{
+	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?not_an_integer?"
+					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	RequestHandler handler;
+
+	string result = handler.handleRequest("upld", request);
+	ASSERT_EQ(result, "Error parsing method 1.");
 }

@@ -9,6 +9,9 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <cassandra.h>
 
+#define IP "cassandra"
+#define DBPORT 8002
+
 using namespace types;
 
 /// <summary>
@@ -20,7 +23,7 @@ public:
 	/// <summary>
 	/// Connect to the database.
 	/// </summary>
-	virtual void connect();
+	virtual void connect(std::string ip, int port);
 
 	/// <summary>
 	/// Add a project to database. Takes a project as input and adds it to the database.

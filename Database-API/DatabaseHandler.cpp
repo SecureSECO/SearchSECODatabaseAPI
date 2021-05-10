@@ -9,14 +9,15 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-void DatabaseHandler::connect()
+void DatabaseHandler::connect(string ip, int port)
 {
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
 	connection = cass_session_new();
 
 	// Add contact points.
-	cass_cluster_set_contact_points(cluster, "127.0.0.1");
+	cass_cluster_set_contact_points(cluster, ip.c_str());
+	cass_cluster_set_port(cluster, port);
 	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
 
 	// Provide the cluster object as configuration to connect the session.
@@ -37,6 +38,8 @@ void DatabaseHandler::connect()
 vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 {
 	CassStatement* query = cass_statement_new("SELECT * FROM projectdata.methods WHERE method_hash = ?", 1);
+
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
 	cass_statement_bind_string(query, 0, hash.c_str());
 
@@ -81,6 +84,8 @@ void DatabaseHandler::addProject(Project project)
 {
 	CassStatement* query = cass_statement_new("INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)", 6);
 
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+
 	cass_statement_bind_int64(query, 0, project.projectID);
 
 	cass_statement_bind_int64(query, 1, project.version);
@@ -113,6 +118,8 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 {
 	CassStatement* query = cass_statement_new("INSERT INTO projectdata.methods (method_hash, version, projectID, name, file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)", 7);
 
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+
 	cass_statement_bind_string(query, 0, method.hash.c_str());
 
 	cass_statement_bind_int64(query, 1, project.version);
@@ -131,7 +138,9 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 
 	for (int i = 0; i < size; i++)
 	{
-		cass_collection_append_uuid(authors, getAuthorID(method.authors[i]));
+		CassUuid authorID = getAuthorID(method.authors[i]);
+		cass_collection_append_uuid(authors, authorID);
+		addMethodByAuthor(authorID, method, project);
 	}
 
 	cass_statement_bind_collection(query, 6, authors);
@@ -157,6 +166,8 @@ void DatabaseHandler::addMethod(MethodIn method, Project project)
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Project project)
 {
 	CassStatement* query = cass_statement_new("INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)", 4);
+
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
 
 	cass_statement_bind_uuid(query, 0, authorID);
 
@@ -185,6 +196,9 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 CassUuid DatabaseHandler::getAuthorID(Author author)
 {
 	CassStatement* query = cass_statement_new("SELECT authorID FROM projectdata.id_by_author WHERE name = ? AND mail = ?", 2);
+
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+
 	cass_statement_bind_string(query, 0, author.name.c_str());
 	cass_statement_bind_string(query, 1, author.mail.c_str());
 	CassFuture* queryFuture = cass_session_execute(connection, query);
@@ -194,7 +208,6 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
 		const CassResult* result = cass_future_get_result(queryFuture);
-		cout << cass_result_row_count(result) << endl;
 
 		if (cass_result_row_count(result) >= 1)
 		{
@@ -227,6 +240,9 @@ CassUuid DatabaseHandler::getAuthorID(Author author)
 CassUuid DatabaseHandler::createAuthor(Author author)
 {
 	CassStatement* insertQuery = cass_statement_new("INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)", 2);
+
+	cass_statement_set_consistency(insertQuery, CASS_CONSISTENCY_QUORUM);
+
 	cass_statement_bind_string(insertQuery, 0, author.name.c_str());
 	cass_statement_bind_string(insertQuery, 1, author.mail.c_str());
 
@@ -241,6 +257,9 @@ CassUuid DatabaseHandler::createAuthor(Author author)
 	CassUuid authorID = getAuthorID(author);
 
 	CassStatement* insertQuery2 = cass_statement_new("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?)", 3);
+
+	cass_statement_set_consistency(insertQuery2, CASS_CONSISTENCY_QUORUM);
+
 	cass_statement_bind_uuid(insertQuery2, 0, authorID);
 	cass_statement_bind_string(insertQuery2, 1, author.name.c_str());
 	cass_statement_bind_string(insertQuery2, 2, author.mail.c_str());

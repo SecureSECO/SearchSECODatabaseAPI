@@ -1,0 +1,24 @@
+version: '3.5'
+
+services:
+  cassandra:
+      image: cassandra:3.11
+      container_name: cassandra
+      restart: always
+      ports:
+        - "8001:8001"
+        - "8002:8002"
+      environment:
+        - CASSANDRA_BROADCAST_ADDRESS=${IP}
+        - CASSANDRA_SEEDS=${IP},${SEEDS}
+        - CASSANDRA_DC=dc${IP}
+      volumes:
+        - ${LOC}:/var/lib/cassandra
+        - ./cassandra.yaml:/etc/cassandra/cassandra.yaml
+      
+  database-api:
+      container_name: api
+      restart: always
+      build: .
+      ports:
+        - "8003:8003"

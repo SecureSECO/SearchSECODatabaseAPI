@@ -29,6 +29,8 @@ add_executable(
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
+  IntegrationTests.cpp
+  Utility_test.cpp
 )
 target_link_libraries(
   tests

@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
- Copyright Utrecht University(Department of Informationand Computing Sciences)*/
+© Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
@@ -85,7 +85,7 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
-		EXPECT_EQ(result, "No results found");
+		EXPECT_EQ(result, "No results found.");
 }
 
 // Checks if the program can successfully handle a check request with multiple hashes, all with one match.
@@ -153,4 +153,14 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_TRUE(result.find(output5) != std::string::npos);
+}
+
+// Checks if the program correctly identifies an invalid hash in the input.
+TEST(CheckRequestTests, InvalidHash)
+{
+	RequestHandler handler;
+	std::string request = "hello_I'm_an_invalid_hash";
+
+	std::string output = handler.handleRequest("chck", request);
+	ASSERT_EQ(output, "Invalid hash presented.");
 }

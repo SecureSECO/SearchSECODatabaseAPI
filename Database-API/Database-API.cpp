@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include <iostream>
+#include <unistd.h>
 #include "Types.h"
 #include "Database-API.h"
 #include "DatabaseHandler.h"
@@ -14,6 +15,9 @@ using namespace std;
 
 int main()
 {
+	usleep(45000000);
+	cout << "Connecting now" << endl;
+
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
 	listen.startListen(&databaseHandler);
