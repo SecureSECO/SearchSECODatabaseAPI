@@ -23,24 +23,24 @@ class DatabaseHandler
 	/// <summary>
 	/// Connect to the database.
 	/// </summary>
-	virtual void connect(std::string ip, int port);
+	void connect(std::string ip, int port);
 
 	/// <summary>
 	/// Add a project to database. Takes a project as input and adds it to the database.
 	/// </summary>
-	virtual void addProject(Project project);
+	void addProject(Project project);
 
 	/// <summary>
 	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
 	/// the database with information of the project.
 	/// </summary>
-	virtual void addMethod(MethodIn method, Project project);
+	void addMethod(MethodIn method, Project project);
 
 	/// <summary>
 	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
 	/// the hash.
 	/// </summary>
-	virtual std::vector<MethodOut> hashToMethods(std::string hash);
+	std::vector<MethodOut> hashToMethods(std::string hash);
 
   private:
 	/// <summary>

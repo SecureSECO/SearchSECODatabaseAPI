@@ -10,6 +10,8 @@ Utrecht University within the Software Project course.
 #include <sstream>
 #include <ctime>
 #include <regex>
+#include <thread>
+#include <future>
 
 #include "DatabaseRequestHandler.h"
 #include "Utility.h"
@@ -229,10 +231,16 @@ string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 
 vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 {
-	vector<MethodOut> methods = { };
+	vector<future<vector<MethodOut>>> threads;
 	for (int i = 0; i < hashes.size(); i++)
 	{
-		vector<MethodOut> newMethods = database -> hashToMethods(hashes[i]);
+		threads.push_back(async(
+			launch::async, [this](Hash hash) { return database->hashToMethods(hash); }, hashes[i]));
+	}
+	vector<MethodOut> methods = {};
+	for (int i = 0; i < threads.size(); i++)
+	{
+		vector<MethodOut> newMethods = threads[i].get();
 
 		for (int j = 0; j < newMethods.size(); j++)
 		{
