@@ -74,4 +74,4 @@ private:
 	eRequestType getERequestType(std::string requestType);
 
 	DatabaseHandler *database;
-}
+};

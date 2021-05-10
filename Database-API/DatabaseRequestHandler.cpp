@@ -11,7 +11,7 @@ Utrecht University within the Software Project course.
 #include <ctime>
 #include <regex>
 
-#include "RequestHandler.h"
+#include "DatabaseRequestHandler.h"
 #include "Utility.h"
 
 using namespace std;
@@ -19,34 +19,6 @@ using namespace std;
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database) 
 {
 	this->database = database;
-}
-
-string DatabaseRequestHandler::handleRequest(string requestType, string request)
-{
-	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequestType = getERequestType(requestType);
-
-	// We handle the request based on its type.
-	string result;
-	switch (eRequestType)
-	{
-		case eUpload:
-			result = handleUploadRequest(request);
-			break;
-		case eCheck:
-			result = handleCheckRequest(request);
-			break;
-		case eCheckUpload:
-			result = handleCheckUploadRequest(request);
-			break;
-		case eUnknown:
-			result = handleUnknownRequest();
-			break;
-		default:
-			result = handleNotImplementedRequest();
-			break;
-	}
-	return result;
 }
 
 string DatabaseRequestHandler::handleCheckUploadRequest(string request)

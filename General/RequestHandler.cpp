@@ -16,7 +16,7 @@ string RequestHandler::handleRequest(string requestType, string request)
 	eRequestType eRequestType = getERequestType(requestType);
 
     // Make the requestHandlers
-    DatabaseRequestHandler dbrh = DatabaseRequestHandler(databaseHandler);
+    DatabaseRequestHandler dbrh = DatabaseRequestHandler(database);
 
 	// We handle the request based on its type.
 	string result;
@@ -41,12 +41,12 @@ string RequestHandler::handleRequest(string requestType, string request)
 	return result;
 }
 
-string DatabaseRequestHandler::handleUnknownRequest()
+string RequestHandler::handleUnknownRequest()
 {
 	return "Unknown request type.";
 }
 
-string DatabaseRequestHandler::handleNotImplementedRequest()
+string RequestHandler::handleNotImplementedRequest()
 {
 	return "Request not implemented yet.";
 }
