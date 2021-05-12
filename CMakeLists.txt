@@ -4,24 +4,27 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("Database-API")
-
 # Add source to this project's executable.
-add_executable (Database-APIexe 
+add_executable (Database-APIexe
 	"General/Database-API.cpp" "General/Database-API.h"
-	"General/ConnectionHandler.cpp" "General/RequestHandler.cpp"
+	"General/ConnectionHandler.cpp" "General/ConnectionHandler.h"
+	"General/RequestHandler.cpp" "General/RequestHandler.h"
+	"General/Utility.cpp" "General/Utility.h"
 	"Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
-	"Database-API/Types.h" "Database-API/Utility.h"
-	"Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp"
+	"Database-API/Types.h" 
+	"Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
 	"JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
 	"JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
 	"JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
 	"JobDistribution/RAFTConsensus.cpp" "JobDistribution/RAFTConsensus.h")
-add_library(Database-API-library 
+add_library(Database-API-library
 	"General/Database-API.cpp" "General/Database-API.h"
-	"General/ConnectionHandler.cpp" "General/RequestHandler.cpp"
+	"General/ConnectionHandler.cpp" "General/ConnectionHandler.h"
+	"General/RequestHandler.cpp" "General/RequestHandler.h"
+	"General/Utility.cpp" "General/Utility.h"
 	"Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
-	"Database-API/Types.h" "Database-API/Utility.h"
-	"Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp"
+	"Database-API/Types.h" 
+	"Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
 	"JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
 	"JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
 	"JobDistribution/Networking.cpp" "JobDistribution/Networking.h"

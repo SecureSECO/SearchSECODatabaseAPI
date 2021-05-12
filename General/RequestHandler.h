@@ -76,7 +76,6 @@ private:
 	/// </returns>
 	eRequestType getERequestType(std::string requestType);
 
-	DatabaseHandler *database;
-    DatabaseRequestHandler* dbrh;
+	DatabaseRequestHandler* dbrh;
 	JobRequestHandler jrh;
 };

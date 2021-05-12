@@ -4,9 +4,8 @@ using namespace std;
 
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
 {
-	// Set up a connection with the database.
-	database = databaseHandler;
-	dbrh = new DatabaseRequestHandler(database, ip, port);
+	// Make the requestHandlers.
+	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
 	jrh  = JobRequestHandler();
 }
 
@@ -14,8 +13,6 @@ string RequestHandler::handleRequest(string requestType, string request)
 {
 	// We convert the requestType to a eRequestType (for the switch below).
 	eRequestType eRequestType = getERequestType(requestType);
-
-    // Make the requestHandlers
 
 	// We handle the request based on its type.
 	string result;
