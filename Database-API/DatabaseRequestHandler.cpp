@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include <regex>
 #include <thread>
 #include <future>
+#include <functional>
 
 #include "DatabaseRequestHandler.h"
 #include "Utility.h"
@@ -231,16 +232,35 @@ string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 
 vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 {
-	vector<future<vector<MethodOut>>> threads;
+	vector<future<vector<MethodOut>>> results;
+	vector<thread> threads;
+	queue<Hash> hashQueue;
+	mutex queueLock;
 	for (int i = 0; i < hashes.size(); i++)
 	{
-		threads.push_back(async(
-			launch::async, [this](Hash hash) { return database->hashToMethods(hash); }, hashes[i]));
+		//threads.push_back(async(
+		//	launch::async, [this](Hash hash) { return database->hashToMethods(hash); }, hashes[i]));
+		hashQueue.push(hashes[i]);
 	}
-	vector<MethodOut> methods = {};
+	for (int i = 0; i < 8; i++)
+	{
+		packaged_task<vector<MethodOut>()> task(
+			bind(&RequestHandler::singleHashToMethodsThread, this, std::ref(hashQueue), std::ref(queueLock)));
+		//	[](queue<Hash> &hashes, mutex &queueLock, RequestHandler handler) {
+		//		return handler.singleHashToMethodsThread(hashes, queueLock);
+		//	});
+		results.push_back(task.get_future());
+		//thread t(std::move(task));//, std::ref(hashQueue), std::ref(queueLock));
+		threads.push_back(thread(std::move(task)));
+	}
 	for (int i = 0; i < threads.size(); i++)
 	{
-		vector<MethodOut> newMethods = threads[i].get();
+		threads[i].join();
+	}
+	vector<MethodOut> methods = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<MethodOut> newMethods = results[i].get();
 
 		for (int j = 0; j < newMethods.size(); j++)
 		{
@@ -248,6 +268,28 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 		}
 	}
 	return methods;
+}
+
+vector<MethodOut> RequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
+{
+	vector<MethodOut> methods;
+	while (true)
+	{
+		queueLock.lock();
+		if (hashes.size() <= 0)
+		{
+			queueLock.unlock();
+			return methods;
+		}
+		Hash hash = hashes.front();
+		hashes.pop();
+		queueLock.unlock();
+		vector<MethodOut> newMethods = database->hashToMethods(hash);
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(newMethods[j]);
+		}
+	}
 }
 
 string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
