@@ -56,7 +56,7 @@ void RAFTConsensus::connectToLeader()
 				// If the IP + port are not open, this will throw an exception sending us to the catch.
 				networkhandler->openConnection(ip, port);
 				// Send a connect request. TODO: formaly document what requet we use for this.
-				networkhandler->sendData("conn0\n\n");
+				networkhandler->sendData("conn1\n\n");
 				response = networkhandler->receiveData();
 				std::vector<std::string> receivedLeader = Utility::splitStringOn(response, '?');
 				if (receivedLeader[0] != RESPONSE_OK) 
@@ -65,7 +65,7 @@ void RAFTConsensus::connectToLeader()
 					// the true leader.
 					if(receivedLeader.size() != 2) 
 					{
-						throw "Incorrect response from connect request";
+						throw std::runtime_error("Incorrect response from connect request. Size was " + std::to_string(receivedLeader.size()));
 					}
 					ip = receivedLeader[0];
 					port = receivedLeader[1];
@@ -74,17 +74,19 @@ void RAFTConsensus::connectToLeader()
 				else 
 				{
 					// TODO: Use the data that the leader send back as initial data.
+					break;
 				}
 			}
 			// If we get through the while loop without throwing an exception, then we have found the leader.
 			leaderIp = ip;
 			leaderPort = port;
 			leader = false;
+			std::cout << "Found leader " + ip + " " + port + "\n";
 			break;
 		}
 		catch (std::exception const& ex) 
 		{
-			std::cout << ex.what();
+			std::cout << ex.what() << "\n";
 			delete networkhandler;
 			continue;
 		}
@@ -145,7 +147,7 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 	{
 		while(true) 
 		{
-			connection->start(requestHandler);
+			connection->start(requestHandler, connection);
 		}
 	}
 	catch (std::exception const& ex) 

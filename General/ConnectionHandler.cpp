@@ -32,7 +32,7 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 	return pointer(new TcpConnection(ioContext));
 }
 
-void TcpConnection::start(RequestHandler* handler)
+void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 {
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
@@ -62,7 +62,7 @@ void TcpConnection::start(RequestHandler* handler)
 	}
 	std::vector<char> data(size);
 	readExpectedData(size, data, totalData, error);
-	std::string result = handler->handleRequest(r.substr(0, 4), totalData, pointer(this));
+	std::string result = handler->handleRequest(r.substr(0, 4), totalData, thisPointer);
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 }
 
@@ -111,7 +111,7 @@ void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	startAccept();
 	if (!error)
 	{
-		newConnection->start(handler);
+		newConnection->start(handler, newConnection);
 	}
 
 }

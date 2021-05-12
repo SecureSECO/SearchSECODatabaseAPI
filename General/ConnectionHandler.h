@@ -56,7 +56,7 @@ public:
 	/// <summary>
 	/// Starts the handeling of a request. Takes in the request handler to call.
 	/// </summary>
-	void start(RequestHandler *handler);
+	void start(RequestHandler *handler, pointer thisPointer);
 
 private:
 	/// <summary>

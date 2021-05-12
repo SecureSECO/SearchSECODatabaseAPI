@@ -31,5 +31,5 @@ std::string JobRequestHandler::addJob(std::string request, std::string data)
         raft->passRequestToLeader(request, data);
         std::cout << "Sending request to leader.\n";
     }
-    return "Job added successfully";
+    return "Job added successfully\n";
 }
