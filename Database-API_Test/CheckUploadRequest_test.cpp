@@ -33,7 +33,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 {
 	MockDatabase database;
 	RequestHandler handler;
-	handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 
 	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
@@ -58,7 +58,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, addProject(projectEqual(project))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project))).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chup", request);
+	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, output);
 }
 
@@ -71,6 +71,6 @@ TEST(CheckUploadRequest, HashConversionError)
                                                   "a6aa62503e2ca3310e3a837502b80df5xx?Method1?"
                                                   "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 
-	std::string result = handler.handleRequest("chup", request);
+	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, "Error parsing hashes.");
 }

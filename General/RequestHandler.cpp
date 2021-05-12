@@ -2,21 +2,21 @@
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = JobRequestHandler();
+	jrh  = new JobRequestHandler(raft, this);
 }
 
-string RequestHandler::handleRequest(string requestType, string request)
+string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
 {
 	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequestType = getERequestType(requestType);
+	eRequestType eRequest = getERequestType(requestType);
 
 	// We handle the request based on its type.
 	string result;
-	switch (eRequestType)
+	switch (eRequest)
 	{
 		case eUpload:
 			result = dbrh->handleUploadRequest(request);
@@ -26,6 +26,12 @@ string RequestHandler::handleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
+			break;
+		case eConnect:
+			result = jrh->handleConnectRequest(connection);
+			break;
+		case eAddJob:
+			result = jrh->addJob(requestType, request);
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
@@ -60,6 +66,14 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "conn")
+	{
+		return eConnect;
+	}
+	else if (requestType == "addj")
+	{
+		return eAddJob;
 	}
 	else
 	{

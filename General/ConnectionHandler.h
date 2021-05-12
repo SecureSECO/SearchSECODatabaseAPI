@@ -5,7 +5,10 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+
 #include "RequestHandler.h"
+#include "RAFTConsensus.h"
+
 #include <string>
 #include <vector>
 #include <boost/bind/bind.hpp>
@@ -26,7 +29,9 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	void startListen(DatabaseHandler* databaseHandler);
+	void startListen(DatabaseHandler* databaseHandler, RAFTConsensus* raft);
+
+	RequestHandler* getRequestHandler() { return &handler; };
 private:
 	RequestHandler handler;
 };
@@ -51,7 +56,7 @@ public:
 	/// <summary>
 	/// Starts the handeling of a request. Takes in the request handler to call.
 	/// </summary>
-	void start(RequestHandler handler);
+	void start(RequestHandler *handler);
 
 private:
 	/// <summary>
@@ -71,7 +76,7 @@ private:
 class TcpServer
 {
 public:
-	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler);
+	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, RAFTConsensus* raft, RequestHandler* handler);
 
 private:
 
@@ -88,5 +93,5 @@ private:
 
 	boost::asio::io_context& ioContext_;
 	tcp::acceptor acceptor_;
-	RequestHandler handler;
+	RequestHandler* handler;
 };

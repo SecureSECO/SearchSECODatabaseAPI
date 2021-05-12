@@ -42,12 +42,12 @@ TEST(CheckRequestTests, SingleHashRequest)
 {
 	MockDatabase database;
 	RequestHandler handler;
-	handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 	std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 	EXPECT_EQ(result, output1);
 }
 
@@ -56,9 +56,9 @@ TEST(CheckRequestTests, MultipleHashRequest)
 {
 	MockDatabase database;
 	RequestHandler handler;
-		handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 	std::vector<MethodOut> v1;
-		v1.push_back(testMethod1);
+	v1.push_back(testMethod1);
 	std::vector<MethodOut> v2;
 	v2.push_back(testMethod2);
 	std::vector<MethodOut> v3;
@@ -69,7 +69,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
 													   "06f73d7ab46184c55bf4742b9428a4c0\n"
-													   "137fed017b6159acc0af30d2c6b403a5\n");
+													   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
 		EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
@@ -80,11 +80,11 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 {
 	MockDatabase database;
 		RequestHandler handler;
-		handler.initialize(&database);
+		handler.initialize(&database, nullptr);
 		std::vector<MethodOut> v;
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
+		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 		EXPECT_EQ(result, "No results found.");
 }
 
@@ -93,7 +93,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 {
 	MockDatabase database;
 		RequestHandler handler;
-		handler.initialize(&database);
+		handler.initialize(&database, nullptr);
 		std::vector<MethodOut> v;
 	std::vector<MethodOut> v2;
 		v.push_back(testMethod2);
@@ -103,7 +103,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 		EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
 		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
 														   "06f73d7ab46184c55bf4742b9428a4c0\n"
-														   "137fed017b6159acc0af30d2c6b403a5\n");
+														   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
 
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
 		EXPECT_TRUE(result.find(output2) != std::string::npos);
@@ -115,13 +115,13 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 {
 	MockDatabase database;
 		RequestHandler handler;
-		handler.initialize(&database);
+		handler.initialize(&database, nullptr);
 		std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 	v.push_back(testMethod4);
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 }
@@ -131,7 +131,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 {
 	MockDatabase database;
 		RequestHandler handler;
-		handler.initialize(&database);
+		handler.initialize(&database, nullptr);
 		std::vector<MethodOut> v1;
 		std::vector<MethodOut> v2;
 	std::vector<MethodOut> v3;
@@ -146,7 +146,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
 							   "06f73d7ab46184c55bf4742b9428a4c0\n"
-							   "137fed017b6159acc0af30d2c6b403a5\n");
+							   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
@@ -161,6 +161,6 @@ TEST(CheckRequestTests, InvalidHash)
 	RequestHandler handler;
 	std::string request = "hello_I'm_an_invalid_hash";
 
-	std::string output = handler.handleRequest("chck", request);
+	std::string output = handler.handleRequest("chck", request, nullptr);
 	ASSERT_EQ(output, "Invalid hash presented.");
 }

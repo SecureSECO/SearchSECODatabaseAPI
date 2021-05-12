@@ -77,7 +77,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 {
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 
 	string requestType = "upld";
 	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
@@ -87,7 +87,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
+	string result = handler.handleRequest(requestType, request, nullptr);
 		ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
@@ -105,14 +105,14 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
+	string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
@@ -132,14 +132,14 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	handler.initialize(&database, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
+	string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
@@ -149,7 +149,7 @@ TEST(UploadRequest, InvalidProjectSize)
 	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing project data.");
 }
 
@@ -159,7 +159,7 @@ TEST(UploadRequest, InvalidProjectID)
 	string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing project data.");
 }
 
@@ -170,7 +170,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 	string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing project data.");
 }
 
@@ -181,7 +181,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing method 1.");
 }
 
@@ -193,7 +193,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing method 1.");
 }
 
@@ -207,7 +207,7 @@ TEST(UploadRequest, InvalidMethodHash)
 					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing method 2.");
 }
 
@@ -219,7 +219,7 @@ TEST(UploadRequest, InvalidMethodLine)
 					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing method 1.");
 }
 
@@ -232,6 +232,6 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
+	string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, "Error parsing method 1.");
 }

@@ -1,6 +1,6 @@
 /*This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)*/
+ï¿½ Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
@@ -16,14 +16,14 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
 
 	// Test:
-	const std::string output1 = handler.handleRequest("chck", input1);
+	const std::string output1 = handler.handleRequest("chck", input1, nullptr);
 	ASSERT_EQ(output1, expectedOutput1);
 }
 
@@ -33,13 +33,13 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	const std::string expectedOutput2 = "No results found.";
 
 	// Test:
-	const std::string output2 = handler.handleRequest("chck", input2);
+	const std::string output2 = handler.handleRequest("chck", input2, nullptr);
 	ASSERT_EQ(output2, expectedOutput2);
 }
 
@@ -49,7 +49,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input3 = "8811e6bedb87e90cef39de1179f3bd2e\n137fed017b6159acc0af30d2c6b403a5";
 	const std::string expectedOutput3_1 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
@@ -61,7 +61,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	std::vector<std::string> expectedOutputs3 = {expectedOutput3_1, expectedOutput3_2, expectedOutput3_3};
 
 	// Test:
-	std::string output3 = handler.handleRequest("chck", input3);
+	std::string output3 = handler.handleRequest("chck", input3, nullptr);
 	std::vector<std::string> entries3 = Utility::splitStringOn(output3, '\n');
 
 	// The number of entries should be equal to 3.
@@ -82,7 +82,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input4 =
 		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
@@ -104,7 +104,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 												 expectedOutput4_1_2, expectedOutput4_3};
 
 	// Test:
-	std::string output4 = handler.handleRequest("chck", input4);
+	std::string output4 = handler.handleRequest("chck", input4, nullptr);
 	std::vector<std::string> entries4 = Utility::splitStringOn(output4, '\n');
 
 	// The number of entries should be equal to 3.
@@ -125,7 +125,7 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
@@ -134,11 +134,11 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	const std::string unexpectedOutput5_2 = "No results found.";
 
 	// Test if output is correct:
-	const std::string output5_1 = handler.handleRequest("upld", input5_1);
+	const std::string output5_1 = handler.handleRequest("upld", input5_1, nullptr);
 	ASSERT_EQ(output5_1, expectedOutput5_1);
 
 	// Test if the method from the project is actually in the database:
-	const std::string output5_2 = handler.handleRequest("chck", input5_2);
+	const std::string output5_2 = handler.handleRequest("chck", input5_2, nullptr);
 	ASSERT_NE(output5_2, unexpectedOutput5_2);
 }
 
@@ -148,7 +148,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input6_1 = "7?5000000011000?L6?P7?www.github.com/p7?Author 9?author9@mail.com\n"
 								 "88e1ad43ee7b716b7d19e5e65ee40da8?M12?P7/M12.cpp?1?2?"
@@ -162,11 +162,11 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	const std::string expectedOutput6 = "Your project has been successfully added to the database.";
 
 	// Test if output is correct:
-	std::string output6_1 = handler.handleRequest("upld", input6_1);
+	std::string output6_1 = handler.handleRequest("upld", input6_1, nullptr);
 	ASSERT_EQ(output6_1, expectedOutput6);
 
 	// Test properties the data in the database should satisfy by doing a check request:
-	std::string output6_2 = handler.handleRequest("chck", input6_2);
+	std::string output6_2 = handler.handleRequest("chck", input6_2, nullptr);
 
 	// Test if the output has the right number of entries (which should be 3):
 	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
@@ -198,7 +198,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, nullptr, "127.0.0.1", 9042);
 
 	const std::string input7 = "8?5000000012000?L7?P8?www.github.com/p8?Author 10?author10@mail.com\n"
 							   "2c7f46d4f57cf9e66b03213358c7ddb5?M14?P8/M14.cpp?1?1?Author 10?author10@mail.com\n"
@@ -207,6 +207,6 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
 
 	// Test:
-	const std::string output7 = handler.handleRequest("chup", input7);
+	const std::string output7 = handler.handleRequest("chup", input7, nullptr);
 	ASSERT_EQ(output7, expectedOutput7);
 }

@@ -6,8 +6,22 @@ Utrecht University within the Software Project course.
 
 #pragma once
 
+#include "RAFTConsensus.h"
+
+#include <boost/shared_ptr.hpp>
+
+class TcpConnection;
+
 class JobRequestHandler
 {
 public:
-    JobRequestHandler();
+	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler);
+
+	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection);
+
+	std::string addJob(std::string request, std::string data);
+
+private:
+	RAFTConsensus* raft;
+	RequestHandler* requestHandler;
 };
