@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+� Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #pragma once
@@ -147,6 +147,33 @@ private:
 	/// All methods in the database with a hash equal to one in 'hashes'.
 	/// </returns>
 	std::vector<MethodOut> getMethods(std::vector<Hash> hashes);
+
+	/// <summary>
+	/// Handles a single thread of checking hashes with the database.
+	/// </summary>
+	/// <param name="hashes">
+	/// The queue with hashes that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with hashes.
+	/// </param>
+	/// <returns></returns>
+	std::vector<MethodOut> singleHashToMethodsThread(std::queue<Hash> &hashes, std::mutex &queueLock);
+
+	/// <summary>
+	/// Handles a single thread of uploading methods to the database.
+	/// </summary>
+	/// <param name="hashes">
+	/// The queue with methods that have to be added to the databse.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with methods.
+	/// </param>
+	/// <param name="project">
+	/// The project the methods are part of.
+	/// </param>
+	/// <returns></returns>
+	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, Project project);
 
 	DatabaseHandler *database;
 };

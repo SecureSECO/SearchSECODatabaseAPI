@@ -94,9 +94,22 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 
 	// Only upload if project and all methods are valid to prevent partial uploads.
 	database -> addProject(project);
+
+	queue<MethodIn> methodQueue;
+	mutex queueLock;
+	vector<thread> threads;
+
 	for (MethodIn method : methods)
 	{
-		database -> addMethod(method, project);
+		methodQueue.push(method);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		threads.push_back(thread(&RequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
 	}
 	if (errno == 0)
 	{
@@ -105,6 +118,23 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	else
 	{
 		return "An unexpected error occurred.";
+	}
+}
+
+void RequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
+{
+	while (true)
+	{
+		queueLock.lock();
+		if (methods.size() <= 0)
+		{
+			queueLock.unlock();
+			return;
+		}
+		MethodIn method = methods.front();
+		methods.pop();
+		queueLock.unlock();
+		database->addMethod(method, project);
 	}
 }
 
