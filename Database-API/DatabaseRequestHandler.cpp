@@ -11,47 +11,18 @@ Utrecht University within the Software Project course.
 #include <ctime>
 #include <regex>
 
-#include "RequestHandler.h"
+#include "DatabaseRequestHandler.h"
 #include "Utility.h"
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
+DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port) 
 {
-	// Set up a connection with the database.
-	database = databaseHandler;
+	this->database = database;
 	database -> connect(ip, port);
 }
 
-string RequestHandler::handleRequest(string requestType, string request)
-{
-	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequestType = getERequestType(requestType);
-
-	// We handle the request based on its type.
-	string result;
-	switch (eRequestType)
-	{
-		case eUpload:
-			result = handleUploadRequest(request);
-			break;
-		case eCheck:
-			result = handleCheckRequest(request);
-			break;
-		case eCheckUpload:
-			result = handleCheckUploadRequest(request);
-			break;
-		case eUnknown:
-			result = handleUnknownRequest();
-			break;
-		default:
-			result = handleNotImplementedRequest();
-			break;
-	}
-	return result;
-}
-
-string RequestHandler::handleCheckUploadRequest(string request)
+string DatabaseRequestHandler::handleCheckUploadRequest(string request)
 {
 	vector<Hash> hashes = requestToHashes(request);
 	if (errno != 0)
@@ -64,7 +35,7 @@ string RequestHandler::handleCheckUploadRequest(string request)
 	return result;
 }
 
-vector<Hash> RequestHandler::requestToHashes(string request)
+vector<Hash> DatabaseRequestHandler::requestToHashes(string request)
 {
 	errno = 0;
 	vector<string> data = Utility::splitStringOn(request, '\n');
@@ -87,13 +58,13 @@ vector<Hash> RequestHandler::requestToHashes(string request)
 	return hashes;
 }
 
-bool RequestHandler::isValidHash(Hash hash)
+bool DatabaseRequestHandler::isValidHash(Hash hash)
 {
 	// Inspired by: https://stackoverflow.com/questions/19737727/c-check-if-string-is-a-valid-md5-hex-hash.
 	return hash.size() == 32 && hash.find_first_not_of(HEX_CHARS) == -1;
 }
 
-string RequestHandler::handleUploadRequest(string request)
+string DatabaseRequestHandler::handleUploadRequest(string request)
 {
 	// Check if project is valid.
 	Project project = requestToProject(request);
@@ -134,7 +105,7 @@ string RequestHandler::handleUploadRequest(string request)
 	}
 }
 
-Project RequestHandler::requestToProject(string request)
+Project DatabaseRequestHandler::requestToProject(string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
@@ -168,7 +139,7 @@ Project RequestHandler::requestToProject(string request)
 	return project;
 }
 
-MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
+MethodIn DatabaseRequestHandler::dataEntryToMethod(string dataEntry)
 {
 	errno = 0;
 	vector<string> methodData = Utility::splitStringOn(dataEntry, '?');
@@ -224,13 +195,13 @@ MethodIn RequestHandler::dataEntryToMethod(string dataEntry)
 	return method;
 }
 
-string RequestHandler::handleCheckRequest(string request)
+string DatabaseRequestHandler::handleCheckRequest(string request)
 {
 	vector<Hash> hashes = Utility::splitStringOn(request, '\n');
 	return handleCheckRequest(hashes);
 }
 
-string RequestHandler::handleCheckRequest(vector<Hash> hashes)
+string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 {
 	// Check if all requested hashes are invalid.
 	for (int i = 0; i < hashes.size(); i++)
@@ -256,7 +227,7 @@ string RequestHandler::handleCheckRequest(vector<Hash> hashes)
 	}
 }
 
-vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
+vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 {
 	vector<MethodOut> methods = { };
 	for (int i = 0; i < hashes.size(); i++)
@@ -271,7 +242,7 @@ vector<MethodOut> RequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
-string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
+string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
 	vector<char> chars = {};
 	while (!methods.empty())
@@ -309,34 +280,4 @@ string RequestHandler::methodsToString(vector<MethodOut> methods, char dataDelim
 	}
 	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
-}
-
-string RequestHandler::handleUnknownRequest()
-{
-	return "Unknown request type.";
-}
-
-string RequestHandler::handleNotImplementedRequest()
-{
-	return "Request not implemented yet.";
-}
-
-eRequestType RequestHandler::getERequestType(string requestType)
-{
-	if (requestType == "upld")
-	{
-		return eUpload;
-	}
-	else if (requestType == "chck")
-	{
-		return eCheck;
-	}
-	else if (requestType == "chup")
-	{
-		return eCheckUpload;
-	}
-	else
-	{
-		return eUnknown;
-	}
 }
