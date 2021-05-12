@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-� Copyright Utrecht University (Department of Information and Computing Sciences)
+© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #pragma once
@@ -9,9 +9,9 @@ Utrecht University within the Software Project course.
 #include <mutex>
 #include <queue>
 
-#define PROJECT_DATA_SIZE	7
-#define METHOD_DATA_MIN_SIZE	5
-#define HEX_CHARS		"0123456789abcdef"
+#define PROJECT_DATA_SIZE 7
+#define METHOD_DATA_MIN_SIZE 5
+#define HEX_CHARS "0123456789abcdef"
 
 /// <summary>
 /// Handles requests towards database.

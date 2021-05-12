@@ -84,8 +84,14 @@ class DatabaseHandler
 	/// <summary>
 	CassSession *connection;
 
+	/// <summary>
+	/// Create the prepared statements to be executed later.
+	/// </summary>
 	void setPreparedStatements();
 
+	/// <summary>
+	/// The prepared statements that can be executed.
+	/// </summary>
 	const CassPrepared *selectMethod;
 	const CassPrepared *insertProject;
 	const CassPrepared *insertMethod;
