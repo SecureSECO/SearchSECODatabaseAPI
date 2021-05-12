@@ -20,7 +20,7 @@ using namespace types;
 /// </summary>
 class DatabaseHandler
 {
-  public:
+ public:
 	/// <summary>
 	/// Connect to the database.
 	/// </summary>
@@ -43,7 +43,7 @@ class DatabaseHandler
 	/// </summary>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
-  private:
+ private:
 	/// <summary>
 	/// Add a method to the method_by_author table.
 	/// </summary>

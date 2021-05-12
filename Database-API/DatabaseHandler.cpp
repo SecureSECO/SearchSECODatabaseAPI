@@ -41,39 +41,46 @@ void DatabaseHandler::connect(string ip, int port)
 
 void DatabaseHandler::setPreparedStatements()
 {
+	// Selects all methods with a given hash.
 	CassFuture *prepareFuture =
 		cass_session_prepare(connection, "SELECT * FROM projectdata.methods WHERE method_hash = ?");
 	CassError rc = cass_future_error_code(prepareFuture);
 	selectMethod = cass_future_get_prepared(prepareFuture);
 
+	// Inserts a project into the database.
 	prepareFuture = cass_session_prepare(
 		connection,
 		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertProject = cass_future_get_prepared(prepareFuture);
 
+	// Inserts a method into the database
 	prepareFuture =
 		cass_session_prepare(connection, "INSERT INTO projectdata.methods (method_hash, version, projectID, name, "
 										 "file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertMethod = cass_future_get_prepared(prepareFuture);
 
+	// Inserts a method by author.
 	prepareFuture = cass_session_prepare(
 		connection,
 		"INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertMethodByAuthor = cass_future_get_prepared(prepareFuture);
 
+	// Selects the authorID corresponding to given name and mail.
 	prepareFuture =
 		cass_session_prepare(connection, "SELECT authorID FROM projectdata.id_by_author WHERE name = ? AND mail = ?");
 	rc = cass_future_error_code(prepareFuture);
 	selectIdByAuthor = cass_future_get_prepared(prepareFuture);
 
+	// Inserts a new author into the id_by_author table. Also generated the id for this author.
 	prepareFuture = cass_session_prepare(
 		connection, "INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertIdByAuthor = cass_future_get_prepared(prepareFuture);
 
+	// Inserts an author into the author_by_id table.
 	prepareFuture = cass_session_prepare(
 		connection, "INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
