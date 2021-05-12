@@ -105,7 +105,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push_back(thread(&RequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+		threads.push_back(thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
@@ -121,7 +121,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 }
 
-void RequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
+void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
 {
 	while (true)
 	{
@@ -273,7 +273,7 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
 		packaged_task<vector<MethodOut>()> task(
-			bind(&RequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
+			bind(&DatabaseRequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
 		results.push_back(task.get_future());
 		threads.push_back(thread(move(task)));
 	}
@@ -294,7 +294,7 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
-vector<MethodOut> RequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
+vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
 {
 	vector<MethodOut> methods;
 	while (true)
