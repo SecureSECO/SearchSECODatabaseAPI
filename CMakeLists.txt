@@ -4,6 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("Database-API")
+
 # Add source to this project's executable.
 add_executable (Database-APIexe 
 	"General/Database-API.cpp" "General/Database-API.h"
@@ -47,6 +48,4 @@ setup_target_for_coverage_lcov(
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # Include sub-projects.
-add_subdirectory ("Database-API")
-add_subdirectory ("General")
 add_subdirectory ("Database-API_Test")
