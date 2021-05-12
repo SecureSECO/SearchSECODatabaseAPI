@@ -4,6 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("Database-API")
+
 # Add source to this project's executable.
 add_executable (Database-APIexe "General/Database-API.cpp" "General/Database-API.h" "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h" "Database-API/Types.h" "General/ConnectionHandler.cpp" "General/RequestHandler.cpp" "Database-API/Utility.h" "Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp")
 add_library(Database-API-library "General/Database-API.cpp" "General/Database-API.h" "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h" "Database-API/Types.h" "General/ConnectionHandler.cpp" "General/RequestHandler.cpp" "Database-API/Utility.h" "Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp")
@@ -28,6 +29,4 @@ setup_target_for_coverage_lcov(
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # Include sub-projects.
-add_subdirectory ("Database-API")
-add_subdirectory ("General")
 add_subdirectory ("Database-API_Test")
