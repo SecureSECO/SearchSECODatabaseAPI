@@ -238,20 +238,14 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	mutex queueLock;
 	for (int i = 0; i < hashes.size(); i++)
 	{
-		//threads.push_back(async(
-		//	launch::async, [this](Hash hash) { return database->hashToMethods(hash); }, hashes[i]));
 		hashQueue.push(hashes[i]);
 	}
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < MAX_THREADS; i++)
 	{
 		packaged_task<vector<MethodOut>()> task(
-			bind(&RequestHandler::singleHashToMethodsThread, this, std::ref(hashQueue), std::ref(queueLock)));
-		//	[](queue<Hash> &hashes, mutex &queueLock, RequestHandler handler) {
-		//		return handler.singleHashToMethodsThread(hashes, queueLock);
-		//	});
+			bind(&RequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		//thread t(std::move(task));//, std::ref(hashQueue), std::ref(queueLock));
-		threads.push_back(thread(std::move(task)));
+		threads.push_back(thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
