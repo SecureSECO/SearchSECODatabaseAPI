@@ -29,12 +29,12 @@ void DatabaseHandler::connect(string ip, int port)
 
 	if (rc != CASS_OK)
 	{
-    	// Display connection error message.
-    	const char* message;
-    	size_t messageLength;
-    	cass_future_error_message(connectFuture, &message, &messageLength);
-    	fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
-  	}
+		// Display connection error message.
+		const char* message;
+		size_t messageLength;
+		cass_future_error_message(connectFuture, &message, &messageLength);
+		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+	}
 	
 	setPreparedStatements();
 }
@@ -112,11 +112,11 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 	}
 	else
 	{
-    	// Handle error.
-    	const char* message;
-    	size_t messageLength;
-    	cass_future_error_message(resultFuture, &message, &messageLength);
-    	fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		// Handle error.
+		const char* message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
 	}
 
 	cass_statement_free(query);
