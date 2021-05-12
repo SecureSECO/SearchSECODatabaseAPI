@@ -5,8 +5,26 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("Database-API")
 # Add source to this project's executable.
-add_executable (Database-APIexe "General/Database-API.cpp" "General/Database-API.h" "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h" "Database-API/Types.h" "General/ConnectionHandler.cpp" "General/RequestHandler.cpp" "Database-API/Utility.h" "Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp")
-add_library(Database-API-library "General/Database-API.cpp" "General/Database-API.h" "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h" "Database-API/Types.h" "General/ConnectionHandler.cpp" "General/RequestHandler.cpp" "Database-API/Utility.h" "Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp")
+add_executable (Database-APIexe 
+	"General/Database-API.cpp" "General/Database-API.h"
+	"General/ConnectionHandler.cpp" "General/RequestHandler.cpp"
+	"Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
+	"Database-API/Types.h" "Database-API/Utility.h"
+	"Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp"
+	"JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
+	"JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
+	"JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
+	"JobDistribution/RAFTConsensus.cpp" "JobDistribution/RAFTConsensus.h")
+add_library(Database-API-library 
+	"General/Database-API.cpp" "General/Database-API.h"
+	"General/ConnectionHandler.cpp" "General/RequestHandler.cpp"
+	"Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
+	"Database-API/Types.h" "Database-API/Utility.h"
+	"Database-API/Utility.cpp" "Database-API/DatabaseRequestHandler.cpp"
+	"JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
+	"JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
+	"JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
+	"JobDistribution/RAFTConsensus.cpp" "JobDistribution/RAFTConsensus.h")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
@@ -16,6 +34,7 @@ target_link_libraries(Database-APIexe /usr/lib/x86_64-linux-gnu/libcassandra.so.
 
 include_directories("Database-API")
 include_directories("General")
+include_directories("JobDistribution")
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 include(Resources/CodeCoverage.cmake)

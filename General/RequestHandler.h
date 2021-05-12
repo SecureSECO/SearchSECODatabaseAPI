@@ -6,6 +6,8 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
+#include "JobRequestHandler.h"
+#include "DatabaseRequestHandler.h"
 
 /// <summary>
 /// The different types of requests which are supported.
@@ -22,6 +24,7 @@ enum eRequestType
 class RequestHandler 
 {
 public:
+
 	/// <summary>
 	/// Makes the RequestHandler ready for later usage.
 	/// </summary>
@@ -74,4 +77,6 @@ private:
 	eRequestType getERequestType(std::string requestType);
 
 	DatabaseHandler *database;
+    DatabaseRequestHandler* dbrh;
+	JobRequestHandler jrh;
 };

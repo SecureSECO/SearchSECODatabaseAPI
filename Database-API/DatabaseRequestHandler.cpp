@@ -16,9 +16,10 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database) 
+DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port) 
 {
 	this->database = database;
+	database -> connect(ip, port);
 }
 
 string DatabaseRequestHandler::handleCheckUploadRequest(string request)

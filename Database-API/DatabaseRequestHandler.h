@@ -17,7 +17,7 @@ Utrecht University within the Software Project course.
 class DatabaseRequestHandler
 {
 public:
-	DatabaseRequestHandler(DatabaseHandler *database);
+	DatabaseRequestHandler(DatabaseHandler *database, std::string ip = IP, int port = DBPORT);
 
 
 	/// <summary>

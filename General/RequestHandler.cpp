@@ -1,5 +1,4 @@
 #include "RequestHandler.h"
-#include "DatabaseRequestHandler.h"
 
 using namespace std;
 
@@ -7,7 +6,8 @@ void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip
 {
 	// Set up a connection with the database.
 	database = databaseHandler;
-	database -> connect(ip, port);
+	dbrh = new DatabaseRequestHandler(database, ip, port);
+	jrh  = JobRequestHandler();
 }
 
 string RequestHandler::handleRequest(string requestType, string request)
@@ -16,20 +16,19 @@ string RequestHandler::handleRequest(string requestType, string request)
 	eRequestType eRequestType = getERequestType(requestType);
 
     // Make the requestHandlers
-    DatabaseRequestHandler dbrh = DatabaseRequestHandler(database);
 
 	// We handle the request based on its type.
 	string result;
 	switch (eRequestType)
 	{
 		case eUpload:
-			result = dbrh.handleUploadRequest(request);
+			result = dbrh->handleUploadRequest(request);
 			break;
 		case eCheck:
-			result = dbrh.handleCheckRequest(request);
+			result = dbrh->handleCheckRequest(request);
 			break;
 		case eCheckUpload:
-			result = dbrh.handleCheckUploadRequest(request);
+			result = dbrh->handleCheckUploadRequest(request);
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
