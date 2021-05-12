@@ -12,7 +12,6 @@ Utrecht University within the Software Project course.
 #define PROJECT_DATA_SIZE	7
 #define METHOD_DATA_MIN_SIZE	5
 #define HEX_CHARS		"0123456789abcdef"
-#define MAX_THREADS 8
 
 /// <summary>
 /// Handles requests towards database.
