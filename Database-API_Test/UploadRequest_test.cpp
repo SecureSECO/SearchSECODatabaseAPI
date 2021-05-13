@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -76,8 +77,9 @@ MATCHER_P(methodEqual, method, "")
 TEST(UploadRequest, SingleMethodSingleAuthor)
 {
 	RequestHandler handler;
+	MockJDDatabase jddatabase;
 	MockDatabase database;
-	handler.initialize(&database);
+	handler.initialize(&database, &jddatabase);
 
 	string requestType = "upld";
 	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
@@ -88,7 +90,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 
 	string result = handler.handleRequest(requestType, request);
-		ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
 
 // Tests if the program can successfully handle an upload request of a project with multiple methods,
@@ -105,7 +107,8 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
@@ -132,7 +135,8 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2))).Times(1);

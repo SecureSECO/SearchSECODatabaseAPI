@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include "JobRequestHandler.h"
 #include "DatabaseRequestHandler.h"
+#include "DatabaseConnection.h"
 
 /// <summary>
 /// The different types of requests which are supported.
@@ -17,11 +18,13 @@ enum eRequestType
 	eUpload,
 	eCheck,
 	eCheckUpload,
+	eUploadJob,
+	eGetTopJob,
 	eUnknown
 };
 
 
-class RequestHandler 
+class RequestHandler
 {
 public:
 
@@ -31,7 +34,7 @@ public:
 	/// <param name="databaseHandler">
 	/// Handler for interactions with the database.
 	/// </param>
-	void initialize(DatabaseHandler* databaseHandler, std::string ip = IP, int port = DBPORT);
+	void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -77,5 +80,5 @@ private:
 	eRequestType getERequestType(std::string requestType);
 
 	DatabaseRequestHandler* dbrh;
-	JobRequestHandler jrh;
+	JobRequestHandler* jrh;
 };

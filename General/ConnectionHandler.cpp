@@ -12,12 +12,12 @@ Utrecht University within the Software Project course.
 #define CONNECTION_TIMEOUT 10000000	// Timeout in microseconds.
 
 // Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler)
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, DatabaseConnection *databaseConnection)
 {
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler);
+		TcpServer server(ioContext, databaseHandler, databaseConnection);
 		ioContext.run();
 	}
 	catch (std::exception& e)
@@ -87,11 +87,11 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 }
 
 // TCP server Methods.
-TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler)
+TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection *databaseConnection)
 	: ioContext_(ioContext),
 	acceptor_(ioContext, tcp::endpoint(tcp::v4(), PORT))
 {
-	handler.initialize(databaseHandler);
+	handler.initialize(databaseHandler, databaseConnection);
 	startAccept();
 }
 

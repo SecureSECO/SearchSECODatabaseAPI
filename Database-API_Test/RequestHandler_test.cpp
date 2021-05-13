@@ -4,15 +4,17 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
 // Tests if the RequestHandler requests to connect to the database when initialized.
 TEST(GeneralTest, InitializeTest){
 	RequestHandler handler;
 	MockDatabase database;
+	MockJDDatabase jddatabase;
 	EXPECT_CALL(database, connect("cassandra", 8002))
 		.Times(1);
-	handler.initialize(&database);
+	handler.initialize(&database, &jddatabase);
 }
 
 // Tests if the RequestHandler correctly responds to an unknown request.

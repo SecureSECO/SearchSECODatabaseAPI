@@ -20,7 +20,8 @@ int main()
 
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
-	listen.startListen(&databaseHandler);
+	DatabaseConnection databaseConnection;
+	listen.startListen(&databaseHandler, &databaseConnection);
 
 	return 0;
 }

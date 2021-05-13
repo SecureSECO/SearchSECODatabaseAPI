@@ -2,11 +2,11 @@
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, std::string ip, int port)
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = JobRequestHandler();
+	jrh  = new JobRequestHandler(databaseConnection, ip, port);
 }
 
 string RequestHandler::handleRequest(string requestType, string request)
@@ -26,6 +26,12 @@ string RequestHandler::handleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
+			break;
+		case eUploadJob:
+			result = jrh->handleUploadJobRequest(request);
+			break;
+		case eGetTopJob:
+			result = jrh->handleGetJobRequest();
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
@@ -60,6 +66,14 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "upjb")
+	{
+		return eUploadJob;
+	}
+	else if (requestType == "tpjb")
+	{
+		return eGetTopJob;
 	}
 	else
 	{

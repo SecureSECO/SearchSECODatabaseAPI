@@ -26,7 +26,7 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	void startListen(DatabaseHandler* databaseHandler);
+	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection *databaseConnection);
 private:
 	RequestHandler handler;
 };
@@ -71,7 +71,7 @@ private:
 class TcpServer
 {
 public:
-	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler);
+	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection *databaseConnection);
 
 private:
 

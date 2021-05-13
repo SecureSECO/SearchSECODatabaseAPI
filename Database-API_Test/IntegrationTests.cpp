@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
+#include "DatabaseConnection.h"
 #include "Utility.h"
 #include <gtest/gtest.h>
 #include <string>
@@ -15,8 +16,9 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
@@ -32,8 +34,9 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	const std::string expectedOutput2 = "No results found.";
@@ -48,8 +51,9 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input3 = "8811e6bedb87e90cef39de1179f3bd2e\n137fed017b6159acc0af30d2c6b403a5";
 	const std::string expectedOutput3_1 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
@@ -81,8 +85,9 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input4 =
 		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
@@ -124,8 +129,9 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
@@ -147,8 +153,9 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input6_1 = "7?5000000011000?L6?P7?www.github.com/p7?Author 9?author9@mail.com\n"
 								 "88e1ad43ee7b716b7d19e5e65ee40da8?M12?P7/M12.cpp?1?2?"
@@ -197,8 +204,9 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, "127.0.0.1", 9042);
 
 	const std::string input7 = "8?5000000012000?L7?P8?www.github.com/p8?Author 10?author10@mail.com\n"
 							   "2c7f46d4f57cf9e66b03213358c7ddb5?M14?P8/M14.cpp?1?1?Author 10?author10@mail.com\n"

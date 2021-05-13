@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
 // Checks if two projects are equal. I.e., they have the same contents.
@@ -32,8 +33,9 @@ MATCHER_P(methodEqual, method, "")
 TEST(CheckUploadRequest, OneRequestOneMatch)
 {
 	MockDatabase database;
+	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database);
+	handler.initialize(&database, &jddatabase);
 
 	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
 						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"

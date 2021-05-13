@@ -5,9 +5,16 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "DatabaseConnection.h"
 
 class JobRequestHandler
 {
 public:
-    JobRequestHandler();
+	JobRequestHandler(DatabaseConnection *database, std::string ip, int port);
+
+	std::string handleUploadJobRequest(std::string);
+
+	std::string handleGetJobRequest();
+
+	DatabaseConnection *database;
 };
