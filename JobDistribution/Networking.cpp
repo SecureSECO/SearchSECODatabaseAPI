@@ -54,7 +54,7 @@ std::string NetworkHandler::receiveData()
 			ret.push_back(buf[i]);
 		}
 
-		if (error == boost::asio::error::eof || ret[ret.size()-1] == '\n')
+		if (ret[ret.size()-1] == '\n')
 		{
 			break; // Connection closed cleanly by peer.
 		}
@@ -66,5 +66,5 @@ std::string NetworkHandler::receiveData()
 		}
 
 	}
-	return std::string(ret.begin(), ret.end());
+	return std::string(ret.begin(), ret.end() - 1);
 }

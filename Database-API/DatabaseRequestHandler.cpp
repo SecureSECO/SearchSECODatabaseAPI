@@ -19,7 +19,7 @@ using namespace std;
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port) 
 {
 	this->database = database;
-	database -> connect(ip, port);
+	//database -> connect(ip, port);
 }
 
 string DatabaseRequestHandler::handleCheckUploadRequest(string request)
