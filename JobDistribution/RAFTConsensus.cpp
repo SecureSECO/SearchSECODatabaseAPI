@@ -17,6 +17,7 @@ Utrecht University within the Software Project course.
 
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
+#define LEADER_DROPOUT_WAIT_TIME 1000000
 
 void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader) 
 {
@@ -25,7 +26,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader)
 	this->requestHandler = requestHandler;
 	if (!assumeLeader) 
 	{
-		connectToLeader();
+		connectToLeader(LEADER_IPS);
 	}
 
 	if (leader) 
@@ -41,10 +42,9 @@ void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader)
 	}
 }
 
-void RAFTConsensus::connectToLeader() 
+void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::string>> ips) 
 {
 	// Loop through all set IP's where we expect the leader to be
-	std::vector<std::pair<std::string, std::string>> ips = LEADER_IPS;
 	for (auto const& x : ips)
 	{
 		try 
@@ -78,7 +78,9 @@ void RAFTConsensus::connectToLeader()
 				else 
 				{
 					// TODO: Use the data that the leader send back as initial data.
-					for (int i = 1; i < receivedLeader.size(); i += 2) 
+					myIp = receivedLeader[1];
+					myPort = receivedLeader[2];
+					for (int i = 3; i < receivedLeader.size(); i += 2) 
 					{
 						// TODO: handle incorrect size.
 						std::cout << "Node: " << receivedLeader[i] << " " << receivedLeader[i + 1] << "\n";
@@ -109,14 +111,31 @@ void RAFTConsensus::listenForHeartbeat()
 	{
 		try 
 		{
+			std::cout << "Trying to receive\n";
 			std::string data = networkhandler->receiveData();
+			std::cout << "Received data\n";
 			handleHeartbeat(data);
 		}
 		catch(std::exception const& ex) 
 		{
 			// TODO: if receiving data fails, then the host is presumably dead,
 			// so we then want to choose a new leader instead of stopping.
-			break;
+			auto newLeader = nonLeaderNodes[0];
+			nonLeaderNodes.clear();
+			if (newLeader.first == myIp && newLeader.second == myPort)
+			{ 
+				// We are next in the list, so we are going to assume leadership.
+				delete others;
+				start(requestHandler, true);
+				return;
+			}
+			usleep(LEADER_DROPOUT_WAIT_TIME);
+			std::cout << "Attempt connection with new leader.";
+			connectToLeader({newLeader});
+			if(leader) 
+			{
+				throw std::runtime_error("Could not connect with the new leader.");
+			}
 		}
 	}
 }
@@ -145,7 +164,10 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 		mtx.unlock();
 		// TODO: look into what initial data we need to send.
 		new std::thread(&RAFTConsensus::listenForRequests, this, connection);
-		return std::string(RESPONSE_OK) + initialData + "\n";
+
+		std::string connectingIp = "?" + connectionToString(connection, request);
+
+		return std::string(RESPONSE_OK) + connectingIp + initialData + "\n";
 	}
 	return leaderIp + "?" + leaderPort;
 }

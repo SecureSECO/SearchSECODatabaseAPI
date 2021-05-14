@@ -5,7 +5,7 @@ Utrecht University within the Software Project course.
 */
 #pragma once
 
-#define LEADER_IPS { {"127.0.0.1", "8002"}}
+#define LEADER_IPS { {"131.211.31.153", "8003"}}
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -28,7 +28,7 @@ public:
 
 	std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
 private:
-	void connectToLeader();
+	void connectToLeader(std::vector<std::pair<std::string, std::string>> ips);
 
 	void listenForHeartbeat();
 	void handleHeartbeat(std::string heartbeat);
@@ -45,7 +45,7 @@ private:
 
 	// Non-leader variables.
 	NetworkHandler* networkhandler;
-	std::string leaderIp, leaderPort;
+	std::string leaderIp, leaderPort, myIp, myPort;
 	std::vector<std::pair<std::string, std::string>> nonLeaderNodes;
 
 
