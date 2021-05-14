@@ -8,7 +8,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-#define MIN_AMOUNT_JOBS 5
+int numberOfJobs;
 
 void DatabaseConnection::connect(string ip, int port)
 {
@@ -20,30 +20,58 @@ void DatabaseConnection::connect(string ip, int port)
 	cass_cluster_set_contact_points(cluster, ip.c_str());
 	cass_cluster_set_port(cluster, port);
 	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
+	cass_cluster_set_consistency(cluster, CASS_CONSISTENCY_QUORUM);
+	cass_cluster_set_num_threads_io(cluster, MAX_THREADS);
 
 	// Provide the cluster object as configuration to connect the session.
-	connectFuture = cass_session_connect(connection, cluster);
+	connectFuture = cass_session_connect_keyspace(connection, cluster, "jobqueue");
 
 	CassError rc = cass_future_error_code(connectFuture);
 
 	if (rc != CASS_OK)
 	{
-    	// Display connection error message.
-    	const char* message;
-    	size_t messageLength;
-    	cass_future_error_message(connectFuture, &message, &messageLength);
-    	fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+		// Display connection error message.
+		const char* message;
+		size_t messageLength;
+		cass_future_error_message(connectFuture, &message, &messageLength);
+		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
   	}
+	// Set initial number of jobs in the queue.
+	numberOfJobs = getNumberOfJobs();
+
+	setPreparedStatements();
 }
+
+void DatabaseConnection::setPreparedStatements()
+{
+	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs LIMIT 1");
+	CassError rc = cass_future_error_code(prepareFuture);
+	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs WHERE job_id = ?");
+	rc = cass_future_error_code(prepareFuture);
+	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (jobID, task, url) VALUES (uuid(), \"spider\", ?)");
+        rc = cass_future_error_code(prepareFuture);
+        preparedUploadJob = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs");
+        rc = cass_future_error_code(prepareFuture);
+        preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
+
+	cass_future_free(prepareFuture);
+}
+
 
 string DatabaseConnection::getJob()
 {
-	int jobAmount = getNumberOfJobs();
 	// Check if number of jobs is enough to provide the top job.
-	if (jobAmount >= MIN_AMOUNT_JOBS)
+	if (numberOfJobs >= MIN_AMOUNT_JOBS)
 	{
 		return getTopJob();
 	}
+	// If number of jobs is not high enough, the job is to crawl for more jobs.
 	else
 	{
 		return "Crawl";
@@ -52,8 +80,7 @@ string DatabaseConnection::getJob()
 
 string DatabaseConnection::getTopJob()
 {
-	CassStatement* query = cass_statement_new("SELECT * FROM jobs LIMIT 1", 0);
-        cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+	CassStatement* query = cass_prepared_bind(preparedGetTopJob);
         CassFuture* resultFuture = cass_session_execute(connection, query);
 	 if (cass_future_error_code(resultFuture) == CASS_OK)
         {
@@ -83,9 +110,7 @@ string DatabaseConnection::getTopJob()
 
 void DatabaseConnection::deleteTopJob(CassUuid id)
 {
-	CassStatement* query = cass_statement_new("DELETE FROM jobs WHERE job_id = ?", 1);
-
-	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
 	cass_statement_bind_uuid(query, 0, id);
 
@@ -103,13 +128,13 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 	}
 
 	cass_future_free(queryFuture);
+	::numberOfJobs -= 1;
 
 }
 
 int DatabaseConnection::getNumberOfJobs()
 {
-	CassStatement* query = cass_statement_new("SELECT COUNT(*) FROM jobs", 0);
-	cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+	CassStatement* query = cass_prepared_bind(preparedAmountOfJobs);
 	CassFuture* resultFuture = cass_session_execute(connection, query);
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -136,9 +161,7 @@ int DatabaseConnection::getNumberOfJobs()
 
 void DatabaseConnection::uploadJob(string url)
 {
-	CassStatement* query = cass_statement_new("INSERT INTO jobs (jobID, task, url) VALUES (uuid(), \"spider\", ?)", 1);
-
-        cass_statement_set_consistency(query, CASS_CONSISTENCY_QUORUM);
+	CassStatement* query = cass_prepared_bind(preparedUploadJob);
 
         cass_statement_bind_string(query, 0, url.c_str());
 
@@ -156,4 +179,5 @@ void DatabaseConnection::uploadJob(string url)
         }
 
         cass_future_free(queryFuture);
+	::numberOfJobs += 1;
 }

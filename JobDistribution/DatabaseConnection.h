@@ -10,6 +10,8 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
+#define MAX_THREADS 32
+#define MIN_AMOUNT_JOBS 5
 
 /// <summary>
 /// Handles interaction with database when dealing with job requests.
@@ -45,9 +47,19 @@ private:
 	int getNumberOfJobs();
 
 	/// <summary>
+	/// Creates prepared queries for later use.
+	/// </summary>
+	void setPreparedStatements();
+
+	/// <summary>
 	/// The connection with the database.
 	/// <summary>
 	CassSession *connection;
+
+	const CassPrepared *preparedGetTopJob;
+	const CassPrepared *preparedDeleteTopJob;
+	const CassPrepared *preparedAmountOfJobs;
+	const CassPrepared *preparedUploadJob;
 
 };
 
