@@ -48,6 +48,5 @@ linting:
     - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
     - dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
   script:
-    - cd Database-API
-    - clang-tidy *.cpp -- -I../Resources/include/
-    - clang *.cpp -I../Resources/include/ -fsyntax-only
+    - clang-tidy *.cpp -- -I Resources/include/
+    - clang *.cpp -I Resources/include/ -fsyntax-only
