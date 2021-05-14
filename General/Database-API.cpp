@@ -16,7 +16,7 @@ using namespace std;
 
 int main()
 {
-	//usleep(45000000);
+	usleep(45000000);
 	cout << "Connecting now" << endl;
 
 	RAFTConsensus raft;
