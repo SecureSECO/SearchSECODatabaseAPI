@@ -6,7 +6,7 @@ void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnec
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = new JobRequestHandler(databaseConnection, raft, this, ip, port);
+	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
 string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
@@ -78,7 +78,7 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	{
 		return eUploadJob;
 	}
-	else if (requestType == "tpjb")
+	else if (requestType == "gtjb")
 	{
 		return eGetTopJob;
 	}
