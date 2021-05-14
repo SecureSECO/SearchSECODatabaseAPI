@@ -49,4 +49,4 @@ linting:
     - dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
   script:
     - clang-tidy **/*.cpp -- -I Resources/include/
-    - clang *.cpp -I Resources/include/ -fsyntax-only
+    - clang **/*.cpp -I Resources/include/ -fsyntax-only
