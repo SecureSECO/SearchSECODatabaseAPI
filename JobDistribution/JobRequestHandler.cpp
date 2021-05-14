@@ -14,9 +14,9 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
     this->requestHandler = requestHandler;
 }
 
-std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection)
+std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
 {
-    return raft->connectNewNode(connection);
+    return raft->connectNewNode(connection, request);
 }
 
 std::string JobRequestHandler::addJob(std::string request, std::string data)

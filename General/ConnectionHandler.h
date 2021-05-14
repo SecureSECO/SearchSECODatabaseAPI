@@ -18,6 +18,9 @@ Utrecht University within the Software Project course.
 #include <boost/array.hpp>
 #include <iostream>
 
+#define PORT 8003
+#define CONNECTION_TIMEOUT 10000000	// Timeout in microseconds.
+
 using boost::asio::ip::tcp;
 
 /// <summary>

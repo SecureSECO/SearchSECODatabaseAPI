@@ -5,7 +5,7 @@ Utrecht University within the Software Project course.
 */
 #pragma once
 
-#define LEADER_IPS { {"131.211.31.153", "8003"}}
+#define LEADER_IPS { {"127.0.0.1", "8002"}}
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -26,7 +26,7 @@ public:
 
 	std::string passRequestToLeader(std::string requestType, std::string request);
 
-	std::string connectNewNode(boost::shared_ptr<TcpConnection> connection);
+	std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
 private:
 	void connectToLeader();
 
@@ -38,7 +38,7 @@ private:
 	std::string getHeartbeat();
 	void listenForRequests(boost::shared_ptr<TcpConnection> connection);
 
-	std::string connectionToString(boost::shared_ptr<TcpConnection> connection);
+	std::string connectionToString(boost::shared_ptr<TcpConnection> connection, std::string port);
 
     bool leader;
 	std::mutex mtx;
@@ -50,7 +50,7 @@ private:
 
 
 	// Leader variables.
-	std::vector<boost::shared_ptr<TcpConnection>>* others;
+	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;
 	RequestHandler* requestHandler;
 	std::string nodeConnectionChange = "";
 };

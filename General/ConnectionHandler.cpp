@@ -8,9 +8,6 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include <chrono>
 
-#define PORT 8003
-#define CONNECTION_TIMEOUT 10000000	// Timeout in microseconds.
-
 // Connection Handler Methods.
 void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, RAFTConsensus* raft)
 {

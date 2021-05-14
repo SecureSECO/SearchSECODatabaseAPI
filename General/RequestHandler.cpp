@@ -28,7 +28,7 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 			result = dbrh->handleCheckUploadRequest(request);
 			break;
 		case eConnect:
-			result = jrh->handleConnectRequest(connection);
+			result = jrh->handleConnectRequest(connection, request);
 			break;
 		case eAddJob:
 			result = jrh->addJob(requestType, request);

@@ -20,7 +20,7 @@ Utrecht University within the Software Project course.
 
 void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader) 
 {
-	others = new std::vector<boost::shared_ptr<TcpConnection>>();
+	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
 	leader = true;
 	this->requestHandler = requestHandler;
 	if (!assumeLeader) 
@@ -58,8 +58,9 @@ void RAFTConsensus::connectToLeader()
 				networkhandler = NetworkHandler::createHandler();
 				// If the IP + port are not open, this will throw an exception sending us to the catch.
 				networkhandler->openConnection(ip, port);
-				// Send a connect request. TODO: formaly document what requet we use for this.
-				networkhandler->sendData("conn1\n\n");
+				// Send a connect request. TODO: formaly document what request we use for this.
+				networkhandler->sendData(
+					"conn" + std::to_string(1 + std::to_string(PORT).length()) + "\n" + std::to_string(PORT) + "\n");
 				response = networkhandler->receiveData();
 				std::vector<std::string> receivedLeader = Utility::splitStringOn(response, '?');
 				if (receivedLeader[0] != RESPONSE_OK) 
@@ -120,24 +121,26 @@ void RAFTConsensus::listenForHeartbeat()
 	}
 }
 
-std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> connection) 
+std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request) 
 {
 	if (leader) 
 	{
+
+		request = request.substr(0, request.length() - 1);
 
 		mtx.lock();
 		std::string initialData = "";
 		for (auto con : *others) 
 		{
-			initialData += "?" + connectionToString(con);
+			initialData += "?" + connectionToString(con.first, con.second);
 		}
 
-		others->push_back(connection);
+		others->push_back(std::pair<boost::shared_ptr<TcpConnection>, std::string>(connection, request));
 		if(nodeConnectionChange != "") 
 		{
 			nodeConnectionChange += "?";
 		}
-		nodeConnectionChange += "A?" + connectionToString(connection);
+		nodeConnectionChange += "A?" + connectionToString(connection, request);
 
 		mtx.unlock();
 		// TODO: look into what initial data we need to send.
@@ -202,7 +205,7 @@ void RAFTConsensus::heartbeatSender()
 		{
 			try 
 			{
-				boost::shared_ptr<TcpConnection> connection = others->at(i);
+				boost::shared_ptr<TcpConnection> connection = others->at(i).first;
 				
 				boost::asio::write(connection->socket(), boost::asio::buffer(data), error);
 				if (error)
@@ -225,12 +228,12 @@ void RAFTConsensus::heartbeatSender()
 
 void RAFTConsensus::dropConnection(int i) 
 {
-	boost::shared_ptr<TcpConnection> c = others->at(i);
+	std::pair<boost::shared_ptr<TcpConnection>, std::string> c = others->at(i);
 	if(nodeConnectionChange != "") 
 	{
 		nodeConnectionChange += "?";
 	}
-	nodeConnectionChange += "R?" + connectionToString(c);
+	nodeConnectionChange += "R?" + connectionToString(c.first, c.second);
 
 	(*others)[i] = (*others)[others->size()-1];
 	others->pop_back();
@@ -260,8 +263,8 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 	}
 }
 
-std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c)
+std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
 {
 	return c->socket().remote_endpoint().address().to_string()
-		+ "?" + std::to_string(c->socket().remote_endpoint().port());
+		+ "?" + port;
 }

@@ -17,7 +17,7 @@ class JobRequestHandler
 public:
 	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler);
 
-	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection);
+	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
 	std::string addJob(std::string request, std::string data);
 
