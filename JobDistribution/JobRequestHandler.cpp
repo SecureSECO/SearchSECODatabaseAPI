@@ -6,12 +6,15 @@ Utrecht University within the Software Project course.
 
 #include "JobRequestHandler.h"
 
+
 #include <iostream>
 
-JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler) 
+JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port)
 {
     this->raft = raft;
     this->requestHandler = requestHandler;
+    this->database = database;
+    database->connect(ip, port);
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
@@ -19,17 +22,29 @@ std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnect
     return raft->connectNewNode(connection, request);
 }
 
-std::string JobRequestHandler::addJob(std::string request, std::string data)
+std::string JobRequestHandler::handleGetJobRequest(std::string request, std::string data)
 {
-    if (raft->isLeader()) 
+    if (raft->isLeader())
     {
-        // TODO: Handle localy
-        std::cout << "REQUEST " << request << ". DATA: " << data << "\n";
+        return database->getJob();
     }
-    else 
-    {
-        raft->passRequestToLeader(request, data);
-        std::cout << "Sending request to leader.\n";
-    }
-    return "Job added successfully\n";
+    return raft->passRequestToLeader(request, data);
 }
+
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string url)
+{
+    if (raft->isLeader())
+    {
+        database->uploadJob(url);
+        if (errno == 0)
+        {
+            return "Your job has been succesfully added to the queue.";
+        }
+        else
+        {
+            return "An error has occurred while adding your job to the queue.";
+        }
+    }
+    return raft->passRequestToLeader(request, url);
+}
+

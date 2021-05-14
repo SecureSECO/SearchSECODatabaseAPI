@@ -22,9 +22,10 @@ int main()
 	RAFTConsensus raft;
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
+	DatabaseConnection databaseConnection;
 
 	raft.start(listen.getRequestHandler());
-	listen.startListen(&databaseHandler, &raft);
+	listen.startListen(&databaseHandler, &databaseConnection, &raft);
 
 	return 0;
 }

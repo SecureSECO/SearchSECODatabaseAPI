@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "DatabaseConnection.h"
 
 #include "RAFTConsensus.h"
 
@@ -15,13 +16,19 @@ class TcpConnection;
 class JobRequestHandler
 {
 public:
-	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler);
+
+	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port);
 
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
-	std::string addJob(std::string request, std::string data);
+	std::string handleUploadJobRequest(std::string request, std::string url);
+
+	std::string handleGetJobRequest(std::string request, std::string data);
 
 private:
+
 	RAFTConsensus* raft;
 	RequestHandler* requestHandler;
+	DatabaseConnection* database;
+
 };

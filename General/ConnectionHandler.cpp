@@ -9,12 +9,12 @@ Utrecht University within the Software Project course.
 #include <chrono>
 
 // Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, RAFTConsensus* raft)
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft)
 {
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler, raft, &handler);
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, &handler);
 		ioContext.run();
 	}
 	catch (std::exception& e)
@@ -84,12 +84,12 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 }
 
 // TCP server Methods.
-TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, RAFTConsensus* raft, RequestHandler* handler)
+TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler)
 	: ioContext_(ioContext),
 	acceptor_(ioContext, tcp::endpoint(tcp::v4(), PORT))
 {
 	this->handler = handler;
-	handler->initialize(databaseHandler, raft);
+	handler->initialize(databaseHandler, databaseConnection, raft);
 	startAccept();
 }
 

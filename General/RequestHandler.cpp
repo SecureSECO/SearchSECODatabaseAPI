@@ -2,11 +2,11 @@
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, RAFTConsensus* raft, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = new JobRequestHandler(raft, this);
+	jrh  = new JobRequestHandler(databaseConnection, raft, this, ip, port);
 }
 
 string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
@@ -30,8 +30,11 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 		case eConnect:
 			result = jrh->handleConnectRequest(connection, request);
 			break;
-		case eAddJob:
-			result = jrh->addJob(requestType, request);
+		case eUploadJob:
+			result = jrh->handleUploadJobRequest(requestType, request);
+			break;
+		case eGetTopJob:
+			result = jrh->handleGetJobRequest(requestType, request);
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
@@ -71,9 +74,13 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	{
 		return eConnect;
 	}
-	else if (requestType == "addj")
+	else if (requestType == "upjb")
 	{
-		return eAddJob;
+		return eUploadJob;
+	}
+	else if (requestType == "tpjb")
+	{
+		return eGetTopJob;
 	}
 	else
 	{

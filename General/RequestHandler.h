@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 #include "JobRequestHandler.h"
 #include "DatabaseRequestHandler.h"
 #include "RAFTConsensus.h"
+#include "DatabaseConnection.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -23,12 +24,13 @@ enum eRequestType
 	eCheck,
 	eCheckUpload,
 	eConnect,
-	eAddJob,
+	eUploadJob,
+	eGetTopJob,
 	eUnknown
 };
 
 
-class RequestHandler 
+class RequestHandler
 {
 public:
 
@@ -38,7 +40,7 @@ public:
 	/// <param name="databaseHandler">
 	/// Handler for interactions with the database.
 	/// </param>
-	void initialize(DatabaseHandler* databaseHandler, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
+	void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
