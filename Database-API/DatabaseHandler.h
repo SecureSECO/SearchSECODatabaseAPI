@@ -43,6 +43,39 @@ public:
 	/// </summary>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
+	/// <summary>
+	/// Given an author returns the id of that author.
+	/// </summary>
+	/// <param name="author">
+	/// The author to retrieve the id for.
+	/// </param>
+	/// <returns>
+	/// A string representing the author id.
+	/// </returns>
+	virtual std::string authorToId(Author author);
+
+	/// <summary>
+	/// Given an author id retrieves the corresponding author.
+	/// </summary>
+	/// <param name="id">
+	/// A string with the id to be checked.
+	/// </param>
+	/// <returns>
+	/// The author corresponding to the given id.
+	/// </returns>
+	virtual Author idToAuthor(std::string id);
+
+	/// <summary>
+	/// Given an author id retrieves the methods created by that author.
+	/// </summary>
+	/// <param name="authorId">
+	/// The id of the author to retrieve the methods for.
+	/// </param>
+	/// <returns>
+	/// A vector with the necessary information of the methods the author has worked on.
+	/// </returns>
+	virtual std::vector<MethodId> authorToMethods(std::string authorId);
+
 private:
 	/// <summary>
 	/// Add a method to the method_by_author table.
@@ -55,9 +88,26 @@ private:
 	MethodOut getMethod(const CassRow *row);
 
 	/// <summary>
-	/// Retrieves the author ID corresponding to the given author.
+	/// Parses a row into a method id. Takes a row as input and outputs a method id.
+	/// </summary>
+	MethodId getMethodId(const CassRow *row);
+
 	/// <summary>
-	CassUuid getAuthorID(Author author);
+	/// Retrieves the author ID corresponding to the given author.
+	/// Also creates a new author if the author does not yet exist.
+	/// <summary>
+	CassUuid getAuthorId(Author author);
+
+	/// <summary>
+	/// Retrieves the author id corresponding to the given author.
+	/// </summary>
+	/// <param name="author">
+	/// The author to retrieve the id for.
+	/// </param>
+	/// <returns>
+	/// The id of the author.
+	/// </returns>
+	virtual CassUuid retrieveAuthorId(Author author);
 
 	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
@@ -96,7 +146,9 @@ private:
 	const CassPrepared *insertProject;
 	const CassPrepared *insertMethod;
 	const CassPrepared *insertMethodByAuthor;
+	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *selectIdByAuthor;
 	const CassPrepared *insertIdByAuthor;
 	const CassPrepared *insertAuthorById;
+	const CassPrepared *selectAuthorById;
 };

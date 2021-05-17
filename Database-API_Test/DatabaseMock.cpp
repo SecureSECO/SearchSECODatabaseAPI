@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "gmock/gmock.h"
 #include "Types.h"
+#include "DatabaseHandler.h"
 #include <string>
 
 using namespace types;
@@ -20,4 +21,7 @@ public:
 	MOCK_METHOD(void, addProject, (Project project), ());
 	MOCK_METHOD(void, addMethod, (MethodIn method, Project project), ());
 	MOCK_METHOD(std::vector<MethodOut>, hashToMethods, (std::string hash), ());
+	MOCK_METHOD(std::string, authorToId, (Author author), ());
+	MOCK_METHOD(Author, idToAuthor, (std::string id), ());
+	MOCK_METHOD(std::vector<MethodId>, authorToMethods, (std::string authorId));
 };

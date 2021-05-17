@@ -21,7 +21,6 @@ class DatabaseRequestHandler
 public:
 	DatabaseRequestHandler(DatabaseHandler *database, std::string ip = IP, int port = DBPORT);
 
-
 	/// <summary>
 	/// Handles requests which want to add one project with their corresponding methods to the database.
 	/// </summary>
@@ -75,6 +74,46 @@ public:
 	/// of the methods within the request, in string format.
 	/// </returns>
 	std::string handleCheckUploadRequest(std::string request);
+
+	/// <summary>
+	/// Handles a requests for retrieving the ids by the give authors.
+	/// </summary>
+	/// <param nam'="request">
+	/// The request that contains the authors with the following format:
+	/// name_1?mail_1\nname_2?mail_2\n...
+	/// </param>
+	/// <returns>
+	/// A string with the author ids retrieved from the database with the following format:
+	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// </returns>
+	std::string handleGetAuthorIDRequest(std::string request);
+
+	/// <summary>
+	/// Handles a requests for retrieving the authors by the given ids.
+	/// </summary>
+	/// <param nam'="request">
+	/// The request that contains the author ids with the following format:
+	/// id_1\nid_2\n...
+	/// </param>
+	/// <returns>
+	/// A string with the authors retrieved from the database with the following format:
+	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// </returns>
+	std::string handleGetAuthorRequest(std::string request);
+
+	/// <summary>
+	/// Handles requests wanting to obtain methods with certain authors.
+	/// </summary>
+	/// <param name="request">
+	/// The request made by the user, having the following format:
+	/// "authorId_1\nauthorId_2\n...".
+	/// </param>
+	/// <returns>
+	/// The methods that the given author has worked on with the following format:
+	/// authorId_1?hash_1?projectId_1?version_1\nauthorId_2?hash_2?projectId_2?version_2\n...
+	/// </returns>
+	std::string handleGetMethodsByAuthorRequest(std::string request);
+
 private:
 	/// <summary>
 	/// Converts a request to a Project (defined in Types.h).
@@ -173,6 +212,119 @@ private:
 	/// </param>
 	/// <returns></returns>
 	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, Project project);
+
+	/// <summary>
+	/// Parses a list of authors with ids to a string to be returned.
+	/// </summary>
+	/// <param name="authors">
+	/// A vector of tuples containing an author and the corresponding id.
+	/// </param>
+	/// <returns>
+	/// A string of the format:
+	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// <returns>
+	std::string authorsToString(std::vector<std::tuple<Author, std::string>> authors);
+
+	/// <summary>
+	/// Parses a dataentry to an author.
+	/// </summary>
+	/// <param name="dataEntry">
+	/// A string with the name and mail of an author seperated by a '?'.
+	/// </param>
+	/// <returns>
+	/// An author with the name and mail passed to the method.
+	/// <returns>
+	Author datanEntryToAuthor(std::string dataEntry);
+
+	/// <summary>
+	/// Retrieves the id corresponding to the authors given as input using the database.
+	/// </summary>
+	/// <param name="authors">
+	/// A vector of strings representing authors.
+	/// </param>
+	/// <returns>
+	/// A vector consisting of tuples with an author and the corresponding id.
+	/// </returns>
+	std::vector<std::tuple<Author, std::string>> getAuthorIDs(std::vector<Author> authors);
+
+	/// <summary>
+	/// Handles a single thread of retrieving author ids from the database.
+	/// </summary>
+	/// <param name="authors">
+	/// The queue with authors that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with authors.
+	/// </param>
+	/// <returns>
+	/// A vector consisting of tuples with an author and the corresponding id.
+	/// </returns>
+	std::vector<std::tuple<Author, std::string>> singleAuthorToIDThread(std::queue<Author> &authors,
+																		std::mutex &queueLock);	
+
+	/// <summary>
+	/// Retrieves the authors corresponding to the ids given as input using the database.
+	/// </summary>
+	/// <param name="authorIds">
+	/// A vector of author ids.
+	/// </param>
+	/// <returns>
+	/// A vector consisting of tuples with an author and the corresponding id.
+	/// </returns>
+	std::vector<std::tuple<Author, std::string>> getAuthors(std::vector<std::string> authorIds);
+
+	/// <summary>
+	/// Handles a single thread of retrieving authors from the database.
+	/// </summary>
+	/// <param name="authorIds">
+	/// The queue with author ids that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with author ids.
+	/// </param>
+	/// <returns>
+	/// A vector consisting of tuples with an author and the corresponding id.
+	/// </returns>
+	std::vector<std::tuple<Author, std::string>> singleIdToAuthorThread(std::queue<std::string> &authorIds,
+																		std::mutex &queueLock);
+
+	/// <summary>
+	/// Retrieves the methods worked on by one of the authors for which the id is given.
+	/// </summary>
+	/// <param name="authorIds">
+	/// A vector of author ids.
+	/// </param>
+	/// <returns>
+	/// All methods in the database that one of the give authors has worked on.
+	/// </returns>
+	std::vector<std::tuple<MethodId, std::string>> getMethodsByAuthor(std::vector<std::string> authorIds);
+
+	/// <summary>
+	/// Handles a single thread of retrieving methods by given authors.
+	/// </summary>
+	/// <param name="authorIds">
+	/// The queue with ids of authors that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with author ids.
+	/// </param>
+	/// <returns>
+	/// A vector consisting of tuples with a method and the corresponding id.
+	/// </returns>
+	std::vector<std::tuple<MethodId, std::string>> singleAuthorToMethodsThread(std::queue<std::string> &authorIds,
+																			 std::mutex &queueLock);
+
+	/// <summary>
+	/// Parses a list of methods with author ids to a string to be returned.
+	/// </summary>
+	/// <param name="methods">
+	/// A vector of tuples containing a method and the corresponding author id.
+	/// </param>
+	/// <returns>
+	/// A string of the format:
+	/// authorId_1?hash_1?projectId_1?version_1\nauthorId_2?hash_2?projectId_2?version_2\n...
+	/// <returns>
+	std::string methodIdsToString(std::vector<std::tuple<MethodId, std::string>> methods);
 
 	DatabaseHandler *database;
 };

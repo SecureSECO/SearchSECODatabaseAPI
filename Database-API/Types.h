@@ -56,6 +56,14 @@ public:
 	std::vector<AuthorID> authorIDs;
 };
 
+struct MethodId
+{
+public:
+	Hash hash;
+	ProjectID projectId;
+	Version version;
+};
+
 /// <summary>
 /// Represents the relevant data of a project.
 /// </summary>
