@@ -386,11 +386,11 @@ string DatabaseRequestHandler::authorsToString(vector<tuple<Author, string>> aut
 		tuple<Author, string> lastAuthorID = authors.back();
 		string name = get<0>(lastAuthorID).name;
 		string mail = get<0>(lastAuthorID).mail;
-		string ID = get<1>(lastAuthorID);
+		string id = get<1>(lastAuthorID);
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
-		vector<string> dataElements = {name, mail, ID};
+		vector<string> dataElements = {name, mail, id};
 
 		for (string data : dataElements)
 		{
@@ -539,13 +539,13 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(que
 			queueLock.unlock();
 			return authors;
 		}
-		string Id = authorIds.front();
+		string id = authorIds.front();
 		authorIds.pop();
 		queueLock.unlock();
-		Author newAuthor = database->idToAuthor(Id);
+		Author newAuthor = database->idToAuthor(id);
 		if (newAuthor.name != "" && newAuthor.mail != "")
 		{
-			authors.push_back(make_tuple(newAuthor, Id));
+			authors.push_back(make_tuple(newAuthor, id));
 		}
 	}
 }
