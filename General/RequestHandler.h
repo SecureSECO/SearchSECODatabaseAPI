@@ -26,6 +26,9 @@ enum eRequestType
 	eConnect,
 	eUploadJob,
 	eGetTopJob,
+	eGetAuthorID,
+	eGetAuthor,
+	eGetMethodByAuthor,
 	eUnknown
 };
 

@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+ï¿½ Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include "RequestHandler.h"
@@ -33,6 +33,7 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
 			break;
+<<<<<<< HEAD
 		case eConnect:
 			result = jrh->handleConnectRequest(connection, request);
 			break;
@@ -41,6 +42,16 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 			break;
 		case eGetTopJob:
 			result = jrh->handleGetJobRequest(requestType, request);
+=======
+		case eGetAuthorID:
+			result = dbrh->handleGetAuthorIDRequest(request);
+			break;
+		case eGetAuthor:
+			result = dbrh->handleGetAuthorRequest(request);
+			break;
+		case eGetMethodByAuthor:
+			result = dbrh->handleGetMethodsByAuthorRequest(request);
+>>>>>>> origin/development
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
@@ -87,6 +98,18 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "gtjb")
 	{
 		return eGetTopJob;
+	}
+	else if (requestType == "auid")
+	{
+		return eGetAuthorID;
+	}
+	else if (requestType == "idau")
+	{
+		return eGetAuthor;
+	}
+	else if (requestType == "aume")
+	{
+		return eGetMethodByAuthor;
 	}
 	else
 	{

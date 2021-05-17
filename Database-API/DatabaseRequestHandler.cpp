@@ -355,3 +355,307 @@ string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char d
 	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
 }
+
+string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
+{
+	vector<string> authorStrings = Utility::splitStringOn(request, '\n');
+
+	vector<Author> authors;
+
+	for (int i = 0; i < authorStrings.size(); i++)
+	{
+		authors.push_back(datanEntryToAuthor(authorStrings[i]));
+	}
+
+	// Request the specified hashes.
+	vector<tuple<Author, string>> authorIDs = getAuthorIDs(authors);
+
+	if (authorIDs.size() <= 0)
+	{
+		return "No results found.";
+	}
+
+	return authorsToString(authorIDs);
+}
+
+string DatabaseRequestHandler::authorsToString(vector<tuple<Author, string>> authors)
+{
+	vector<char> chars = {};
+	while (!authors.empty())
+	{
+		tuple<Author, string> lastAuthorID = authors.back();
+		string name = get<0>(lastAuthorID).name;
+		string mail = get<0>(lastAuthorID).mail;
+		string id = get<1>(lastAuthorID);
+
+		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+		// authorTotal and all the authorIDs.
+		vector<string> dataElements = {name, mail, id};
+
+		for (string data : dataElements)
+		{
+			Utility::appendBy(chars, data, '?');
+		}
+
+		// We should get rid of the last dataDelimiter if something is appended to 'chars',
+		// which is precisely the case when it is non-empty.
+		if (!chars.empty())
+		{
+			chars.pop_back();
+		}
+
+		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
+		chars.push_back('\n');
+		authors.pop_back();
+	}
+	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	return result;
+}
+
+Author DatabaseRequestHandler::datanEntryToAuthor(string dataEntry)
+{
+	vector<string> authorData = Utility::splitStringOn(dataEntry, '?');
+
+	Author author;
+	author.name = authorData[0];
+	author.mail = authorData[1];
+
+	return author;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::getAuthorIDs(vector<Author> authors)
+{
+	vector<future<vector<tuple<Author, string>>>> results;
+	vector<thread> threads;
+	queue<Author> authorQueue;
+	mutex queueLock;
+	for (int i = 0; i < authors.size(); i++)
+	{
+		authorQueue.push(authors[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<Author, string>>()> task(
+			bind(&DatabaseRequestHandler::singleAuthorToIDThread, this, ref(authorQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<Author, string>> authorIDs;
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<Author, string>> newAuthorIDs = results[i].get();
+
+		for (int j = 0; j < newAuthorIDs.size(); j++)
+		{
+			authorIDs.push_back(newAuthorIDs[j]);
+		}
+	}
+	return authorIDs;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(queue<Author> &authors, mutex &queueLock)
+{
+	vector<tuple<Author, string>> authorIDs;
+	while (true)
+	{
+		queueLock.lock();
+		if (authors.size() <= 0)
+		{
+			queueLock.unlock();
+			return authorIDs;
+		}
+		Author author = authors.front();
+		authors.pop();
+		queueLock.unlock();
+		string newAuthorID = database->authorToId(author);
+		if (newAuthorID != "")
+		{
+			authorIDs.push_back(make_tuple(author, newAuthorID));
+		}
+	}
+}
+
+string DatabaseRequestHandler::handleGetAuthorRequest(string request)
+{
+	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	// Request the specified hashes.
+	vector<tuple<Author, string>> authors = getAuthors(authorIds);
+
+	if (authors.size() <= 0)
+	{
+		return "No results found.";
+	}
+
+	return authorsToString(authors);
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::getAuthors(vector<string> authorIds)
+{
+	vector<future<vector<tuple<Author, string>>>> results;
+	vector<thread> threads;
+	queue<string> authorIdQueue;
+	mutex queueLock;
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		authorIdQueue.push(authorIds[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<Author, string>>()> task(
+			bind(&DatabaseRequestHandler::singleIdToAuthorThread, this, ref(authorIdQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<Author, string>> authors;
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<Author, string>> newAuthors = results[i].get();
+
+		for (int j = 0; j < newAuthors.size(); j++)
+		{
+			authors.push_back(newAuthors[j]);
+		}
+	}
+	return authors;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(queue<string> &authorIds, mutex &queueLock)
+{
+	vector<tuple<Author, string>> authors;
+	while (true)
+	{
+		queueLock.lock();
+		if (authorIds.size() <= 0)
+		{
+			queueLock.unlock();
+			return authors;
+		}
+		string id = authorIds.front();
+		authorIds.pop();
+		queueLock.unlock();
+		Author newAuthor = database->idToAuthor(id);
+		if (newAuthor.name != "" && newAuthor.mail != "")
+		{
+			authors.push_back(make_tuple(newAuthor, id));
+		}
+	}
+}
+
+string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
+{
+	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	// Request the specified hashes.
+	vector<tuple<MethodId,string>> methods = getMethodsByAuthor(authorIds);
+
+	// Return retrieved data.
+	string methodsStringFormat = methodIdsToString(methods);
+	if (!(methodsStringFormat == ""))
+	{
+		return methodsStringFormat;
+	}
+	else
+	{
+		return "No results found.";
+	}
+}
+
+vector<tuple<MethodId, string>> DatabaseRequestHandler::getMethodsByAuthor(vector<string> authorIds)
+{
+	vector<future<vector<tuple<MethodId, string>>>> results;
+	vector<thread> threads;
+	queue<string> idQueue;
+	mutex queueLock;
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		idQueue.push(authorIds[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<MethodId, string>>()> task(
+			bind(&DatabaseRequestHandler::singleAuthorToMethodsThread, this, ref(idQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<MethodId, string>> methods = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<MethodId, string>> newMethods = results[i].get();
+
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(newMethods[j]);
+		}
+	}
+	return methods;
+}
+
+vector<tuple<MethodId, string>> DatabaseRequestHandler::singleAuthorToMethodsThread(queue<string> &authorIds, mutex &queueLock)
+{
+	vector<tuple<MethodId, string>> methods;
+	while (true)
+	{
+		queueLock.lock();
+		if (authorIds.size() <= 0)
+		{
+			queueLock.unlock();
+			return methods;
+		}
+		string authorId = authorIds.front();
+		authorIds.pop();
+		queueLock.unlock();
+		vector<MethodId> newMethods = database->authorToMethods(authorId);
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(make_tuple(newMethods[j], authorId));
+		}
+	}
+}
+
+string DatabaseRequestHandler::methodIdsToString(vector<tuple<MethodId, string>> methods)
+{
+	vector<char> chars = {};
+	while (!methods.empty())
+	{
+		tuple<MethodId, string> lastMethod = methods.back();
+		string hash = get<0>(lastMethod).hash;
+		string projectID = to_string(get<0>(lastMethod).projectId);
+		string version = to_string(get<0>(lastMethod).version);
+		string authorId = get<1>(lastMethod);
+
+		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+		// authorTotal and all the authorIDs.
+		vector<string> dataElements = {authorId, hash, projectID, version};
+
+		for (string data : dataElements)
+		{
+			Utility::appendBy(chars, data, '?');
+		}
+
+		// We should get rid of the last dataDelimiter if something is appended to 'chars',
+		// which is precisely the case when it is non-empty.
+		if (!chars.empty())
+		{
+			chars.pop_back();
+		}
+
+		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
+		chars.push_back('\n');
+		methods.pop_back();
+	}
+	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	return result;
+}
