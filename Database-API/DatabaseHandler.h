@@ -11,6 +11,7 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
+#define MAX_THREADS 32
 
 using namespace types;
 
@@ -31,14 +32,17 @@ public:
 	virtual void addProject(Project project);
 
 	/// <summary>
-	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to the database with information of the project.
+	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
+	/// the database with information of the project.
 	/// </summary>
 	virtual void addMethod(MethodIn method, Project project);
 
 	/// <summary>
-	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match the hash.
+	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
+	/// the hash.
 	/// </summary>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
+
 private:
 	/// <summary>
 	/// Add a method to the method_by_author table.
@@ -48,7 +52,7 @@ private:
 	/// <summary>
 	/// Parses a row into a method. Takes a row as input and outputs a method.
 	/// </summary>
-	MethodOut getMethod(const CassRow* row);
+	MethodOut getMethod(const CassRow *row);
 
 	/// <summary>
 	/// Retrieves the author ID corresponding to the given author.
@@ -63,20 +67,36 @@ private:
 	/// <summary>
 	/// Retrieves a string from a row. Takes in the row and the name of the column.
 	/// </summary>
-	std::string getString(const CassRow* row, const char* column);
+	std::string getString(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// Retrieves a 32 bit integer from a row. Takes in the row and the name of the column.
 	/// </summary>
-	int getInt32(const CassRow* row, const char* column);
+	int getInt32(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// Retrieves a 64 bit integer from a row. Takes in the row and the name of the column.
 	/// </summary>
-	long long getInt64(const CassRow* row, const char* column);
+	long long getInt64(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// The connection with the database.
 	/// <summary>
-	CassSession* connection;
+	CassSession *connection;
+
+	/// <summary>
+	/// Create the prepared statements to be executed later.
+	/// </summary>
+	void setPreparedStatements();
+
+	/// <summary>
+	/// The prepared statements that can be executed.
+	/// </summary>
+	const CassPrepared *selectMethod;
+	const CassPrepared *insertProject;
+	const CassPrepared *insertMethod;
+	const CassPrepared *insertMethodByAuthor;
+	const CassPrepared *selectIdByAuthor;
+	const CassPrepared *insertIdByAuthor;
+	const CassPrepared *insertAuthorById;
 };

@@ -16,4 +16,4 @@ RUN mkdir build && \
 	cd build && \
 	cmake .. && \
 	cmake --build .
-ENTRYPOINT ["./build/Database-API/Database-API"]
+ENTRYPOINT ["./build/Database-APIexe"]

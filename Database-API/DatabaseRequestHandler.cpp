@@ -10,6 +10,9 @@ Utrecht University within the Software Project course.
 #include <sstream>
 #include <ctime>
 #include <regex>
+#include <thread>
+#include <future>
+#include <functional>
 
 #include "DatabaseRequestHandler.h"
 #include "Utility.h"
@@ -91,9 +94,22 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 
 	// Only upload if project and all methods are valid to prevent partial uploads.
 	database -> addProject(project);
+
+	queue<MethodIn> methodQueue;
+	mutex queueLock;
+	vector<thread> threads;
+
 	for (MethodIn method : methods)
 	{
-		database -> addMethod(method, project);
+		methodQueue.push(method);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		threads.push_back(thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
 	}
 	if (errno == 0)
 	{
@@ -102,6 +118,23 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	else
 	{
 		return "An unexpected error occurred.";
+	}
+}
+
+void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
+{
+	while (true)
+	{
+		queueLock.lock();
+		if (methods.size() <= 0)
+		{
+			queueLock.unlock();
+			return;
+		}
+		MethodIn method = methods.front();
+		methods.pop();
+		queueLock.unlock();
+		database->addMethod(method, project);
 	}
 }
 
@@ -229,10 +262,29 @@ string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 
 vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 {
-	vector<MethodOut> methods = { };
+	vector<future<vector<MethodOut>>> results;
+	vector<thread> threads;
+	queue<Hash> hashQueue;
+	mutex queueLock;
 	for (int i = 0; i < hashes.size(); i++)
 	{
-		vector<MethodOut> newMethods = database -> hashToMethods(hashes[i]);
+		hashQueue.push(hashes[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<MethodOut>()> task(
+			bind(&DatabaseRequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<MethodOut> methods = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<MethodOut> newMethods = results[i].get();
 
 		for (int j = 0; j < newMethods.size(); j++)
 		{
@@ -240,6 +292,28 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 		}
 	}
 	return methods;
+}
+
+vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
+{
+	vector<MethodOut> methods;
+	while (true)
+	{
+		queueLock.lock();
+		if (hashes.size() <= 0)
+		{
+			queueLock.unlock();
+			return methods;
+		}
+		Hash hash = hashes.front();
+		hashes.pop();
+		queueLock.unlock();
+		vector<MethodOut> newMethods = database->hashToMethods(hash);
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(newMethods[j]);
+		}
+	}
 }
 
 string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
