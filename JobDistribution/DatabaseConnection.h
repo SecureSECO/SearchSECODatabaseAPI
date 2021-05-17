@@ -29,7 +29,7 @@ public:
 	/// </summary>
 	virtual std::string getJob();
 
-	virtual void uploadJob(std::string url);
+	virtual void uploadJob(std::string url, int priority);
 private:
 	/// <summary>
         /// Retrieves the url of the first job in the jobs table..

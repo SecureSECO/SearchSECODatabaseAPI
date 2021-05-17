@@ -31,11 +31,13 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
     return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string url)
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) //Data format is url?priority
 {
     if (raft->isLeader())
     {
-        database->uploadJob(url);
+	std::string url = Utility::splitStringOn(data,'?')[0];
+	int priority = Utility::safeStoi(Utility::splitStringOn(data,'?')[1]);
+        database->uploadJob(url, priority);
         if (errno == 0)
         {
             return "Your job has been succesfully added to the queue.";
@@ -45,6 +47,5 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
             return "An error has occurred while adding your job to the queue.";
         }
     }
-    return raft->passRequestToLeader(request, url);
+    return raft->passRequestToLeader(request, data);
 }
-

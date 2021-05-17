@@ -44,15 +44,15 @@ void DatabaseConnection::connect(string ip, int port)
 
 void DatabaseConnection::setPreparedStatements()
 {
-	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs LIMIT 1");
+	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobsqueue LIMIT 1");
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs WHERE job_id = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobsqueue WHERE jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (jobID, task, url) VALUES (uuid(), \"spider\", ?)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (url, jobid, task, priority) VALUES (?, uuid(), \"spider\", ?)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
@@ -90,7 +90,7 @@ string DatabaseConnection::getTopJob()
 		size_t len;
 		CassUuid id;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
-		cass_value_get_uuid(cass_row_get_column(row, 0), &id);
+		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
 		deleteTopJob(id);
@@ -159,11 +159,13 @@ int DatabaseConnection::getNumberOfJobs()
 
 }
 
-void DatabaseConnection::uploadJob(string url)
+void DatabaseConnection::uploadJob(string url, int priority)
 {
 	CassStatement* query = cass_prepared_bind(preparedUploadJob);
 
         cass_statement_bind_string(query, 0, url.c_str());
+
+	cass_statement_bind_int64(query, 1, priority);
 
         CassFuture* queryFuture = cass_session_execute(connection, query);
 

@@ -6,8 +6,8 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseConnection.h"
-
 #include "RAFTConsensus.h"
+#include "Utility.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -21,7 +21,7 @@ public:
 
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
-	std::string handleUploadJobRequest(std::string request, std::string url);
+	std::string handleUploadJobRequest(std::string request, std::string data);
 
 	std::string handleGetJobRequest(std::string request, std::string data);
 
