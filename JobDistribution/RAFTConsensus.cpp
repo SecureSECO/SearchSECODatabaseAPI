@@ -31,13 +31,10 @@ void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader)
 
 	if (leader) 
 	{
-		// We are just going to use the request handler for the incomming requests.
-		// TODO: Start heartbeat.
 		new std::thread(&RAFTConsensus::heartbeatSender, this);
 	}
 	else 
 	{
-		// TODO: Listen for heartbeat.
 		new std::thread(&RAFTConsensus::listenForHeartbeat, this);
 	}
 }
@@ -53,41 +50,9 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			std::string ip = x.first;
 			std::string port = x.second;
 			std::string response = "";
-			while (response != RESPONSE_OK) 
+			while (response.substr(0, std::string(RESPONSE_OK).size()) != RESPONSE_OK) 
 			{
-				networkhandler = NetworkHandler::createHandler();
-				// If the IP + port are not open, this will throw an exception sending us to the catch.
-				networkhandler->openConnection(ip, port);
-				// Send a connect request. TODO: formaly document what request we use for this.
-				networkhandler->sendData(
-					"conn" + std::to_string(1 + std::to_string(PORT).length()) + "\n" + std::to_string(PORT) + "\n");
-				response = networkhandler->receiveData();
-				std::vector<std::string> receivedLeader = Utility::splitStringOn(response, '?');
-				if (receivedLeader[0] != RESPONSE_OK) 
-				{
-					// If we get something which is not an ok, we will assume that it has send back
-					// the true leader.
-					if(receivedLeader.size() != 2) 
-					{
-						throw std::runtime_error("Incorrect response from connect request. Size was " + std::to_string(receivedLeader.size()));
-					}
-					ip = receivedLeader[0];
-					port = receivedLeader[1];
-					delete networkhandler;
-				}
-				else 
-				{
-					// TODO: Use the data that the leader send back as initial data.
-					myIp = receivedLeader[1];
-					myPort = receivedLeader[2];
-					for (int i = 3; i < receivedLeader.size(); i += 2) 
-					{
-						// TODO: handle incorrect size.
-						std::cout << "Node: " << receivedLeader[i] << " " << receivedLeader[i + 1] << "\n";
-						nonLeaderNodes.push_back(std::pair<std::string, std::string>(receivedLeader[i], receivedLeader[i + 1]));
-					}
-					break;
-				}
+				tryConnectingWithIp(ip, port, response);
 			}
 			// If we get through the while loop without throwing an exception, then we have found the leader.
 			leaderIp = ip;
@@ -105,21 +70,59 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 	}
 }
 
+void RAFTConsensus::handleInitialData(std::vector<std::string> initialData)
+{
+	if (initialData.size() < 3)
+	{
+		throw std::runtime_error("Incorrect initial data.");
+	}
+	myIp = initialData[1];
+	myPort = initialData[2];
+	// We check i + 1 instead if just i, because we need 2 values every time.
+	for (int i = 3; i + 1 < initialData.size(); i += 2) 
+	{
+		nonLeaderNodes.push_back(std::pair<std::string, std::string>(initialData[i], initialData[i + 1]));
+	}
+}
+
+void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std::string &response)
+{
+	networkhandler = NetworkHandler::createHandler();
+	// If the IP + port are not open, this will throw an exception sending us to the catch.
+	networkhandler->openConnection(ip, port);
+	// Send a connect request. TODO: formaly document what request we use for this.
+	networkhandler->sendData(
+		"conn" + std::to_string(1 + std::to_string(PORT).length()) + "\n" + std::to_string(PORT) + "\n");
+	response = networkhandler->receiveData();
+	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, '?');
+	if (receivedLeader[0] != RESPONSE_OK) 
+	{
+		// If we get something which is not an ok, we will assume that it has send back the true leader.
+		if(receivedLeader.size() != 2) 
+		{
+			throw std::runtime_error("Incorrect response from connect request. Size was " + std::to_string(receivedLeader.size()));
+		}
+		ip = receivedLeader[0];
+		port = receivedLeader[1];
+		delete networkhandler;
+	}
+	else 
+	{
+		handleInitialData(receivedLeader);
+	}
+}
+
 void RAFTConsensus::listenForHeartbeat() 
 {
 	while (true) 
 	{
 		try 
 		{
-			std::cout << "Trying to receive\n";
 			std::string data = networkhandler->receiveData();
-			std::cout << "Received data\n";
 			handleHeartbeat(data);
 		}
 		catch(std::exception const& ex) 
 		{
-			// TODO: if receiving data fails, then the host is presumably dead,
-			// so we then want to choose a new leader instead of stopping.
 			auto newLeader = nonLeaderNodes[0];
 			nonLeaderNodes.clear();
 			if (newLeader.first == myIp && newLeader.second == myPort)
@@ -169,38 +172,43 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 
 		return std::string(RESPONSE_OK) + connectingIp + initialData + "\n";
 	}
-	return leaderIp + "?" + leaderPort;
+	return leaderIp + "?" + leaderPort + "\n";
 }
 
 void RAFTConsensus::handleHeartbeat(std::string heartbeat) 
 {
-	// TODO: implement this function properly.
 	std::cout << "Heartbeat received: "  << heartbeat << "\n";
 	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, '?');
-	std::cout << "\nSplitted size" <<hbSplitted.size() << "\n";
 	for (int i = 0; i < hbSplitted.size(); i += 3) 
 	{
+		std::pair<std::string, std::string> pairReceived = 
+			std::pair<std::string, std::string>(hbSplitted[i+1], hbSplitted[i+2]);
 		if (hbSplitted[i] == "A") 
 		{
-			std::cout << "Adding: " << hbSplitted[i+1] << " " << hbSplitted[i+2];
-			nonLeaderNodes.push_back(std::pair<std::string, std::string>(hbSplitted[i+1], hbSplitted[i+2]));
+			bool found = false;
+			for (auto node : nonLeaderNodes)
+			{
+				if (pairReceived == node) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) 
+			{
+				nonLeaderNodes.push_back(pairReceived);
+			}
 		}
 		else if (hbSplitted[i] == "R")
 		{
 			nonLeaderNodes.erase(
 				std::remove(nonLeaderNodes.begin(), nonLeaderNodes.end(), 
-				std::pair<std::string, std::string>(hbSplitted[i+1], hbSplitted[i+2])), 
+				pairReceived), 
 				nonLeaderNodes.end());
 		}
 		else 
 		{
 			std::cout << "Incorrect heartbeat\n";
 		}
-	}
-	std::cout << "New list of non leader nodes: \n";
-	for (auto x : nonLeaderNodes) 
-	{
-		std::cout << "\t" << x.first << " " << x.second << "\n";
 	}
 }
 
@@ -263,7 +271,6 @@ void RAFTConsensus::dropConnection(int i)
 
 std::string RAFTConsensus::getHeartbeat()
 {
-	// TODO: More heartbeat data.
 	std::string hb = nodeConnectionChange + "\n";
 	std::cout << "Sending heartbeat: " + hb;
 	nodeConnectionChange = "";
