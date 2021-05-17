@@ -39,6 +39,9 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 		case eUploadJob:
 			result = jrh->handleUploadJobRequest(requestType, request);
 			break;
+		case eUploadCrawlData:
+			result = jrh->handleCrawlDataRequest(requestType, request);
+			break;
 		case eGetTopJob:
 			result = jrh->handleGetJobRequest(requestType, request);
 			break;
@@ -83,6 +86,10 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "upjb")
 	{
 		return eUploadJob;
+	}
+	else if (requestType == "upcd")
+	{
+		return eUploadCrawlData;
 	}
 	else if (requestType == "gtjb")
 	{

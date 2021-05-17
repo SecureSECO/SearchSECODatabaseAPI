@@ -30,6 +30,8 @@ public:
 	virtual std::string getJob();
 
 	virtual void uploadJob(std::string url, int priority);
+
+	virtual void updateCrawlId(int id);
 private:
 	/// <summary>
         /// Retrieves the url of the first job in the jobs table..

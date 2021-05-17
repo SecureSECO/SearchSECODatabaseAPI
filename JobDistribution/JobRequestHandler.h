@@ -25,6 +25,8 @@ public:
 
 	std::string handleGetJobRequest(std::string request, std::string data);
 
+	std::string handleCrawlDataRequest(std::string request, std::string data);
+
 private:
 
 	RAFTConsensus* raft;

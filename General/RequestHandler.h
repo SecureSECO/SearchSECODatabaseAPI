@@ -25,6 +25,7 @@ enum eRequestType
 	eCheckUpload,
 	eConnect,
 	eUploadJob,
+	eUploadCrawlData,
 	eGetTopJob,
 	eUnknown
 };

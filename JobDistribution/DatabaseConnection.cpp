@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 using namespace std;
 
 int numberOfJobs;
+int crawlId;
 
 void DatabaseConnection::connect(string ip, int port)
 {
@@ -38,6 +39,7 @@ void DatabaseConnection::connect(string ip, int port)
   	}
 	// Set initial number of jobs in the queue.
 	//numberOfJobs = getNumberOfJobs();
+	::crawlId = 0;
 
 	//setPreparedStatements();
 }
@@ -182,4 +184,9 @@ void DatabaseConnection::uploadJob(string url, int priority)
 
         cass_future_free(queryFuture);
 	::numberOfJobs += 1;
+}
+
+void DatabaseConnection::updateCrawlId(int id)
+{
+	::crawlId = id;
 }
