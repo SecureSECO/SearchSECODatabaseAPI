@@ -18,7 +18,7 @@ Utrecht University within the Software Project course.
 /// </summary>
 class DatabaseRequestHandler
 {
-  public:
+public:
 	DatabaseRequestHandler(DatabaseHandler *database, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
@@ -114,7 +114,7 @@ class DatabaseRequestHandler
 	/// </returns>
 	std::string handleGetMethodsByAuthorRequest(std::string request);
 
-  private:
+private:
 	/// <summary>
 	/// Converts a request to a Project (defined in Types.h).
 	/// </summary>
