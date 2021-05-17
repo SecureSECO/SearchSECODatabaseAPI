@@ -226,8 +226,9 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
 	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
@@ -236,7 +237,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
 
 	// Test:
-	const std::string output = handler.handleRequest("auid", request);
+	const std::string output = handler.handleRequest("auid", request, nullptr);
 	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
 }
 
@@ -245,14 +246,15 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "UnknownAuthor?unknownauthor@mail.com\n";
 	std::string expectedOutput = "No results found.";
 
 	// Test:
-	const std::string output = handler.handleRequest("auid", request);
+	const std::string output = handler.handleRequest("auid", request, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -261,14 +263,15 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "Author1?author1@mail.com\nUnknownAuthor?unknownauthor2@mail.com\n";
 	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
 
 	// Test:
-	const std::string output = handler.handleRequest("auid", request);
+	const std::string output = handler.handleRequest("auid", request, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -277,8 +280,9 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
@@ -287,7 +291,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
 
 	// Test:
-	const std::string output = handler.handleRequest("idau", request);
+	const std::string output = handler.handleRequest("idau", request, nullptr);
 	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
 }
 
@@ -296,14 +300,15 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	std::string expectedOutput = "No results found.";
 
 	// Test:
-	const std::string output = handler.handleRequest("idau", request);
+	const std::string output = handler.handleRequest("idau", request, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -312,14 +317,15 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
 
 	// Test:
-	const std::string output = handler.handleRequest("idau", request);
+	const std::string output = handler.handleRequest("idau", request, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -328,14 +334,15 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
 
 	// Test:
-	const std::string output = handler.handleRequest("aume", input);
+	const std::string output = handler.handleRequest("aume", input, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -344,14 +351,15 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	const std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	const std::string expectedOutput = "No results found.";
 
 	// Test:
-	const std::string output = handler.handleRequest("aume", input);
+	const std::string output = handler.handleRequest("aume", input, nullptr);
 	ASSERT_EQ(output, expectedOutput);
 }
 
@@ -360,8 +368,9 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	const std::string input = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
@@ -369,7 +378,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 	std::string output3 = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
 
 	// Test:
-	std::string result = handler.handleRequest("aume", input);
+	std::string result = handler.handleRequest("aume", input, nullptr);
 
 	EXPECT_EQ(result.size(), output1.size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
@@ -382,14 +391,15 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
 
 	// Test:
-	std::string output = handler.handleRequest("aume", input);
+	std::string output = handler.handleRequest("aume", input, nullptr);
 
 	ASSERT_EQ(output, expectedOutput);
 }

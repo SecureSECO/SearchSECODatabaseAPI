@@ -33,7 +33,6 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
 			break;
-<<<<<<< HEAD
 		case eConnect:
 			result = jrh->handleConnectRequest(connection, request);
 			break;
@@ -42,7 +41,7 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 			break;
 		case eGetTopJob:
 			result = jrh->handleGetJobRequest(requestType, request);
-=======
+			break;
 		case eGetAuthorID:
 			result = dbrh->handleGetAuthorIDRequest(request);
 			break;
@@ -51,7 +50,6 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 			break;
 		case eGetMethodByAuthor:
 			result = dbrh->handleGetMethodsByAuthorRequest(request);
->>>>>>> origin/development
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
