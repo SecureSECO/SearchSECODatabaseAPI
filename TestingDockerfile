@@ -1,0 +1,25 @@
+FROM ubuntu:latest
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get -y update && \
+	apt-get -y dist-upgrade && \
+	apt-get -y install gcc g++ cmake autoconf dpkg wget git && \
+	apt-get -y install libboost-all-dev && \
+	wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
+	dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
+	apt-get -y install libssl-dev libkrb5-dev zlib1g && \
+	wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb && \
+	dpkg -i libuv1_1.35.0-1_amd64.deb && \
+	wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb && \
+	dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb && \
+	apt-get -y install openjdk-8-jdk python && \
+    wget https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz && \
+    tar xzvf apache-cassandra-3.11.10-bin.tar.gz
+COPY . .
+RUN mkdir build && \
+	cd build && \
+	cmake .. && \
+	cmake --build .
+#RUN ["chmod", "+x", "./TestingEntrypoint.sh"]
+#ENTRYPOINT ["ls"]
+#./TestingEntrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "-c" , "apache-cassandra-3.11.10/bin/cassandra -R && sleep 30 && apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql && ./build/Database-API_Test/tests"]

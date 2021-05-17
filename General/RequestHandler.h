@@ -17,6 +17,9 @@ enum eRequestType
 	eUpload,
 	eCheck,
 	eCheckUpload,
+	eGetAuthorID,
+	eGetAuthor,
+	eGetMethodByAuthor,
 	eUnknown
 };
 

@@ -33,6 +33,15 @@ string RequestHandler::handleRequest(string requestType, string request)
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
 			break;
+		case eGetAuthorID:
+			result = dbrh->handleGetAuthorIDRequest(request);
+			break;
+		case eGetAuthor:
+			result = dbrh->handleGetAuthorRequest(request);
+			break;
+		case eGetMethodByAuthor:
+			result = dbrh->handleGetMethodsByAuthorRequest(request);
+			break;
 		case eUnknown:
 			result = handleUnknownRequest();
 			break;
@@ -66,6 +75,18 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "auid")
+	{
+		return eGetAuthorID;
+	}
+	else if (requestType == "idau")
+	{
+		return eGetAuthor;
+	}
+	else if (requestType == "aume")
+	{
+		return eGetMethodByAuthor;
 	}
 	else
 	{
