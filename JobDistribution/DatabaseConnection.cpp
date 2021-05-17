@@ -10,6 +10,7 @@ using namespace std;
 
 int numberOfJobs;
 int crawlId;
+bool alreadyCrawling = false;
 
 void DatabaseConnection::connect(string ip, int port)
 {
@@ -69,14 +70,19 @@ void DatabaseConnection::setPreparedStatements()
 string DatabaseConnection::getJob()
 {
 	// Check if number of jobs is enough to provide the top job.
-	if (numberOfJobs >= MIN_AMOUNT_JOBS)
+	if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 	{
 		return getTopJob();
 	}
 	// If number of jobs is not high enough, the job is to crawl for more jobs.
+	else if (alreadyCrawling == false)
+	{
+		alreadyCrawling = true;
+		return "Crawl?" + to_string(crawlId);
+	}
 	else
 	{
-		return "Crawl";
+		return "NoJob";
 	}
 }
 
@@ -189,4 +195,5 @@ void DatabaseConnection::uploadJob(string url, int priority)
 void DatabaseConnection::updateCrawlId(int id)
 {
 	::crawlId = id;
+	alreadyCrawling = false;
 }
