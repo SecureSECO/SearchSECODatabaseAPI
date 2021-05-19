@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+Â© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include "RequestHandler.h"
@@ -32,6 +32,9 @@ string RequestHandler::handleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
+			break;
+		case eExtractProjects:
+			result = dbrh->handleExtractProjectsRequest(request);
 			break;
 		case eGetAuthorID:
 			result = dbrh->handleGetAuthorIDRequest(request);
@@ -75,6 +78,10 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "extp")
+	{
+		return eExtractProjects;
 	}
 	else if (requestType == "auid")
 	{

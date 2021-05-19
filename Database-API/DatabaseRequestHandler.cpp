@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include <regex>
 #include <thread>
 #include <future>
+#include <utility>
 #include <functional>
 
 #include "DatabaseRequestHandler.h"
@@ -19,7 +20,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port) 
+DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
 {
 	this->database = database;
 	database -> connect(ip, port);
@@ -70,7 +71,7 @@ bool DatabaseRequestHandler::isValidHash(Hash hash)
 string DatabaseRequestHandler::handleUploadRequest(string request)
 {
 	// Check if project is valid.
-	Project project = requestToProject(request);
+	ProjectIn project = requestToProject(request);
 	if (errno != 0)
 	{
 		// Project could not be parsed.
@@ -121,7 +122,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 }
 
-void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
+void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, ProjectIn project)
 {
 	while (true)
 	{
@@ -138,7 +139,7 @@ void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex 
 	}
 }
 
-Project DatabaseRequestHandler::requestToProject(string request)
+ProjectIn DatabaseRequestHandler::requestToProject(string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
@@ -148,20 +149,20 @@ Project DatabaseRequestHandler::requestToProject(string request)
 	if (projectData.size() != PROJECT_DATA_SIZE)
 	{
 		errno = EILSEQ;
-		return Project();
+		return ProjectIn();
 	}
 
 	// We return the project information in the form of a Project.
-	Project project;
+	ProjectIn project;
 	project.projectID  = Utility::safeStoll(projectData[0]);	// Converts string to long long.
 	if (errno != 0)
 	{
-		return Project();
+		return ProjectIn();
 	}
 	project.version    = Utility::safeStoll(projectData[1]);
 	if (errno != 0)
 	{
-		return Project();
+		return ProjectIn();
 	}
 	project.license    = projectData[2];
 	project.name       = projectData[3];
@@ -294,6 +295,35 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
+vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<ProjectID, Version>> keyQueue)
+{
+	vector<future<vector<ProjectOut>>> results;
+	vector<thread> threads;
+	mutex queueLock;
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<ProjectOut>()> task(
+			bind(&DatabaseRequestHandler::singleSearchProjectThread, this, ref(keyQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	std::vector<ProjectOut> projects = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<ProjectOut> newProjects = results[i].get();
+
+		for (int j = 0; j < newProjects.size(); j++)
+		{
+			projects.push_back(newProjects[j]);
+		}
+	}
+	return projects;
+}
+
 vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
 {
 	vector<MethodOut> methods;
@@ -336,24 +366,94 @@ string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char d
 		vector<string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
 		dataElements.insert(end(dataElements), begin(authorIDs), end(authorIDs));
 
-		for (string data : dataElements)
-		{
-			Utility::appendBy(chars, data, dataDelimiter);
-		}
-
-		// We should get rid of the last dataDelimiter if something is appended to 'chars',
-		// which is precisely the case when it is non-empty.
-		if (!chars.empty())
-		{
-			chars.pop_back();
-		}
-
-		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
-		chars.push_back(methodDelimiter);
+		// Append 'chars' by the special dataElements separated by special characters.
+		Utility::appendBy(chars, dataElements, dataDelimiter, methodDelimiter);
 		methods.pop_back();
 	}
 	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
+}
+
+string DatabaseRequestHandler::handleExtractProjectsRequest(string request)
+{
+	errno = 0;
+	vector<string> projectsData = Utility::splitStringOn(request, '\n');
+	std::queue<std::pair<ProjectID, Version>> keyQueue;
+
+	// We fill the queue with projectKeys, which identify a project uniquely.
+	for (int i = 0; i < projectsData.size(); i++)
+	{
+		vector<string> projectData = Utility::splitStringOn(projectsData[i], '?');
+		if (projectData.size() < 2)
+		{
+			errno = EILSEQ;
+			return "The request failed. Each project should be provided a projectID and a version (in that order).";
+		}
+		ProjectID projectID = Utility::safeStoll(projectData[0]);
+		Version version = Utility::safeStoll(projectData[1]);
+		if (errno != 0)
+		{
+			return "The request failed. For each project, both the projectID "
+				   "and the version should be a long long int.";
+		}
+
+		std::pair<ProjectID, Version> key = std::make_pair(projectID, version);
+		keyQueue.push(key);
+	}
+
+	std::vector<ProjectOut> projects = getProjects(keyQueue);
+	return projectsToString(projects, '?', '\n');
+}
+
+vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(queue<std::pair<ProjectID, Version>> &keys, mutex &queueLock)
+{
+	vector<ProjectOut> projects;
+	while (true)
+	{
+		queueLock.lock();
+		if (keys.size() <= 0)
+		{
+			queueLock.unlock();
+			return projects;
+		}
+		std::pair<ProjectID, Version> key = keys.front();
+		keys.pop();
+		queueLock.unlock();
+
+		ProjectID projectID = key.first;
+		Version version = key.second;
+		vector<ProjectOut> newProject = database->searchForProject(projectID, version);
+		if (!newProject.empty())
+		{
+			projects.push_back(newProject[0]);
+		}
+	}
+}
+
+string DatabaseRequestHandler::projectsToString(vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter)
+{
+	vector<char> chars = {};
+	for (int i = 0; i < projects.size(); i++)
+	{
+		std::string projectID = to_string(projects[i].projectID);
+		std::string version = to_string(projects[i].version);
+		std::string license = projects[i].license;
+		std::string name = projects[i].name;
+		std::string url = projects[i].url;
+		std::string ownerID = projects[i].ownerID;
+		std::vector<Hash> hashes = projects[i].hashes;
+		std::string hashesTotal = to_string(hashes.size());
+
+		vector<string> dataElements = { projectID, version, license, name, url, ownerID };
+		Utility::appendBy(chars, dataElements, dataDelimiter, projectDelimiter);
+	}
+	string result(chars.begin(), chars.end());
+
+	if (result != "")
+	{
+		return result;
+	}
+	return "No results found.";
 }
 
 string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)

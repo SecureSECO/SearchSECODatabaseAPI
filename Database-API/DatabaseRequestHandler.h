@@ -9,9 +9,9 @@ Utrecht University within the Software Project course.
 #include <mutex>
 #include <queue>
 
-#define PROJECT_DATA_SIZE 7
-#define METHOD_DATA_MIN_SIZE 5
-#define HEX_CHARS "0123456789abcdef"
+#define PROJECT_DATA_SIZE	7
+#define METHOD_DATA_MIN_SIZE	5
+#define HEX_CHARS		"0123456789abcdef"
 
 /// <summary>
 /// Handles requests towards database.
@@ -26,9 +26,9 @@ public:
 	/// </summary>
 	/// <param name="request">
 	/// The request made by the user. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail?stars \n
+	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
 	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ... <methodN_data>".
+	///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// Response towards user after processing the request successfully.
@@ -64,10 +64,10 @@ public:
 	/// </summary>
 	/// <param name="request">
 	/// The request made by the user, having the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail?stars\n
+	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
 	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail\n
-	///  <method2_data>\n...\n<methodN_data>".
+	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail'\n'
+	///  <method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// The methods which contain hashes equal to the one of the hashes
@@ -76,6 +76,19 @@ public:
 	std::string handleCheckUploadRequest(std::string request);
 
 	/// <summary>
+	/// Handles requests wanting to obtain project data from the database given their projectID and version.
+	/// </summary>
+	/// <param name="request">
+	/// The request made by the user which has the following format:
+	/// "projectID1?version1'\n'...'\n'projectIDM?versionM".
+	/// </param>
+	/// <returns>
+	/// The relevant projects found in the database in string format as follows:
+	/// "projectID_1?version_1?license_1?project_name_1?url_1?owner_id1'\n'"
+	/// "<project2_data>'\n'...'\n'<projectN_data>".
+	/// </returns>
+	std::string handleExtractProjectsRequest(std::string request);
+	
 	/// Handles a requests for retrieving the ids by the give authors.
 	/// </summary>
 	/// <param nam'="request">
@@ -120,12 +133,12 @@ private:
 	/// </summary>
 	/// <param name="request">
 	/// The relevant data to create the Project. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail?stars".
+	/// "projectID?version?license?project_name?url?author_name?author_mail".
 	/// </param>
 	/// <returns>
 	/// A Project containing all data as provided within request.
 	/// </returns>
-	Project requestToProject(std::string request);
+	ProjectIn requestToProject(std::string request);
 
 	/// <summary>
 	/// Converts a data entry to a Method (defined in Types.h).
@@ -136,7 +149,7 @@ private:
 	///  method_author1_name?method_author1_mail?...?method_authorN_name?method_authorN_mail".
 	/// </param>
 	/// <returns>
-	/// A Project containing all data as provided within request.
+	/// A method containing all data as provided in input.
 	/// </returns>
 	MethodIn dataEntryToMethod(std::string dataEntry);
 
@@ -145,9 +158,9 @@ private:
 	/// </summary>
 	/// <param name="request">
 	/// Represents the request made by the user. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail?stars \n
+	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
 	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail? <other authors> \n <method2_data> \n ... <methodN_data>".
+	///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// The hashes of the methods given in the requests.
@@ -157,7 +170,7 @@ private:
 	/// <summary>
 	/// Checks if a hash is valid.
 	/// </summary>
-	/// <param name = "hash">
+	/// <param name="hash">
 	/// The hash to be checked.
 	/// </param>
 	/// <returns>
@@ -166,14 +179,22 @@ private:
 	bool isValidHash(Hash hash);
 
 	/// <summary>
-	/// Appends a vector of chars 'result' by methods which still need to be converted to vectors of chars.
-	/// Also separates different methods and different method data elements by special characters,
-	/// 'dataDelimiter' and 'methodDelimiters' respectively.
+	/// Converts methods to a string by placing special delimiters between fields and between entries.
 	/// </summary>
 	/// <returns>
-	/// A Project containing all data as provided within request.
+	/// A string consisting of all provided methods, separated by 'dataDelimiter' to recognise different fields and
+	/// separated by 'methodDelimiter' for separate methods.
 	/// </returns>
 	std::string methodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter);
+
+	/// <summary>
+	/// Converts projects to a string by placing special delimiters between fields and between entries.
+	/// </summary>
+	/// <returns>
+	/// A string consisting of all provided projects, separated by 'dataDelimiter' to recognise different fields and
+	/// separated by 'projectDelimiter' for separate projects..
+	/// </returns>
+        std::string projectsToString(std::vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter);
 
 	/// <summary>
 	/// Retrieves the methods corresponding to the hashes given as input using the database.
@@ -187,6 +208,17 @@ private:
 	std::vector<MethodOut> getMethods(std::vector<Hash> hashes);
 
 	/// <summary>
+	/// Retrieves the projects corresponding to the projectKeys given as input (in a queue) using the database.
+	/// </summary>
+	/// <param name="keys">
+	/// A queue of projectKeys, which are pairs of projectIDs and versions.
+	/// </param>
+	/// <returns>
+	/// All projects in the database corresponding to one of the keys in the queue 'keys'.
+	/// </returns>
+	std::vector<ProjectOut> getProjects(std::queue<std::pair<ProjectID, Version>> keys);
+
+	/// <summary>
 	/// Handles a single thread of checking hashes with the database.
 	/// </summary>
 	/// <param name="hashes">
@@ -195,8 +227,24 @@ private:
 	/// <param name="queueLock">
 	/// The lock for the queue with hashes.
 	/// </param>
-	/// <returns></returns>
+	/// <returns>
+	/// The methods found by a single thread inside a vector.
+	/// </returns>
 	std::vector<MethodOut> singleHashToMethodsThread(std::queue<Hash> &hashes, std::mutex &queueLock);
+
+	/// <summary>
+	/// Handles a single thread of checking hashes with the database.
+	/// </summary>
+	/// <param name="hashes">
+	/// The queue with hashes that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with hashes.
+	/// </param>
+	/// <returns>
+	/// The projects found by a single thread inside a vector.
+	/// </returns>
+	std::vector<ProjectOut> singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &projectKeyQueue, std::mutex &queueLock);
 
 	/// <summary>
 	/// Handles a single thread of uploading methods to the database.
@@ -211,7 +259,7 @@ private:
 	/// The project the methods are part of.
 	/// </param>
 	/// <returns></returns>
-	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, Project project);
+	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project);
 
 	/// <summary>
 	/// Parses a list of authors with ids to a string to be returned.
