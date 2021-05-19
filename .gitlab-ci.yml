@@ -1,5 +1,14 @@
 image: database-api-ci-image
 
+image-build:
+  image: docker
+  stage: build
+  only:
+    changes:
+      - PipelineDockerfile
+  script:
+    - docker build -f PipelineDockerfile -t database-api-ci-image
+
 google-tests:
   stage: test
   variables:
