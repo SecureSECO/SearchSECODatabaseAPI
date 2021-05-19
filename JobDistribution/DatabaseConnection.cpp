@@ -26,7 +26,7 @@ void DatabaseConnection::connect(string ip, int port)
 	cass_cluster_set_num_threads_io(cluster, MAX_THREADS);
 
 	// Provide the cluster object as configuration to connect the session.
-	connectFuture = cass_session_connect_keyspace(connection, cluster, "projectdata");
+	connectFuture = cass_session_connect_keyspace(connection, cluster, "jobs");
 
 	CassError rc = cass_future_error_code(connectFuture);
 
