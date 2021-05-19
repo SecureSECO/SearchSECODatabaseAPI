@@ -6,8 +6,6 @@ image-build:
   only:
     changes:
       - PipelineDockerfile
-  services:
-    - docker:dind
   script:
     - docker build -f PipelineDockerfile -t database-api-ci-image .
 
