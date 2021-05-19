@@ -14,6 +14,7 @@ bool alreadyCrawling = false;
 
 void DatabaseConnection::connect(string ip, int port)
 {
+	return;
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
 	connection = cass_session_new();
