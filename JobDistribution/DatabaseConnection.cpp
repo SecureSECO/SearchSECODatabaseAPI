@@ -37,6 +37,7 @@ void DatabaseConnection::connect(string ip, int port)
 		size_t messageLength;
 		cass_future_error_message(connectFuture, &message, &messageLength);
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+		return;
   	}
 	// Set initial number of jobs in the queue.
 	numberOfJobs = getNumberOfJobs();
