@@ -7,12 +7,19 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
 #include "DatabaseConnection.h"
+#include "RAFTConsensus.h"
 #include "Utility.h"
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
+TEST(DatabaseIntegrationTest, trivialTest)
+{
+	std::cout << "trivial\n";
+	ASSERT_EQ(true, true);
+}
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {

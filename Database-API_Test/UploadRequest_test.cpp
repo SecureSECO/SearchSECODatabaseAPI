@@ -88,7 +88,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
-	cout << "Jajajaja";
+
 	string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, "Your project has been successfully added to the database.");
 }
