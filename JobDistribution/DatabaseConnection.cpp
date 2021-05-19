@@ -14,7 +14,6 @@ bool alreadyCrawling = false;
 
 void DatabaseConnection::connect(string ip, int port)
 {
-	return;
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
 	connection = cass_session_new();
@@ -41,7 +40,7 @@ void DatabaseConnection::connect(string ip, int port)
 		return;
   	}
 	// Set initial number of jobs in the queue.
-	numberOfJobs = getNumberOfJobs();
+	//numberOfJobs = getNumberOfJobs();
 	::crawlId = 0;
 
 	setPreparedStatements();
