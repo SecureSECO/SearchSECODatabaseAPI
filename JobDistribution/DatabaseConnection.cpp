@@ -39,10 +39,10 @@ void DatabaseConnection::connect(string ip, int port)
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
   	}
 	// Set initial number of jobs in the queue.
-	//numberOfJobs = getNumberOfJobs();
+	numberOfJobs = getNumberOfJobs();
 	::crawlId = 0;
 
-	//setPreparedStatements();
+	setPreparedStatements();
 }
 
 void DatabaseConnection::setPreparedStatements()
@@ -55,7 +55,7 @@ void DatabaseConnection::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (url, jobid, task, priority) VALUES (?, uuid(), \"spider\", ?)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (url, jobid, priority) VALUES (?, uuid(), ?)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
@@ -101,6 +101,7 @@ string DatabaseConnection::getTopJob()
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
+		//Delete the job that is returned.
 		deleteTopJob(id);
                 return url;
 	}

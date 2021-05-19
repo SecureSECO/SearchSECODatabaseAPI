@@ -220,3 +220,19 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	const std::string output7 = handler.handleRequest("chup", input7, nullptr);
 	ASSERT_EQ(output7, expectedOutput7);
 }
+
+TEST(DatabaseIntegrationTest, GetJobRequest)
+{
+	// Set up:
+        DatabaseHandler database;
+        DatabaseConnection jddatabase;
+        RequestHandler handler;
+        handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
+
+	std::string input8 = "Give job";
+	std::string expectedOutput8 = "Crawl?0";
+
+	//Test:
+	std::string output8 = handler.handleRequest("gtjb", input8, nullptr);
+	ASSERT_EQ(output8, expectedOutput8);
+}

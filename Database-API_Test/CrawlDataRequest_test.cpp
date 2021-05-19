@@ -10,6 +10,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
+//Check if data is correctly handled when the crawlId is valid.
 TEST(CrawlDataRequest, SingleJob)
 {
 	RequestHandler handler;
@@ -29,6 +30,7 @@ TEST(CrawlDataRequest, SingleJob)
 	ASSERT_EQ(result, "Your job(s) has been succesfully added to the queue.");
 }
 
+//Check if an invalid crawlId is handled correctly.
 TEST(CrawlDataRequest, InvalidId)
 {
 	RequestHandler handler;

@@ -10,6 +10,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
+//Test if a job is succesfully returned.
 TEST(GetJobRequest, BasicTest)
 {
 	RequestHandler handler;

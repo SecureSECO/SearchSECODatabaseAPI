@@ -10,6 +10,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
+// Test for a single correct job.
 TEST(UploadJobRequest, SingleJob)
 {
 	RequestHandler handler;
@@ -29,6 +30,7 @@ TEST(UploadJobRequest, SingleJob)
 	ASSERT_EQ(result, "Your job(s) has been succesfully added to the queue.");
 }
 
+// Test for multiple correct jobs.
 TEST(UploadJobRequest, MultipleJobs)
 {
         RequestHandler handler;
@@ -48,6 +50,7 @@ TEST(UploadJobRequest, MultipleJobs)
         ASSERT_EQ(result, "Your job(s) has been succesfully added to the queue.");
 }
 
+// Test for one job, but with an invalid priority.
 TEST(UploadJobRequest, OneJobInvalidPriority)
 {
         RequestHandler handler;
@@ -66,6 +69,7 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
         ASSERT_EQ(result, "A job has an invalid priority, no jobs have been added to the queue.");
 }
 
+//Test for multiple jobs, where one job has an invalid priority.
 TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 {
         RequestHandler handler;

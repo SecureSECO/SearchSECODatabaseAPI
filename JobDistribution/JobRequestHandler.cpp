@@ -31,10 +31,11 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) //Data format is url1?priority1?url2?priority2?...
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) // Data format is url1?priority1?url2?priority2?...
 {
 	if (raft->isLeader())
 	{
+		// Split data on '?'.
 		std::vector<std::string> datasplits = Utility::splitStringOn(data,'?');
 		std::vector<std::string> urls;
 		std::vector<int> priorities;
@@ -43,6 +44,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 			std::string url = datasplits[2 * i];
 			urls.push_back(url);
 			int priority = Utility::safeStoi(datasplits[2 * i + 1]);
+			// Check if priority could be parsed correctly.
 			if (errno == 0)
 			{
 				priorities.push_back(priority);
@@ -52,6 +54,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 				return "A job has an invalid priority, no jobs have been added to the queue.";
 			}
 		}
+		// Call to the database to upload jobs.
 		for (int i = 0; i < urls.size(); i++)
 		{
 			database->uploadJob(urls[i], priorities[i]);
@@ -68,7 +71,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data) //Data format is id?url1?priority1?url2?priority2?...
+std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data) // Data format is id?url1?priority1?url2?priority2?...
 {
 	if (raft->isLeader())
         {
@@ -81,6 +84,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 		{
 			return "Error: invalid crawlId.";
 		}
+		// Get data after crawlId and pass it on to handleUploadRequest.
 		std::string jobdata = data.substr(data.find('?') + 1, data.length());
 		return handleUploadJobRequest(request, jobdata);
 	}

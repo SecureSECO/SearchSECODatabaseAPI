@@ -29,7 +29,7 @@ add_executable(
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
-#  IntegrationTests.cpp
+  IntegrationTests.cpp
   Utility_test.cpp
   UploadJobRequest_test.cpp
   JobRequestHandler_test.cpp

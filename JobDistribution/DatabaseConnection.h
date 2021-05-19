@@ -29,8 +29,14 @@ public:
 	/// </summary>
 	virtual std::string getJob();
 
+	/// <summary>
+        /// Uploads a job to the database given the url to a repository and a priority.
+        /// </summary>
 	virtual void uploadJob(std::string url, int priority);
 
+	/// <summary>
+        /// Updates the id from where should be crawled the next time.
+        /// </summary>
 	virtual void updateCrawlId(int id);
 private:
 	/// <summary>
@@ -62,6 +68,5 @@ private:
 	const CassPrepared *preparedDeleteTopJob;
 	const CassPrepared *preparedAmountOfJobs;
 	const CassPrepared *preparedUploadJob;
-
 };
 
