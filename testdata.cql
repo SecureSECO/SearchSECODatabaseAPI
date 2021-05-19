@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS projectData.id_by_author
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
     url text,
-    jobid uuid,
+    jobid UUID,
     priority int,
     PRIMARY KEY (jobid, priority) 
 ) 
