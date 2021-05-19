@@ -2,7 +2,7 @@ FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
 	apt-get -y dist-upgrade && \
-	apt-get -y install gcc g++ cmake autoconf dpkg wget git && \
+	apt-get -y install gcc g++ cmake autoconf dpkg wget git lcov && \
 	apt-get -y install libboost-all-dev && \
 	wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
 	dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
@@ -17,9 +17,6 @@ RUN apt-get -y update && \
 COPY . .
 RUN mkdir build && \
 	cd build && \
-	cmake .. && \
+	cmake -DCMAKE_BUILD_TYPE=Debug .. && \
 	cmake --build .
-#RUN ["chmod", "+x", "./TestingEntrypoint.sh"]
-#ENTRYPOINT ["ls"]
-#./TestingEntrypoint.sh"]
-ENTRYPOINT ["/bin/sh", "-c" , "apache-cassandra-3.11.10/bin/cassandra -R && sleep 30 && apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql && ./build/Database-API_Test/tests"]
+ENTRYPOINT ["/bin/sh", "-c" , "apache-cassandra-3.11.10/bin/cassandra -R && sleep 15 && apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql && cd build && make coverage"]
