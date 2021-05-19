@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseConnection.h"
+#include <iostream>
 
 using namespace std;
 
@@ -50,19 +51,19 @@ void DatabaseConnection::setPreparedStatements()
 	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue LIMIT 1");
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
-
+	cout << "GetTopJob\n";
 	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
-
+	cout << "delete\n";
 	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url) VALUES (uuid(), ?, ?)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
-
+	cout << "insert\n";
 	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue");
         rc = cass_future_error_code(prepareFuture);
         preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
-
+	cout << "count\n";
 	cass_future_free(prepareFuture);
 }
 
