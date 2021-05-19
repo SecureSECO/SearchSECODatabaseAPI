@@ -52,11 +52,11 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 	cout << "GetTopJob\n";
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 	cout << "delete\n";
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url) VALUES (uuid(), ?, ?)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 	cout << "insert\n";
