@@ -227,7 +227,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	ASSERT_EQ(output7, expectedOutput7);
 }
 
-TEST(DatabaseIntegrationTest, GetJobRequest)
+TEST(JobDatabaseIntegrationTest, GetJobRequest)
 {
 	// Set up:
         DatabaseHandler database;
@@ -236,10 +236,59 @@ TEST(DatabaseIntegrationTest, GetJobRequest)
 	RAFTConsensus raftConsensus;
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-	std::string input8 = "Give job";
-	std::string expectedOutput8 = "Crawl?0";
+	std::string input = "Give job";
+	std::string expectedOutput = "Crawl?0";
 
 	//Test:
-	std::string output8 = handler.handleRequest("gtjb", input8, nullptr);
-	ASSERT_EQ(output8, expectedOutput8);
+	std::string output = handler.handleRequest("gtjb", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+TEST(JobDatabaseIntegrationTest, UploadJobRequest)
+{
+	// Set up:
+        DatabaseHandler database;
+        DatabaseConnection jddatabase;
+        RequestHandler handler;
+        RAFTConsensus raftConsensus;
+        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input = "https://github.com/mcostalba/Stockfish?10";
+	int size = jddatabase.getNumberOfJobs();
+
+	std::string output = handler.handleRequest("upjb", input, nullptr);
+	ASSERT_EQ(size, 4);
+}
+
+TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
+{
+        // Set up:
+        DatabaseHandler database;
+        DatabaseConnection jddatabase;
+        RequestHandler handler;
+        RAFTConsensus raftConsensus;
+        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input = "https://github.com/HackerPoet/Chaos-Equations?42?https://github.com/Yiziwinnie/Home-Depot-Product-Search-Relevance?69";
+	int size = jddatabase.getNumberOfJobs();
+
+	std::string output = handler.handleRequest("upjb", input, nullptr);
+	ASSERT_EQ(size, 5);
+}
+
+TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
+{
+	// Set up:
+        DatabaseHandler database;
+        DatabaseConnection jddatabase;
+        RequestHandler handler;
+        RAFTConsensus raftConsensus;
+        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input = "100?https://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
+	int size = jddatabase.getNumberOfJobs();
+
+	std::string output = handler.handleRequest("upcd", input, nullptr);
+	ASSERT_EQ(size, 4);
+	ASSERT_EQ(jddatabase.crawlId, 100);
 }
