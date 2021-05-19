@@ -24,6 +24,7 @@ google-tests:
     - apache-cassandra-3.11.10/bin/cassandra -R
     - sleep 20
     - apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql
+    - sudo rm -rf database_build
     - mkdir database_build
     - cd database_build
     - cmake ..
