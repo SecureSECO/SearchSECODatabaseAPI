@@ -16,20 +16,23 @@ Utrecht University within the Software Project course.
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
+	std::cout << "Beginning of test\n";
 	// Set up:
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
+	std::cout << "Middle of setup\n";
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
-
+	std::cout << "End of setup\n";
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
-
+	std::cout << "Begin testing\n";
 	// Test:
 	const std::string output1 = handler.handleRequest("chck", input1, nullptr);
 	ASSERT_EQ(output1, expectedOutput1);
+	std::cout << "End of test\n";
 }
 
 // Tests check request functionality with unknown hash as input.
