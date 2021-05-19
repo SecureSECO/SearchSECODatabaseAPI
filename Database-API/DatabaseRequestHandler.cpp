@@ -358,6 +358,7 @@ string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char d
 
 string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
 {
+	errno = 0;
 	vector<string> authorStrings = Utility::splitStringOn(request, '\n');
 
 	vector<Author> authors;
@@ -365,6 +366,10 @@ string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
 	for (int i = 0; i < authorStrings.size(); i++)
 	{
 		authors.push_back(datanEntryToAuthor(authorStrings[i]));
+		if (errno != 0)
+		{
+			return "Error parsing author: " + authorStrings[i];
+		}
 	}
 
 	// Request the specified hashes.
@@ -417,6 +422,13 @@ Author DatabaseRequestHandler::datanEntryToAuthor(string dataEntry)
 	vector<string> authorData = Utility::splitStringOn(dataEntry, '?');
 
 	Author author;
+
+	if (authorData.size() != 2)
+	{
+		errno = EILSEQ;
+		return author;
+	}
+	
 	author.name = authorData[0];
 	author.mail = authorData[1];
 
@@ -482,6 +494,16 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(que
 string DatabaseRequestHandler::handleGetAuthorRequest(string request)
 {
 	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		if (!regex_match(authorIds[i], re))
+		{
+			return "Error parsing author id: " + authorIds[i];
+		}
+	}
 
 	// Request the specified hashes.
 	vector<tuple<Author, string>> authors = getAuthors(authorIds);
@@ -553,6 +575,16 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(que
 string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
 {
 	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		if (!regex_match(authorIds[i], re))
+		{
+			return "Error parsing author id: " + authorIds[i];
+		}
+	}
 
 	// Request the specified hashes.
 	vector<tuple<MethodId,string>> methods = getMethodsByAuthor(authorIds);

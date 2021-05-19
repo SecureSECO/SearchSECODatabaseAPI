@@ -102,6 +102,20 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 	ASSERT_EQ(result, output);
 }
 
+// Tests wether an error message is returned when only one argument is given.
+TEST(GetAuthorIdRequest, IncorrectInput)
+{
+	MockDatabase database;
+	RequestHandler handler;
+	handler.initialize(&database);
+
+	std::string request = "Author\n";
+	std::string output = "Error parsing author: Author";
+
+	std::string result = handler.handleRequest("auid", request);
+	ASSERT_EQ(result, output);
+}
+
 // Tests if program correctly retreieves an author with one request and one (hard-coded) match.
 TEST(GetAuthorRequest, OneRequestOneMatch)
 {
@@ -178,6 +192,20 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
+	std::string result = handler.handleRequest("idau", request);
+	ASSERT_EQ(result, output);
+}
+
+// Tests if program returns an error message when an incorrect id is given.
+TEST(GetAuthorRequest, IncorrectInput)
+{
+	MockDatabase database;
+	RequestHandler handler;
+	handler.initialize(&database);
+
+	std::string request = "47919e8f710348a395143f2d9d49ac61\n";
+	std::string output = "Error parsing author id: 47919e8f710348a395143f2d9d49ac61";
+
 	std::string result = handler.handleRequest("idau", request);
 	ASSERT_EQ(result, output);
 }
@@ -350,4 +378,17 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
+}
+
+// Tests if program returns an error message when an incorrect id is given.
+TEST(GetMethodByAuthorTests, IncorrectInput)
+{
+	MockDatabase database;
+	RequestHandler handler;
+	handler.initialize(&database);
+
+	std::string output = "Error parsing author id: 41ab73738f244a0383dc621036d99f34";
+
+	std::string result = handler.handleRequest("aume", "41ab73738f244a0383dc621036d99f34\n");
+	EXPECT_EQ(result, output);
 }
