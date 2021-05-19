@@ -2,7 +2,7 @@ CREATE KEYSPACE IF NOT EXISTS projectData
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
 
 CREATE KEYSPACE IF NOT EXISTS jobs
-    WITH replication = {'class': 'NetworkTopologyStrategy'};
+    WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
     
 CREATE TABLE IF NOT EXISTS projectData.methods
 (
