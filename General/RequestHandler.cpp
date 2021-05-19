@@ -12,11 +12,11 @@ using namespace std;
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
-	cout << "Begin initialize";
+	cout << "Begin initialize\n";
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	cout << "Database initialized";
+	cout << "Database initialized\n";
 	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
-	cout << "Job initialize done";
+	cout << "Job initialize done\n";
 }
 
 string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
