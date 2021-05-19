@@ -30,7 +30,7 @@ google-tests:
 #    - wget https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz
 #    - tar xzvf apache-cassandra-3.11.10-bin.tar.gz
   script:
-    - ls
+    - ls ..
     - rm -rf apache-cassandra-3.11.10/data
     - apache-cassandra-3.11.10/bin/cassandra -R
     - sleep 20
