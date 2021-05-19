@@ -46,9 +46,9 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 							 .fileLocation = "MyProject/Method1.cpp", .lineNumber = 1,
 							 .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
 	Author author = { .name = "Owner", .mail = "owner@mail.com" };
-	Project project = { .projectID = 0, .version = 0, .license = "MyLicense",
+	ProjectIn project = { .projectID = 0, .version = 0, .license = "MyLicense",
 						.name = "MyProject", .url = "MyUrl", .owner = author,
-						.stars = 0, .hashes = { } };
+						.hashes = { } };
 	MethodIn method1in = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
 						   .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp",
 						   .lineNumber = 1, .authors = { author } };

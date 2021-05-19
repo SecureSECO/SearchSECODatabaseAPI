@@ -29,13 +29,20 @@ public:
 	/// <summary>
 	/// Add a project to database. Takes a project as input and adds it to the database.
 	/// </summary>
-	virtual void addProject(Project project);
+	virtual void addProject(ProjectIn project);
+
+	/// <summary>
+	/// Searches for project in the database and returns them to the user. Takes primary key of project as input
+	/// consisting of projectID and version. Returns the project corresponding to the input, if it exists.
+	/// If no entry can be found, simply returns an empty vector.
+	/// </summary>
+	virtual std::vector<ProjectOut> searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
 	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
 	/// the database with information of the project.
 	/// </summary>
-	virtual void addMethod(MethodIn method, Project project);
+	virtual void addMethod(MethodIn method, ProjectIn project);
 
 	/// <summary>
 	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
@@ -80,7 +87,12 @@ private:
 	/// <summary>
 	/// Add a method to the method_by_author table.
 	/// </summary>
-	void addMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
+	void addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project);
+
+	/// <summary>
+	/// Parses a row into a project. Takes a row as input and outputs a project.
+	/// </summary>
+	ProjectOut getProject(const CassRow *row);
 
 	/// <summary>
 	/// Parses a row into a method. Takes a row as input and outputs a method.
@@ -130,6 +142,11 @@ private:
 	long long getInt64(const CassRow *row, const char *column);
 
 	/// <summary>
+	/// Retrieves a UUID from a row and converts it into a string. Takes in the row and the name of the column.
+	/// </summary>
+	std::string getUUID(const CassRow *row, const char *column);
+
+	/// <summary>
 	/// The connection with the database.
 	/// <summary>
 	CassSession *connection;
@@ -143,6 +160,7 @@ private:
 	/// The prepared statements that can be executed.
 	/// </summary>
 	const CassPrepared *selectMethod;
+	const CassPrepared *selectProject;
 	const CassPrepared *insertProject;
 	const CassPrepared *insertMethod;
 	const CassPrepared *insertMethodByAuthor;

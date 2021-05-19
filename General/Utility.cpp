@@ -21,7 +21,7 @@ int Utility::safeStoi(std::string str)
 	}
 	catch(const std::exception& e)
 	{
-                errno = EDOM;
+		errno = EDOM;
 	}
 	return res;
 }
@@ -52,6 +52,35 @@ void Utility::appendBy(std::vector<char>& result, std::string word, char endChar
 		result.push_back(word[i]);
 	}
 	result.push_back(endCharacter);
+}
+
+void Utility::appendBy(std::vector<char> &result, std::vector<std::string> words, char wordSeparator, char endCharacter)
+{
+	for (int i = 0; i < words.size(); i++)
+	{
+		appendBy(result, words[i], wordSeparator);
+	}
+
+	if (words.size() != 0)
+	{
+		result.pop_back();
+	}
+	result.push_back(endCharacter);
+}
+
+std::string Utility::makeTuple(std::vector<std::string> words)
+{
+	std::vector<char> chars = { '(' };
+	for (std::string word : words)
+	{
+		Utility::appendBy(chars, word, ',');
+	}
+	if (chars.size() > 1)
+	{
+		chars.pop_back();
+	}
+	chars.push_back(')');
+	return std::string(chars.begin(), chars.end());
 }
 
 std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)

@@ -17,6 +17,7 @@ enum eRequestType
 	eUpload,
 	eCheck,
 	eCheckUpload,
+	eExtractProjects,
 	eGetAuthorID,
 	eGetAuthor,
 	eGetMethodByAuthor,
@@ -24,7 +25,7 @@ enum eRequestType
 };
 
 
-class RequestHandler 
+class RequestHandler
 {
 public:
 
