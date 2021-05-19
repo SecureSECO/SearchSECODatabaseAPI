@@ -43,7 +43,7 @@ void DatabaseConnection::connect(string ip, int port)
 	setPreparedStatements();
 	// Set initial number of jobs in the queue.
 	numberOfJobs = getNumberOfJobs();
-	cout << numberOfJobs + "\n";
+	cout << to_string(numberOfJobs) + "\n";
 	::crawlId = 0;
 }
 
