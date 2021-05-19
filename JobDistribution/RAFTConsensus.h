@@ -17,7 +17,7 @@ Utrecht University within the Software Project course.
 class TcpConnection;
 class RequestHandler;
 
-class RAFTConsensus 
+class RAFTConsensus
 {
 public:
 	/// <summary>
@@ -30,13 +30,13 @@ public:
 	/// <summary>
 	/// Returns true if this node is the leader in the network.
 	/// </summary>
-	bool isLeader() { return leader; };
+	virtual bool isLeader() { return leader; };
 
 	/// <summary>
 	/// Will pass the given request on to the leader of the network.
 	/// </summary>
 	/// <returns>The string that the leader gives back.</returns>
-	std::string passRequestToLeader(std::string requestType, std::string request);
+	virtual std::string passRequestToLeader(std::string requestType, std::string request);
 
 	/// <summary>
 	/// Will handle a connect request by a new node that wants to join the network.
@@ -45,7 +45,7 @@ public:
 	/// </summary>
 	/// <returns>If we are the leader, we will return ok and the initial data.
 	///	If we are not the leader, we will return the leader of the network.</returns>
-	std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
+	virtual std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
 private:
 	/// <summary>
 	/// Will try to set up a connection with the leader.

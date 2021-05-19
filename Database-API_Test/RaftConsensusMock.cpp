@@ -5,19 +5,20 @@ Utrecht University within the Software Project course.
 */
 
 #include "gmock/gmock.h"
+#include "Types.h"
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 using namespace types;
 
 /// <summary>
 /// Handles interaction with database.
 /// </summary>
-class MockJDDatabase : public DatabaseConnection
+class MockRaftConsensus : public RAFTConsensus
 {
 public:
-	MOCK_METHOD(void, connect, (std::string ip, int port), ());
-	MOCK_METHOD(std::string, getJob, (), ());
-	MOCK_METHOD(void, uploadJob, (std::string url, int priority), ());
-	MOCK_METHOD(void, updateCrawlId, (int id), ());
+	MOCK_METHOD(bool, isLeader, (), ());
+	MOCK_METHOD(std::string, passRequestToLeader, (std::string requestType, std::string request), ());
+	MOCK_METHOD(std::string, connectNewNode, (boost::shared_ptr<TcpConnection> connection, std::string request), ());
 };
 

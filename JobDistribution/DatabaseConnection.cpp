@@ -72,7 +72,7 @@ string DatabaseConnection::getJob()
 	// Check if number of jobs is enough to provide the top job.
 	if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 	{
-		return getTopJob();
+		return "Spider?" +  getTopJob();
 	}
 	// If number of jobs is not high enough, the job is to crawl for more jobs.
 	else if (alreadyCrawling == false)

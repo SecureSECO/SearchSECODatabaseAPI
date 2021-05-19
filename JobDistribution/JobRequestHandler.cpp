@@ -36,11 +36,25 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	if (raft->isLeader())
 	{
 		std::vector<std::string> datasplits = Utility::splitStringOn(data,'?');
+		std::vector<std::string> urls;
+		std::vector<int> priorities;
 		for (int i = 0; i < datasplits.size() / 2; i++)
 		{
 			std::string url = datasplits[2 * i];
+			urls.push_back(url);
 			int priority = Utility::safeStoi(datasplits[2 * i + 1]);
-			database->uploadJob(url, priority);
+			if (errno == 0)
+			{
+				priorities.push_back(priority);
+			}
+			else
+			{
+				return "A job has an invalid priority, no jobs have been added to the queue.";
+			}
+		}
+		for (int i = 0; i < urls.size(); i++)
+		{
+			database->uploadJob(urls[i], priorities[i]);
 		}
 		if (errno == 0)
 		{
@@ -59,8 +73,15 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 	if (raft->isLeader())
         {
 		int crawlId = Utility::safeStoi(data.substr(0, data.find('?')));
-		database->updateCrawlId(crawlId);
-		std::string jobdata = data.substr(data.find('?'), data.length() - 1);
+		if (errno == 0)
+		{
+			database->updateCrawlId(crawlId);
+		}
+		else
+		{
+			return "Error: invalid crawlId.";
+		}
+		std::string jobdata = data.substr(data.find('?') + 1, data.length());
 		return handleUploadJobRequest(request, jobdata);
 	}
 	return raft->passRequestToLeader(request, data);
