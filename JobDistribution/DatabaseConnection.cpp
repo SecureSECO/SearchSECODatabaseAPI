@@ -39,11 +39,10 @@ void DatabaseConnection::connect(string ip, int port)
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
 		return;
   	}
-	// Set initial number of jobs in the queue.
-	//numberOfJobs = getNumberOfJobs();
-	::crawlId = 0;
-
 	setPreparedStatements();
+	// Set initial number of jobs in the queue.
+	numberOfJobs = getNumberOfJobs();
+	::crawlId = 0;
 }
 
 void DatabaseConnection::setPreparedStatements()
