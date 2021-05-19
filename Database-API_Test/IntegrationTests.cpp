@@ -254,10 +254,10 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string input = "https://github.com/mcostalba/Stockfish?10";
-	int size = jddatabase.getNumberOfJobs();
+	extern int numberOfJobs;
 
 	std::string output = handler.handleRequest("upjb", input, nullptr);
-	ASSERT_EQ(size, 4);
+	ASSERT_EQ(numberOfJobs, 4);
 }
 
 TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
@@ -270,10 +270,10 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string input = "https://github.com/HackerPoet/Chaos-Equations?42?https://github.com/Yiziwinnie/Home-Depot-Product-Search-Relevance?69";
-	int size = jddatabase.getNumberOfJobs();
+	extern int numberOfJobs;
 
 	std::string output = handler.handleRequest("upjb", input, nullptr);
-	ASSERT_EQ(size, 5);
+	ASSERT_EQ(numberOfJobs, 5);
 }
 
 TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
@@ -286,9 +286,10 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string input = "100?https://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
-	int size = jddatabase.getNumberOfJobs();
+	extern int numberOfJobs;
+	extern int crawlId;
 
 	std::string output = handler.handleRequest("upcd", input, nullptr);
-	ASSERT_EQ(size, 4);
-	ASSERT_EQ(jddatabase.crawlId, 100);
+	ASSERT_EQ(numberOfJobs, 4);
+	ASSERT_EQ(crawlId, 100);
 }
