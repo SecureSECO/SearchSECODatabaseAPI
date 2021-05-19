@@ -15,19 +15,6 @@ Utrecht University within the Software Project course.
 #include <algorithm>
 #include <iostream>
 
-TEST(DatabaseIntegrationTest, trivialTest)
-{
-	std::cout << "trivial\n";
-	DatabaseHandler database;
-        DatabaseConnection jddatabase;
-        RequestHandler handler;
-        RAFTConsensus raftConsensus;
-        std::cout << "Middle of setup\n";
-        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
-        std::cout << "End of setup\n";
-	ASSERT_EQ(true, true);
-}
-
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
@@ -246,7 +233,8 @@ TEST(DatabaseIntegrationTest, GetJobRequest)
         DatabaseHandler database;
         DatabaseConnection jddatabase;
         RequestHandler handler;
-        handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
+	RAFTConsensus raftConsensus;
+        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string input8 = "Give job";
 	std::string expectedOutput8 = "Crawl?0";
