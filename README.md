@@ -21,7 +21,7 @@ In order for you computer to not automatically join the database cluster you can
 
 ### Running tests
 
-To locally run the tests(inculding integration tests) you can first use `docker build -f TestingDockerfile -t testing .` in the main folder to build the container. After this you can use `docker run --name testContainer testing` to actually run the tests. This will also generate the code coverage. To copy the code coverage files to a local folder you can use `docker cp testContainer:/build/coverage ./coverage`. After this you can open _index.html_ in the coverage folder to see the code coverage.
+To locally run the tests(including integration tests) you can first use `docker build -f TestingDockerfile -t testing .` in the main folder to build the container. After this you can use `docker run --name testContainer testing` to actually run the tests. This will also generate the code coverage. To copy the code coverage files to a local folder you can use `docker cp testContainer:/build/coverage ./coverage`. After this you can open _index.html_ in the coverage folder to see the code coverage.
 
 # Running seperately
 
