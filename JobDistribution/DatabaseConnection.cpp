@@ -49,7 +49,7 @@ void DatabaseConnection::connect(string ip, int port)
 
 void DatabaseConnection::setPreparedStatements()
 {
-	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue LIMIT 1");
+	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue WHERE constant = 1 LIMIT 1");
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -61,7 +61,7 @@ void DatabaseConnection::setPreparedStatements()
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue");
+	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
         rc = cass_future_error_code(prepareFuture);
         preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
