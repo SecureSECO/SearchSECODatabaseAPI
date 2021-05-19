@@ -5,14 +5,18 @@ Utrecht University within the Software Project course.
 */
 
 #include "RequestHandler.h"
+#include <iostream>
 
 using namespace std;
 
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
+	cout << "Begin initialize";
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
+	cout << "Database initialized";
 	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
+	cout << "Job initialize done";
 }
 
 string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)

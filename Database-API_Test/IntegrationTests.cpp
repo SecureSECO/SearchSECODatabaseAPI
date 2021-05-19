@@ -23,7 +23,7 @@ TEST(DatabaseIntegrationTest, trivialTest)
         RequestHandler handler;
         RAFTConsensus raftConsensus;
         std::cout << "Middle of setup\n";
-        //handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+        handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
         std::cout << "End of setup\n";
 	ASSERT_EQ(true, true);
 }
