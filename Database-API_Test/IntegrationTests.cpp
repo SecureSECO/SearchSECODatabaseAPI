@@ -273,7 +273,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 
 	std::string output = handler.handleRequest("upjb", input, nullptr);
 	extern int numberOfJobs;
-	ASSERT_EQ(numberOfJobs, 5);
+	ASSERT_EQ(numberOfJobs, 6);
 }
 
 TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
@@ -290,6 +290,6 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	std::string output = handler.handleRequest("upcd", input, nullptr);
 	extern int numberOfJobs;
         extern int crawlId;
-	ASSERT_EQ(numberOfJobs, 4);
+	ASSERT_EQ(numberOfJobs, 7);
 	ASSERT_EQ(crawlId, 100);
 }
