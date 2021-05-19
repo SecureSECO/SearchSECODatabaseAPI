@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
     url text,
     jobid uuid,
     priority int,
-    PRIMARY KEY (uuid, priority) 
+    PRIMARY KEY (jobid, priority) 
 ) 
 WITH CLUSTERING ORDER BY (priority DESC);
 
