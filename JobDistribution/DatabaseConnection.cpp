@@ -55,7 +55,7 @@ void DatabaseConnection::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (url, jobid, priority) VALUES (?, uuid(), ?)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url) VALUES (uuid(), ?, ?)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
@@ -172,9 +172,9 @@ void DatabaseConnection::uploadJob(string url, int priority)
 {
 	CassStatement* query = cass_prepared_bind(preparedUploadJob);
 
-        cass_statement_bind_string(query, 0, url.c_str());
+        cass_statement_bind_int64(query, 0, priority);
 
-	cass_statement_bind_int64(query, 1, priority);
+	cass_statement_bind_string(query, 1, url.c_str());
 
         CassFuture* queryFuture = cass_session_execute(connection, query);
 

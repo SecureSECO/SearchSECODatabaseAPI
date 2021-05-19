@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS projectData.id_by_author
 
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
-    url text,
     jobid UUID,
     priority int,
+    url text,
     PRIMARY KEY (jobid, priority) 
 ) 
 WITH CLUSTERING ORDER BY (priority DESC);
