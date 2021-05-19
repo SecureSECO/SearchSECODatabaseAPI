@@ -7,7 +7,7 @@ image-build:
     changes:
       - PipelineDockerfile
   script:
-    - docker build -f PipelineDockerfile -t database-api-ci-image
+    - docker build -f PipelineDockerfile -t database-api-ci-image .
 
 google-tests:
   stage: test
