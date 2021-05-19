@@ -153,8 +153,8 @@ int DatabaseConnection::getNumberOfJobs()
 		const CassRow* row = cass_result_first_row(result);
 		cout << to_string(cass_result_column_count(result)) + " " + to_string(cass_result_row_count(result)) + "\n";
 		cout << to_string(cass_result_column_type(result, 0)) + "\n";
-		cass_int32_t count;
-		cass_value_get_int32(cass_row_get_column(row, 0), &count);
+		cass_int64_t count;
+		cass_value_get_int64(cass_row_get_column(row, 0), &count);
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
 		return count;
