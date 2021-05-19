@@ -20,7 +20,8 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, "127.0.0.1", 9042);
+	RAFTConsensus raftConsensus;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
