@@ -48,19 +48,19 @@ void DatabaseConnection::connect(string ip, int port)
 
 void DatabaseConnection::setPreparedStatements()
 {
-	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobsqueue LIMIT 1");
+	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue LIMIT 1");
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobsqueue WHERE jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs (url, jobid, priority) VALUES (?, uuid(), ?)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (url, jobid, priority) VALUES (?, uuid(), ?)");
         rc = cass_future_error_code(prepareFuture);
         preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs");
+	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue");
         rc = cass_future_error_code(prepareFuture);
         preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
