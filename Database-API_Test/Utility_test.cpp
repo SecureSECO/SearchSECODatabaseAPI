@@ -86,7 +86,7 @@ TEST(CheckSafeStoll, NonParseable)
 }
 
 // Checks if appendBy functions as desired.
-TEST(CheckAppendBy, SmallTest)
+TEST(CheckAppendBySingleWord, SmallTest)
 {
 	std::vector<char> input = {'a', 'b', 'c', 'd'};
 	std::string word 	= "nice";
@@ -100,6 +100,62 @@ TEST(CheckAppendBy, SmallTest)
 	{
 		ASSERT_EQ(output[i], expected[i]);
 	}
+}
+
+// Checks if appendBy (with vector of words) works if vector of words is empty.
+TEST(CheckAppendByMultipleWords, EmptyVector)
+{
+	std::vector<char> input = {'a', 'b', 'c', 'd'};
+	std::vector<std::string> words = {};
+	char wordSeparator = ' ';
+	char endCharacter = '\n';
+	std::vector<char> output = input;
+	const std::string expected = "abcd\n";
+
+	Utility::appendBy(output, words, wordSeparator, endCharacter);
+	ASSERT_EQ(output.size(), 5);
+	for (int i = 0; i < output.size(); i++)
+	{
+		ASSERT_EQ(output[i], expected[i]);
+	}
+}
+
+// Checks if appendBy (with vector of words) works with multiple words.
+TEST(CheckAppendByMultipleWords, SmallTest)
+{
+	std::vector<char> input = {'T', 'h', 'i', 's', ' '};
+	std::vector<std::string> words = {"is", "a", "test"};
+	char wordSeparator = ' ';
+	char endCharacter = '.';
+	std::vector<char> output = input;
+	const std::string expected = "This is a test.";
+
+	Utility::appendBy(output, words, wordSeparator, endCharacter);
+	ASSERT_EQ(output.size(), 15);
+	for (int i = 0; i < output.size(); i++)
+	{
+		ASSERT_EQ(output[i], expected[i]);
+	}
+}
+
+// Checks if makeTuple functions properly for non-empty vectors.
+TEST(CheckMakeTuple, SmallTest)
+{
+	std::vector<std::string> input = {"ab", "cd", "ef"};
+	std::string expected = "(ab,cd,ef)";
+
+	std::string output = Utility::makeTuple(input);
+	ASSERT_EQ(output, expected);
+}
+
+// Checks if makeTuple works on empty vector.
+TEST(CheckMakeTuple, EmptyVector)
+{
+	std::vector<std::string> input = {};
+	std::string expected = "()";
+
+	std::string output = Utility::makeTuple(input);
+	ASSERT_EQ(output, expected);
 }
 
 // Checks if splitStringOn works if no delimiter is present.

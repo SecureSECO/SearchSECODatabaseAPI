@@ -56,10 +56,18 @@ public:
 	std::vector<AuthorID> authorIDs;
 };
 
+struct MethodId
+{
+public:
+	Hash hash;
+	ProjectID projectId;
+	Version version;
+};
+
 /// <summary>
-/// Represents the relevant data of a project.
+/// Represents the relevant data of a project when it is put into the database.
 /// </summary>
-struct Project
+struct ProjectIn
 {
 public:
 	ProjectID projectID;
@@ -68,7 +76,21 @@ public:
 	std::string name;
 	std::string url;
 	Author owner;
-	int stars;
+	std::vector<Hash> hashes;
+};
+
+/// <summary>
+/// Represents the relevant data of a project when it is returned to user.
+/// </summary>
+struct ProjectOut
+{
+public:
+	ProjectID projectID;
+	Version version;
+	std::string license;
+	std::string name;
+	std::string url;
+	AuthorID ownerID;
 	std::vector<Hash> hashes;
 };
 }

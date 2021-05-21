@@ -11,6 +11,7 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
+#define MAX_THREADS 32
 
 using namespace types;
 
@@ -28,32 +29,97 @@ public:
 	/// <summary>
 	/// Add a project to database. Takes a project as input and adds it to the database.
 	/// </summary>
-	virtual void addProject(Project project);
+	virtual void addProject(ProjectIn project);
 
 	/// <summary>
-	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to the database with information of the project.
+	/// Searches for project in the database and returns them to the user. Takes primary key of project as input
+	/// consisting of projectID and version. Returns the project corresponding to the input, if it exists.
+	/// If no entry can be found, simply returns an empty vector.
 	/// </summary>
-	virtual void addMethod(MethodIn method, Project project);
+	virtual std::vector<ProjectOut> searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
-	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match the hash.
+	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
+	/// the database with information of the project.
+	/// </summary>
+	virtual void addMethod(MethodIn method, ProjectIn project);
+
+	/// <summary>
+	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
+	/// the hash.
 	/// </summary>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
+
+	/// <summary>
+	/// Given an author returns the id of that author.
+	/// </summary>
+	/// <param name="author">
+	/// The author to retrieve the id for.
+	/// </param>
+	/// <returns>
+	/// A string representing the author id.
+	/// </returns>
+	virtual std::string authorToId(Author author);
+
+	/// <summary>
+	/// Given an author id retrieves the corresponding author.
+	/// </summary>
+	/// <param name="id">
+	/// A string with the id to be checked.
+	/// </param>
+	/// <returns>
+	/// The author corresponding to the given id.
+	/// </returns>
+	virtual Author idToAuthor(std::string id);
+
+	/// <summary>
+	/// Given an author id retrieves the methods created by that author.
+	/// </summary>
+	/// <param name="authorId">
+	/// The id of the author to retrieve the methods for.
+	/// </param>
+	/// <returns>
+	/// A vector with the necessary information of the methods the author has worked on.
+	/// </returns>
+	virtual std::vector<MethodId> authorToMethods(std::string authorId);
+
 private:
 	/// <summary>
 	/// Add a method to the method_by_author table.
 	/// </summary>
-	void addMethodByAuthor(CassUuid authorID, MethodIn method, Project project);
+	void addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project);
+
+	/// <summary>
+	/// Parses a row into a project. Takes a row as input and outputs a project.
+	/// </summary>
+	ProjectOut getProject(const CassRow *row);
 
 	/// <summary>
 	/// Parses a row into a method. Takes a row as input and outputs a method.
 	/// </summary>
-	MethodOut getMethod(const CassRow* row);
+	MethodOut getMethod(const CassRow *row);
+
+	/// <summary>
+	/// Parses a row into a method id. Takes a row as input and outputs a method id.
+	/// </summary>
+	MethodId getMethodId(const CassRow *row);
 
 	/// <summary>
 	/// Retrieves the author ID corresponding to the given author.
+	/// Also creates a new author if the author does not yet exist.
 	/// <summary>
-	CassUuid getAuthorID(Author author);
+	CassUuid getAuthorId(Author author);
+
+	/// <summary>
+	/// Retrieves the author id corresponding to the given author.
+	/// </summary>
+	/// <param name="author">
+	/// The author to retrieve the id for.
+	/// </param>
+	/// <returns>
+	/// The id of the author.
+	/// </returns>
+	virtual CassUuid retrieveAuthorId(Author author);
 
 	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
@@ -63,20 +129,44 @@ private:
 	/// <summary>
 	/// Retrieves a string from a row. Takes in the row and the name of the column.
 	/// </summary>
-	std::string getString(const CassRow* row, const char* column);
+	std::string getString(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// Retrieves a 32 bit integer from a row. Takes in the row and the name of the column.
 	/// </summary>
-	int getInt32(const CassRow* row, const char* column);
+	int getInt32(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// Retrieves a 64 bit integer from a row. Takes in the row and the name of the column.
 	/// </summary>
-	long long getInt64(const CassRow* row, const char* column);
+	long long getInt64(const CassRow *row, const char *column);
+
+	/// <summary>
+	/// Retrieves a UUID from a row and converts it into a string. Takes in the row and the name of the column.
+	/// </summary>
+	std::string getUUID(const CassRow *row, const char *column);
 
 	/// <summary>
 	/// The connection with the database.
 	/// <summary>
-	CassSession* connection;
+	CassSession *connection;
+
+	/// <summary>
+	/// Create the prepared statements to be executed later.
+	/// </summary>
+	void setPreparedStatements();
+
+	/// <summary>
+	/// The prepared statements that can be executed.
+	/// </summary>
+	const CassPrepared *selectMethod;
+	const CassPrepared *selectProject;
+	const CassPrepared *insertProject;
+	const CassPrepared *insertMethod;
+	const CassPrepared *insertMethodByAuthor;
+	const CassPrepared *selectMethodByAuthor;
+	const CassPrepared *selectIdByAuthor;
+	const CassPrepared *insertIdByAuthor;
+	const CassPrepared *insertAuthorById;
+	const CassPrepared *selectAuthorById;
 };
