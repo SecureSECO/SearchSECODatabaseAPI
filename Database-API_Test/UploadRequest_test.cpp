@@ -15,9 +15,9 @@ Author owner = { .name = "Owner", .mail = "owner@mail.com" };
 vector<Hash> hashes = { "a6aa62503e2ca3310e3a837502b80df5",
 			"f3a258ba6cd26c1b7d553a493c614104",
 			"59bf62494932580165af0451f76be3e9" };
-Project projectT1 = { .projectID = 0, .version = 0, .license = "MyLicense",
-			  .name = "MyProject", .url = "MyUrl", .owner = owner,
-			  .stars = 0, .hashes = { } };
+ProjectIn projectT1 = { .projectID = 0, .version = 0, .license = "MyLicense",
+			.name = "MyProject", .url = "MyUrl", .owner = owner,
+			.hashes = { } };
 MethodIn methodT1_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
 			.methodName = "Method1",
 			.fileLocation = "MyProject/Method1.cpp",
@@ -35,9 +35,9 @@ MethodIn methodT1_3 = { .hash = "59bf62494932580165af0451f76be3e9",
 Author author1 = { .name = "Author 1", .mail = "author1@mail.com" };
 Author author2 = { .name = "Author 2", .mail = "author2@mail.com" };
 Author author3 = { .name = "Author 3", .mail = "author3@mail.com" };
-Project projectT2 = { .projectID = 398798723, .version = 1618222334,
+ProjectIn projectT2 = { .projectID = 398798723, .version = 1618222334,
 			  .license = "MyLicense", .name = "MyProject",
-			  .url = "MyUrl", .owner = owner, .stars = 0, .hashes = { } };
+			  .url = "MyUrl", .owner = owner, .hashes = { } };
 MethodIn methodT2_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
 			.methodName = "Method1",
 			.fileLocation = "MyProject/Method1.cpp",

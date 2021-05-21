@@ -25,10 +25,13 @@ enable_testing()
 
 add_executable(
   tests
+  Utility_test.cpp
   RequestHandler_test.cpp
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
+  ExtractProjectsRequest_test.cpp
+  AuthorRequest_test.cpp
   IntegrationTests.cpp
   Utility_test.cpp
   UploadJobRequest_test.cpp

@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include <regex>
 #include <thread>
 #include <future>
+#include <utility>
 #include <functional>
 
 #include "DatabaseRequestHandler.h"
@@ -19,7 +20,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port) 
+DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
 {
 	this->database = database;
 	database -> connect(ip, port);
@@ -70,7 +71,7 @@ bool DatabaseRequestHandler::isValidHash(Hash hash)
 string DatabaseRequestHandler::handleUploadRequest(string request)
 {
 	// Check if project is valid.
-	Project project = requestToProject(request);
+	ProjectIn project = requestToProject(request);
 	if (errno != 0)
 	{
 		// Project could not be parsed.
@@ -121,7 +122,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 }
 
-void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, Project project)
+void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, ProjectIn project)
 {
 	while (true)
 	{
@@ -138,7 +139,7 @@ void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex 
 	}
 }
 
-Project DatabaseRequestHandler::requestToProject(string request)
+ProjectIn DatabaseRequestHandler::requestToProject(string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
@@ -148,20 +149,20 @@ Project DatabaseRequestHandler::requestToProject(string request)
 	if (projectData.size() != PROJECT_DATA_SIZE)
 	{
 		errno = EILSEQ;
-		return Project();
+		return ProjectIn();
 	}
 
 	// We return the project information in the form of a Project.
-	Project project;
+	ProjectIn project;
 	project.projectID  = Utility::safeStoll(projectData[0]);	// Converts string to long long.
 	if (errno != 0)
 	{
-		return Project();
+		return ProjectIn();
 	}
 	project.version    = Utility::safeStoll(projectData[1]);
 	if (errno != 0)
 	{
-		return Project();
+		return ProjectIn();
 	}
 	project.license    = projectData[2];
 	project.name       = projectData[3];
@@ -294,6 +295,35 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
+vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<ProjectID, Version>> keyQueue)
+{
+	vector<future<vector<ProjectOut>>> results;
+	vector<thread> threads;
+	mutex queueLock;
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<ProjectOut>()> task(
+			bind(&DatabaseRequestHandler::singleSearchProjectThread, this, ref(keyQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	std::vector<ProjectOut> projects = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<ProjectOut> newProjects = results[i].get();
+
+		for (int j = 0; j < newProjects.size(); j++)
+		{
+			projects.push_back(newProjects[j]);
+		}
+	}
+	return projects;
+}
+
 vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
 {
 	vector<MethodOut> methods;
@@ -336,9 +366,140 @@ string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char d
 		vector<string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
 		dataElements.insert(end(dataElements), begin(authorIDs), end(authorIDs));
 
+		// Append 'chars' by the special dataElements separated by special characters.
+		Utility::appendBy(chars, dataElements, dataDelimiter, methodDelimiter);
+		methods.pop_back();
+	}
+	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	return result;
+}
+
+string DatabaseRequestHandler::handleExtractProjectsRequest(string request)
+{
+	errno = 0;
+	vector<string> projectsData = Utility::splitStringOn(request, '\n');
+	std::queue<std::pair<ProjectID, Version>> keyQueue;
+
+	// We fill the queue with projectKeys, which identify a project uniquely.
+	for (int i = 0; i < projectsData.size(); i++)
+	{
+		vector<string> projectData = Utility::splitStringOn(projectsData[i], '?');
+		if (projectData.size() < 2)
+		{
+			errno = EILSEQ;
+			return "The request failed. Each project should be provided a projectID and a version (in that order).";
+		}
+		ProjectID projectID = Utility::safeStoll(projectData[0]);
+		Version version = Utility::safeStoll(projectData[1]);
+		if (errno != 0)
+		{
+			return "The request failed. For each project, both the projectID "
+				   "and the version should be a long long int.";
+		}
+
+		std::pair<ProjectID, Version> key = std::make_pair(projectID, version);
+		keyQueue.push(key);
+	}
+
+	std::vector<ProjectOut> projects = getProjects(keyQueue);
+	return projectsToString(projects, '?', '\n');
+}
+
+vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(queue<std::pair<ProjectID, Version>> &keys, mutex &queueLock)
+{
+	vector<ProjectOut> projects;
+	while (true)
+	{
+		queueLock.lock();
+		if (keys.size() <= 0)
+		{
+			queueLock.unlock();
+			return projects;
+		}
+		std::pair<ProjectID, Version> key = keys.front();
+		keys.pop();
+		queueLock.unlock();
+
+		ProjectID projectID = key.first;
+		Version version = key.second;
+		vector<ProjectOut> newProject = database->searchForProject(projectID, version);
+		if (!newProject.empty())
+		{
+			projects.push_back(newProject[0]);
+		}
+	}
+}
+
+string DatabaseRequestHandler::projectsToString(vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter)
+{
+	vector<char> chars = {};
+	for (int i = 0; i < projects.size(); i++)
+	{
+		std::string projectID = to_string(projects[i].projectID);
+		std::string version = to_string(projects[i].version);
+		std::string license = projects[i].license;
+		std::string name = projects[i].name;
+		std::string url = projects[i].url;
+		std::string ownerID = projects[i].ownerID;
+		std::vector<Hash> hashes = projects[i].hashes;
+		std::string hashesTotal = to_string(hashes.size());
+
+		vector<string> dataElements = { projectID, version, license, name, url, ownerID };
+		Utility::appendBy(chars, dataElements, dataDelimiter, projectDelimiter);
+	}
+	string result(chars.begin(), chars.end());
+
+	if (result != "")
+	{
+		return result;
+	}
+	return "No results found.";
+}
+
+string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
+{
+	errno = 0;
+	vector<string> authorStrings = Utility::splitStringOn(request, '\n');
+
+	vector<Author> authors;
+
+	for (int i = 0; i < authorStrings.size(); i++)
+	{
+		authors.push_back(datanEntryToAuthor(authorStrings[i]));
+		if (errno != 0)
+		{
+			return "Error parsing author: " + authorStrings[i];
+		}
+	}
+
+	// Request the specified hashes.
+	vector<tuple<Author, string>> authorIDs = getAuthorIDs(authors);
+
+	if (authorIDs.size() <= 0)
+	{
+		return "No results found.";
+	}
+
+	return authorsToString(authorIDs);
+}
+
+string DatabaseRequestHandler::authorsToString(vector<tuple<Author, string>> authors)
+{
+	vector<char> chars = {};
+	while (!authors.empty())
+	{
+		tuple<Author, string> lastAuthorID = authors.back();
+		string name = get<0>(lastAuthorID).name;
+		string mail = get<0>(lastAuthorID).mail;
+		string id = get<1>(lastAuthorID);
+
+		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+		// authorTotal and all the authorIDs.
+		vector<string> dataElements = {name, mail, id};
+
 		for (string data : dataElements)
 		{
-			Utility::appendBy(chars, data, dataDelimiter);
+			Utility::appendBy(chars, data, '?');
 		}
 
 		// We should get rid of the last dataDelimiter if something is appended to 'chars',
@@ -349,7 +510,282 @@ string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char d
 		}
 
 		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
-		chars.push_back(methodDelimiter);
+		chars.push_back('\n');
+		authors.pop_back();
+	}
+	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	return result;
+}
+
+Author DatabaseRequestHandler::datanEntryToAuthor(string dataEntry)
+{
+	vector<string> authorData = Utility::splitStringOn(dataEntry, '?');
+
+	Author author;
+
+	if (authorData.size() != 2)
+	{
+		errno = EILSEQ;
+		return author;
+	}
+	
+	author.name = authorData[0];
+	author.mail = authorData[1];
+
+	return author;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::getAuthorIDs(vector<Author> authors)
+{
+	vector<future<vector<tuple<Author, string>>>> results;
+	vector<thread> threads;
+	queue<Author> authorQueue;
+	mutex queueLock;
+	for (int i = 0; i < authors.size(); i++)
+	{
+		authorQueue.push(authors[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<Author, string>>()> task(
+			bind(&DatabaseRequestHandler::singleAuthorToIDThread, this, ref(authorQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<Author, string>> authorIDs;
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<Author, string>> newAuthorIDs = results[i].get();
+
+		for (int j = 0; j < newAuthorIDs.size(); j++)
+		{
+			authorIDs.push_back(newAuthorIDs[j]);
+		}
+	}
+	return authorIDs;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(queue<Author> &authors, mutex &queueLock)
+{
+	vector<tuple<Author, string>> authorIDs;
+	while (true)
+	{
+		queueLock.lock();
+		if (authors.size() <= 0)
+		{
+			queueLock.unlock();
+			return authorIDs;
+		}
+		Author author = authors.front();
+		authors.pop();
+		queueLock.unlock();
+		string newAuthorID = database->authorToId(author);
+		if (newAuthorID != "")
+		{
+			authorIDs.push_back(make_tuple(author, newAuthorID));
+		}
+	}
+}
+
+string DatabaseRequestHandler::handleGetAuthorRequest(string request)
+{
+	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		if (!regex_match(authorIds[i], re))
+		{
+			return "Error parsing author id: " + authorIds[i];
+		}
+	}
+
+	// Request the specified hashes.
+	vector<tuple<Author, string>> authors = getAuthors(authorIds);
+
+	if (authors.size() <= 0)
+	{
+		return "No results found.";
+	}
+
+	return authorsToString(authors);
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::getAuthors(vector<string> authorIds)
+{
+	vector<future<vector<tuple<Author, string>>>> results;
+	vector<thread> threads;
+	queue<string> authorIdQueue;
+	mutex queueLock;
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		authorIdQueue.push(authorIds[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<Author, string>>()> task(
+			bind(&DatabaseRequestHandler::singleIdToAuthorThread, this, ref(authorIdQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<Author, string>> authors;
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<Author, string>> newAuthors = results[i].get();
+
+		for (int j = 0; j < newAuthors.size(); j++)
+		{
+			authors.push_back(newAuthors[j]);
+		}
+	}
+	return authors;
+}
+
+vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(queue<string> &authorIds, mutex &queueLock)
+{
+	vector<tuple<Author, string>> authors;
+	while (true)
+	{
+		queueLock.lock();
+		if (authorIds.size() <= 0)
+		{
+			queueLock.unlock();
+			return authors;
+		}
+		string id = authorIds.front();
+		authorIds.pop();
+		queueLock.unlock();
+		Author newAuthor = database->idToAuthor(id);
+		if (newAuthor.name != "" && newAuthor.mail != "")
+		{
+			authors.push_back(make_tuple(newAuthor, id));
+		}
+	}
+}
+
+string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
+{
+	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+
+	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		if (!regex_match(authorIds[i], re))
+		{
+			return "Error parsing author id: " + authorIds[i];
+		}
+	}
+
+	// Request the specified hashes.
+	vector<tuple<MethodId,string>> methods = getMethodsByAuthor(authorIds);
+
+	// Return retrieved data.
+	string methodsStringFormat = methodIdsToString(methods);
+	if (!(methodsStringFormat == ""))
+	{
+		return methodsStringFormat;
+	}
+	else
+	{
+		return "No results found.";
+	}
+}
+
+vector<tuple<MethodId, string>> DatabaseRequestHandler::getMethodsByAuthor(vector<string> authorIds)
+{
+	vector<future<vector<tuple<MethodId, string>>>> results;
+	vector<thread> threads;
+	queue<string> idQueue;
+	mutex queueLock;
+	for (int i = 0; i < authorIds.size(); i++)
+	{
+		idQueue.push(authorIds[i]);
+	}
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		packaged_task<vector<tuple<MethodId, string>>()> task(
+			bind(&DatabaseRequestHandler::singleAuthorToMethodsThread, this, ref(idQueue), ref(queueLock)));
+		results.push_back(task.get_future());
+		threads.push_back(thread(move(task)));
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+	vector<tuple<MethodId, string>> methods = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		vector<tuple<MethodId, string>> newMethods = results[i].get();
+
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(newMethods[j]);
+		}
+	}
+	return methods;
+}
+
+vector<tuple<MethodId, string>> DatabaseRequestHandler::singleAuthorToMethodsThread(queue<string> &authorIds, mutex &queueLock)
+{
+	vector<tuple<MethodId, string>> methods;
+	while (true)
+	{
+		queueLock.lock();
+		if (authorIds.size() <= 0)
+		{
+			queueLock.unlock();
+			return methods;
+		}
+		string authorId = authorIds.front();
+		authorIds.pop();
+		queueLock.unlock();
+		vector<MethodId> newMethods = database->authorToMethods(authorId);
+		for (int j = 0; j < newMethods.size(); j++)
+		{
+			methods.push_back(make_tuple(newMethods[j], authorId));
+		}
+	}
+}
+
+string DatabaseRequestHandler::methodIdsToString(vector<tuple<MethodId, string>> methods)
+{
+	vector<char> chars = {};
+	while (!methods.empty())
+	{
+		tuple<MethodId, string> lastMethod = methods.back();
+		string hash = get<0>(lastMethod).hash;
+		string projectID = to_string(get<0>(lastMethod).projectId);
+		string version = to_string(get<0>(lastMethod).version);
+		string authorId = get<1>(lastMethod);
+
+		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+		// authorTotal and all the authorIDs.
+		vector<string> dataElements = {authorId, hash, projectID, version};
+
+		for (string data : dataElements)
+		{
+			Utility::appendBy(chars, data, '?');
+		}
+
+		// We should get rid of the last dataDelimiter if something is appended to 'chars',
+		// which is precisely the case when it is non-empty.
+		if (!chars.empty())
+		{
+			chars.pop_back();
+		}
+
+		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
+		chars.push_back('\n');
 		methods.pop_back();
 	}
 	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.

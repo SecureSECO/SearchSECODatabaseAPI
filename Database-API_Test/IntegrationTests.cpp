@@ -290,3 +290,297 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	ASSERT_EQ(numberOfJobs, 7);
 	ASSERT_EQ(crawlId, 100);
 }
+
+// Tests id by author request functionality with multiple known authors as input.
+TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+	DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
+	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
+						  "41ab7373-8f24-4a03-83dc-621036d99f34\n";
+	std::string expectedOutput2 = "Author2?author2@mail.com?41ab7373-8f24-4a03-83dc-621036d99f34\nAuthor1?author1@mail.com?"
+						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+
+	// Test:
+	const std::string output = handler.handleRequest("auid", request, nullptr);
+	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
+}
+
+// Tests id by author request functionality with an unknown author as input.
+TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "UnknownAuthor?unknownauthor@mail.com\n";
+	std::string expectedOutput = "No results found.";
+
+	// Test:
+	const std::string output = handler.handleRequest("auid", request, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests id by author request functionality with a known and unknown author as input.
+TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "Author1?author1@mail.com\nUnknownAuthor?unknownauthor2@mail.com\n";
+	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+
+	// Test:
+	const std::string output = handler.handleRequest("auid", request, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests author by id request functionality with multiple known authors as input.
+TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
+	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
+						  "41ab7373-8f24-4a03-83dc-621036d99f34\n";
+	std::string expectedOutput2 = "Author2?author2@mail.com?41ab7373-8f24-4a03-83dc-621036d99f34\nAuthor1?author1@mail.com?"
+						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+
+	// Test:
+	const std::string output = handler.handleRequest("idau", request, nullptr);
+	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
+}
+
+// Tests author by id request functionality with an unknown author as input.
+TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
+	std::string expectedOutput = "No results found.";
+
+	// Test:
+	const std::string output = handler.handleRequest("idau", request, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests author by id request functionality with a known and unknown author as input.
+TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
+	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+
+	// Test:
+	const std::string output = handler.handleRequest("idau", request, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests method by author request functionality with a single known author id as input.
+TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n";
+	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
+
+	// Test:
+	const std::string output = handler.handleRequest("aume", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests method by author request functionality with unknown author id as input.
+TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	const std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
+	const std::string expectedOutput = "No results found.";
+
+	// Test:
+	const std::string output = handler.handleRequest("aume", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+}
+
+// Tests method by author request functionality with multiple author ids as input.
+TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	const std::string input = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
+	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
+	std::string output2 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
+	std::string output3 = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
+
+	// Test:
+	std::string result = handler.handleRequest("aume", input, nullptr);
+
+	EXPECT_EQ(result.size(), output1.size() + output2.size() + output3.size());
+	EXPECT_TRUE(result.find(output1) != std::string::npos);
+	EXPECT_TRUE(result.find(output2) != std::string::npos);
+	EXPECT_TRUE(result.find(output3) != std::string::npos);
+}
+
+// Tests method by author request functionality with a known and unknow author id as input.
+TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
+	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
+
+	// Test:
+	std::string output = handler.handleRequest("aume", input, nullptr);
+
+	ASSERT_EQ(output, expectedOutput);
+}
+
+
+// Tests extract projects request functionaility with one existing project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input9 = "1?5000000000000";
+	std::string expected9 = "1?5000000000000?L1?P1?www.github.com/p1?"
+							"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+
+	// Test:
+	std::string output9 = handler.handleRequest("extp", input9, nullptr);
+	ASSERT_EQ(output9, expected9);
+}
+
+// Tests extract projects request with a non-existent project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input10 = "1?5000000001000";
+	std::string expected10 = "No results found.";
+
+	// Test:
+	std::string output10 = handler.handleRequest("extp", input10, nullptr);
+	ASSERT_EQ(output10, expected10);
+}
+
+// Tests extract projects request with multiple versions of the same project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input11 = "101?5000000008000\n101?5000000009000";
+	std::string expectedOutput11_1 =
+		"101?5000000008000?L5?P101?www.github.com/p101?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::string expectedOutput11_2 =
+		"101?5000000009000?L5?P101?www.github.com/p101?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::vector<std::string> expectedOutputs11 = {expectedOutput11_1, expectedOutput11_2};
+
+	// Test:
+	std::string output11 = handler.handleRequest("extp", input11, nullptr);
+	std::vector<std::string> entries11 = Utility::splitStringOn(output11, '\n');
+
+	ASSERT_EQ(entries11.size(), 2);
+
+	for (int i = 0; i < entries11.size(); i++)
+	{
+		std::vector<std::string>::iterator index11 =
+			std::find(expectedOutputs11.begin(), expectedOutputs11.end(), entries11[i]);
+		ASSERT_NE(index11, expectedOutputs11.end());
+	}
+}
+
+// Tests extract projects request with different projects.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	RAFTConsensus raftConsensus;
+        DatabaseConnection jddatabase;
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+
+	std::string input12 = "2?5000000001000\n2?5000000002000\n3?5000000002000\n4?5000000005000";
+	std::string expectedOutput12_1 = "2?5000000001000?L2?P2?www.github.com/p2?68bd2db6-fe91-47d2-a134-cf82b104f547";
+	std::string expectedOutput12_2 = "3?5000000002000?L3?P3?www.github.com/p3?b2217c08-06eb-4a57-b977-7c6d72299301";
+	std::string expectedOutput12_3 = "4?5000000005000?L4?P4?www.github.com/p4?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::vector<std::string> expectedOutputs12 = {expectedOutput12_1, expectedOutput12_2, expectedOutput12_3};
+
+	// Test:
+	std::string output12 = handler.handleRequest("extp", input12, nullptr);
+	std::vector<std::string> entries12 = Utility::splitStringOn(output12, '\n');
+
+	// Check if the number of found projects is equal to 3.
+	ASSERT_EQ(entries12.size(), 3);
+
+	// Ensure that the entries found correspond to these in the expectedOutput.
+	for (int i = 0; i < entries12.size(); i++)
+	{
+		std::vector<std::string>::iterator index12 =
+			std::find(expectedOutputs12.begin(), expectedOutputs12.end(), entries12[i]);
+		ASSERT_NE(index12, expectedOutputs12.end());
+	}
+}
