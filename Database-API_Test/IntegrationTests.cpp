@@ -21,6 +21,7 @@ RequestHandler setUp()
 	DatabaseHandler database;
 	RequestHandler handler;
 	handler.initialize(&database, TESTIP, TESTPORT);
+	return handler;
 }
 
 // Tests check request functionality with a single known hash as input.
