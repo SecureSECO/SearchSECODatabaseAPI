@@ -102,7 +102,7 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 	ASSERT_EQ(result, output);
 }
 
-// Tests wether an error message is returned when only one argument is given.
+// Tests whether an error message is returned when only one argument is given.
 TEST(GetAuthorIdRequest, IncorrectInput)
 {
 	MockDatabase database;
