@@ -35,12 +35,12 @@ public:
 
 	std::string receiveData();
 private:
-	static boost::asio::io_context ioContext;
+	boost::asio::io_context ioContext;
 	/// <summary>
 	/// Basic constructor which initializes the socket with the given context.
 	/// </summary>
-	NetworkHandler(boost::asio::io_context& io_context)
-		: socket(io_context)
+	NetworkHandler()
+		: socket(ioContext)
 	{
 	};
 

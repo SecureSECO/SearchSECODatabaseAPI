@@ -13,7 +13,6 @@ Utrecht University within the Software Project course.
 
 
 // https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/tutorial.html was used as a base.
-boost::asio::io_context NetworkHandler::ioContext;
 
 void NetworkHandler::openConnection(std::string server, std::string port)
 {
@@ -27,7 +26,7 @@ void NetworkHandler::openConnection(std::string server, std::string port)
 
 NetworkHandler* NetworkHandler::createHandler()
 {
-	return new NetworkHandler(ioContext);
+	return new NetworkHandler();
 }
 
 void NetworkHandler::sendData(const char* data, int dataLength)
