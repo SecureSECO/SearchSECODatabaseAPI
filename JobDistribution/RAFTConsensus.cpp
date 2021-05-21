@@ -15,10 +15,6 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <algorithm>
 
-#define RESPONSE_OK "ok"
-#define HEARTBEAT_TIME 1000000
-#define LEADER_DROPOUT_WAIT_TIME 1000000
-
 void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader) 
 {
 	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
@@ -90,7 +86,6 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	networkhandler = NetworkHandler::createHandler();
 	// If the IP + port are not open, this will throw an exception sending us to the catch.
 	networkhandler->openConnection(ip, port);
-	// Send a connect request. TODO: formaly document what request we use for this.
 	networkhandler->sendData(
 		"conn" + std::to_string(1 + std::to_string(PORT).length()) + "\n" + std::to_string(PORT) + "\n");
 	response = networkhandler->receiveData();
@@ -165,7 +160,6 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 		nodeConnectionChange += "A?" + connectionToString(connection, request);
 
 		mtx.unlock();
-		// TODO: look into what initial data we need to send.
 		new std::thread(&RAFTConsensus::listenForRequests, this, connection);
 
 		std::string connectingIp = "?" + connectionToString(connection, request);
@@ -177,7 +171,6 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 
 void RAFTConsensus::handleHeartbeat(std::string heartbeat) 
 {
-	std::cout << "Heartbeat received: "  << heartbeat << "\n";
 	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, '?');
 	for (int i = 0; i < hbSplitted.size(); i += 3) 
 	{
@@ -272,7 +265,6 @@ void RAFTConsensus::dropConnection(int i)
 std::string RAFTConsensus::getHeartbeat()
 {
 	std::string hb = nodeConnectionChange + "\n";
-	std::cout << "Sending heartbeat: " + hb;
 	nodeConnectionChange = "";
 	return hb;
 }
