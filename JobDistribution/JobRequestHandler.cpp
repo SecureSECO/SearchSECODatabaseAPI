@@ -41,7 +41,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 		std::vector<int> priorities;
 		for (int i = 0; i < datasplits.size(); i++)
 		{
-			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(data,'?');
+			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(datasplits[i],'?');
 			std::string url = dataSecondSplit[0];
 			urls.push_back(url);
 			int priority = Utility::safeStoi(dataSecondSplit[1]);
