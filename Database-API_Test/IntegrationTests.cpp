@@ -12,13 +12,16 @@ Utrecht University within the Software Project course.
 #include <vector>
 #include <algorithm>
 
+#define TESTIP "127.0.0.1"
+#define TESTPORT 9042
+
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	const std::string expectedOutput1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
@@ -35,7 +38,7 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	const std::string expectedOutput2 = "No results found.";
@@ -51,7 +54,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input3 = "8811e6bedb87e90cef39de1179f3bd2e\n137fed017b6159acc0af30d2c6b403a5";
 	const std::string expectedOutput3_1 = "137fed017b6159acc0af30d2c6b403a5?3?5000000002000?M3?P3/M3.cpp?1?1?"
@@ -84,7 +87,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input4 =
 		"137fed017b6159acc0af30d2c6b403a5\n7d5aad6f6fcc727d51b4859c17cbdb90\n23920776594c85fdc30cd96f928487f1";
@@ -127,7 +130,7 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input5_1 = "6?5000000010000?L5?P6?www.github.com/p6?Author 8?author8@mail.com\n"
 								 "a6aa62503e2ca3310e3a837502b80df5?M11?P6/M11.cpp?1?1?Author 8?author8@mail.com";
@@ -150,7 +153,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input6_1 = "7?5000000011000?L6?P7?www.github.com/p7?Author 9?author9@mail.com\n"
 								 "88e1ad43ee7b716b7d19e5e65ee40da8?M12?P7/M12.cpp?1?2?"
@@ -200,7 +203,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input7 = "8?5000000012000?L7?P8?www.github.com/p8?Author 10?author10@mail.com\n"
 							   "2c7f46d4f57cf9e66b03213358c7ddb5?M14?P8/M14.cpp?1?1?Author 10?author10@mail.com\n"
@@ -219,7 +222,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
 	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
@@ -238,7 +241,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "UnknownAuthor?unknownauthor@mail.com\n";
 	std::string expectedOutput = "No results found.";
@@ -254,7 +257,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "Author1?author1@mail.com\nUnknownAuthor?unknownauthor2@mail.com\n";
 	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
@@ -270,7 +273,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	std::string expectedOutput1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
@@ -289,7 +292,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	std::string expectedOutput = "No results found.";
@@ -305,7 +308,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	std::string expectedOutput = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
@@ -321,7 +324,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
@@ -337,7 +340,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	const std::string expectedOutput = "No results found.";
@@ -353,7 +356,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
 	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
@@ -375,7 +378,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
 	const std::string expectedOutput = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
@@ -393,7 +396,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string input9 = "1?5000000000000";
 	std::string expected9 = "1?5000000000000?L1?P1?www.github.com/p1?"
@@ -410,7 +413,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string input10 = "1?5000000001000";
 	std::string expected10 = "No results found.";
@@ -426,7 +429,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string input11 = "101?5000000008000\n101?5000000009000";
 	std::string expectedOutput11_1 =
@@ -455,7 +458,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	// Set up:
 	DatabaseHandler database;
 	RequestHandler handler;
-	handler.initialize(&database, "127.0.0.1", 9042);
+	handler.initialize(&database, TESTIP, TESTPORT);
 
 	std::string input12 = "2?5000000001000\n2?5000000002000\n3?5000000002000\n4?5000000005000";
 	std::string expectedOutput12_1 = "2?5000000001000?L2?P2?www.github.com/p2?68bd2db6-fe91-47d2-a134-cf82b104f547";
