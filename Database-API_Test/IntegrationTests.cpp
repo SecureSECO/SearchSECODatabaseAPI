@@ -296,6 +296,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
 	DatabaseConnection jddatabase;
@@ -317,6 +318,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -335,6 +337,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -353,6 +356,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -374,6 +378,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -392,6 +397,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -410,6 +416,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -428,6 +435,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -446,6 +454,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -470,6 +479,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 {
 	// Set up:
 	DatabaseHandler database;
+	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
         DatabaseConnection jddatabase;
@@ -584,3 +594,4 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 		ASSERT_NE(index12, expectedOutputs12.end());
 	}
 }
+
