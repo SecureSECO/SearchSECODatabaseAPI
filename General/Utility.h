@@ -49,6 +49,21 @@ public:
 	static void appendBy(std::vector<char>& result, std::string word, char delimiter);
 
 	/// <summary>
+	/// Appends 'result' by a multiple strings while separating the different strings
+	/// by a special character ('wordSeparator') and adds a special character at the end ('endChar').
+	/// </summary>
+	static void appendBy(std::vector<char> &result, std::vector<std::string> words, char wordSeparator, char endChar);
+
+	/// <summary>
+	/// Makes a tuple of the words provided as input by putting commas between different words and
+	/// encapsulating the separated words by parentheses.
+	/// </summary>
+	/// <returns>
+	/// Tuple consisting of the words provided as input.
+	/// </returns>
+	static std::string makeTuple(std::vector<std::string> words);
+
+	/// <summary>
 	/// Splits a string ('str') on a special character ('delimiter').
 	/// </summary>
 	/// <returns>

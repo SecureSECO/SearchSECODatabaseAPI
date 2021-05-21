@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+ Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include "RequestHandler.h"
@@ -384,4 +384,97 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 	std::string output = handler.handleRequest("aume", input);
 
 	ASSERT_EQ(output, expectedOutput);
+}
+
+
+// Tests extract projects request functionaility with one existing project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
+	std::string input9 = "1?5000000000000";
+	std::string expected9 = "1?5000000000000?L1?P1?www.github.com/p1?"
+							"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+
+	// Test:
+	std::string output9 = handler.handleRequest("extp", input9);
+	ASSERT_EQ(output9, expected9);
+}
+
+// Tests extract projects request with a non-existent project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
+	std::string input10 = "1?5000000001000";
+	std::string expected10 = "No results found.";
+
+	// Test:
+	std::string output10 = handler.handleRequest("extp", input10);
+	ASSERT_EQ(output10, expected10);
+}
+
+// Tests extract projects request with multiple versions of the same project.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
+	std::string input11 = "101?5000000008000\n101?5000000009000";
+	std::string expectedOutput11_1 =
+		"101?5000000008000?L5?P101?www.github.com/p101?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::string expectedOutput11_2 =
+		"101?5000000009000?L5?P101?www.github.com/p101?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::vector<std::string> expectedOutputs11 = {expectedOutput11_1, expectedOutput11_2};
+
+	// Test:
+	std::string output11 = handler.handleRequest("extp", input11);
+	std::vector<std::string> entries11 = Utility::splitStringOn(output11, '\n');
+
+	ASSERT_EQ(entries11.size(), 2);
+
+	for (int i = 0; i < entries11.size(); i++)
+	{
+		std::vector<std::string>::iterator index11 =
+			std::find(expectedOutputs11.begin(), expectedOutputs11.end(), entries11[i]);
+		ASSERT_NE(index11, expectedOutputs11.end());
+	}
+}
+
+// Tests extract projects request with different projects.
+TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
+{
+	// Set up:
+	DatabaseHandler database;
+	RequestHandler handler;
+	handler.initialize(&database, "127.0.0.1", 9042);
+
+	std::string input12 = "2?5000000001000\n2?5000000002000\n3?5000000002000\n4?5000000005000";
+	std::string expectedOutput12_1 = "2?5000000001000?L2?P2?www.github.com/p2?68bd2db6-fe91-47d2-a134-cf82b104f547";
+	std::string expectedOutput12_2 = "3?5000000002000?L3?P3?www.github.com/p3?b2217c08-06eb-4a57-b977-7c6d72299301";
+	std::string expectedOutput12_3 = "4?5000000005000?L4?P4?www.github.com/p4?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::vector<std::string> expectedOutputs12 = {expectedOutput12_1, expectedOutput12_2, expectedOutput12_3};
+
+	// Test:
+	std::string output12 = handler.handleRequest("extp", input12);
+	std::vector<std::string> entries12 = Utility::splitStringOn(output12, '\n');
+
+	// Check if the number of found projects is equal to 3.
+	ASSERT_EQ(entries12.size(), 3);
+
+	// Ensure that the entries found correspond to these in the expectedOutput.
+	for (int i = 0; i < entries12.size(); i++)
+	{
+		std::vector<std::string>::iterator index12 =
+			std::find(expectedOutputs12.begin(), expectedOutputs12.end(), entries12[i]);
+		ASSERT_NE(index12, expectedOutputs12.end());
+	}
 }
