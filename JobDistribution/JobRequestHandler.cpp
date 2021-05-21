@@ -31,19 +31,21 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) // Data format is url1?priority1?url2?priority2?...
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) // Data format is url1?priority1\nurl2?priority2\n...
 {
 	if (raft->isLeader())
 	{
-		// Split data on '?'.
-		std::vector<std::string> datasplits = Utility::splitStringOn(data,'?');
+		// Split data on '\n', to get individual jobs.
+		std::vector<std::string> datasplits = Utility::splitStringOn(data,'\n');
 		std::vector<std::string> urls;
 		std::vector<int> priorities;
-		for (int i = 0; i < datasplits.size() / 2; i++)
+		for (int i = 0; i < datasplits.size(); i++)
 		{
-			std::string url = datasplits[2 * i];
+			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(data,'?');
+			std::string url = dataSecondSplit[0];
 			urls.push_back(url);
-			int priority = Utility::safeStoi(datasplits[2 * i + 1]);
+			int priority = Utility::safeStoi(dataSecondSplit[1]);
+
 			// Check if priority could be parsed correctly.
 			if (errno == 0)
 			{
@@ -71,11 +73,11 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data) // Data format is id?url1?priority1?url2?priority2?...
+std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data) // Data format is id\nurl1?priority1\nurl2?priority2\n...
 {
 	if (raft->isLeader())
         {
-		int crawlId = Utility::safeStoi(data.substr(0, data.find('?')));
+		int crawlId = Utility::safeStoi(data.substr(0, data.find('\n')));
 		if (errno == 0)
 		{
 			database->updateCrawlId(crawlId);
@@ -85,7 +87,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 			return "Error: invalid crawlId.";
 		}
 		// Get data after crawlId and pass it on to handleUploadRequest.
-		std::string jobdata = data.substr(data.find('?') + 1, data.length());
+		std::string jobdata = data.substr(data.find('\n') + 1, data.length());
 		return handleUploadJobRequest(request, jobdata);
 	}
 	return raft->passRequestToLeader(request, data);

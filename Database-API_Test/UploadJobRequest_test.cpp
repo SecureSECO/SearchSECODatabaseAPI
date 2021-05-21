@@ -40,7 +40,7 @@ TEST(UploadJobRequest, MultipleJobs)
         handler.initialize(&database, &jddatabase, &raftConsensus);
 
         string requestType = "upjb";
-        string request = "https://github.com/zavg/linux-0.01?1?https://github.com/nlohmann/json/issues/1573?2";
+        string request = "https://github.com/zavg/linux-0.01?1\nhttps://github.com/nlohmann/json/issues/1573?2";
 
         EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
@@ -79,7 +79,7 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
         handler.initialize(&database, &jddatabase, &raftConsensus);
 
         string requestType = "upjb";
-        string request = "https://github.com/zavg/linux-0.01?1?https://github.com/nlohmann/json/issues/1573?aaaa";
+        string request = "https://github.com/zavg/linux-0.01?1\nhttps://github.com/nlohmann/json/issues/1573?aaaa";
 
         EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));

@@ -20,7 +20,7 @@ TEST(CrawlDataRequest, SingleJob)
         handler.initialize(&database, &jddatabase, &raftConsensus);
 
         string requestType = "upcd";
-        string request = "100?https://github.com/zavg/linux-0.01?1";
+        string request = "100\nhttps://github.com/zavg/linux-0.01?1";
 
 	EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
@@ -40,7 +40,7 @@ TEST(CrawlDataRequest, InvalidId)
         handler.initialize(&database, &jddatabase, &raftConsensus);
 
         string requestType = "upcd";
-        string request = "aaa?https://github.com/zavg/linux-0.01?1";
+        string request = "aaa\nhttps://github.com/zavg/linux-0.01?1";
 
         EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(0);
         EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));

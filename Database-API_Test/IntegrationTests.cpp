@@ -233,7 +233,7 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 	RAFTConsensus raftConsensus;
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-	std::string input = "Give job";
+	std::string input = "";
 	std::string expectedOutput = "Crawl?0";
 
 	//Test:
@@ -266,7 +266,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         RAFTConsensus raftConsensus;
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-	std::string input = "https://github.com/HackerPoet/Chaos-Equations?42?https://github.com/Yiziwinnie/Home-Depot-Product-Search-Relevance?69";
+	std::string input = "https://github.com/HackerPoet/Chaos-Equations?42\nhttps://github.com/Yiziwinnie/Home-Depot-Product-Search-Relevance?69";
 
 	std::string output = handler.handleRequest("upjb", input, nullptr);
 	extern int numberOfJobs;
@@ -282,7 +282,7 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
         RAFTConsensus raftConsensus;
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-	std::string input = "100?https://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
+	std::string input = "100\nhttps://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
 
 	std::string output = handler.handleRequest("upcd", input, nullptr);
 	extern int numberOfJobs;
@@ -299,7 +299,6 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
@@ -321,7 +320,6 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "UnknownAuthor?unknownauthor@mail.com\n";
@@ -340,7 +338,6 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "Author1?author1@mail.com\nUnknownAuthor?unknownauthor2@mail.com\n";
@@ -359,7 +356,6 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
@@ -381,7 +377,6 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
@@ -400,7 +395,6 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
@@ -419,7 +413,6 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n";
@@ -438,7 +431,6 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	const std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
@@ -457,7 +449,6 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	const std::string input = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
@@ -482,7 +473,6 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
 	const std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34\n9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280\n";
