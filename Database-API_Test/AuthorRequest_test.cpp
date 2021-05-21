@@ -15,7 +15,7 @@ MATCHER_P(authorEqual, author, "")
 	return arg.name == author.name && arg.mail == author.mail;
 }
 
-// Tests if program correctly retreieves an author id with one request and one (hard-coded) match.
+// Tests if program correctly retrieves an author id with one request and one (hard-coded) match.
 TEST(GetAuthorIdRequest, OneRequestOneMatch)
 {
 	MockDatabase database;
@@ -33,7 +33,7 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves an author id with one request and no match.
+// Tests if program correctly retrieves an author id with one request and no match.
 TEST(GetAuthorIdRequest, OneRequestNoMatch)
 {
 	MockDatabase database;
@@ -52,7 +52,7 @@ TEST(GetAuthorIdRequest, OneRequestNoMatch)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves an author id with multiple requests and one match per request.
+// Tests if program correctly retrieves an author id with multiple requests and one match per request.
 TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 {
 	MockDatabase database;
@@ -79,7 +79,7 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	ASSERT_TRUE(result == output1 || result == output2);
 }
 
-// Tests if program correctly retreieves an author id with multiple requests and one match total.
+// Tests if program correctly retrieves an author id with multiple requests and one match total.
 TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 {
 	MockDatabase database;
@@ -116,7 +116,7 @@ TEST(GetAuthorIdRequest, IncorrectInput)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves an author with one request and one (hard-coded) match.
+// Tests if program correctly retrieves an author with one request and one (hard-coded) match.
 TEST(GetAuthorRequest, OneRequestOneMatch)
 {
 	MockDatabase database;
@@ -135,7 +135,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves an author with one request and no match.
+// Tests if program correctly retrieves an author with one request and no match.
 TEST(GetAuthorRequest, OneRequestNoMatch)
 {
 	MockDatabase database;
@@ -151,7 +151,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves an author with multiple requests and one match pre request.
+// Tests if program correctly retrieves an author with multiple requests and one match pre request.
 TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 {
 	MockDatabase database;
@@ -176,7 +176,7 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	ASSERT_TRUE(result == output1 || result == output2);
 }
 
-// Tests if program correctly retreieves an author with multiple requests and one match total.
+// Tests if program correctly retrieves an author with multiple requests and one match total.
 TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 {
 	MockDatabase database;
@@ -210,7 +210,7 @@ TEST(GetAuthorRequest, IncorrectInput)
 	ASSERT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves a method with one author and one match.
+// Tests if program correctly retrieves a method with one author and one match.
 TEST(GetMethodByAuthorTests, SingleIdRequest)
 {
 	MockDatabase database;
@@ -232,7 +232,7 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	EXPECT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves a method with multiple authors and one match per author.
+// Tests if program correctly retrieves a method with multiple authors and one match per author.
 TEST(GetMethodByAuthorTests, MultipleIdRequest)
 {
 	MockDatabase database;
@@ -266,7 +266,7 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 	EXPECT_TRUE(result == output1 || result == output2);
 }
 
-// Tests if program correctly retreieves a method with one author and no match.
+// Tests if program correctly retrieves a method with one author and no match.
 TEST(GetMethodByAuthorTests, SingleIdNoMatch)
 {
 	MockDatabase database;
@@ -280,7 +280,7 @@ TEST(GetMethodByAuthorTests, SingleIdNoMatch)
 	EXPECT_EQ(result, "No results found.");
 }
 
-// Tests if program correctly retreieves a method with multiple authors and one match total.
+// Tests if program correctly retrieves a method with multiple authors and one match total.
 TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 {
 	MockDatabase database;
@@ -306,7 +306,7 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 	EXPECT_EQ(result, output);
 }
 
-// Tests if program correctly retreieves a method with one author and multiple matches.
+// Tests if program correctly retrieves a method with one author and multiple matches.
 TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 {
 	MockDatabase database;
@@ -337,7 +337,7 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 	EXPECT_TRUE(result == output1 || result == output2);
 }
 
-// Tests if program correctly retreieves a method with multiple authors and multiple matches.
+// Tests if program correctly retrieves a method with multiple authors and multiple matches.
 TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 {
 	MockDatabase database;
