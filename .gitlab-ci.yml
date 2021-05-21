@@ -4,8 +4,9 @@ image-build:
   image: docker
   stage: build
   rules:
-    changes:
-      - PipelineDockerfile
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - PipelineDockerfile
   script:
     - docker build -f PipelineDockerfile -t database-api-ci-image .
 
