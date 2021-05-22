@@ -33,6 +33,7 @@ add_executable(
   ExtractProjectsRequest_test.cpp
   AuthorRequest_test.cpp
   IntegrationTests.cpp
+  JobIntegrationTests.cpp
   Utility_test.cpp
   UploadJobRequest_test.cpp
   JobRequestHandler_test.cpp

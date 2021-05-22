@@ -11,7 +11,6 @@ Utrecht University within the Software Project course.
 #define IP "cassandra"
 #define DBPORT 8002
 #define MAX_THREADS 32
-#define MIN_AMOUNT_JOBS 500
 
 /// <summary>
 /// Handles interaction with database when dealing with job requests.
@@ -25,34 +24,25 @@ public:
 	virtual void connect(std::string ip, int port);
 
 	/// <summary>
-	/// Return the url of the first job in jobs table if the number of jobs in the table is high enough, or return a string that indicates that the job is to crawl new repositories if the number of jobs is not high enough.
-	/// </summary>
-	virtual std::string getJob();
-
-	/// <summary>
         /// Uploads a job to the database given the url to a repository and a priority.
         /// </summary>
 	virtual void uploadJob(std::string url, int priority);
 
 	/// <summary>
-        /// Updates the id from where should be crawled the next time.
-        /// </summary>
-	virtual void updateCrawlId(int id);
-private:
-	/// <summary>
         /// Retrieves the url of the first job in the jobs table..
         /// </summary>
-	std::string getTopJob();
+        std::string getTopJob();
+
+	/// <summary>
+        /// Returns the amount of jobs in the jobs table.
+        /// </summary>
+        int getNumberOfJobs();
+private:
 
 	/// <summary>
         /// Deletes the first job in the jobs table.
         /// </summary>
 	void deleteTopJob(CassUuid id);
-
-	/// <summary>
-        /// Returns the amount of jobs in the jobs table.
-        /// </summary>
-	int getNumberOfJobs();
 
 	/// <summary>
 	/// Creates prepared queries for later use.

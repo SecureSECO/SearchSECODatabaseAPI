@@ -9,10 +9,6 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-int numberOfJobs;
-int crawlId;
-bool alreadyCrawling = false;
-
 void DatabaseConnection::connect(string ip, int port)
 {
 	CassFuture* connectFuture = NULL;
@@ -41,10 +37,6 @@ void DatabaseConnection::connect(string ip, int port)
 		return;
   	}
 	setPreparedStatements();
-	// Set initial number of jobs in the queue.
-	numberOfJobs = getNumberOfJobs();
-	// Set crawlId to 0.
-	::crawlId = 0;
 }
 
 void DatabaseConnection::setPreparedStatements()
@@ -66,26 +58,6 @@ void DatabaseConnection::setPreparedStatements()
         preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
 	cass_future_free(prepareFuture);
-}
-
-
-string DatabaseConnection::getJob()
-{
-	// Check if number of jobs is enough to provide the top job.
-	if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
-	{
-		return "Spider?" +  getTopJob();
-	}
-	// If number of jobs is not high enough, the job is to crawl for more jobs.
-	else if (alreadyCrawling == false)
-	{
-		alreadyCrawling = true;
-		return "Crawl?" + to_string(crawlId);
-	}
-	else
-	{
-		return "NoJob";
-	}
 }
 
 string DatabaseConnection::getTopJob()
@@ -139,8 +111,6 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 	}
 
 	cass_future_free(queryFuture);
-	::numberOfJobs -= 1;
-
 }
 
 int DatabaseConnection::getNumberOfJobs()
@@ -192,11 +162,4 @@ void DatabaseConnection::uploadJob(string url, int priority)
         }
 
         cass_future_free(queryFuture);
-	::numberOfJobs += 1;
-}
-
-void DatabaseConnection::updateCrawlId(int id)
-{
-	::crawlId = id;
-	alreadyCrawling = false;
 }
