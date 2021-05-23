@@ -76,7 +76,7 @@ string DatabaseConnection::getTopJob()
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
 		//Delete the job that is returned.
-		deleteTopJob(id);
+		//deleteTopJob(id);
                 return url;
 	}
 	else

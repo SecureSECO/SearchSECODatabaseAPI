@@ -34,7 +34,6 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 
 	std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
 	ASSERT_EQ(output2, expectedOutput2);
 }
@@ -59,12 +58,12 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	std::string input2 = "";
         std::string expectedOutput2 = "Crawl?0";
 
-        std::string output2 = handler.handleRequest("gtjb", input, nullptr);
+        std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
         ASSERT_EQ(output2, expectedOutput2);
 
         std::string expectedOutput3 = "Spider?https://github.com/mcostalba/Stockfish";
 
-        std::string output3 = handler.handleRequest("gtjb", input, nullptr);
+        std::string output3 = handler.handleRequest("gtjb", input2, nullptr);
         ASSERT_EQ(output3, expectedOutput3);
 }
 
