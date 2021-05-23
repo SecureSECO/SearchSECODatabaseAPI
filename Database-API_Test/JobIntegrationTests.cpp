@@ -96,11 +96,6 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 
         std::string input = "100\nhttps://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
         std::string output = handler.handleRequest("upcd", input, nullptr);
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
-	int jobs = jhandler->numberOfJobs;
-	int id = jhandler->crawlId;
-        ASSERT_EQ(jobs, 5);
-        ASSERT_EQ(id, 100);
 
 	std::string input2 = "";
 	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
