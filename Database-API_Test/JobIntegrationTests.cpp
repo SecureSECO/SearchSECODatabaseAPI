@@ -103,7 +103,7 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
         ASSERT_EQ(id, 100);
 
 	std::string input2 = "";
-	std:string output2 = handler.handleRequest("gtjb", input2, nullptr);
+	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
 	std::string expectedOutput2 = "Crawl?100";
 
 	ASSERT_EQ(output2, expectedOutput2);
