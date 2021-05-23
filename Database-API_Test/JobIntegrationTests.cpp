@@ -30,11 +30,13 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 
         //Test:
         std::string output = handler.handleRequest("gtjb", input, nullptr);
+	cout << output + "\n";
         ASSERT_EQ(output, expectedOutput);
 
 	std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
 
 	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
+	cout << output + "\n";
 	ASSERT_EQ(output2, expectedOutput2);
 }
 
