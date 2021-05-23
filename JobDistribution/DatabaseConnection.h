@@ -31,12 +31,12 @@ public:
 	/// <summary>
         /// Retrieves the url of the first job in the jobs table..
         /// </summary>
-        std::string getTopJob();
+        virtual std::string getTopJob();
 
 	/// <summary>
         /// Returns the amount of jobs in the jobs table.
         /// </summary>
-        int getNumberOfJobs();
+        virtual int getNumberOfJobs();
 private:
 
 	/// <summary>
