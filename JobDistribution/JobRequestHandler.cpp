@@ -91,7 +91,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data).
+std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data)
 {
 	if (raft->isLeader())
         {
