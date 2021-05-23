@@ -45,7 +45,7 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 and jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -93,7 +93,7 @@ string DatabaseConnection::getTopJob()
 
 void DatabaseConnection::deleteTopJob(CassUuid id)
 {
-	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
+	/*CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
 	cass_statement_bind_uuid_by_name(query, "jobid", id);
 
@@ -110,7 +110,7 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
-	cass_future_free(queryFuture);
+	cass_future_free(queryFuture);*/
 }
 
 int DatabaseConnection::getNumberOfJobs()
