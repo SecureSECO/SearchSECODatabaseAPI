@@ -45,7 +45,7 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = 2f78a799-0e18-4eb5-bd33-83718a3257d9");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -71,12 +71,14 @@ string DatabaseConnection::getTopJob()
 		const char* url;
 		size_t len;
 		CassUuid id;
+		int priority;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
+		cass_value_get_int32(cass_row_get_column_by_name(row, "priority"), &priority);
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
 		//Delete the job that is returned.
-		deleteTopJob(id);
+		deleteTopJob(id, priority);
                 return url;
 	}
 	else
@@ -91,11 +93,12 @@ string DatabaseConnection::getTopJob()
         }
 }
 
-void DatabaseConnection::deleteTopJob(CassUuid id)
+void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
 {
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	//cass_statement_bind_uuid(query, 0, id);
+	cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_uuid(query, 1, id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
 	// Statement objects can be freed immediately after being executed.
