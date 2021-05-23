@@ -595,7 +595,7 @@ string DatabaseRequestHandler::handleGetAuthorRequest(string request)
 {
 	vector<string> authorIds = Utility::splitStringOn(request, '\n');
 
-	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+	regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIds.size(); i++)
 	{
@@ -676,7 +676,7 @@ string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
 {
 	vector<string> authorIds = Utility::splitStringOn(request, '\n');
 
-	regex re("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+	regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIds.size(); i++)
 	{
