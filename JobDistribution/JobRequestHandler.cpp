@@ -16,6 +16,7 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
 	this->database = database;
 	database->connect(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
+	crawlId = 0;
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)

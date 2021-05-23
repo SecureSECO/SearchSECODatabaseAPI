@@ -48,7 +48,7 @@ public:
 	/// and if there is currently a crawler working.
 	/// </summary>
 	int numberOfJobs;
-	int crawlId = 0;
+	int crawlId;
 	bool alreadyCrawling = false;
 
 	void updateCrawlId(int id);
