@@ -15,6 +15,7 @@ Utrecht University within the Software Project course.
 #include <algorithm>
 #include <iostream>
 
+// Test if first crawl is returned and then the correct job.
 TEST(JobDatabaseIntegrationTest, GetJobRequest)
 {
         // Set up:
@@ -30,8 +31,15 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
         //Test:
         std::string output = handler.handleRequest("gtjb", input, nullptr);
         ASSERT_EQ(output, expectedOutput);
+
+	std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
+
+	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
+	ASSERT_EQ(output2, expectedOutput2);
 }
 
+// Test if job is succesfully uploaded and the numberOfJobs variable is increased
+// and the job is inserted correctly in the database.
 TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 {
         // Set up:
@@ -42,12 +50,24 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-        std::string input = "https://github.com/mcostalba/Stockfish?10";
-	int jobs = jhandler->numberOfJobs;
+        std::string input = "https://github.com/mcostalba/Stockfish?1";
         std::string output = handler.handleRequest("upjb", input, nullptr);
+	int jobs = jhandler->numberOfJobs;
         ASSERT_EQ(jobs, 4);
+
+	std::string input2 = "";
+        std::string expectedOutput2 = "Crawl?0";
+
+        std::string output2 = handler.handleRequest("gtjb", input, nullptr);
+        ASSERT_EQ(output2, expectedOutput2);
+
+        std::string expectedOutput3 = "Spider?https://github.com/mcostalba/Stockfish";
+
+        std::string output3 = handler.handleRequest("gtjb", input, nullptr);
+        ASSERT_EQ(output3, expectedOutput3);
 }
 
+// Test if multiple jobs get succesfully uploaded.
 TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 {
         // Set up:
@@ -59,11 +79,12 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "https://github.com/HackerPoet/Chaos-Equations?42\nhttps://github.com/Yiziwinnie/Home-Depot?69";
-	int jobs = jhandler->numberOfJobs;
         std::string output = handler.handleRequest("upjb", input, nullptr);
+	int jobs = jhandler->numberOfJobs;
         ASSERT_EQ(jobs, 6);
 }
 
+// Test if crawl data is handled succesfully.
 TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 {
         // Set up:
@@ -75,9 +96,9 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "100\nhttps://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
+        std::string output = handler.handleRequest("upcd", input, nullptr);
 	int jobs = jhandler->numberOfJobs;
 	int id = jhandler->crawlId;
-        std::string output = handler.handleRequest("upcd", input, nullptr);
         ASSERT_EQ(jobs, 7);
         ASSERT_EQ(id, 100);
 }
