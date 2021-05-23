@@ -93,12 +93,14 @@ string DatabaseConnection::getTopJob()
 
 void DatabaseConnection::deleteTopJob(CassUuid id)
 {
-	/*CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
+	cout << "beginning delete\n";
+	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cass_statement_bind_uuid_by_name(query, "jobid", id);
-
+	cout << "query bind done\n";
+	cass_statement_bind_uuid(query, 0, id);
+	cout << "statement bind done\n";
 	CassFuture* queryFuture = cass_session_execute(connection, query);
-
+	cout << "Execute done\n";
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
 
@@ -110,7 +112,7 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 		printf("Query result: %s\n", cass_error_desc(rc));
 	}
 
-	cass_future_free(queryFuture);*/
+	cass_future_free(queryFuture);
 }
 
 int DatabaseConnection::getNumberOfJobs()

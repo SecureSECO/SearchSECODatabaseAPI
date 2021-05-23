@@ -53,7 +53,7 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
         std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
-        ASSERT_EQ(jobs, 4);
+        ASSERT_EQ(jobs, 3);
 
 	std::string input2 = "";
         std::string expectedOutput2 = "Crawl?0";
@@ -81,7 +81,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
-        ASSERT_EQ(jobs, 5);
+        ASSERT_EQ(jobs, 4);
 }
 
 // Test if crawl data is handled succesfully.
@@ -99,7 +99,7 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
 	int id = jhandler->crawlId;
-        ASSERT_EQ(jobs, 6);
+        ASSERT_EQ(jobs, 5);
         ASSERT_EQ(id, 100);
 
 	std::string input2 = "";
