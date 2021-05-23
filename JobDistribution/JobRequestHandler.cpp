@@ -31,7 +31,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data) // Data format is url1?priority1\nurl2?priority2\n...
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data)
 {
 	if (raft->isLeader())
 	{
@@ -73,7 +73,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	return raft->passRequestToLeader(request, data);
 }
 
-std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data) // Data format is id\nurl1?priority1\nurl2?priority2\n...
+std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data).
 {
 	if (raft->isLeader())
         {

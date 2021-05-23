@@ -27,7 +27,8 @@ public:
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
 	/// <summary>
-        /// Handles request to upload one or more jobs with their priorities..
+        /// Handles request to upload one or more jobs with their priorities.
+	/// Data format is url1?priority1\nurl2?priority2\n...
         /// </summary>
 	std::string handleUploadJobRequest(std::string request, std::string data);
 
@@ -38,6 +39,7 @@ public:
 
 	/// <summary>
         /// Handles request to upload crawl data to the job queue.
+	/// Data format is id\nurl1?priority1\nurl2?priority2\n...
         /// </summary>
 	std::string handleCrawlDataRequest(std::string request, std::string data);
 
