@@ -95,6 +95,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 	if (raft->isLeader())
         {
 		int id = Utility::safeStoi(data.substr(0, data.find('\n')));
+		std::cout << std::to_string(id) + "\n";
 		if (errno == 0)
 		{
 			updateCrawlId(id);

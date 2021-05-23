@@ -49,7 +49,7 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
         RAFTConsensus raftConsensus;
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-        std::string input = "https://github.com/mcostalba/Stockfish?1";
+        std::string input = "https://github.com/mcostalba/Stockfish?10";
         std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
@@ -81,7 +81,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
-        ASSERT_EQ(jobs, 6);
+        ASSERT_EQ(jobs, 5);
 }
 
 // Test if crawl data is handled succesfully.
@@ -99,6 +99,12 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
 	int id = jhandler->crawlId;
-        ASSERT_EQ(jobs, 7);
+        ASSERT_EQ(jobs, 6);
         ASSERT_EQ(id, 100);
+
+	std::string input2 = "";
+	std:string output2 = handler.handleRequest("gtjb", input2, nullptr);
+	std::string expectedOutput2 = "Crawl?100";
+
+	ASSERT_EQ(output2, expectedOutput2);
 }

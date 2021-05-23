@@ -45,7 +45,7 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 and jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -76,7 +76,7 @@ string DatabaseConnection::getTopJob()
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
 		//Delete the job that is returned.
-		//deleteTopJob(id);
+		deleteTopJob(id);
                 return url;
 	}
 	else
