@@ -23,23 +23,20 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
         DatabaseConnection jddatabase;
         RequestHandler handler;
         RAFTConsensus raftConsensus;
-	std::cout << "Before initialize\n";
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "";
         std::string expectedOutput = "Crawl?0";
 
         //Test:
-	std::cout << "Before first handleRequest\n";
         std::string output = handler.handleRequest("gtjb", input, nullptr);
-	std::cout << output + "\n";
         ASSERT_EQ(output, expectedOutput);
 
-	//std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
+	std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
 
-	//std::string output2 = handler.handleRequest("gtjb", input, nullptr);
-	//std::cout << output + "\n";
-	//ASSERT_EQ(output2, expectedOutput2);
+	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
+	ASSERT_EQ(output2, expectedOutput2);
 }
 
 // Test if job is succesfully uploaded and the numberOfJobs variable is increased
@@ -51,11 +48,11 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
         DatabaseConnection jddatabase;
         RequestHandler handler;
         RAFTConsensus raftConsensus;
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "https://github.com/mcostalba/Stockfish?1";
         std::string output = handler.handleRequest("upjb", input, nullptr);
+	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
         ASSERT_EQ(jobs, 4);
 
@@ -79,11 +76,11 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
         DatabaseConnection jddatabase;
         RequestHandler handler;
         RAFTConsensus raftConsensus;
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "https://github.com/HackerPoet/Chaos-Equations?42\nhttps://github.com/Yiziwinnie/Home-Depot?69";
         std::string output = handler.handleRequest("upjb", input, nullptr);
+	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
         ASSERT_EQ(jobs, 6);
 }
@@ -96,11 +93,11 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
         DatabaseConnection jddatabase;
         RequestHandler handler;
         RAFTConsensus raftConsensus;
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "100\nhttps://github.com/Yiziwinnie/Bike-Sharing-in-Boston?420";
         std::string output = handler.handleRequest("upcd", input, nullptr);
+	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
 	int id = jhandler->crawlId;
         ASSERT_EQ(jobs, 7);
