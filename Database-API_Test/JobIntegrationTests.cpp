@@ -23,12 +23,14 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
         DatabaseConnection jddatabase;
         RequestHandler handler;
         RAFTConsensus raftConsensus;
+	std::cout << "Before initialize\n";
         handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
         std::string input = "";
         std::string expectedOutput = "Crawl?0";
 
         //Test:
+	std::cout << "Before first handleRequest\n";
         std::string output = handler.handleRequest("gtjb", input, nullptr);
 	std::cout << output + "\n";
         ASSERT_EQ(output, expectedOutput);
