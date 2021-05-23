@@ -206,11 +206,11 @@ INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
 
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES 
-(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 1, 'https://github.com/zavg/linux-0.01', 1);
+(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 3, 'https://github.com/zavg/linux-0.01', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(61c9d732-1f98-40af-b201-3b20fbf7a6db, 2, 'https://github.com/304471720/CSAPI', 1);
+(61c9d732-1f98-40af-b201-3b20fbf7a6db, 4, 'https://github.com/304471720/CSAPI', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(2f78a799-0e18-4eb5-bd33-83718a3257d9, 3, 'https://github.com/caged/microsis', 1);
+(2f78a799-0e18-4eb5-bd33-83718a3257d9, 5, 'https://github.com/caged/microsis', 1);
 
 INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');

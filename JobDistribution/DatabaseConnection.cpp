@@ -9,10 +9,6 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-int numberOfJobs;
-int crawlId;
-bool alreadyCrawling = false;
-
 void DatabaseConnection::connect(string ip, int port)
 {
 	CassFuture* connectFuture = NULL;
@@ -41,10 +37,6 @@ void DatabaseConnection::connect(string ip, int port)
 		return;
   	}
 	setPreparedStatements();
-	// Set initial number of jobs in the queue.
-	numberOfJobs = getNumberOfJobs();
-	// Set crawlId to 0.
-	::crawlId = 0;
 }
 
 void DatabaseConnection::setPreparedStatements()
@@ -53,7 +45,7 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -68,26 +60,6 @@ void DatabaseConnection::setPreparedStatements()
 	cass_future_free(prepareFuture);
 }
 
-
-string DatabaseConnection::getJob()
-{
-	// Check if number of jobs is enough to provide the top job.
-	if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
-	{
-		return "Spider?" +  getTopJob();
-	}
-	// If number of jobs is not high enough, the job is to crawl for more jobs.
-	else if (alreadyCrawling == false)
-	{
-		alreadyCrawling = true;
-		return "Crawl?" + to_string(crawlId);
-	}
-	else
-	{
-		return "NoJob";
-	}
-}
-
 string DatabaseConnection::getTopJob()
 {
 	CassStatement* query = cass_prepared_bind(preparedGetTopJob);
@@ -99,12 +71,14 @@ string DatabaseConnection::getTopJob()
 		const char* url;
 		size_t len;
 		CassUuid id;
+		int priority;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
+		cass_value_get_int32(cass_row_get_column_by_name(row, "priority"), &priority);
                 cass_statement_free(query);
                 cass_future_free(resultFuture);
 		//Delete the job that is returned.
-		deleteTopJob(id);
+		deleteTopJob(id, priority);
                 return url;
 	}
 	else
@@ -119,14 +93,14 @@ string DatabaseConnection::getTopJob()
         }
 }
 
-void DatabaseConnection::deleteTopJob(CassUuid id)
+void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
 {
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cass_statement_bind_uuid(query, 0, id);
+	cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_uuid(query, 1, id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
-
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
 
@@ -139,8 +113,6 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 	}
 
 	cass_future_free(queryFuture);
-	::numberOfJobs -= 1;
-
 }
 
 int DatabaseConnection::getNumberOfJobs()
@@ -192,11 +164,4 @@ void DatabaseConnection::uploadJob(string url, int priority)
         }
 
         cass_future_free(queryFuture);
-	::numberOfJobs += 1;
-}
-
-void DatabaseConnection::updateCrawlId(int id)
-{
-	::crawlId = id;
-	alreadyCrawling = false;
 }

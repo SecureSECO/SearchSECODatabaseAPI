@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 
 using namespace std;
 
-//Check if data is correctly handled when the crawlId is valid.
+// Check if data is correctly handled when the crawlId is valid.
 TEST(CrawlDataRequest, SingleJob)
 {
 	RequestHandler handler;
@@ -22,15 +22,23 @@ TEST(CrawlDataRequest, SingleJob)
         string requestType = "upcd";
         string request = "100\nhttps://github.com/zavg/linux-0.01?1";
 
-	EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
 
 	string result = handler.handleRequest(requestType, request, nullptr);
 
 	ASSERT_EQ(result, "Your job(s) has been succesfully added to the queue.");
+
+	string requestType2 = "gtjb";
+	string request2 = "";
+
+	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
+
+	string result2 = handler.handleRequest(requestType2, request2, nullptr);
+
+	ASSERT_EQ(result2, "Crawl?100");
 }
 
-//Check if an invalid crawlId is handled correctly.
+// Check if an invalid crawlId is handled correctly.
 TEST(CrawlDataRequest, InvalidId)
 {
 	RequestHandler handler;
@@ -42,7 +50,7 @@ TEST(CrawlDataRequest, InvalidId)
         string requestType = "upcd";
         string request = "aaa\nhttps://github.com/zavg/linux-0.01?1";
 
-        EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(0);
+        //EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(0);
         EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
         string result = handler.handleRequest(requestType, request, nullptr);

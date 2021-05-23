@@ -11,6 +11,8 @@ Utrecht University within the Software Project course.
 
 #include <boost/shared_ptr.hpp>
 
+#define MIN_AMOUNT_JOBS 500
+
 class TcpConnection;
 
 class JobRequestHandler
@@ -43,6 +45,15 @@ public:
         /// </summary>
 	std::string handleCrawlDataRequest(std::string request, std::string data);
 
+	/// <summary>
+	/// Variables describing the number of jobs in the jobqueue, the current crawlId
+	/// and if there is currently a crawler working.
+	/// </summary>
+	int numberOfJobs;
+	int crawlId;
+	bool alreadyCrawling = false;
+
+	void updateCrawlId(int id);
 private:
 
 	RAFTConsensus* raft;
