@@ -95,7 +95,7 @@ void DatabaseConnection::deleteTopJob(CassUuid id)
 {
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cass_statement_bind_uuid(query, 0, id);
+	cass_statement_bind_uuid_by_name(query, "jobid", id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
 
