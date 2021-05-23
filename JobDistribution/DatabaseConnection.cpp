@@ -45,7 +45,7 @@ void DatabaseConnection::setPreparedStatements()
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = ?");
+	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND jobid = 2f78a799-0e18-4eb5-bd33-83718a3257d9");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
@@ -93,14 +93,11 @@ string DatabaseConnection::getTopJob()
 
 void DatabaseConnection::deleteTopJob(CassUuid id)
 {
-	cout << "beginning delete\n";
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cout << "query bind done\n";
-	cass_statement_bind_uuid(query, 0, id);
-	cout << "statement bind done\n";
+	//cass_statement_bind_uuid(query, 0, id);
+
 	CassFuture* queryFuture = cass_session_execute(connection, query);
-	cout << "Execute done\n";
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
 
