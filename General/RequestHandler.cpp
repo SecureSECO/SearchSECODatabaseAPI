@@ -5,24 +5,25 @@ Utrecht University within the Software Project course.
 */
 
 #include "RequestHandler.h"
+#include <iostream>
 
 using namespace std;
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = JobRequestHandler();
+	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
-string RequestHandler::handleRequest(string requestType, string request)
+string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
 {
 	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequestType = getERequestType(requestType);
+	eRequestType eRequest = getERequestType(requestType);
 
 	// We handle the request based on its type.
 	string result;
-	switch (eRequestType)
+	switch (eRequest)
 	{
 		case eUpload:
 			result = dbrh->handleUploadRequest(request);
@@ -32,6 +33,18 @@ string RequestHandler::handleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
+			break;
+		case eConnect:
+			result = jrh->handleConnectRequest(connection, request);
+			break;
+		case eUploadJob:
+			result = jrh->handleUploadJobRequest(requestType, request);
+			break;
+		case eUploadCrawlData:
+			result = jrh->handleCrawlDataRequest(requestType, request);
+			break;
+		case eGetTopJob:
+			result = jrh->handleGetJobRequest(requestType, request);
 			break;
 		case eExtractProjects:
 			result = dbrh->handleExtractProjectsRequest(request);
@@ -78,6 +91,22 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "conn")
+	{
+		return eConnect;
+	}
+	else if (requestType == "upjb")
+	{
+		return eUploadJob;
+	}
+	else if (requestType == "upcd")
+	{
+		return eUploadCrawlData;
+	}
+	else if (requestType == "gtjb")
+	{
+		return eGetTopJob;
 	}
 	else if (requestType == "extp")
 	{
