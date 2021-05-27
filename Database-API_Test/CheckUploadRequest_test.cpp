@@ -43,17 +43,26 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"
 						 "MyProject/Method1.cpp?1?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
 	std::string authorID = "f1a028d7-3845-41df-bec1-2e16c49e4c35";
-	MethodOut method1out = { .hash = "a6aa62503e2ca3310e3a837502b80df5", .projectID = 0,
-							 .version = 0, .methodName = "Method1",
-							 .fileLocation = "MyProject/Method1.cpp", .lineNumber = 1,
-							 .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
-	Author author = { .name = "Owner", .mail = "owner@mail.com" };
-	ProjectIn project = { .projectID = 0, .version = 0, .license = "MyLicense",
-						.name = "MyProject", .url = "MyUrl", .owner = author,
-						.hashes = { } };
-	MethodIn method1in = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
-						   .methodName = "Method1", .fileLocation = "MyProject/Method1.cpp",
-						   .lineNumber = 1, .authors = { author } };
+	MethodOut method1out = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
+							.projectID = 0,
+							.version = 0,
+							.methodName = "Method1",
+							.fileLocation = "MyProject/Method1.cpp",
+							.lineNumber = 1,
+							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
+	Author author = {.name = "Owner", .mail = "owner@mail.com"};
+	ProjectIn project = {.projectID = 0,
+						 .version = 0,
+						 .license = "MyLicense",
+						 .name = "MyProject",
+						 .url = "MyUrl",
+						 .owner = author,
+						 .hashes = {}};
+	MethodIn method1in = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
+						  .methodName = "Method1",
+						  .fileLocation = "MyProject/Method1.cpp",
+						  .lineNumber = 1,
+						  .authors = {author}};
 	std::vector<MethodOut> v;
 	v.push_back(method1out);
 
@@ -70,8 +79,8 @@ TEST(CheckUploadRequest, HashConversionError)
 	RequestHandler handler;
 
 	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-                                                  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?"
-                                                  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+						  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?"
+						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, "Error parsing hashes.");

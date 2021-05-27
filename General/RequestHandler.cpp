@@ -7,8 +7,6 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 #include <iostream>
 
-using namespace std;
-
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
@@ -16,13 +14,13 @@ void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnec
 	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
-string RequestHandler::handleRequest(string requestType, string request, boost::shared_ptr<TcpConnection> connection)
+std::string RequestHandler::handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection)
 {
 	// We convert the requestType to a eRequestType (for the switch below).
 	eRequestType eRequest = getERequestType(requestType);
 
 	// We handle the request based on its type.
-	string result;
+	std::string result;
 	switch (eRequest)
 	{
 		case eUpload:
@@ -68,17 +66,17 @@ string RequestHandler::handleRequest(string requestType, string request, boost::
 	return result;
 }
 
-string RequestHandler::handleUnknownRequest()
+std::string RequestHandler::handleUnknownRequest()
 {
 	return "Unknown request type.";
 }
 
-string RequestHandler::handleNotImplementedRequest()
+std::string RequestHandler::handleNotImplementedRequest()
 {
 	return "Request not implemented yet.";
 }
 
-eRequestType RequestHandler::getERequestType(string requestType)
+eRequestType RequestHandler::getERequestType(std::string requestType)
 {
 	if (requestType == "upld")
 	{

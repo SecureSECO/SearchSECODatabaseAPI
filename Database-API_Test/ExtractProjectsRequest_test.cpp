@@ -30,7 +30,7 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID2 = 1;
@@ -58,7 +58,7 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID3 = 1;
@@ -78,7 +78,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID4_1 = 2;
@@ -134,8 +134,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	// Make sure that the entries are as expected.
 	for (int i = 0; i < entries4.size(); i++)
 	{
-		std::vector<std::string>::iterator index4 =
-			std::find(expected4.begin(), expected4.end(), entries4[i]);
+		std::vector<std::string>::iterator index4 = std::find(expected4.begin(), expected4.end(), entries4[i]);
 		ASSERT_NE(index4, expected4.end());
 	}
 }
@@ -146,7 +145,8 @@ TEST(ExtractProjectsRequestTests, TooFewArguments)
 	RequestHandler handler;
 
 	std::string input5 = "0?0?\n1\n2?2";
-	std::string expected5 = "The request failed. Each project should be provided a projectID and a version (in that order).";
+	std::string expected5 =
+		"The request failed. Each project should be provided a projectID and a version (in that order).";
 
 	std::string output5 = handler.handleRequest("extp", input5, nullptr);
 	ASSERT_EQ(output5, expected5);
@@ -164,4 +164,3 @@ TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 	std::string output6 = handler.handleRequest("extp", input6, nullptr);
 	ASSERT_EQ(output6, expected6);
 }
-

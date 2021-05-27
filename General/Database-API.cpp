@@ -12,12 +12,10 @@ Utrecht University within the Software Project course.
 #include "ConnectionHandler.h"
 #include "RAFTConsensus.h"
 
-using namespace std;
-
 int main()
 {
 	usleep(45000000);
-	cout << "Connecting now" << endl;
+	std::cout << "Connecting now" << std::endl;
 
 	RAFTConsensus raft;
 	ConnectionHandler listen;

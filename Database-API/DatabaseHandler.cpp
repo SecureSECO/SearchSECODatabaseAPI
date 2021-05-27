@@ -7,9 +7,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <iostream>
 
-using namespace std;
-
-void DatabaseHandler::connect(string ip, int port)
+void DatabaseHandler::connect(std::string ip, int port)
 {
 	CassFuture *connectFuture = NULL;
 	CassCluster *cluster = cass_cluster_new();
@@ -105,14 +103,14 @@ void DatabaseHandler::setPreparedStatements()
 	cass_future_free(prepareFuture);
 }
 
-vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Version version)
+std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Version version)
 {
 	CassStatement *query = cass_prepared_bind(selectProject);
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
 	cass_statement_bind_int64_by_name(query, "version", version);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
-	vector<ProjectOut> projects = {};
+	std::vector<ProjectOut> projects = {};
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);
@@ -143,7 +141,7 @@ vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Versio
 	return projects;
 }
 
-vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
+std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
@@ -151,7 +149,7 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	vector<MethodOut> methods;
+	std::vector<MethodOut> methods;
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -293,7 +291,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 	cass_future_free(queryFuture);
 }
 
-vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
+std::vector<MethodId> DatabaseHandler::authorToMethods(std::string authorId)
 {
 	CassStatement *query = cass_prepared_bind(selectMethodByAuthor);
 
@@ -303,7 +301,7 @@ vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	vector<MethodId> methods;
+	std::vector<MethodId> methods;
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -337,7 +335,7 @@ vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
 	return methods;
 }
 
-Author DatabaseHandler::idToAuthor(string id)
+Author DatabaseHandler::idToAuthor(std::string id)
 {
 	CassStatement *query = cass_prepared_bind(selectAuthorById);
 
@@ -389,7 +387,7 @@ CassUuid DatabaseHandler::getAuthorId(Author author)
 	return authorID;
 }
 
-string DatabaseHandler::authorToId(Author author)
+std::string DatabaseHandler::authorToId(Author author)
 {
 	CassUuid authorID = retrieveAuthorId(author);
 
@@ -531,13 +529,13 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 }
 
 
-string DatabaseHandler::getString(const CassRow* row, const char* column)
+std::string DatabaseHandler::getString(const CassRow* row, const char* column)
 {
 	const char *result;
 	size_t len;
 	const CassValue *value = cass_row_get_column_by_name(row, column);
 	cass_value_get_string(value, &result, &len);
-	return string(result, len);
+	return std::string(result, len);
 }
 
 int DatabaseHandler::getInt32(const CassRow *row, const char *column)
@@ -556,7 +554,7 @@ long long DatabaseHandler::getInt64(const CassRow *row, const char *column)
 	return result;
 }
 
-string DatabaseHandler::getUUID(const CassRow *row, const char *column)
+std::string DatabaseHandler::getUUID(const CassRow *row, const char *column)
 {
 	char result[CASS_UUID_STRING_LENGTH];
 	CassUuid authorID;
