@@ -7,9 +7,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseConnection.h"
 #include <iostream>
 
-using namespace std;
-
-void DatabaseConnection::connect(string ip, int port)
+void DatabaseConnection::connect(std::string ip, int port)
 {
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
@@ -35,7 +33,7 @@ void DatabaseConnection::connect(string ip, int port)
 		cass_future_error_message(connectFuture, &message, &messageLength);
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
 		return;
-  	}
+	}
 	setPreparedStatements();
 }
 
@@ -50,47 +48,47 @@ void DatabaseConnection::setPreparedStatements()
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
 	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
-        rc = cass_future_error_code(prepareFuture);
-        preparedUploadJob = cass_future_get_prepared(prepareFuture);
+		rc = cass_future_error_code(prepareFuture);
+		preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
 	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
-        rc = cass_future_error_code(prepareFuture);
-        preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
+		rc = cass_future_error_code(prepareFuture);
+		preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
 	cass_future_free(prepareFuture);
 }
 
-string DatabaseConnection::getTopJob()
+std::string DatabaseConnection::getTopJob()
 {
-	CassStatement* query = cass_prepared_bind(preparedGetTopJob);
-        CassFuture* resultFuture = cass_session_execute(connection, query);
-	 if (cass_future_error_code(resultFuture) == CASS_OK)
-        {
-		const CassResult* result = cass_future_get_result(resultFuture);
-                const CassRow* row = cass_result_first_row(result);
-		const char* url;
+	CassStatement *query = cass_prepared_bind(preparedGetTopJob);
+	CassFuture *resultFuture = cass_session_execute(connection, query);
+	if (cass_future_error_code(resultFuture) == CASS_OK)
+	{
+		const CassResult *result = cass_future_get_result(resultFuture);
+		const CassRow *row = cass_result_first_row(result);
+		const char *url;
 		size_t len;
 		CassUuid id;
 		int priority;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
 		cass_value_get_int32(cass_row_get_column_by_name(row, "priority"), &priority);
-                cass_statement_free(query);
-                cass_future_free(resultFuture);
-		//Delete the job that is returned.
+		cass_statement_free(query);
+		cass_future_free(resultFuture);
+		// Delete the job that is returned.
 		deleteTopJob(id, priority);
-                return url;
+		return url;
 	}
 	else
-        {
-                // Handle error.
-                const char* message;
-                size_t messageLength;
-                cass_future_error_message(resultFuture, &message, &messageLength);
-                fprintf(stderr, "Unable to get job: '%.*s'\n", (int)messageLength, message);
+	{
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to get job: '%.*s'\n", (int)messageLength, message);
 		cass_statement_free(query);
-                return "";
-        }
+		return "";
+	}
 }
 
 void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
@@ -142,26 +140,26 @@ int DatabaseConnection::getNumberOfJobs()
 
 }
 
-void DatabaseConnection::uploadJob(string url, int priority)
+void DatabaseConnection::uploadJob(std::string url, int priority)
 {
-	CassStatement* query = cass_prepared_bind(preparedUploadJob);
+	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-        cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_int32(query, 0, priority);
 
 	cass_statement_bind_string(query, 1, url.c_str());
 
-        CassFuture* queryFuture = cass_session_execute(connection, query);
+	CassFuture *queryFuture = cass_session_execute(connection, query);
 
-        // Statement objects can be freed immediately after being executed.
-        cass_statement_free(query);
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
 
-        // This will block until the query has finished.
-        CassError rc = cass_future_error_code(queryFuture);
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
 
-        if (rc != 0)
-        {
-                printf("Query result: %s\n", cass_error_desc(rc));
-        }
+	if (rc != 0)
+	{
+		printf("Query result: %s\n", cass_error_desc(rc));
+	}
 
-        cass_future_free(queryFuture);
+	cass_future_free(queryFuture);
 }

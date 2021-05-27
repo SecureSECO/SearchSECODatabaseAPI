@@ -18,32 +18,30 @@ Utrecht University within the Software Project course.
 #include "DatabaseRequestHandler.h"
 #include "Utility.h"
 
-using namespace std;
-
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
 {
 	this->database = database;
 	database -> connect(ip, port);
 }
 
-string DatabaseRequestHandler::handleCheckUploadRequest(string request)
+std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request)
 {
-	vector<Hash> hashes = requestToHashes(request);
+	std::vector<Hash> hashes = requestToHashes(request);
 	if (errno != 0)
 	{
 		// Hashes could not be parsed.
 		return "Error parsing hashes.";
 	}
-	string result = handleCheckRequest(hashes);
+	std::string result = handleCheckRequest(hashes);
 	handleUploadRequest(request);
 	return result;
 }
 
-vector<Hash> DatabaseRequestHandler::requestToHashes(string request)
+std::vector<Hash> DatabaseRequestHandler::requestToHashes(std::string request)
 {
 	errno = 0;
-	vector<string> data = Utility::splitStringOn(request, '\n');
-	vector<Hash> hashes = {};
+	std::vector<std::string> data = Utility::splitStringOn(request, '\n');
+	std::vector<Hash> hashes = {};
 	for (int i = 1; i < data.size(); i++)
 	{
 		// Data before first delimiter.
@@ -56,7 +54,7 @@ vector<Hash> DatabaseRequestHandler::requestToHashes(string request)
 		{
 			// Invalid hash in sequence.
 			errno = EILSEQ;
-			return vector<Hash>();
+			return std::vector<Hash>();
 		}
 	}
 	return hashes;
@@ -68,7 +66,7 @@ bool DatabaseRequestHandler::isValidHash(Hash hash)
 	return hash.size() == 32 && hash.find_first_not_of(HEX_CHARS) == -1;
 }
 
-string DatabaseRequestHandler::handleUploadRequest(string request)
+std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 {
 	// Check if project is valid.
 	ProjectIn project = requestToProject(request);
@@ -78,9 +76,9 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 		return "Error parsing project data.";
 	}
 
-	vector<MethodIn> methods;
+	std::vector<MethodIn> methods;
 
-	vector<string> dataEntries = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> dataEntries = Utility::splitStringOn(request, '\n');
 
 	// Check if all methods are valid.
 	for (int i = 1; i < dataEntries.size(); i++)
@@ -96,9 +94,9 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	// Only upload if project and all methods are valid to prevent partial uploads.
 	database -> addProject(project);
 
-	queue<MethodIn> methodQueue;
-	mutex queueLock;
-	vector<thread> threads;
+	std::queue<MethodIn> methodQueue;
+	std::mutex queueLock;
+	std::vector<std::thread> threads;
 
 	for (MethodIn method : methods)
 	{
@@ -106,7 +104,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push_back(thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
@@ -122,7 +120,7 @@ string DatabaseRequestHandler::handleUploadRequest(string request)
 	}
 }
 
-void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex &queueLock, ProjectIn project)
+void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project)
 {
 	while (true)
 	{
@@ -139,12 +137,12 @@ void DatabaseRequestHandler::singleUploadThread(queue<MethodIn> &methods, mutex 
 	}
 }
 
-ProjectIn DatabaseRequestHandler::requestToProject(string request)
+ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
-	string projectString = request.substr(0, request.find('\n'));
-	vector<string> projectData = Utility::splitStringOn(projectString, '?');
+	std::string projectString = request.substr(0, request.find('\n'));
+	std::vector<std::string> projectData = Utility::splitStringOn(projectString, '?');
 
 	if (projectData.size() != PROJECT_DATA_SIZE)
 	{
@@ -173,10 +171,10 @@ ProjectIn DatabaseRequestHandler::requestToProject(string request)
 	return project;
 }
 
-MethodIn DatabaseRequestHandler::dataEntryToMethod(string dataEntry)
+MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 {
 	errno = 0;
-	vector<string> methodData = Utility::splitStringOn(dataEntry, '?');
+	std::vector<std::string> methodData = Utility::splitStringOn(dataEntry, '?');
 
 	if (methodData.size() < METHOD_DATA_MIN_SIZE)
 	{
@@ -202,7 +200,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(string dataEntry)
 		return MethodIn();
 	}
 
-	vector<Author> authors;
+	std::vector<Author> authors;
 	int numberOfAuthors = Utility::safeStoi(methodData[4]);
 	if (errno != 0)
 	{
@@ -229,13 +227,13 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(string dataEntry)
 	return method;
 }
 
-string DatabaseRequestHandler::handleCheckRequest(string request)
+std::string DatabaseRequestHandler::handleCheckRequest(std::string request)
 {
-	vector<Hash> hashes = Utility::splitStringOn(request, '\n');
+	std::vector<Hash> hashes = Utility::splitStringOn(request, '\n');
 	return handleCheckRequest(hashes);
 }
 
-string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
+std::string DatabaseRequestHandler::handleCheckRequest(std::vector<Hash> hashes)
 {
 	// Check if all requested hashes are invalid.
 	for (int i = 0; i < hashes.size(); i++)
@@ -247,10 +245,10 @@ string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 	}
 
 	// Request the specified hashes.
-	vector<MethodOut> methods = getMethods(hashes);
+	std::vector<MethodOut> methods = getMethods(hashes);
 
 	// Return retrieved data.
-	string methodsStringFormat = methodsToString(methods, '?', '\n');
+	std::string methodsStringFormat = methodsToString(methods, '?', '\n');
 	if (!(methodsStringFormat == ""))
 	{
 		return methodsStringFormat;
@@ -261,31 +259,31 @@ string DatabaseRequestHandler::handleCheckRequest(vector<Hash> hashes)
 	}
 }
 
-vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
+std::vector<MethodOut> DatabaseRequestHandler::getMethods(std::vector<Hash> hashes)
 {
-	vector<future<vector<MethodOut>>> results;
-	vector<thread> threads;
-	queue<Hash> hashQueue;
-	mutex queueLock;
+	std::vector<std::future<std::vector<MethodOut>>> results;
+	std::vector<std::thread> threads;
+	std::queue<Hash> hashQueue;
+	std::mutex queueLock;
 	for (int i = 0; i < hashes.size(); i++)
 	{
 		hashQueue.push(hashes[i]);
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		packaged_task<vector<MethodOut>()> task(
+		std::packaged_task<std::vector<MethodOut>()> task(
 			bind(&DatabaseRequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		threads.push_back(thread(move(task)));
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
 		threads[i].join();
 	}
-	vector<MethodOut> methods = {};
+	std::vector<MethodOut> methods = {};
 	for (int i = 0; i < results.size(); i++)
 	{
-		vector<MethodOut> newMethods = results[i].get();
+		std::vector<MethodOut> newMethods = results[i].get();
 
 		for (int j = 0; j < newMethods.size(); j++)
 		{
@@ -295,17 +293,17 @@ vector<MethodOut> DatabaseRequestHandler::getMethods(vector<Hash> hashes)
 	return methods;
 }
 
-vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<ProjectID, Version>> keyQueue)
+std::vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<ProjectID, Version>> keyQueue)
 {
-	vector<future<vector<ProjectOut>>> results;
-	vector<thread> threads;
-	mutex queueLock;
+	std::vector<std::future<std::vector<ProjectOut>>> results;
+	std::vector<std::thread> threads;
+	std::mutex queueLock;
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		packaged_task<vector<ProjectOut>()> task(
+		std::packaged_task<std::vector<ProjectOut>()> task(
 			bind(&DatabaseRequestHandler::singleSearchProjectThread, this, ref(keyQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		threads.push_back(thread(move(task)));
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
@@ -314,7 +312,7 @@ vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<Proj
 	std::vector<ProjectOut> projects = {};
 	for (int i = 0; i < results.size(); i++)
 	{
-		vector<ProjectOut> newProjects = results[i].get();
+		std::vector<ProjectOut> newProjects = results[i].get();
 
 		for (int j = 0; j < newProjects.size(); j++)
 		{
@@ -324,9 +322,9 @@ vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair<Proj
 	return projects;
 }
 
-vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> &hashes, mutex &queueLock)
+std::vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(std::queue<Hash> &hashes, std::mutex &queueLock)
 {
-	vector<MethodOut> methods;
+	std::vector<MethodOut> methods;
 	while (true)
 	{
 		queueLock.lock();
@@ -338,7 +336,7 @@ vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> 
 		Hash hash = hashes.front();
 		hashes.pop();
 		queueLock.unlock();
-		vector<MethodOut> newMethods = database->hashToMethods(hash);
+		std::vector<MethodOut> newMethods = database->hashToMethods(hash);
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(newMethods[j]);
@@ -346,44 +344,44 @@ vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(queue<Hash> 
 	}
 }
 
-string DatabaseRequestHandler::methodsToString(vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
+std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
 {
-	vector<char> chars = {};
+	std::vector<char> chars = {};
 	while (!methods.empty())
 	{
 		MethodOut lastMethod     = methods.back();
-		string hash              = lastMethod.hash;
-		string projectID         = to_string(lastMethod.projectID);
-		string version           = to_string(lastMethod.version);
-		string name              = lastMethod.methodName;
-		string fileLocation      = lastMethod.fileLocation;
-		string lineNumber        = to_string(lastMethod.lineNumber);
-		vector<string> authorIDs = lastMethod.authorIDs;
-		string authorTotal       = to_string(authorIDs.size());
+		std::string hash              = lastMethod.hash;
+		std::string projectID         = std::to_string(lastMethod.projectID);
+		std::string version           = std::to_string(lastMethod.version);
+		std::string name              = lastMethod.methodName;
+		std::string fileLocation      = lastMethod.fileLocation;
+		std::string lineNumber        = std::to_string(lastMethod.lineNumber);
+		std::vector<std::string> authorIDs = lastMethod.authorIDs;
+		std::string authorTotal       = std::to_string(authorIDs.size());
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
-		vector<string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
-		dataElements.insert(end(dataElements), begin(authorIDs), end(authorIDs));
+		std::vector<std::string> dataElements = { hash, projectID, version, name, fileLocation, lineNumber, authorTotal };
+		dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
 
 		// Append 'chars' by the special dataElements separated by special characters.
 		Utility::appendBy(chars, dataElements, dataDelimiter, methodDelimiter);
 		methods.pop_back();
 	}
-	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
 }
 
-string DatabaseRequestHandler::handleExtractProjectsRequest(string request)
+std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string request)
 {
 	errno = 0;
-	vector<string> projectsData = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> projectsData = Utility::splitStringOn(request, '\n');
 	std::queue<std::pair<ProjectID, Version>> keyQueue;
 
 	// We fill the queue with projectKeys, which identify a project uniquely.
 	for (int i = 0; i < projectsData.size(); i++)
 	{
-		vector<string> projectData = Utility::splitStringOn(projectsData[i], '?');
+		std::vector<std::string> projectData = Utility::splitStringOn(projectsData[i], '?');
 		if (projectData.size() < 2)
 		{
 			errno = EILSEQ;
@@ -405,9 +403,9 @@ string DatabaseRequestHandler::handleExtractProjectsRequest(string request)
 	return projectsToString(projects, '?', '\n');
 }
 
-vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(queue<std::pair<ProjectID, Version>> &keys, mutex &queueLock)
+std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &keys, std::mutex &queueLock)
 {
-	vector<ProjectOut> projects;
+	std::vector<ProjectOut> projects;
 	while (true)
 	{
 		queueLock.lock();
@@ -422,7 +420,7 @@ vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(queue<std::
 
 		ProjectID projectID = key.first;
 		Version version = key.second;
-		vector<ProjectOut> newProject = database->searchForProject(projectID, version);
+		std::vector<ProjectOut> newProject = database->searchForProject(projectID, version);
 		if (!newProject.empty())
 		{
 			projects.push_back(newProject[0]);
@@ -430,24 +428,24 @@ vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(queue<std::
 	}
 }
 
-string DatabaseRequestHandler::projectsToString(vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter)
+std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter)
 {
-	vector<char> chars = {};
+	std::vector<char> chars = {};
 	for (int i = 0; i < projects.size(); i++)
 	{
-		std::string projectID = to_string(projects[i].projectID);
-		std::string version = to_string(projects[i].version);
+		std::string projectID = std::to_string(projects[i].projectID);
+		std::string version = std::to_string(projects[i].version);
 		std::string license = projects[i].license;
 		std::string name = projects[i].name;
 		std::string url = projects[i].url;
 		std::string ownerID = projects[i].ownerID;
 		std::vector<Hash> hashes = projects[i].hashes;
-		std::string hashesTotal = to_string(hashes.size());
+		std::string hashesTotal = std::to_string(hashes.size());
 
-		vector<string> dataElements = { projectID, version, license, name, url, ownerID };
+		std::vector<std::string> dataElements = { projectID, version, license, name, url, ownerID };
 		Utility::appendBy(chars, dataElements, dataDelimiter, projectDelimiter);
 	}
-	string result(chars.begin(), chars.end());
+	std::string result(chars.begin(), chars.end());
 
 	if (result != "")
 	{
@@ -456,12 +454,12 @@ string DatabaseRequestHandler::projectsToString(vector<ProjectOut> projects, cha
 	return "No results found.";
 }
 
-string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
+std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request)
 {
 	errno = 0;
-	vector<string> authorStrings = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorStrings = Utility::splitStringOn(request, '\n');
 
-	vector<Author> authors;
+	std::vector<Author> authors;
 
 	for (int i = 0; i < authorStrings.size(); i++)
 	{
@@ -473,7 +471,7 @@ string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
 	}
 
 	// Request the specified hashes.
-	vector<tuple<Author, string>> authorIDs = getAuthorIDs(authors);
+	std::vector<std::tuple<Author, std::string>> authorIDs = getAuthorIDs(authors);
 
 	if (authorIDs.size() <= 0)
 	{
@@ -483,21 +481,21 @@ string DatabaseRequestHandler::handleGetAuthorIDRequest(string request)
 	return authorsToString(authorIDs);
 }
 
-string DatabaseRequestHandler::authorsToString(vector<tuple<Author, string>> authors)
+std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Author, std::string>> authors)
 {
-	vector<char> chars = {};
+	std::vector<char> chars = {};
 	while (!authors.empty())
 	{
-		tuple<Author, string> lastAuthorID = authors.back();
-		string name = get<0>(lastAuthorID).name;
-		string mail = get<0>(lastAuthorID).mail;
-		string id = get<1>(lastAuthorID);
+		std::tuple<Author, std::string> lastAuthorID = authors.back();
+		std::string name = std::get<0>(lastAuthorID).name;
+		std::string mail = std::get<0>(lastAuthorID).mail;
+		std::string id = std::get<1>(lastAuthorID);
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
-		vector<string> dataElements = {name, mail, id};
+		std::vector<std::string> dataElements = {name, mail, id};
 
-		for (string data : dataElements)
+		for (std::string data : dataElements)
 		{
 			Utility::appendBy(chars, data, '?');
 		}
@@ -513,13 +511,13 @@ string DatabaseRequestHandler::authorsToString(vector<tuple<Author, string>> aut
 		chars.push_back('\n');
 		authors.pop_back();
 	}
-	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
 }
 
-Author DatabaseRequestHandler::datanEntryToAuthor(string dataEntry)
+Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
 {
-	vector<string> authorData = Utility::splitStringOn(dataEntry, '?');
+	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, '?');
 
 	Author author;
 
@@ -535,31 +533,31 @@ Author DatabaseRequestHandler::datanEntryToAuthor(string dataEntry)
 	return author;
 }
 
-vector<tuple<Author, string>> DatabaseRequestHandler::getAuthorIDs(vector<Author> authors)
+std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthorIDs(std::vector<Author> authors)
 {
-	vector<future<vector<tuple<Author, string>>>> results;
-	vector<thread> threads;
-	queue<Author> authorQueue;
-	mutex queueLock;
+	std::vector<std::future<std::vector<std::tuple<Author, std::string>>>> results;
+	std::vector<std::thread> threads;
+	std::queue<Author> authorQueue;
+	std::mutex queueLock;
 	for (int i = 0; i < authors.size(); i++)
 	{
 		authorQueue.push(authors[i]);
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		packaged_task<vector<tuple<Author, string>>()> task(
+		std::packaged_task<std::vector<std::tuple<Author, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleAuthorToIDThread, this, ref(authorQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		threads.push_back(thread(move(task)));
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
 		threads[i].join();
 	}
-	vector<tuple<Author, string>> authorIDs;
+	std::vector<std::tuple<Author, std::string>> authorIDs;
 	for (int i = 0; i < results.size(); i++)
 	{
-		vector<tuple<Author, string>> newAuthorIDs = results[i].get();
+		std::vector<std::tuple<Author, std::string>> newAuthorIDs = results[i].get();
 
 		for (int j = 0; j < newAuthorIDs.size(); j++)
 		{
@@ -569,9 +567,9 @@ vector<tuple<Author, string>> DatabaseRequestHandler::getAuthorIDs(vector<Author
 	return authorIDs;
 }
 
-vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(queue<Author> &authors, mutex &queueLock)
+std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleAuthorToIDThread(std::queue<Author> &authors, std::mutex &queueLock)
 {
-	vector<tuple<Author, string>> authorIDs;
+	std::vector<std::tuple<Author, std::string>> authorIDs;
 	while (true)
 	{
 		queueLock.lock();
@@ -583,7 +581,7 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(que
 		Author author = authors.front();
 		authors.pop();
 		queueLock.unlock();
-		string newAuthorID = database->authorToId(author);
+		std::string newAuthorID = database->authorToId(author);
 		if (newAuthorID != "")
 		{
 			authorIDs.push_back(make_tuple(author, newAuthorID));
@@ -591,11 +589,11 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleAuthorToIDThread(que
 	}
 }
 
-string DatabaseRequestHandler::handleGetAuthorRequest(string request)
+std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 {
-	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorIds = Utility::splitStringOn(request, '\n');
 
-	regex re(UUID_REGEX);
+	std::regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIds.size(); i++)
 	{
@@ -606,7 +604,7 @@ string DatabaseRequestHandler::handleGetAuthorRequest(string request)
 	}
 
 	// Request the specified hashes.
-	vector<tuple<Author, string>> authors = getAuthors(authorIds);
+	std::vector<std::tuple<Author, std::string>> authors = getAuthors(authorIds);
 
 	if (authors.size() <= 0)
 	{
@@ -616,31 +614,31 @@ string DatabaseRequestHandler::handleGetAuthorRequest(string request)
 	return authorsToString(authors);
 }
 
-vector<tuple<Author, string>> DatabaseRequestHandler::getAuthors(vector<string> authorIds)
+std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthors(std::vector<std::string> authorIds)
 {
-	vector<future<vector<tuple<Author, string>>>> results;
-	vector<thread> threads;
-	queue<string> authorIdQueue;
-	mutex queueLock;
+	std::vector<std::future<std::vector<std::tuple<Author, std::string>>>> results;
+	std::vector<std::thread> threads;
+	std::queue<std::string> authorIdQueue;
+	std::mutex queueLock;
 	for (int i = 0; i < authorIds.size(); i++)
 	{
 		authorIdQueue.push(authorIds[i]);
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		packaged_task<vector<tuple<Author, string>>()> task(
+		std::packaged_task<std::vector<std::tuple<Author, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleIdToAuthorThread, this, ref(authorIdQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		threads.push_back(thread(move(task)));
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
 		threads[i].join();
 	}
-	vector<tuple<Author, string>> authors;
+	std::vector<std::tuple<Author, std::string>> authors;
 	for (int i = 0; i < results.size(); i++)
 	{
-		vector<tuple<Author, string>> newAuthors = results[i].get();
+		std::vector<std::tuple<Author, std::string>> newAuthors = results[i].get();
 
 		for (int j = 0; j < newAuthors.size(); j++)
 		{
@@ -650,9 +648,9 @@ vector<tuple<Author, string>> DatabaseRequestHandler::getAuthors(vector<string> 
 	return authors;
 }
 
-vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(queue<string> &authorIds, mutex &queueLock)
+std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleIdToAuthorThread(std::queue<std::string> &authorIds, std::mutex &queueLock)
 {
-	vector<tuple<Author, string>> authors;
+	std::vector<std::tuple<Author, std::string>> authors;
 	while (true)
 	{
 		queueLock.lock();
@@ -661,7 +659,7 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(que
 			queueLock.unlock();
 			return authors;
 		}
-		string id = authorIds.front();
+		std::string id = authorIds.front();
 		authorIds.pop();
 		queueLock.unlock();
 		Author newAuthor = database->idToAuthor(id);
@@ -672,11 +670,11 @@ vector<tuple<Author, string>> DatabaseRequestHandler::singleIdToAuthorThread(que
 	}
 }
 
-string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
+std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string request)
 {
-	vector<string> authorIds = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorIds = Utility::splitStringOn(request, '\n');
 
-	regex re(UUID_REGEX);
+	std::regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIds.size(); i++)
 	{
@@ -687,10 +685,10 @@ string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
 	}
 
 	// Request the specified hashes.
-	vector<tuple<MethodId,string>> methods = getMethodsByAuthor(authorIds);
+	std::vector<std::tuple<MethodId, std::string>> methods = getMethodsByAuthor(authorIds);
 
 	// Return retrieved data.
-	string methodsStringFormat = methodIdsToString(methods);
+	std::string methodsStringFormat = methodIdsToString(methods);
 	if (!(methodsStringFormat == ""))
 	{
 		return methodsStringFormat;
@@ -701,31 +699,31 @@ string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(string request)
 	}
 }
 
-vector<tuple<MethodId, string>> DatabaseRequestHandler::getMethodsByAuthor(vector<string> authorIds)
+std::vector<std::tuple<MethodId, std::string>> DatabaseRequestHandler::getMethodsByAuthor(std::vector<std::string> authorIds)
 {
-	vector<future<vector<tuple<MethodId, string>>>> results;
-	vector<thread> threads;
-	queue<string> idQueue;
-	mutex queueLock;
+	std::vector<std::future<std::vector<std::tuple<MethodId, std::string>>>> results;
+	std::vector<std::thread> threads;
+	std::queue<std::string> idQueue;
+	std::mutex queueLock;
 	for (int i = 0; i < authorIds.size(); i++)
 	{
 		idQueue.push(authorIds[i]);
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		packaged_task<vector<tuple<MethodId, string>>()> task(
+		std::packaged_task<std::vector<std::tuple<MethodId, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleAuthorToMethodsThread, this, ref(idQueue), ref(queueLock)));
 		results.push_back(task.get_future());
-		threads.push_back(thread(move(task)));
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
 		threads[i].join();
 	}
-	vector<tuple<MethodId, string>> methods = {};
+	std::vector<std::tuple<MethodId, std::string>> methods = {};
 	for (int i = 0; i < results.size(); i++)
 	{
-		vector<tuple<MethodId, string>> newMethods = results[i].get();
+		std::vector<std::tuple<MethodId, std::string>> newMethods = results[i].get();
 
 		for (int j = 0; j < newMethods.size(); j++)
 		{
@@ -735,9 +733,9 @@ vector<tuple<MethodId, string>> DatabaseRequestHandler::getMethodsByAuthor(vecto
 	return methods;
 }
 
-vector<tuple<MethodId, string>> DatabaseRequestHandler::singleAuthorToMethodsThread(queue<string> &authorIds, mutex &queueLock)
+std::vector<std::tuple<MethodId, std::string>> DatabaseRequestHandler::singleAuthorToMethodsThread(std::queue<std::string> &authorIds, std::mutex &queueLock)
 {
-	vector<tuple<MethodId, string>> methods;
+	std::vector<std::tuple<MethodId, std::string>> methods;
 	while (true)
 	{
 		queueLock.lock();
@@ -746,10 +744,10 @@ vector<tuple<MethodId, string>> DatabaseRequestHandler::singleAuthorToMethodsThr
 			queueLock.unlock();
 			return methods;
 		}
-		string authorId = authorIds.front();
+		std::string authorId = authorIds.front();
 		authorIds.pop();
 		queueLock.unlock();
-		vector<MethodId> newMethods = database->authorToMethods(authorId);
+		std::vector<MethodId> newMethods = database->authorToMethods(authorId);
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(make_tuple(newMethods[j], authorId));
@@ -757,22 +755,22 @@ vector<tuple<MethodId, string>> DatabaseRequestHandler::singleAuthorToMethodsThr
 	}
 }
 
-string DatabaseRequestHandler::methodIdsToString(vector<tuple<MethodId, string>> methods)
+std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<MethodId, std::string>> methods)
 {
-	vector<char> chars = {};
+	std::vector<char> chars = {};
 	while (!methods.empty())
 	{
-		tuple<MethodId, string> lastMethod = methods.back();
-		string hash = get<0>(lastMethod).hash;
-		string projectID = to_string(get<0>(lastMethod).projectId);
-		string version = to_string(get<0>(lastMethod).version);
-		string authorId = get<1>(lastMethod);
+		std::tuple<MethodId, std::string> lastMethod = methods.back();
+		std::string hash = std::get<0>(lastMethod).hash;
+		std::string projectID = std::to_string(std::get<0>(lastMethod).projectId);
+		std::string version = std::to_string(std::get<0>(lastMethod).version);
+		std::string authorId = std::get<1>(lastMethod);
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
-		vector<string> dataElements = {authorId, hash, projectID, version};
+		std::vector<std::string> dataElements = {authorId, hash, projectID, version};
 
-		for (string data : dataElements)
+		for (std::string data : dataElements)
 		{
 			Utility::appendBy(chars, data, '?');
 		}
@@ -788,6 +786,6 @@ string DatabaseRequestHandler::methodIdsToString(vector<tuple<MethodId, string>>
 		chars.push_back('\n');
 		methods.pop_back();
 	}
-	string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
+	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
 }

@@ -21,7 +21,7 @@ Utrecht University within the Software Project course.
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 {
-	//Set up.
+	// Set up.
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;

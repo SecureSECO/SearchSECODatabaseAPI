@@ -94,7 +94,7 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
@@ -119,7 +119,7 @@ TEST(GetAuthorIdRequest, IncorrectInput)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author\n";
@@ -135,7 +135,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
@@ -144,8 +144,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	author.name = "Author";
 	author.mail = "author@mail.com";
 
-	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61"))
-		.WillOnce(testing::Return(author));
+	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
 	ASSERT_EQ(result, output);
 }
@@ -156,7 +155,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
@@ -174,7 +173,7 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
@@ -201,7 +200,7 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
@@ -223,7 +222,7 @@ TEST(GetAuthorRequest, IncorrectInput)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f710348a395143f2d9d49ac61\n";
@@ -239,7 +238,7 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	MethodId method;
@@ -263,7 +262,7 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	MethodId method1;
@@ -288,8 +287,10 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-													   "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	std::string result = handler.handleRequest("aume",
+											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
+											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
+											   nullptr);
 	EXPECT_TRUE(result == output1 || result == output2);
 }
 
@@ -315,7 +316,7 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	MethodId method;
@@ -329,8 +330,10 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-													   "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	std::string result = handler.handleRequest("aume",
+											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
+											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
+											   nullptr);
 
 	std::string output = "41ab7373-8f24-4a03-83dc-621036d99f34?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
 
@@ -343,7 +346,7 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	MethodId method1;
@@ -376,7 +379,7 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	MethodId method1;
@@ -402,8 +405,10 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-													   "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	std::string result = handler.handleRequest("aume",
+											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
+											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
+											   nullptr);
 
 	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
 	std::string output2 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
@@ -421,7 +426,7 @@ TEST(GetMethodByAuthorTests, IncorrectInput)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string output = "Error parsing author id: 41ab73738f244a0383dc621036d99f34";

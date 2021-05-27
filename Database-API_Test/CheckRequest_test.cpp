@@ -67,13 +67,15 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	std::vector<MethodOut> v3;
 	v3.push_back(testMethod3);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
-	EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
-	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-													   "06f73d7ab46184c55bf4742b9428a4c0\n"
-													   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
-		EXPECT_TRUE(result.find(output1) != std::string::npos);
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
+	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
 }
@@ -103,12 +105,14 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 	std::vector<MethodOut> v2;
 	v.push_back(testMethod2);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v2));
-	EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v));
-	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-														   "06f73d7ab46184c55bf4742b9428a4c0\n"
-														   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
 
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
@@ -126,7 +130,7 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 	v.push_back(testMethod1);
 	v.push_back(testMethod4);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
@@ -148,12 +152,14 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	v2.push_back(testMethod5);
 	v3.push_back(testMethod3);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
-	EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
-	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-							   "06f73d7ab46184c55bf4742b9428a4c0\n"
-							   "137fed017b6159acc0af30d2c6b403a5\n", nullptr);
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
