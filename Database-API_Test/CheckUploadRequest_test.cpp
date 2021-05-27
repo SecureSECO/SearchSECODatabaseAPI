@@ -3,6 +3,7 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
+#include "HTTPStatus.h"
 #include "DatabaseMock.cpp"
 #include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
@@ -11,12 +12,12 @@ Utrecht University within the Software Project course.
 MATCHER_P(projectEqual, project, "")
 {
 	return arg.projectID  == project.projectID
-	    && arg.version    == project.version
-	    && arg.license    == project.license
-	    && arg.name       == project.name
-	    && arg.url        == project.url
-	    && arg.owner.name == project.owner.name
-	    && arg.owner.mail == project.owner.mail;
+		&& arg.version    == project.version
+		&& arg.license    == project.license
+		&& arg.name       == project.name
+		&& arg.url        == project.url
+		&& arg.owner.name == project.owner.name
+		&& arg.owner.mail == project.owner.mail;
 
 }
 
@@ -70,7 +71,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project))).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly handles a checkupload which cannot be converted to hashes.
@@ -83,5 +84,5 @@ TEST(CheckUploadRequest, HashConversionError)
 						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 
 	std::string result = handler.handleRequest("chup", request, nullptr);
-	ASSERT_EQ(result, "Error parsing hashes.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing hashes."));
 }

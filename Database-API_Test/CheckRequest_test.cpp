@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
@@ -50,7 +51,8 @@ TEST(CheckRequestTests, SingleHashRequest)
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
-	EXPECT_EQ(result, output1);
+	EXPECT_EQ(result, HTTPStatusCodes::success(output1));
+
 }
 
 // Checks if the program works when a check request is sent providing multiple hashes.
@@ -78,6 +80,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program can successfully handle a check request with a hash which is not in the database.
@@ -91,7 +94,7 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
-	EXPECT_EQ(result, "No results found.");
+	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
 // Checks if the program can successfully handle a check request with multiple hashes, all with one match.
@@ -117,6 +120,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_FALSE(result.find(output3) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program can successfully handle a check request with one hash, having multiple matches.
@@ -134,6 +138,7 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Check if the program can successfully handle a check request with multiple hashes, having multiple matches.
@@ -166,6 +171,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_TRUE(result.find(output5) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program correctly identifies an invalid hash in the input.
@@ -175,5 +181,5 @@ TEST(CheckRequestTests, InvalidHash)
 	std::string request = "hello_I'm_an_invalid_hash";
 
 	std::string output = handler.handleRequest("chck", request, nullptr);
-	ASSERT_EQ(output, "Invalid hash presented.");
+	ASSERT_EQ(output, HTTPStatusCodes::clientError("Invalid hash presented."));
 }

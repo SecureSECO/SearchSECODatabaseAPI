@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
 #include "DatabaseConnection.h"
+#include "HTTPStatus.h"
 #include "RAFTConsensus.h"
 #include "Utility.h"
 #include <gtest/gtest.h>
@@ -34,7 +35,7 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 
 	// Test:
 	const std::string output1 = handler.handleRequest("chck", input1, nullptr);
-	ASSERT_EQ(output1, expectedOutput1);
+	ASSERT_EQ(output1, HTTPStatusCodes::success(expectedOutput1));
 }
 
 // Tests check request functionality with unknown hash as input.
@@ -51,7 +52,7 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 
 	// Test:
 	const std::string output2 = handler.handleRequest("chck", input2, nullptr);
-	ASSERT_EQ(output2, expectedOutput2);
+	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }
 
 // Tests check request functionality with multiple hashes as input.
@@ -74,7 +75,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	// Test:
 	std::string output3 = handler.handleRequest("chck", input3, nullptr);
-	std::vector<std::string> entries3 = Utility::splitStringOn(output3, '\n');
+	std::vector<std::string> entries3 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output3), '\n');
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries3.size(), 3);
@@ -118,7 +119,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	// Test:
 	std::string output4 = handler.handleRequest("chck", input4, nullptr);
-	std::vector<std::string> entries4 = Utility::splitStringOn(output4, '\n');
+	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), '\n');
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries4.size(), 3);
@@ -149,11 +150,11 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 
 	// Test if output is correct:
 	const std::string output5_1 = handler.handleRequest("upld", input5_1, nullptr);
-	ASSERT_EQ(output5_1, expectedOutput5_1);
+	ASSERT_EQ(output5_1, HTTPStatusCodes::success(expectedOutput5_1));
 
 	// Test if the method from the project is actually in the database:
 	const std::string output5_2 = handler.handleRequest("chck", input5_2, nullptr);
-	ASSERT_NE(output5_2, unexpectedOutput5_2);
+	ASSERT_NE(output5_2, HTTPStatusCodes::success(unexpectedOutput5_2));
 }
 
 // Tests upload request functionality with multiple methods as input.
@@ -178,16 +179,17 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 
 	// Test if output is correct:
 	std::string output6_1 = handler.handleRequest("upld", input6_1, nullptr);
-	ASSERT_EQ(output6_1, expectedOutput6);
+	ASSERT_EQ(output6_1, HTTPStatusCodes::success(expectedOutput6));
 
 	// Test properties the data in the database should satisfy by doing a check request:
 	std::string output6_2 = handler.handleRequest("chck", input6_2, nullptr);
 
 	// Test if the output has the right number of entries (which should be 3):
-	ASSERT_EQ(std::count(output6_2.begin(), output6_2.end(), '\n'), 3);
+	std::string output6_2_message = HTTPStatusCodes::getMessage(output6_2);
+	ASSERT_EQ(std::count(output6_2_message.begin(), output6_2_message.end(), '\n'), 3);
 
 	// Test if authorID generation works correctly by checking if there are exactly two authorIDs with frequency 2:
-	std::vector<std::string> entries = Utility::splitStringOn(output6_2, '\n');
+	std::vector<std::string> entries = Utility::splitStringOn(output6_2_message, '\n');
 	std::vector<std::string> authorIDs = {};
 	const int numberOfAuthorsIndex = 6;
 	for (int i = 0; i < entries.size(); i++)
@@ -224,7 +226,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 
 	// Test:
 	const std::string output7 = handler.handleRequest("chup", input7, nullptr);
-	ASSERT_EQ(output7, expectedOutput7);
+	ASSERT_EQ(output7, HTTPStatusCodes::success(expectedOutput7));
 }
 
 // Tests id by author request functionality with multiple known authors as input.
@@ -245,7 +247,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("auid", request, nullptr);
-	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
+	ASSERT_TRUE(output == HTTPStatusCodes::success(expectedOutput1) || output == HTTPStatusCodes::success(expectedOutput2));
 }
 
 // Tests id by author request functionality with an unknown author as input.
@@ -263,7 +265,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests id by author request functionality with a known and unknown author as input.
@@ -281,7 +283,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests author by id request functionality with multiple known authors as input.
@@ -302,7 +304,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("idau", request, nullptr);
-	ASSERT_TRUE(output == expectedOutput1 || output == expectedOutput2);
+	ASSERT_TRUE(output == HTTPStatusCodes::success(expectedOutput1) || output == HTTPStatusCodes::success(expectedOutput2));
 }
 
 // Tests author by id request functionality with an unknown author as input.
@@ -320,7 +322,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests author by id request functionality with a known and unknown author as input.
@@ -338,7 +340,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 
 	// Test:
 	const std::string output = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests method by author request functionality with a single known author id as input.
@@ -356,7 +358,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 
 	// Test:
 	const std::string output = handler.handleRequest("aume", input, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests method by author request functionality with unknown author id as input.
@@ -374,7 +376,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 
 	// Test:
 	const std::string output = handler.handleRequest("aume", input, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 // Tests method by author request functionality with multiple author ids as input.
@@ -395,7 +397,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 	// Test:
 	std::string result = handler.handleRequest("aume", input, nullptr);
 
-	EXPECT_EQ(result.size(), output1.size() + output2.size() + output3.size());
+	EXPECT_EQ(result.size(), HTTPStatusCodes::success(output1).size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
@@ -417,7 +419,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 	// Test:
 	std::string output = handler.handleRequest("aume", input, nullptr);
 
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
 
@@ -428,7 +430,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 	DatabaseHandler database;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
+	DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
 
 	std::string input9 = "1?5000000000000";
@@ -437,7 +439,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 
 	// Test:
 	std::string output9 = handler.handleRequest("extp", input9, nullptr);
-	ASSERT_EQ(output9, expected9);
+	ASSERT_EQ(output9, HTTPStatusCodes::success(expected9));
 }
 
 // Tests extract projects request with a non-existent project.
@@ -447,7 +449,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 	DatabaseHandler database;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
+	DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
 
 	std::string input10 = "1?5000000001000";
@@ -455,7 +457,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 
 	// Test:
 	std::string output10 = handler.handleRequest("extp", input10, nullptr);
-	ASSERT_EQ(output10, expected10);
+	ASSERT_EQ(output10, HTTPStatusCodes::success(expected10));
 }
 
 // Tests extract projects request with multiple versions of the same project.
@@ -465,7 +467,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	DatabaseHandler database;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
+	DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
 
 	std::string input11 = "101?5000000008000\n101?5000000009000";
@@ -477,7 +479,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 
 	// Test:
 	std::string output11 = handler.handleRequest("extp", input11, nullptr);
-	std::vector<std::string> entries11 = Utility::splitStringOn(output11, '\n');
+	std::vector<std::string> entries11 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output11), '\n');
 
 	ASSERT_EQ(entries11.size(), 2);
 
@@ -496,7 +498,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	DatabaseHandler database;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-        DatabaseConnection jddatabase;
+	DatabaseConnection jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
 
 	std::string input12 = "2?5000000001000\n2?5000000002000\n3?5000000002000\n4?5000000005000";
@@ -507,7 +509,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 
 	// Test:
 	std::string output12 = handler.handleRequest("extp", input12, nullptr);
-	std::vector<std::string> entries12 = Utility::splitStringOn(output12, '\n');
+	std::vector<std::string> entries12 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), '\n');
 
 	// Check if the number of found projects is equal to 3.
 	ASSERT_EQ(entries12.size(), 3);

@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
 #include "RequestHandler.h"
 #include "JDDatabaseMock.cpp"
 #include "RaftConsensusMock.cpp"
@@ -35,7 +36,7 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 
 	EXPECT_CALL(database, authorToId(authorEqual(author))).WillOnce(testing::Return("47919e8f-7103-48a3-9514-3f2d9d49ac61"));
 	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves an author id with one request and no match.
@@ -44,7 +45,7 @@ TEST(GetAuthorIdRequest, OneRequestNoMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author?author@mail.com\n";
@@ -56,7 +57,7 @@ TEST(GetAuthorIdRequest, OneRequestNoMatch)
 	EXPECT_CALL(database, authorToId(authorEqual(author)))
 		.WillOnce(testing::Return(""));
 	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves an author id with multiple requests and one match per request.
@@ -65,7 +66,7 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
@@ -85,7 +86,7 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	EXPECT_CALL(database, authorToId(authorEqual(author2)))
 		.WillOnce(testing::Return("41ab7373-8f24-4a03-83dc-621036d99f34"));
 	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_TRUE(result == output1 || result == output2);
+	ASSERT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
 // Tests if program correctly retrieves an author id with multiple requests and one match total.
@@ -110,7 +111,7 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 		.WillOnce(testing::Return("47919e8f-7103-48a3-9514-3f2d9d49ac61"));
 	EXPECT_CALL(database, authorToId(authorEqual(author2))).WillOnce(testing::Return(""));
 	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests whether an error message is returned when only one argument is given.
@@ -126,7 +127,7 @@ TEST(GetAuthorIdRequest, IncorrectInput)
 	std::string output = "Error parsing author: Author";
 
 	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError(output));
 }
 
 // Tests if program correctly retrieves an author with one request and one (hard-coded) match.
@@ -146,7 +147,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves an author with one request and no match.
@@ -164,7 +165,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves an author with multiple requests and one match pre request.
@@ -191,7 +192,7 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
 	std::string result = handler.handleRequest("idau", request, nullptr);
-	ASSERT_TRUE(result == output1 || result == output2);
+	ASSERT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
 // Tests if program correctly retrieves an author with multiple requests and one match total.
@@ -213,7 +214,7 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
 	std::string result = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program returns an error message when an incorrect id is given.
@@ -229,7 +230,7 @@ TEST(GetAuthorRequest, IncorrectInput)
 	std::string output = "Error parsing author id: 47919e8f710348a395143f2d9d49ac61";
 
 	std::string result = handler.handleRequest("idau", request, nullptr);
-	ASSERT_EQ(result, output);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError(output));
 }
 
 // Tests if program correctly retrieves a method with one author and one match.
@@ -253,7 +254,7 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
-	EXPECT_EQ(result, output);
+	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves a method with multiple authors and one match per author.
@@ -287,11 +288,10 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("aume",
-											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
-											   nullptr);
-	EXPECT_TRUE(result == output1 || result == output2);
+
+	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
+													   "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
 // Tests if program correctly retrieves a method with one author and no match.
@@ -300,14 +300,14 @@ TEST(GetMethodByAuthorTests, SingleIdNoMatch)
 	MockDatabase database;
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
-        MockJDDatabase jddatabase;
+	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::vector<MethodId> v;
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n", nullptr);
-	EXPECT_EQ(result, "No results found.");
+	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
 // Tests if program correctly retrieves a method with multiple authors and one match total.
@@ -337,7 +337,7 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 
 	std::string output = "41ab7373-8f24-4a03-83dc-621036d99f34?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
 
-	EXPECT_EQ(result, output);
+	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
 
 // Tests if program correctly retrieves a method with one author and multiple matches.
@@ -370,7 +370,7 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n", nullptr);
-	EXPECT_TRUE(result == output1 || result == output2);
+	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
 // Tests if program correctly retrieves a method with multiple authors and multiple matches.
@@ -414,10 +414,11 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	std::string output2 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
 	std::string output3 = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
 
-	EXPECT_EQ(result.size(), output1.size() + output2.size() + output3.size());
+	EXPECT_EQ(result.size(), HTTPStatusCodes::success(output1).size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
+	ASSERT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Tests if program returns an error message when an incorrect id is given.
@@ -432,5 +433,5 @@ TEST(GetMethodByAuthorTests, IncorrectInput)
 	std::string output = "Error parsing author id: 41ab73738f244a0383dc621036d99f34";
 
 	std::string result = handler.handleRequest("aume", "41ab73738f244a0383dc621036d99f34\n", nullptr);
-	EXPECT_EQ(result, output);
+	EXPECT_EQ(result, HTTPStatusCodes::clientError(output));
 }

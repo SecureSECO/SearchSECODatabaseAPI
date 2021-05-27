@@ -1,9 +1,10 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+Â© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "HTTPStatus.h"
 #include "RequestHandler.h"
 #include "Utility.h"
 #include "JDDatabaseMock.cpp"
@@ -11,6 +12,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseMock.cpp"
 #include <gtest/gtest.h>
 #include <boost/shared_ptr.hpp>
+
 
 // Checks if extract projects request works correctly when the request is empty.
 TEST(ExtractProjectsRequestTests, Empty)
@@ -21,7 +23,7 @@ TEST(ExtractProjectsRequestTests, Empty)
 	std::string expected1 = "No results found.";
 
 	std::string output1 = handler.handleRequest("extp", input1, nullptr);
-	ASSERT_EQ(output1, expected1);
+	ASSERT_EQ(output1, HTTPStatusCodes::success(expected1));
 }
 
 // Checks if the extract projects request works correctly when searching for a single existing project.
@@ -49,7 +51,7 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 
 	EXPECT_CALL(database, searchForProject(projectID2, version2)).WillOnce(testing::Return(p2));
 	std::string output2 = handler.handleRequest("extp", input2, nullptr);
-	ASSERT_EQ(output2, expected2);
+	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
 
 // Checks if the extract projects request works correctly when searching for a non-existing project.
@@ -69,7 +71,7 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 
 	EXPECT_CALL(database, searchForProject(projectID3, version3)).WillOnce(testing::Return(p3));
 	std::string output3 = handler.handleRequest("extp", input3, nullptr);
-	ASSERT_EQ(output3, expected3);
+	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
 
 // Checks if the extract projects request works correctly when searching for multiple projects.
@@ -126,7 +128,10 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	EXPECT_CALL(database, searchForProject(projectID4_3, version4_3)).WillOnce(testing::Return(p4_3));
 	EXPECT_CALL(database, searchForProject(projectID4_4, version4_4)).WillOnce(testing::Return(p4_4));
 	std::string output4 = handler.handleRequest("extp", input4, nullptr);
-	std::vector<std::string> entries4 = Utility::splitStringOn(output4, '\n');
+	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), '\n');
+
+	// Expect the status code to be succesfull.
+	EXPECT_EQ(HTTPStatusCodes::getCode(output4), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 
 	// Assert that the output contains 3 entries.
 	ASSERT_EQ(entries4.size(), 3);
@@ -149,7 +154,7 @@ TEST(ExtractProjectsRequestTests, TooFewArguments)
 		"The request failed. Each project should be provided a projectID and a version (in that order).";
 
 	std::string output5 = handler.handleRequest("extp", input5, nullptr);
-	ASSERT_EQ(output5, expected5);
+	ASSERT_EQ(output5, HTTPStatusCodes::clientError(expected5));
 }
 
 // Tests if an input for the extract projects request with wrong argument types is correctly handled.
@@ -162,5 +167,5 @@ TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 		"The request failed. For each project, both the projectID and the version should be a long long int.";
 
 	std::string output6 = handler.handleRequest("extp", input6, nullptr);
-	ASSERT_EQ(output6, expected6);
+	ASSERT_EQ(output6, HTTPStatusCodes::clientError(expected6));
 }

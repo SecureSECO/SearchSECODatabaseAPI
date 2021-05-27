@@ -19,18 +19,18 @@ class JobRequestHandler
 {
 public:
 	/// <summary>
-        /// Constructor method.
-        /// </summary>
+	/// Constructor method.
+	/// </summary>
 	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port);
 
 	/// <summary>
-        /// Handles request from new node to connect to the network.
-        /// </summary>
+	/// Handles request from new node to connect to the network.
+	/// </summary>
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
 	/// <summary>
-        /// Handles request to upload one or more jobs with their priorities.
-        /// </summary>
+	/// Handles request to upload one or more jobs with their priorities.
+	/// </summary>
 	/// <param name="data">
 	/// Consists of url and priority pairs, the url and priority are separated by a '?' and the pairs by '\n'.
 	/// Data format is url1?priority1\nurl2?priority2\n...
@@ -41,8 +41,8 @@ public:
 	std::string handleUploadJobRequest(std::string request, std::string data);
 
 	/// <summary>
-        /// Handles request to give the top job from the queue.
-        /// </summary>
+	/// Handles request to give the top job from the queue.
+	/// </summary>
 	/// <returns>
 	/// Response is "Spider?url", where url is the url of the first job in the database
 	/// if there are enough in the database or if a crawler is already working.
@@ -53,8 +53,8 @@ public:
 	std::string handleGetJobRequest(std::string request, std::string data);
 
 	/// <summary>
-        /// Handles request to upload crawl data to the job queue.
-        /// </summary>
+	/// Handles request to upload crawl data to the job queue.
+	/// </summary>
 	/// <param name="data">
 	/// Data is almost the same as in handleUploadJobRequest, but now with an id in front.
 	/// Data format is id\nurl1?priority1\nurl2?priority2\n...

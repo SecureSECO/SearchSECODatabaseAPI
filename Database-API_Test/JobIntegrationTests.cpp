@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 #include "DatabaseHandler.h"
 #include "DatabaseConnection.h"
+#include "HTTPStatus.h"
 #include "RAFTConsensus.h"
 #include "Utility.h"
 #include <gtest/gtest.h>
@@ -30,12 +31,12 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 
 	// Test:
 	std::string output = handler.handleRequest("gtjb", input, nullptr);
-	ASSERT_EQ(output, expectedOutput);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	std::string expectedOutput2 = "Spider?https://github.com/caged/microsis";
 
 	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
-	ASSERT_EQ(output2, expectedOutput2);
+	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }
 
 // Test if job is succesfully uploaded and the numberOfJobs variable is increased
@@ -59,12 +60,12 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	std::string expectedOutput2 = "Crawl?0";
 
 	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
-	ASSERT_EQ(output2, expectedOutput2);
+	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 
 	std::string expectedOutput3 = "Spider?https://github.com/mcostalba/Stockfish";
 
 	std::string output3 = handler.handleRequest("gtjb", input2, nullptr);
-	ASSERT_EQ(output3, expectedOutput3);
+	ASSERT_EQ(output3, HTTPStatusCodes::success(expectedOutput3));
 }
 
 // Test if multiple jobs get succesfully uploaded.
@@ -101,5 +102,5 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
 	std::string expectedOutput2 = "Crawl?100";
 
-	ASSERT_EQ(output2, expectedOutput2);
+	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }

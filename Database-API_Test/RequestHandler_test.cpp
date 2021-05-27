@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
 #include "RAFTConsensus.h"
 #include <gtest/gtest.h>
@@ -22,5 +23,5 @@ TEST(GeneralTest, InitializeTest)
 TEST(GeneralTest, UnknownRequest)
 {
 	RequestHandler handler;
-	EXPECT_EQ(handler.handleRequest("kill", "", nullptr), "Unknown request type.");
+	EXPECT_EQ(handler.handleRequest("kill", "", nullptr), HTTPStatusCodes::clientError("Unknown request type."));
 }
