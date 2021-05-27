@@ -16,6 +16,7 @@ Utrecht University within the Software Project course.
 #include <functional>
 
 #include "DatabaseRequestHandler.h"
+#include "HTTPStatus.h"
 #include "Utility.h"
 
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
@@ -30,11 +31,40 @@ std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request
 	if (errno != 0)
 	{
 		// Hashes could not be parsed.
-		return "Error parsing hashes.";
+		return HTTPStatusCodes::clientError("Error parsing hashes.");
 	}
-	std::string result = handleCheckRequest(hashes);
-	handleUploadRequest(request);
-	return result;
+	std::string checkResult = handleCheckRequest(hashes);
+	std::string checkStatusCode = HTTPStatusCodes::getCode(checkResult);
+
+	// Check failed.
+	if (checkStatusCode == "400")
+	{
+		return checkResult;
+	}
+	// Unknown response.
+	else if (checkStatusCode != "200")
+	{
+		return checkResult;
+	}
+
+	std::string uploadResult = handleUploadRequest(request);
+	std::string uploadStatusCode = HTTPStatusCodes::getCode(uploadResult);
+
+	// Uploaded succeeded.
+	if (uploadStatusCode == "200")
+	{
+		return checkResult;
+	}
+	// Check failed.
+	else if (uploadStatusCode == "400")
+	{
+		return uploadResult;
+	}
+	// Unknown response.
+	else
+	{
+		return uploadResult;
+	}
 }
 
 std::vector<Hash> DatabaseRequestHandler::requestToHashes(std::string request)
@@ -73,7 +103,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	if (errno != 0)
 	{
 		// Project could not be parsed.
-		return "Error parsing project data.";
+		return HTTPStatusCodes::clientError("Error parsing project data.");
 	}
 
 	std::vector<MethodIn> methods;
@@ -86,7 +116,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
 		if (errno != 0)
 		{
-			return "Error parsing method " + std::to_string(i) + ".";
+			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i) + ".");
 		}
 		methods.push_back(method);
 	}
@@ -112,11 +142,11 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	}
 	if (errno == 0)
 	{
-		return "Your project has been successfully added to the database.";
+		return HTTPStatusCodes::success("Your project has been successfully added to the database.");
 	}
 	else
 	{
-		return "An unexpected error occurred.";
+		return HTTPStatusCodes::clientError("An unexpected error occurred.");
 	}
 }
 
@@ -240,7 +270,7 @@ std::string DatabaseRequestHandler::handleCheckRequest(std::vector<Hash> hashes)
 	{
 		if (!isValidHash(hashes[i]))
 		{
-			return "Invalid hash presented.";
+			return HTTPStatusCodes::clientError("Invalid hash presented.");
 		}
 	}
 
@@ -251,11 +281,11 @@ std::string DatabaseRequestHandler::handleCheckRequest(std::vector<Hash> hashes)
 	std::string methodsStringFormat = methodsToString(methods, '?', '\n');
 	if (!(methodsStringFormat == ""))
 	{
-		return methodsStringFormat;
+		return HTTPStatusCodes::success(methodsStringFormat);
 	}
 	else
 	{
-		return "No results found.";
+		return HTTPStatusCodes::success("No results found.");
 	}
 }
 
@@ -385,14 +415,13 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 		if (projectData.size() < 2)
 		{
 			errno = EILSEQ;
-			return "The request failed. Each project should be provided a projectID and a version (in that order).";
+			return HTTPStatusCodes::clientError("The request failed. Each project should be provided a projectID and a version (in that order).");
 		}
 		ProjectID projectID = Utility::safeStoll(projectData[0]);
 		Version version = Utility::safeStoll(projectData[1]);
 		if (errno != 0)
 		{
-			return "The request failed. For each project, both the projectID "
-				   "and the version should be a long long int.";
+			return HTTPStatusCodes::clientError("The request failed. For each project, both the projectID and the version should be a long long int.");
 		}
 
 		std::pair<ProjectID, Version> key = std::make_pair(projectID, version);
@@ -400,7 +429,7 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 	}
 
 	std::vector<ProjectOut> projects = getProjects(keyQueue);
-	return projectsToString(projects, '?', '\n');
+	return HTTPStatusCodes::success(projectsToString(projects, '?', '\n'));
 }
 
 std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &keys, std::mutex &queueLock)
@@ -466,7 +495,7 @@ std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request
 		authors.push_back(datanEntryToAuthor(authorStrings[i]));
 		if (errno != 0)
 		{
-			return "Error parsing author: " + authorStrings[i];
+			return HTTPStatusCodes::clientError("Error parsing author: " + authorStrings[i]);
 		}
 	}
 
@@ -475,10 +504,10 @@ std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request
 
 	if (authorIDs.size() <= 0)
 	{
-		return "No results found.";
+		return HTTPStatusCodes::success("No results found.");
 	}
 
-	return authorsToString(authorIDs);
+	return HTTPStatusCodes::success(authorsToString(authorIDs));
 }
 
 std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Author, std::string>> authors)
@@ -599,7 +628,7 @@ std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 	{
 		if (!regex_match(authorIds[i], re))
 		{
-			return "Error parsing author id: " + authorIds[i];
+			return HTTPStatusCodes::clientError("Error parsing author id: " + authorIds[i]);
 		}
 	}
 
@@ -608,10 +637,10 @@ std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 
 	if (authors.size() <= 0)
 	{
-		return "No results found.";
+		return HTTPStatusCodes::success("No results found.");
 	}
 
-	return authorsToString(authors);
+	return HTTPStatusCodes::success(authorsToString(authors));
 }
 
 std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthors(std::vector<std::string> authorIds)
@@ -680,7 +709,7 @@ std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string 
 	{
 		if (!regex_match(authorIds[i], re))
 		{
-			return "Error parsing author id: " + authorIds[i];
+			return HTTPStatusCodes::clientError("Error parsing author id: " + authorIds[i]);
 		}
 	}
 
@@ -691,11 +720,11 @@ std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string 
 	std::string methodsStringFormat = methodIdsToString(methods);
 	if (!(methodsStringFormat == ""))
 	{
-		return methodsStringFormat;
+		return HTTPStatusCodes::success(methodsStringFormat);
 	}
 	else
 	{
-		return "No results found.";
+		return HTTPStatusCodes::success("No results found.");
 	}
 }
 

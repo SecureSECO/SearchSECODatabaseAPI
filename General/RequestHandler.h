@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
+#include "HTTPStatus.h"
 #include "JobRequestHandler.h"
 #include "DatabaseRequestHandler.h"
 #include "RAFTConsensus.h"

@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
 #include "RaftConsensusMock.cpp"
 #include <gtest/gtest.h>
@@ -28,13 +29,13 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, "Crawl?0");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Crawl?0"));
 
 	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result2, "Spider?https://github.com/zavg/linux-0.01");
+	ASSERT_EQ(result2, HTTPStatusCodes::success("Spider?https://github.com/zavg/linux-0.01"));
 }
 
 // Test if job is returned when there are enough jobs in the database.
@@ -55,7 +56,7 @@ TEST(GetJobRequest, EnoughJobsTest)
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, "Spider?https://github.com/zavg/linux-0.01");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Spider?https://github.com/zavg/linux-0.01"));
 }
 
 // Test if the right string is returned when there are no jobs in the database.
@@ -76,10 +77,10 @@ TEST(GetJobRequest, NoJobsTest)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, "Crawl?0");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Crawl?0"));
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result2, "NoJob");
+	ASSERT_EQ(result2, HTTPStatusCodes::success("NoJob"));
 }

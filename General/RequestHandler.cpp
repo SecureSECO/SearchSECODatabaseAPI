@@ -68,12 +68,12 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 
 std::string RequestHandler::handleUnknownRequest()
 {
-	return "Unknown request type.";
+	return HTTPStatusCodes::clientError("Unknown request type.");
 }
 
 std::string RequestHandler::handleNotImplementedRequest()
 {
-	return "Request not implemented yet.";
+	return HTTPStatusCodes::clientError("Request not implemented yet.");
 }
 
 eRequestType RequestHandler::getERequestType(std::string requestType)

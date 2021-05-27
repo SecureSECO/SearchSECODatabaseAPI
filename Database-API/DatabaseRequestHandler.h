@@ -195,7 +195,7 @@ private:
 	/// A string consisting of all provided projects, separated by 'dataDelimiter' to recognise different fields and
 	/// separated by 'projectDelimiter' for separate projects..
 	/// </returns>
-        std::string projectsToString(std::vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter);
+	std::string projectsToString(std::vector<ProjectOut> projects, char dataDelimiter, char projectDelimiter);
 
 	/// <summary>
 	/// Retrieves the methods corresponding to the hashes given as input using the database.

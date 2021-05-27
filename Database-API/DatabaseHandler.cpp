@@ -171,11 +171,11 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 	}
 	else
 	{
-	    	// Handle error.
-    		const char *message;
-    		size_t messageLength;
-    		cass_future_error_message(resultFuture, &message, &messageLength);
-    		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
 	}
 
 	cass_statement_free(query);

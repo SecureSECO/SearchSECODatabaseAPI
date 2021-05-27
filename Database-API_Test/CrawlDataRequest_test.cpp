@@ -3,6 +3,7 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "RequestHandler.h"
+#include "HTTPStatus.h"
 #include "DatabaseMock.cpp"
 #include "JDDatabaseMock.cpp"
 #include "RaftConsensusMock.cpp"
@@ -24,7 +25,7 @@ TEST(CrawlDataRequest, SingleJob)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, "Your job(s) has been succesfully added to the queue.");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue."));
 
 	std::string requestType2 = "gtjb";
 	std::string request2 = "";
@@ -33,7 +34,7 @@ TEST(CrawlDataRequest, SingleJob)
 
 	std::string result2 = handler.handleRequest(requestType2, request2, nullptr);
 
-	ASSERT_EQ(result2, "Crawl?100");
+	ASSERT_EQ(result2, HTTPStatusCodes::success("Crawl?100"));
 }
 
 // Check if an invalid crawlId is handled correctly.
@@ -53,5 +54,5 @@ TEST(CrawlDataRequest, InvalidId)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, "Error: invalid crawlId.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error: invalid crawlId."));
 }

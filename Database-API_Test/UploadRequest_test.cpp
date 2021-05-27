@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 #include <vector>
@@ -88,7 +89,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
-	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if the program can successfully handle an upload request of a project with multiple methods,
@@ -114,7 +115,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1))).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
-	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if program can successfully handle an upload request with multiple methods
@@ -142,7 +143,7 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2))).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
-	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if the program can handle an upload request with invalid project data, too many arguments.
@@ -152,7 +153,7 @@ TEST(UploadRequest, InvalidProjectSize)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing project data.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 // Tests if the program can handle an upload request with invalid project data, non-integer id.
@@ -162,7 +163,7 @@ TEST(UploadRequest, InvalidProjectID)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing project data.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 
@@ -173,7 +174,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing project data.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, too few arguments.
@@ -184,7 +185,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, too many arguments.
@@ -196,7 +197,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, invalid method hash.
@@ -210,7 +211,7 @@ TEST(UploadRequest, InvalidMethodHash)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing method 2.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 2."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, non-integer line number.
@@ -222,7 +223,7 @@ TEST(UploadRequest, InvalidMethodLine)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 
@@ -235,5 +236,5 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 	RequestHandler handler;
 
 	std::string result = handler.handleRequest("upld", request, nullptr);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }

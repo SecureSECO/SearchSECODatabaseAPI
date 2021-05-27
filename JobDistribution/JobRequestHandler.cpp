@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "JobRequestHandler.h"
+#include "HTTPStatus.h"
 
 
 #include <iostream>
@@ -29,21 +30,21 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	if (raft->isLeader())
 	{
 		// Check if number of jobs is enough to provide the top job.
-        	if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
-        	{
+		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
+		{
 			numberOfJobs -= 1;
-                	return "Spider?" +  database->getTopJob();
-        	}
-        	// If number of jobs is not high enough, the job is to crawl for more jobs.
-        	else if (alreadyCrawling == false)
-        	{
-                	alreadyCrawling = true;
-                	return "Crawl?" + std::to_string(crawlId);
-        	}
-        	else
-        	{
-                	return "NoJob";
-        	}
+			return HTTPStatusCodes::success("Spider?" +  database->getTopJob());
+		}
+		// If number of jobs is not high enough, the job is to crawl for more jobs.
+		else if (alreadyCrawling == false)
+		{
+			alreadyCrawling = true;
+			return HTTPStatusCodes::success("Crawl?" + std::to_string(crawlId));
+		}
+		else
+		{
+			return HTTPStatusCodes::success("NoJob");
+		}
 	}
 	return raft->passRequestToLeader(request, data);
 }
@@ -70,7 +71,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 			}
 			else
 			{
-				return "A job has an invalid priority, no jobs have been added to the queue.";
+				return HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue.");
 			}
 		}
 		// Call to the database to upload jobs.
@@ -81,11 +82,11 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 		}
 		if (errno == 0)
 		{
-			return "Your job(s) has been succesfully added to the queue.";
+			return HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue.");
 		}
 		else
 		{
-			return "An error has occurred while adding your job(s) to the queue.";
+			return HTTPStatusCodes::clientError("An error has occurred while adding your job(s) to the queue.");
 		}
 	}
 	return raft->passRequestToLeader(request, data);
@@ -94,7 +95,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data)
 {
 	if (raft->isLeader())
-        {
+	{
 		int id = Utility::safeStoi(data.substr(0, data.find('\n')));
 		std::cout << std::to_string(id) + "\n";
 		if (errno == 0)
@@ -103,7 +104,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 		}
 		else
 		{
-			return "Error: invalid crawlId.";
+			return HTTPStatusCodes::clientError("Error: invalid crawlId.");
 		}
 		// Get data after crawlId and pass it on to handleUploadRequest.
 		std::string jobdata = data.substr(data.find('\n') + 1, data.length());
@@ -114,6 +115,6 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 
 void JobRequestHandler::updateCrawlId(int id)
 {
-        crawlId = id;
-        alreadyCrawling = false;
+	crawlId = id;
+	alreadyCrawling = false;
 }
