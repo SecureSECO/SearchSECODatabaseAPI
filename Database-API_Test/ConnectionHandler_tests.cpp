@@ -46,6 +46,56 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
     std::string result = n->receiveData();
 
     
-    ASSERT_EQ(result, HTTPStatusCodes::success(expectedOutput));
+    ASSERT_EQ(result, expectedOutput);
+    delete n;
+}
+
+TEST(ConnectionHandlerIntegrationTests, to_big_request)
+{
+    // Set up.
+    RequestHandlerMock handler; 
+
+    const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
+
+	const std::string expectedOutput = "Request body larger than expected.";
+    
+    ConnectionHandler listen;
+
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, "", -1, &handler);
+    usleep(500000); // Just to make sure the listner has started.
+
+    NetworkHandler* n = NetworkHandler::createHandler();
+    n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
+    n->sendData("chck" + std::to_string(input.size() - 10) +"\n");
+    n->sendData(input);
+    std::string result = n->receiveData();
+
+    
+    ASSERT_EQ(result, expectedOutput);
+    delete n;
+}
+
+TEST(ConnectionHandlerIntegrationTests, invalid)
+{
+    // Set up.
+    RequestHandlerMock handler; 
+
+    const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
+
+	const std::string expectedOutput = "Error parsing command.";
+    
+    ConnectionHandler listen;
+
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, "", -1, &handler);
+    usleep(500000); // Just to make sure the listner has started.
+
+    NetworkHandler* n = NetworkHandler::createHandler();
+    n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
+    n->sendData("chckk" +"\n");
+    n->sendData(input);
+    std::string result = n->receiveData();
+
+    
+    ASSERT_EQ(result, expectedOutput);
     delete n;
 }
