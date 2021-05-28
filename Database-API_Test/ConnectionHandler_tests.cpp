@@ -43,7 +43,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
     n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
     n->sendData("chck" + std::to_string(input.size()) +"\n");
     n->sendData(input);
-    std::string result = n->receiveData();
+    std::string result = n->receiveData(false);
 
     
     ASSERT_EQ(result, expectedOutput);
@@ -68,7 +68,7 @@ TEST(ConnectionHandlerIntegrationTests, to_big_request)
     n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
     n->sendData("chck" + std::to_string(input.size() - 10) +"\n");
     n->sendData(input);
-    std::string result = n->receiveData();
+    std::string result = n->receiveData(false);
 
     
     ASSERT_EQ(result, expectedOutput);
@@ -93,7 +93,7 @@ TEST(ConnectionHandlerIntegrationTests, invalid)
     n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
     n->sendData("chckk\n");
     n->sendData(input);
-    std::string result = n->receiveData();
+    std::string result = n->receiveData(false);
 
     
     ASSERT_EQ(result, expectedOutput);

@@ -33,7 +33,7 @@ public:
 	/// </summary>
 	void openConnection(std::string server, std::string port);
 
-	std::string receiveData();
+	std::string receiveData(bool stopOnNewLine = true);
 private:
 	boost::asio::io_context ioContext;
 	/// <summary>

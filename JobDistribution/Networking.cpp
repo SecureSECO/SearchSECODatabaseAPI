@@ -34,7 +34,7 @@ void NetworkHandler::sendData(const char* data, int dataLength)
 	boost::asio::write(socket, boost::asio::buffer(data, dataLength));
 }
 
-std::string NetworkHandler::receiveData()
+std::string NetworkHandler::receiveData(bool stopOnNewLine)
 {
 	// The buffer we are going to return as a string.
 	std::vector<char> ret = std::vector<char>();
@@ -47,7 +47,7 @@ std::string NetworkHandler::receiveData()
 		// Read incomming data.
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
-		if (len == 0) 
+		if (len == 0 && stopOnNewLine) 
 		{
 			throw std::runtime_error("No data received, meaning the other side dropped out.");
 		}
@@ -58,7 +58,7 @@ std::string NetworkHandler::receiveData()
 			ret.push_back(buf[i]);
 		}
 
-		if (ret[ret.size()-1] == '\n')
+		if (ret[ret.size()-1] == '\n' && stopOnNewLine || error == boost::asio::error::eof && !stopOnNewLine)
 		{
 			break; // Connection closed cleanly by peer.
 		}
