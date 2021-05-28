@@ -37,7 +37,9 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547";
     
+    std::cout << "Checking result.\n";
     ASSERT_EQ(result, HTTPStatusCodes::success(expectedOutput));
+    std::cout << "Result was correct.\n";
     delete n;
     delete t;
 }
