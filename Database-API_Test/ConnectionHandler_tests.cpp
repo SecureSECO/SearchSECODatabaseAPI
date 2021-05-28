@@ -26,8 +26,8 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	//std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
-    listen.startListen( &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+    //listen.startListen( &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
     std::cout << "Listner started.\n";
     usleep(500000); // Just to make sure the listner has started.
 
@@ -37,7 +37,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
     n->sendData("2c7f46d4f57cf9e66b03213358c7ddb5\n");
     std::string result = n->receiveData();
 	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
-										"68bd2db6-fe91-47d2-a134-cf82b104f547";
+										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
     
     std::cout << "Checking result.\n";
     ASSERT_EQ(result, HTTPStatusCodes::success(expectedOutput));
