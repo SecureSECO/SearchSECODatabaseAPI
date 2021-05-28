@@ -70,7 +70,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chck" + std::to_string(input.size()) +"\n");
+	n->sendData("chck" + std::to_string((inputPart1 + inputPart2).size()) +"\n");
 	n->sendData(inputPart1);
 	usleep(500000);
 	n->sendData(inputPart2);
