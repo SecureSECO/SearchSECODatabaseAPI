@@ -12,21 +12,21 @@ Utrecht University within the Software Project course.
 void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, 
 	DatabaseConnection* databaseConnection, 
 	RAFTConsensus* raft, 
-	int port, std::string ip, int dbport, 
-	RequestHandler *handler)
+	int port, 
+	RequestHandler *requestHandler)
 {
-	if (handler == nullptr) 
+	if (requestHandler == nullptr) 
 	{
-		this->handler = new RequestHandler();
+		handler = new RequestHandler();
 	}
 	else 
 	{
-		this->handler = handler;
+		handler = requestHandler;
 	}
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, this->handler, port, ip, dbport);
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
 		ioContext.run();
 	}
 	catch (std::exception& e)
@@ -100,12 +100,12 @@ TcpServer::TcpServer(boost::asio::io_context& ioContext,
 	DatabaseHandler* databaseHandler, 
 	DatabaseConnection* databaseConnection, 
 	RAFTConsensus* raft, RequestHandler* handler, 
-	int port, std::string ip, int dbport)
+	int port)
 	: ioContext_(ioContext),
 	acceptor_(ioContext, tcp::endpoint(tcp::v4(), port))
 {
 	this->handler = handler;
-	handler->initialize(databaseHandler, databaseConnection, raft, ip, dbport);
+	handler->initialize(databaseHandler, databaseConnection, raft);
 	startAccept();
 }
 
