@@ -36,7 +36,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 
     ConnectionHandler listen;
 
-	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, -1, "", TESTCONNECTPORT, &handler);
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, "", -1, &handler);
     usleep(500000); // Just to make sure the listner has started.
 
     NetworkHandler* n = NetworkHandler::createHandler();
