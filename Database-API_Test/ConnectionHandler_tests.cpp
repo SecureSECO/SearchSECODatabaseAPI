@@ -42,8 +42,8 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
     std::cout << "Checking result.\n";
     ASSERT_EQ(result, HTTPStatusCodes::success(expectedOutput));
     std::cout << "Result was correct.\n";
-    //delete n;
-    usleep(500000); // Just to make sure the listner has started.
+    delete n;
+    //usleep(500000); // Just to make sure the listner has started.
 
-    delete t;
+    //delete t;
 }
