@@ -55,13 +55,12 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 	// Set up.
 	RequestHandlerMock handler; 
 
-	const std::string inputPart1 = "2c7f46d4f57cf9e66";
-	const std::string inputPart2 = "b03213358c7ddb5\n";
+	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
 
 	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
 	// Mock expectations
-	EXPECT_CALL(handler, handleRequest("chck", inputPart1 + inputPart2, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
+	EXPECT_CALL(handler, handleRequest("chck", input, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
 
 	ConnectionHandler listen;
 
@@ -70,10 +69,10 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chck" + std::to_string((inputPart1 + inputPart2).size()) +"\n");
-	n->sendData(inputPart1);
+	n->sendData("chck" + std::to_string(input.size()) +"\n");
+	n->sendData(input.substr(0, 12));
 	usleep(500000);
-	n->sendData(inputPart2);
+	n->sendData(input.substr(12));
 	std::string result = n->receiveData(false);
 
 	
