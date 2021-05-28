@@ -32,7 +32,7 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft);
+	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, int port = PORT, std::string ip = IP, int dbport = DBPORT);
 
 	RequestHandler* getRequestHandler() { return &handler; };
 private:
@@ -79,7 +79,7 @@ private:
 class TcpServer
 {
 public:
-	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler);
+	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler, int port, std::string ip, int dbport);
 
 private:
 

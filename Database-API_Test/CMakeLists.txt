@@ -39,6 +39,7 @@ add_executable(
   JobRequestHandler_test.cpp
   GetJobRequest_test.cpp
   CrawlDataRequest_test.cpp
+  ConnectionHandler_tests.cpp
 )
 target_link_libraries(
   tests
