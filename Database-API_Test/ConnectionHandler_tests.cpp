@@ -26,7 +26,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	std::thread t(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
     usleep(500000); // Just to make sure the listner has started.
 
     NetworkHandler* n = NetworkHandler::createHandler();
@@ -39,4 +39,5 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
     
     ASSERT_EQ(result, HTTPStatusCodes::success(expectedOutput));
     delete n;
+    delete t;
 }
