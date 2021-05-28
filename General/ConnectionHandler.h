@@ -32,11 +32,11 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, int port = PORT, std::string ip = IP, int dbport = DBPORT);
+	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, int port = PORT, std::string ip = IP, int dbport = DBPORT, RequestHandler *handler = nullptr);
 
-	RequestHandler* getRequestHandler() { return &handler; };
+	RequestHandler* getRequestHandler() { return handler; };
 private:
-	RequestHandler handler;
+	RequestHandler* handler;
 };
 
 class TcpConnection

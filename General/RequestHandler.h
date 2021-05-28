@@ -46,7 +46,7 @@ public:
 	/// <param name="databaseHandler">
 	/// Handler for interactions with the database.
 	/// </param>
-	void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
+	virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -61,7 +61,7 @@ public:
 	/// <returns>
 	/// Response towards user after processing the request successfully.
 	/// </returns>
-	std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection);
+	virtual std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection);
 private:
 
 	/// <summary>

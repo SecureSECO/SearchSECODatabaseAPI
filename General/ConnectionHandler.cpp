@@ -9,12 +9,24 @@ Utrecht University within the Software Project course.
 #include <chrono>
 
 // Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, int port, std::string ip, int dbport)
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, 
+	DatabaseConnection* databaseConnection, 
+	RAFTConsensus* raft, 
+	int port, std::string ip, int dbport, 
+	RequestHandler *handler)
 {
+	if (handler == nullptr) 
+	{
+		this->handler = new RequestHandler();
+	}
+	else 
+	{
+		this->handler = handler;
+	}
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, &handler, port, ip, dbport);
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, this->handler, port, ip, dbport);
 		ioContext.run();
 	}
 	catch (std::exception& e)
