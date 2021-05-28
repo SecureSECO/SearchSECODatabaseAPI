@@ -61,7 +61,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
 										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
 	// Mock expectations
-	EXPECT_CALL(handler, handleRequest("chck", input, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
+	EXPECT_CALL(handler, handleRequest("chck", inputPart1 + inputPart2, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
 
 	ConnectionHandler listen;
 
