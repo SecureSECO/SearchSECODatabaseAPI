@@ -70,5 +70,9 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 		}
 
 	}
-	return std::string(ret.begin(), ret.end() - 1);
+	if (stopOnNewLine) 
+	{
+		return std::string(ret.begin(), ret.end() - 1);
+	}
+	return std::string(ret.begin(), ret.end());
 }
