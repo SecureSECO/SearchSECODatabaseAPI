@@ -26,7 +26,9 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+	//std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+    listen.startListen( &databaseHandler, &databaseConnection, &raft, TESTCONNECTPORT, TESTIP, TESTPORT);
+    std::cout << "Listner started.\n";
     usleep(500000); // Just to make sure the listner has started.
 
     NetworkHandler* n = NetworkHandler::createHandler();
