@@ -91,7 +91,7 @@ TEST(ConnectionHandlerIntegrationTests, invalid)
 
     NetworkHandler* n = NetworkHandler::createHandler();
     n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-    n->sendData("chckk" +"\n");
+    n->sendData("chckk\n");
     n->sendData(input);
     std::string result = n->receiveData();
 
