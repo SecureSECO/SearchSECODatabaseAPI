@@ -13,12 +13,14 @@ Utility::appendBy(outputChars1,
 				  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69", "1",
 				   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-std::string output1(outputChars1.begin(), outputChars.end());
+std::string output1(outputChars1.begin(), outputChars1.end());
 MethodOut testMethod1 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
-																.projectID = 1,
-																.version = 2,
-						  .methodName = "TestMethod1", .fileLocation = "Test1/Test2/TestFile1.cpp", .lineNumber = 69,
-						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
+						 .projectID = 1,
+						 .version = 2,
+						 .methodName = "TestMethod1",
+						 .fileLocation = "Test1/Test2/TestFile1.cpp",
+						 .lineNumber = 69,
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
 
 std::vector<char> outputChars2 = {};
 Utility::appendBy(outputChars2,
@@ -26,29 +28,57 @@ Utility::appendBy(outputChars2,
 				   "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
 				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 std::string output2(outputChars2.begin(), outputChars2.end());
-MethodOut testMethod2 = { .hash = "06f73d7ab46184c55bf4742b9428a4c0", .projectID = 3, .version = 4,
-						  .methodName = "TestMethod2", .fileLocation = "Test3/Test4/TestFile2.cpp", .lineNumber = 42,
-						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35",
-										 "8b55fa97-5442-48f7-969c-793664388264" } };
-std::string output3 = "137fed017b6159acc0af30d2c6b403a5?5?6?TestMethod3?Test5/Test6/TestFile3.cpp?420?3?"
-					  "f1a028d7-3845-41df-bec1-2e16c49e4c35?fa37bbe0-ef68-4653-800c-d5bf30dcc7ef?"
-					  "5a726b9e-6173-4fc1-831b-54f98f6e760c\n";
-MethodOut testMethod3 = { .hash = "137fed017b6159acc0af30d2c6b403a5", .projectID = 5, .version = 6,
-						  .methodName = "TestMethod3", .fileLocation = "Test5/Test6/TestFile3.cpp", .lineNumber = 420,
-						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35",
-										 "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
-										 "5a726b9e-6173-4fc1-831b-54f98f6e760c" } };
-std::string output4 = "2c7f46d4f57cf9e66b03213358c7ddb5?7?8?TestMethod4?Test7/Test8/TestFile4.cpp?69?1?"
-					  "f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
-MethodOut testMethod4 = { .hash = "2c7f46d4f57cf9e66b03213358c7ddb5", .projectID = 7, .version = 8,
-			  .methodName = "TestMethod4", .fileLocation = "Test7/Test8/TestFile4.cpp", .lineNumber = 69,
-			  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" }};
-std::string output5 = "06f73d7ab46184c55bf4742b9428a4c0?9?10?TestMethod5?Test9/Test10/TestFile5.cpp?42?2?"
-					  "f1a028d7-3845-41df-bec1-2e16c49e4c35?8b55fa97-5442-48f7-969c-793664388264\n";
-MethodOut testMethod5 = { .hash = "06f73d7ab46184c55bf4742b9428a4c0", .projectID = 9, .version = 10,
-						  .methodName = "TestMethod5", .fileLocation = "Test9/Test10/TestFile5.cpp", .lineNumber = 42,
-						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35",
-										 "8b55fa97-5442-48f7-969c-793664388264" } };
+MethodOut testMethod2 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
+						 .projectID = 3,
+						 .version = 4,
+						 .methodName = "TestMethod2",
+						 .fileLocation = "Test3/Test4/TestFile2.cpp",
+						 .lineNumber = 42,
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"}};
+
+std::vector<char> outputChars3 = {};
+Utility::appendBy(outputChars3,
+				  {"137fed017b6159acc0af30d2c6b403a5", "5", "6", "TestMethod3", "Test5/Test6/TestFile3.cpp", "420", "3",
+				   "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
+				   "5a726b9e-6173-4fc1-831b-54f98f6e760c"},
+				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+std::string output3(outputChars3.begin(), outputChars3.end());
+MethodOut testMethod3 = {.hash = "137fed017b6159acc0af30d2c6b403a5",
+						 .projectID = 5,
+						 .version = 6,
+						 .methodName = "TestMethod3",
+						 .fileLocation = "Test5/Test6/TestFile3.cpp",
+						 .lineNumber = 420,
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
+									   "5a726b9e-6173-4fc1-831b-54f98f6e760c"}};
+
+std::vector<char> outputChars4 = {};
+Utility::appendBy(outputChars4,
+				  {"2c7f46d4f57cf9e66b03213358c7ddb5", "7", "8", "TestMethod4", "Test7/Test8/TestFile4.cpp", "69", "1",
+				   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+std::string output4(outputChars4.begin(), outputChars4.end());
+MethodOut testMethod4 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
+						 .projectID = 7,
+						 .version = 8,
+						 .methodName = "TestMethod4",
+						 .fileLocation = "Test7/Test8/TestFile4.cpp",
+						 .lineNumber = 69,
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
+
+std::vector<char> outputChars5 = {};
+Utility::appendBy(outputChars5,
+				  {"06f73d7ab46184c55bf4742b9428a4c0", "9", "10", "TestMethod5", "Test9/Test10/TestFile5.cpp", "42",
+				   "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+std::string output5(outputChars5.begin(), outputChars5.end());
+MethodOut testMethod5 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
+						 .projectID = 9,
+						 .version = 10,
+						 .methodName = "TestMethod5",
+						 .fileLocation = "Test9/Test10/TestFile5.cpp",
+						 .lineNumber = 42,
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"}};
 
 // Checks if the program works when a check request is sent providing a single hash.
 TEST(CheckRequestTests, SingleHashRequest)
