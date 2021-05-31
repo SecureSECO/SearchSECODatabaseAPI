@@ -16,6 +16,7 @@ TEST(CrawlDataRequest, SingleJob)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";

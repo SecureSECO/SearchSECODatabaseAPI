@@ -899,8 +899,8 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 
 void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 {
-	database->connect(ip, port);
 	int retries = 0;
+	database->connect(ip, port);
 	if (errno != 0)
 	{
 		while (retries < MAX_RETRIES)
