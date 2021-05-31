@@ -20,7 +20,7 @@ MethodOut testMethod1 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
 						  .methodName = "TestMethod1", .fileLocation = "Test1/Test2/TestFile1.cpp", .lineNumber = 69,
 						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
 
-std::string outputChars2 = {};
+std::vector<char> outputChars2 = {};
 Utility::appendBy(outputChars2,
 				  {"06f73d7ab46184c55bf4742b9428a4c0", "3", "4", "TestMethod2", "Test3/Test4/TestFile2.cpp", "42", "2",
 				   "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
