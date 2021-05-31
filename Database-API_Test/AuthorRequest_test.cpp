@@ -29,9 +29,10 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author?author@mail.com";
-	std::string output = "";
-	Utility::appendBy(output, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	Author author;
 	author.name = "Author";
@@ -72,21 +73,24 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "";
-	Utility::appendBy(request, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(request, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
-	std::string output1 = "";
-	Utility::appendBy(output1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::string outputChars1 = {};
+	Utility::appendBy(outputChars1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	Utility::appendBy(outputChars1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output1(outputChars1.begin(), outputChars1.end());
 
-	std::string output2 = "";
-	Utility::appendBy(output2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::string outputChars2 = {};
+	Utility::appendBy(outputChars2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	Utility::appendBy(outputChars2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2(outputChars2.begin(), outputChars2.end());
 
 	Author author1;
 	author1.name = "Author1";
@@ -112,13 +116,15 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "";
-	Utility::appendBy(request, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(request, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
-	std::string output = "";
-	Utility::appendBy(output, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	Author author1;
 	author1.name = "Author1";
@@ -160,9 +166,10 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
-	std::string output = "";
-	Utility::appendBy(output, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	Author author;
 	author.name = "Author";
@@ -200,19 +207,23 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "";
-	Utility::appendBy(request, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output1 = "";
-	Utility::appendBy(output1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::string request(requestChars.begin(), requestChars.end());
+
+	std::vector<char> outputChars1 = {};
+	Utility::appendBy(outputChars1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	Utility::appendBy(outputChars1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output2 = "";
-	Utility::appendBy(output2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::string output1(outputChars1.begin(), outputChars1.end());
+	std::vector<char> outputChars2 = {};
+	Utility::appendBy(outputChars2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	Utility::appendBy(outputChars2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2(outputChars2.begin(), outputChars2.end());
 
 	Author author1;
 	author1.name = "Author1";
@@ -236,12 +247,14 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "";
-	Utility::appendBy(request, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output = "";
-	Utility::appendBy(output, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+	std::string request(requestChars.begin(), requestChars.end());
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	Author author1;
 	author1.name = "Author1";
@@ -287,9 +300,10 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	std::vector<MethodId> v;
 	v.push_back(method);
 
-	std::string output = "";
-	Utility::appendBy(output, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
@@ -320,26 +334,30 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 	std::vector<MethodId> v2;
 	v2.push_back(method2);
 
-	std::string output1 = "";
-	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	std::vector<char> outputChars1 = {};
+	Utility::appendBy(outputChars1,
+					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output1,
+	Utility::appendBy(outputChars1,
 					  {"41ab7373-8f24-4a03-83dc-621036d99f34", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-
-	std::string output2 = "";
-	Utility::appendBy(output1,
+	std::string output1(outputChars1.begin(), outputChars1.end());
+	std::vector<char> outputChars2 = {};
+	Utility::appendBy(outputChars2,
 					  {"41ab7373-8f24-4a03-83dc-621036d99f34", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	Utility::appendBy(outputChars2,
+					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2(outputChars2.begin(), outputChars2.end());
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
 
-	std::string inputFunction = "";
-	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(inputFunctionChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
@@ -357,6 +375,7 @@ TEST(GetMethodByAuthorTests, SingleIdNoMatch)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
+
 	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
@@ -381,14 +400,16 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
 
-	std::string inputFunction = "";
-	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(inputFunctionChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
 
-	std::string output = "";
-	Utility::appendBy(output, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
 
 	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
@@ -416,22 +437,24 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 	v.push_back(method1);
 	v.push_back(method2);
 
-	std::string output1 = "";
-	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	std::vector<char> outputChars1 = {};
+	Utility::appendBy(outputChars1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output1,
+	Utility::appendBy(outputChars1,
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-
-	std::string output2 = "";
-	Utility::appendBy(output2,
+	std::string output1(outputChars1.begin(), outputChars1.end());
+	std::vector<char> outputChars2 = {};
+	Utility::appendBy(outputChars2,
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(output2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	Utility::appendBy(outputChars2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2(outputChars2.begin(), outputChars2.end());
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
+
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
@@ -468,20 +491,25 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
 
-	std::string inputFunction = "";
-	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(inputFunctionChars,
+					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
 
-	std::string output1 = "";
-	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+	std::vector<char> outputChars1 = {};
+	Utility::appendBy(outputChars1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output2 = "";
-	Utility::appendBy(output2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+	std::string output1(outputChars1.begin(), outputChars1.end());
+	std::vector<char> outputChars2 = {};
+	Utility::appendBy(outputChars2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output3 = "";
-	Utility::appendBy(output3, {"41ab7373-8f24-4a03-83dc-621036d99f34", "137fed017b6159acc0af30d2c6b403a5", "69", "420"},
+	std::string output2(outputChars2.begin(), outputChars2.end());
+	std::vector<char> outputChars3 = {};
+	Utility::appendBy(outputChars3, {"41ab7373-8f24-4a03-83dc-621036d99f34", "137fed017b6159acc0af30d2c6b403a5", "69", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output3(outputChars3.begin(), outputChars3.end());
 
 	EXPECT_EQ(result.size(), HTTPStatusCodes::success(output1).size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);

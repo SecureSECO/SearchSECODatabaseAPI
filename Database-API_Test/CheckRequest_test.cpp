@@ -8,17 +8,24 @@ Utrecht University within the Software Project course.
 #include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
-std::string output1 = "";
-Utility::appendBy(output1,
+std::vector<char> outputChars1 = {};
+Utility::appendBy(outputChars1,
 				  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69", "1",
 				   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-
-MethodOut testMethod1 = { .hash = "2c7f46d4f57cf9e66b03213358c7ddb5", .projectID = 1, .version = 2,
+std::string output1(outputChars1.begin(), outputChars.end());
+MethodOut testMethod1 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
+																.projectID = 1,
+																.version = 2,
 						  .methodName = "TestMethod1", .fileLocation = "Test1/Test2/TestFile1.cpp", .lineNumber = 69,
 						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
-std::string output2 = "06f73d7ab46184c55bf4742b9428a4c0?3?4?TestMethod2?Test3/Test4/TestFile2.cpp?42?2?"
-					  "f1a028d7-3845-41df-bec1-2e16c49e4c35?8b55fa97-5442-48f7-969c-793664388264\n";
+
+std::string outputChars2 = {};
+Utility::appendBy(outputChars2,
+				  {"06f73d7ab46184c55bf4742b9428a4c0", "3", "4", "TestMethod2", "Test3/Test4/TestFile2.cpp", "42", "2",
+				   "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+std::string output2(outputChars2.begin(), outputChars2.end());
 MethodOut testMethod2 = { .hash = "06f73d7ab46184c55bf4742b9428a4c0", .projectID = 3, .version = 4,
 						  .methodName = "TestMethod2", .fileLocation = "Test3/Test4/TestFile2.cpp", .lineNumber = 42,
 						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35",
@@ -77,11 +84,12 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
 
-	std::string inputFunction = "";
+	std::vector<char> inputFunctionChars = {};
 	Utility::appendBy(
-		inputFunction,
+		inputFunctionChars,
 		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
 		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
@@ -118,11 +126,14 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v));
 	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("chck",
-											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-											   "06f73d7ab46184c55bf4742b9428a4c0\n"
-											   "137fed017b6159acc0af30d2c6b403a5\n",
-											   nullptr);
+
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(
+		inputFunctionChars,
+		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
+		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
+	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
 
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
@@ -142,7 +153,7 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 	v.push_back(testMethod4);
 
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
@@ -167,11 +178,14 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
-	std::string result = handler.handleRequest("chck",
-											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-											   "06f73d7ab46184c55bf4742b9428a4c0\n"
-											   "137fed017b6159acc0af30d2c6b403a5\n",
-											   nullptr);
+
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(
+		inputFunctionChars,
+		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
+		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
+	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
