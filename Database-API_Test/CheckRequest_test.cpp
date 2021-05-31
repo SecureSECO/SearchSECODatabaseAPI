@@ -8,8 +8,11 @@ Utrecht University within the Software Project course.
 #include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
-std::string output1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?2?TestMethod1?Test1/Test2/TestFile1.cpp?69?1?"
-					  "f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
+std::string output1 = "";
+Utility::appendBy(output1,
+				  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69", "1",
+				   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+				  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 MethodOut testMethod1 = { .hash = "2c7f46d4f57cf9e66b03213358c7ddb5", .projectID = 1, .version = 2,
 						  .methodName = "TestMethod1", .fileLocation = "Test1/Test2/TestFile1.cpp", .lineNumber = 69,
 						  .authorIDs = { "f1a028d7-3845-41df-bec1-2e16c49e4c35" } };
