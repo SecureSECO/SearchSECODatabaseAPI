@@ -48,12 +48,12 @@ void DatabaseConnection::setPreparedStatements()
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
 	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
-		rc = cass_future_error_code(prepareFuture);
-		preparedUploadJob = cass_future_get_prepared(prepareFuture);
+	rc = cass_future_error_code(prepareFuture);
+	preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
 	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
-		rc = cass_future_error_code(prepareFuture);
-		preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
+	rc = cass_future_error_code(prepareFuture);
+	preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
 	cass_future_free(prepareFuture);
 }

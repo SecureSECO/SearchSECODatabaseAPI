@@ -142,7 +142,6 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 {
 	if (leader) 
 	{
-
 		request = request.substr(0, request.length() - 1);
 
 		mtx.lock();
