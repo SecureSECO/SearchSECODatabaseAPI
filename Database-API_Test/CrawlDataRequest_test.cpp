@@ -19,6 +19,8 @@ TEST(CrawlDataRequest, SingleJob)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";
+	//std::vector<char> requestChars = {};
+	//Utility::appendBy(requestChars, )
 	std::string request = "100\nhttps://github.com/zavg/linux-0.01?1";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
