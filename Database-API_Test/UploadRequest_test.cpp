@@ -4,14 +4,14 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
+#include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 #include <vector>
 
-using namespace std;
-
 // Test input part 1:
 Author owner = { .name = "Owner", .mail = "owner@mail.com" };
-vector<Hash> hashes = { "a6aa62503e2ca3310e3a837502b80df5",
+std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5",
 			"f3a258ba6cd26c1b7d553a493c614104",
 			"59bf62494932580165af0451f76be3e9" };
 ProjectIn projectT1 = { .projectID = 0, .version = 0, .license = "MyLicense",
@@ -76,162 +76,165 @@ MATCHER_P(methodEqual, method, "")
 TEST(UploadRequest, SingleMethodSingleAuthor)
 {
 	RequestHandler handler;
+	MockJDDatabase jddatabase;
 	MockDatabase database;
-	handler.initialize(&database);
+	handler.initialize(&database, &jddatabase, nullptr);
 
-	string requestType = "upld";
-	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					 "a6aa62503e2ca3310e3a837502b80df5?Method1?"
-					 "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+	std::string requestType = "upld";
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
+						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
-		ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	std::string result = handler.handleRequest(requestType, request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if the program can successfully handle an upload request of a project with multiple methods,
 // each having a single author.
 TEST(UploadRequest, MultipleMethodsSingleAuthor)
 {
-	string requestType = "upld";
-	string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					 "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?"
-					 "1?1?Owner?owner@mail.com\nf3a258ba6cd26c1b7d553a493c614104?"
-					 "Method2?MyProject/Method2.cpp?11?1?Owner?owner@mail.com\n"
-					 "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?"
-					 "31?1?Owner?owner@mail.com";
+	std::string requestType = "upld";
+	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?"
+						  "1?1?Owner?owner@mail.com\nf3a258ba6cd26c1b7d553a493c614104?"
+						  "Method2?MyProject/Method2.cpp?11?1?Owner?owner@mail.com\n"
+						  "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?"
+						  "31?1?Owner?owner@mail.com";
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
-	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	std::string result = handler.handleRequest(requestType, request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if program can successfully handle an upload request with multiple methods
 // and multiple authors for each method.
 TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 {
-	string requestType = "upld";
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					 "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
-					 "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
-					 "f3a258ba6cd26c1b7d553a493c614104?Method2?MyProject/Method2.cpp?999?2?"
-					 "Author 2?author2@mail.com?Owner?owner@mail.com\n"
-					 "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?9999999?4?"
-					 "Owner?owner@mail.com?Author 2?author2@mail.com?"
-					 "Author 1?author1@mail.com?Author 3?author3@mail.com";
+	std::string requestType = "upld";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
+						  "f3a258ba6cd26c1b7d553a493c614104?Method2?MyProject/Method2.cpp?999?2?"
+						  "Author 2?author2@mail.com?Owner?owner@mail.com\n"
+						  "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?9999999?4?"
+						  "Owner?owner@mail.com?Author 2?author2@mail.com?"
+						  "Author 1?author1@mail.com?Author 3?author3@mail.com";
 
 	RequestHandler handler;
 	MockDatabase database;
-	handler.initialize(&database);
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2))).Times(1);
 
-	string result = handler.handleRequest(requestType, request);
-	ASSERT_EQ(result, "Your project has been successfully added to the database.");
+	std::string result = handler.handleRequest(requestType, request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
 // Tests if the program can handle an upload request with invalid project data, too many arguments.
 TEST(UploadRequest, InvalidProjectSize)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing project data.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 // Tests if the program can handle an upload request with invalid project data, non-integer id.
 TEST(UploadRequest, InvalidProjectID)
 {
-	string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	std::string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing project data.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 
 // Tests if the program can handle an upload request with invalid project data, non-integer version.
 TEST(UploadRequest, InvalidProjectVersion)
 {
-	string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
+	std::string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing project data.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, too few arguments.
 TEST(UploadRequest, InvalidMethodSizeSmall)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, too many arguments.
 TEST(UploadRequest, InvalidMethodSizeLarge)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?2?"
-					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?2?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, invalid method hash.
 TEST(UploadRequest, InvalidMethodHash)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
-					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5xx?Method1?MyProject/Method1.cpp?1?3?"
-					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?MyProject/Method1.cpp?1?3?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing method 2.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 2."));
 }
 
 // Tests if the program can handle an upload request with invalid method data, non-integer line number.
 TEST(UploadRequest, InvalidMethodLine)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?not_an_integer?3?"
-					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?not_an_integer?3?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
 
 // Tests if the program can handle an upload request with invalid method data, non-integer number of authors.
 TEST(UploadRequest, InvalidMethodAuthorLines)
 {
-	string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-					"a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?not_an_integer?"
-					"Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
+	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
+						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?not_an_integer?"
+						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
 	RequestHandler handler;
 
-	string result = handler.handleRequest("upld", request);
-	ASSERT_EQ(result, "Error parsing method 1.");
+	std::string result = handler.handleRequest("upld", request, nullptr);
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }

@@ -1,28 +1,26 @@
-image: ubuntu:latest
+image-build:
+  image: docker
+  stage: build
+  rules:
+    - changes:
+        - PipelineDockerfile
+  script:
+    - docker build -f PipelineDockerfile -t database-api-ci-image:$CI_COMMIT_REF_NAME .
 
 google-tests:
+  image: database-api-ci-image:$CI_COMMIT_REF_NAME
   stage: test
   variables:
     DEBIAN_FRONTEND: noninteractive
   before_script:
-    - apt-get -y update
-    - apt-get -y dist-upgrade
-    - apt-get -y install gcc g++ cmake autoconf dpkg wget git
-    - apt-get -y install libboost-all-dev
-    - wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
-    - dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
-    - apt-get -y install libssl-dev libkrb5-dev zlib1g
-    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
-    - dpkg -i libuv1_1.35.0-1_amd64.deb
-    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
-    - dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
-    - apt-get -y install openjdk-8-jdk python
-    - wget https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz
-    - tar xzvf apache-cassandra-3.11.10-bin.tar.gz
+    - wget -nv https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz
+    - tar xzf apache-cassandra-3.11.10-bin.tar.gz
   script:
+    - rm -rf apache-cassandra-3.11.10/data
     - apache-cassandra-3.11.10/bin/cassandra -R
-    - sleep 30
+    - sleep 20
     - apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql
+    - rm -rf database_build
     - mkdir database_build
     - cd database_build
     - cmake ..
@@ -31,23 +29,12 @@ google-tests:
 
 
 linting:
+  image: database-api-ci-image:$CI_COMMIT_REF_NAME
   stage: test
   variables:
     DEBIAN_FRONTEND: noninteractive
   before_script:
-    - apt-get update
-    - apt-get -y dist-upgrade
-    - apt-get -y install gcc g++ cmake autoconf dpkg wget git
     - apt-get -y install clang clang-tidy clang-format
-    - apt-get -y install libboost-all-dev
-    - wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
-    - dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
-    - apt-get -y install libssl-dev libkrb5-dev zlib1g
-    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
-    - dpkg -i libuv1_1.35.0-1_amd64.deb
-    - wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
-    - dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
   script:
     - clang-tidy Database-API/*.cpp General/*.cpp JobDistribution/*.cpp -- -IResources/include/ -IDatabase-API/ -IGeneral/ -IJobDistribution/ 
     - clang Database-API/*.cpp General/*.cpp JobDistribution/*.cpp -IResources/include/ -IDatabase-API/ -IGeneral/ -IJobDistribution/ -fsyntax-only
-

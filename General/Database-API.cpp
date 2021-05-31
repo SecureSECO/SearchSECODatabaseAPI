@@ -10,17 +10,20 @@ Utrecht University within the Software Project course.
 #include "Database-API.h"
 #include "DatabaseHandler.h"
 #include "ConnectionHandler.h"
-
-using namespace std;
+#include "RAFTConsensus.h"
 
 int main()
 {
 	usleep(45000000);
-	cout << "Connecting now" << endl;
+	std::cout << "Connecting now" << std::endl;
 
+	RAFTConsensus raft;
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
-	listen.startListen(&databaseHandler);
+	DatabaseConnection databaseConnection;
+
+	raft.start(listen.getRequestHandler());
+	listen.startListen(&databaseHandler, &databaseConnection, &raft);
 
 	return 0;
 }

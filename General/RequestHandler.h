@@ -6,8 +6,15 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
+#include "HTTPStatus.h"
 #include "JobRequestHandler.h"
 #include "DatabaseRequestHandler.h"
+#include "RAFTConsensus.h"
+#include "DatabaseConnection.h"
+
+#include <boost/shared_ptr.hpp>
+
+class TcpConnection;
 
 /// <summary>
 /// The different types of requests which are supported.
@@ -17,6 +24,10 @@ enum eRequestType
 	eUpload,
 	eCheck,
 	eCheckUpload,
+	eConnect,
+	eUploadJob,
+	eUploadCrawlData,
+	eGetTopJob,
 	eExtractProjects,
 	eGetAuthorID,
 	eGetAuthor,
@@ -35,7 +46,7 @@ public:
 	/// <param name="databaseHandler">
 	/// Handler for interactions with the database.
 	/// </param>
-	void initialize(DatabaseHandler* databaseHandler, std::string ip = IP, int port = DBPORT);
+	void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -50,7 +61,7 @@ public:
 	/// <returns>
 	/// Response towards user after processing the request successfully.
 	/// </returns>
-	std::string handleRequest(std::string requestType, std::string request);
+	std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection);
 private:
 
 	/// <summary>
@@ -81,5 +92,5 @@ private:
 	eRequestType getERequestType(std::string requestType);
 
 	DatabaseRequestHandler* dbrh;
-	JobRequestHandler jrh;
+	JobRequestHandler* jrh;
 };

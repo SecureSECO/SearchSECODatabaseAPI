@@ -5,24 +5,23 @@ Utrecht University within the Software Project course.
 */
 
 #include "RequestHandler.h"
+#include <iostream>
 
-using namespace std;
-
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
 	// Make the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = JobRequestHandler();
+	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
-string RequestHandler::handleRequest(string requestType, string request)
+std::string RequestHandler::handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection)
 {
 	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequestType = getERequestType(requestType);
+	eRequestType eRequest = getERequestType(requestType);
 
 	// We handle the request based on its type.
-	string result;
-	switch (eRequestType)
+	std::string result;
+	switch (eRequest)
 	{
 		case eUpload:
 			result = dbrh->handleUploadRequest(request);
@@ -32,6 +31,18 @@ string RequestHandler::handleRequest(string requestType, string request)
 			break;
 		case eCheckUpload:
 			result = dbrh->handleCheckUploadRequest(request);
+			break;
+		case eConnect:
+			result = jrh->handleConnectRequest(connection, request);
+			break;
+		case eUploadJob:
+			result = jrh->handleUploadJobRequest(requestType, request);
+			break;
+		case eUploadCrawlData:
+			result = jrh->handleCrawlDataRequest(requestType, request);
+			break;
+		case eGetTopJob:
+			result = jrh->handleGetJobRequest(requestType, request);
 			break;
 		case eExtractProjects:
 			result = dbrh->handleExtractProjectsRequest(request);
@@ -55,17 +66,17 @@ string RequestHandler::handleRequest(string requestType, string request)
 	return result;
 }
 
-string RequestHandler::handleUnknownRequest()
+std::string RequestHandler::handleUnknownRequest()
 {
-	return "Unknown request type.";
+	return HTTPStatusCodes::clientError("Unknown request type.");
 }
 
-string RequestHandler::handleNotImplementedRequest()
+std::string RequestHandler::handleNotImplementedRequest()
 {
-	return "Request not implemented yet.";
+	return HTTPStatusCodes::clientError("Request not implemented yet.");
 }
 
-eRequestType RequestHandler::getERequestType(string requestType)
+eRequestType RequestHandler::getERequestType(std::string requestType)
 {
 	if (requestType == "upld")
 	{
@@ -78,6 +89,22 @@ eRequestType RequestHandler::getERequestType(string requestType)
 	else if (requestType == "chup")
 	{
 		return eCheckUpload;
+	}
+	else if (requestType == "conn")
+	{
+		return eConnect;
+	}
+	else if (requestType == "upjb")
+	{
+		return eUploadJob;
+	}
+	else if (requestType == "upcd")
+	{
+		return eUploadCrawlData;
+	}
+	else if (requestType == "gtjb")
+	{
+		return eGetTopJob;
 	}
 	else if (requestType == "extp")
 	{

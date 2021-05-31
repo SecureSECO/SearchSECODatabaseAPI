@@ -8,16 +8,13 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include <chrono>
 
-#define PORT 8003
-#define CONNECTION_TIMEOUT 10000000	// Timeout in microseconds.
-
 // Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler)
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft)
 {
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler);
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, &handler);
 		ioContext.run();
 	}
 	catch (std::exception& e)
@@ -32,7 +29,7 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 	return pointer(new TcpConnection(ioContext));
 }
 
-void TcpConnection::start(RequestHandler handler)
+void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 {
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
@@ -62,7 +59,7 @@ void TcpConnection::start(RequestHandler handler)
 	}
 	std::vector<char> data(size);
 	readExpectedData(size, data, totalData, error);
-	std::string result = handler.handleRequest(r.substr(0, 4), totalData);
+	std::string result = handler->handleRequest(r.substr(0, 4), totalData, thisPointer);
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 }
 
@@ -87,11 +84,12 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 }
 
 // TCP server Methods.
-TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler)
+TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler)
 	: ioContext_(ioContext),
 	acceptor_(ioContext, tcp::endpoint(tcp::v4(), PORT))
 {
-	handler.initialize(databaseHandler);
+	this->handler = handler;
+	handler->initialize(databaseHandler, databaseConnection, raft);
 	startAccept();
 }
 
@@ -110,7 +108,7 @@ void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	startAccept();
 	if (!error)
 	{
-		newConnection->start(handler);
+		newConnection->start(handler, newConnection);
 	}
 
 }

@@ -4,6 +4,8 @@ Utrecht University within the Software Project course.
 
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "HTTPStatus.h"
+#include "JDDatabaseMock.cpp"
 #include <gtest/gtest.h>
 
 std::string output1 = "2c7f46d4f57cf9e66b03213358c7ddb5?1?2?TestMethod1?Test1/Test2/TestFile1.cpp?69?1?"
@@ -41,99 +43,113 @@ MethodOut testMethod5 = { .hash = "06f73d7ab46184c55bf4742b9428a4c0", .projectID
 TEST(CheckRequestTests, SingleHashRequest)
 {
 	MockDatabase database;
+	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database);
+	handler.initialize(&database, &jddatabase, nullptr);
 	std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
-	EXPECT_EQ(result, output1);
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
+	EXPECT_EQ(result, HTTPStatusCodes::success(output1));
+
 }
 
 // Checks if the program works when a check request is sent providing multiple hashes.
 TEST(CheckRequestTests, MultipleHashRequest)
 {
 	MockDatabase database;
+	MockJDDatabase jddatabase;
 	RequestHandler handler;
-		handler.initialize(&database);
+	handler.initialize(&database, &jddatabase, nullptr);
 	std::vector<MethodOut> v1;
-		v1.push_back(testMethod1);
+	v1.push_back(testMethod1);
 	std::vector<MethodOut> v2;
 	v2.push_back(testMethod2);
 	std::vector<MethodOut> v3;
 	v3.push_back(testMethod3);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
-	EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
-	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-													   "06f73d7ab46184c55bf4742b9428a4c0\n"
-													   "137fed017b6159acc0af30d2c6b403a5\n");
-		EXPECT_TRUE(result.find(output1) != std::string::npos);
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
+	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program can successfully handle a check request with a hash which is not in the database.
 TEST(CheckRequestTests, SingleHashNoMatch)
 {
 	MockDatabase database;
-		RequestHandler handler;
-		handler.initialize(&database);
-		std::vector<MethodOut> v;
+	MockJDDatabase jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+	std::vector<MethodOut> v;
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
-		EXPECT_EQ(result, "No results found.");
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
+	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
 // Checks if the program can successfully handle a check request with multiple hashes, all with one match.
 TEST(CheckRequestTests, MultipleHashOneMatch)
 {
 	MockDatabase database;
-		RequestHandler handler;
-		handler.initialize(&database);
-		std::vector<MethodOut> v;
+	MockJDDatabase jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+	std::vector<MethodOut> v;
 	std::vector<MethodOut> v2;
-		v.push_back(testMethod2);
+	v.push_back(testMethod2);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v2));
-		EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v));
-		EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
-		std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-														   "06f73d7ab46184c55bf4742b9428a4c0\n"
-														   "137fed017b6159acc0af30d2c6b403a5\n");
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v2));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
 
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
-		EXPECT_TRUE(result.find(output2) != std::string::npos);
-		EXPECT_FALSE(result.find(output3) != std::string::npos);
+	EXPECT_TRUE(result.find(output2) != std::string::npos);
+	EXPECT_FALSE(result.find(output3) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program can successfully handle a check request with one hash, having multiple matches.
 TEST(CheckRequestTests, OneHashMultipleMatches)
 {
 	MockDatabase database;
-		RequestHandler handler;
-		handler.initialize(&database);
-		std::vector<MethodOut> v;
+	MockJDDatabase jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+	std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 	v.push_back(testMethod4);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n");
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
+	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n", nullptr);
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Check if the program can successfully handle a check request with multiple hashes, having multiple matches.
 TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 {
 	MockDatabase database;
-		RequestHandler handler;
-		handler.initialize(&database);
-		std::vector<MethodOut> v1;
-		std::vector<MethodOut> v2;
+	MockJDDatabase jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+	std::vector<MethodOut> v1;
+	std::vector<MethodOut> v2;
 	std::vector<MethodOut> v3;
 	v1.push_back(testMethod1);
 	v1.push_back(testMethod4);
@@ -141,18 +157,21 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	v2.push_back(testMethod5);
 	v3.push_back(testMethod3);
 
-	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
-	EXPECT_CALL(database,hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
-	EXPECT_CALL(database,hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5\n"
-							   "06f73d7ab46184c55bf4742b9428a4c0\n"
-							   "137fed017b6159acc0af30d2c6b403a5\n");
+	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
+	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
+	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
+	std::string result = handler.handleRequest("chck",
+											   "2c7f46d4f57cf9e66b03213358c7ddb5\n"
+											   "06f73d7ab46184c55bf4742b9428a4c0\n"
+											   "137fed017b6159acc0af30d2c6b403a5\n",
+											   nullptr);
 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_TRUE(result.find(output5) != std::string::npos);
+	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 }
 
 // Checks if the program correctly identifies an invalid hash in the input.
@@ -161,6 +180,6 @@ TEST(CheckRequestTests, InvalidHash)
 	RequestHandler handler;
 	std::string request = "hello_I'm_an_invalid_hash";
 
-	std::string output = handler.handleRequest("chck", request);
-	ASSERT_EQ(output, "Invalid hash presented.");
+	std::string output = handler.handleRequest("chck", request, nullptr);
+	ASSERT_EQ(output, HTTPStatusCodes::clientError("Invalid hash presented."));
 }

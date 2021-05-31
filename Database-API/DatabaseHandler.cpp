@@ -7,10 +7,9 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include <iostream>
 
-using namespace std;
-
-void DatabaseHandler::connect(string ip, int port)
+void DatabaseHandler::connect(std::string ip, int port)
 {
+	errno = 0;
 	CassFuture *connectFuture = NULL;
 	CassCluster *cluster = cass_cluster_new();
 	connection = cass_session_new();
@@ -34,8 +33,8 @@ void DatabaseHandler::connect(string ip, int port)
 		size_t messageLength;
 		cass_future_error_message(connectFuture, &message, &messageLength);
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
-
 	setPreparedStatements();
 }
 
@@ -105,14 +104,15 @@ void DatabaseHandler::setPreparedStatements()
 	cass_future_free(prepareFuture);
 }
 
-vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Version version)
+std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Version version)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectProject);
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
 	cass_statement_bind_int64_by_name(query, "version", version);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
-	vector<ProjectOut> projects = {};
+	std::vector<ProjectOut> projects = {};
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);
@@ -135,6 +135,7 @@ vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Versio
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
 
 	cass_statement_free(query);
@@ -143,15 +144,16 @@ vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Versio
 	return projects;
 }
 
-vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
+std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
+	errno = 0;
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
 	cass_statement_bind_string_by_name(query, "method_hash", hash.c_str());
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	vector<MethodOut> methods;
+	std::vector<MethodOut> methods;
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -173,11 +175,12 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 	}
 	else
 	{
-	    	// Handle error.
-    		const char *message;
-    		size_t messageLength;
-    		cass_future_error_message(resultFuture, &message, &messageLength);
-    		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
 
 	cass_statement_free(query);
@@ -188,6 +191,7 @@ vector<MethodOut> DatabaseHandler::hashToMethods(string hash)
 
 void DatabaseHandler::addProject(ProjectIn project)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertProject);
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
@@ -213,6 +217,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
 	}
 
 	cass_future_free(queryFuture);
@@ -220,6 +225,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 
 void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
 	cass_statement_bind_string_by_name(query, "method_hash", method.hash.c_str());
@@ -260,6 +266,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
 	}
 
 	cass_future_free(queryFuture);
@@ -267,6 +274,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
@@ -288,13 +296,15 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
 	}
 
 	cass_future_free(queryFuture);
 }
 
-vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
+std::vector<MethodId> DatabaseHandler::authorToMethods(std::string authorId)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectMethodByAuthor);
 
 	CassUuid uuid;
@@ -303,7 +313,7 @@ vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	vector<MethodId> methods;
+	std::vector<MethodId> methods;
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -329,6 +339,7 @@ vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
 
 	cass_statement_free(query);
@@ -337,8 +348,9 @@ vector<MethodId> DatabaseHandler::authorToMethods(string authorId)
 	return methods;
 }
 
-Author DatabaseHandler::idToAuthor(string id)
+Author DatabaseHandler::idToAuthor(std::string id)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectAuthorById);
 
 	CassUuid uuid;
@@ -370,6 +382,7 @@ Author DatabaseHandler::idToAuthor(string id)
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
 
 	cass_statement_free(query);
@@ -389,7 +402,7 @@ CassUuid DatabaseHandler::getAuthorId(Author author)
 	return authorID;
 }
 
-string DatabaseHandler::authorToId(Author author)
+std::string DatabaseHandler::authorToId(Author author)
 {
 	CassUuid authorID = retrieveAuthorId(author);
 
@@ -404,6 +417,7 @@ string DatabaseHandler::authorToId(Author author)
 
 CassUuid DatabaseHandler::retrieveAuthorId(Author author)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectIdByAuthor);
 
 	cass_statement_bind_string_by_name(query, "name", author.name.c_str());
@@ -436,6 +450,7 @@ CassUuid DatabaseHandler::retrieveAuthorId(Author author)
 		size_t messageLength;
 		cass_future_error_message(queryFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
 
 	cass_statement_free(query);
@@ -531,13 +546,13 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 }
 
 
-string DatabaseHandler::getString(const CassRow* row, const char* column)
+std::string DatabaseHandler::getString(const CassRow* row, const char* column)
 {
 	const char *result;
 	size_t len;
 	const CassValue *value = cass_row_get_column_by_name(row, column);
 	cass_value_get_string(value, &result, &len);
-	return string(result, len);
+	return std::string(result, len);
 }
 
 int DatabaseHandler::getInt32(const CassRow *row, const char *column)
@@ -556,7 +571,7 @@ long long DatabaseHandler::getInt64(const CassRow *row, const char *column)
 	return result;
 }
 
-string DatabaseHandler::getUUID(const CassRow *row, const char *column)
+std::string DatabaseHandler::getUUID(const CassRow *row, const char *column)
 {
 	char result[CASS_UUID_STRING_LENGTH];
 	CassUuid authorID;

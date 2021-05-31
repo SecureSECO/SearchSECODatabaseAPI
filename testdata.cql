@@ -1,5 +1,8 @@
 CREATE KEYSPACE IF NOT EXISTS projectData
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+
+CREATE KEYSPACE IF NOT EXISTS jobs
+    WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
     
 CREATE TABLE IF NOT EXISTS projectData.methods
 (
@@ -52,6 +55,16 @@ CREATE TABLE IF NOT EXISTS projectData.id_by_author
   authorID UUID,
   PRIMARY KEY ((name, mail))
 );
+
+CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
+(
+    jobid UUID,
+    priority int,
+    url text,
+    constant int,
+    PRIMARY KEY ((constant), priority, jobid) 
+) 
+WITH CLUSTERING ORDER BY (priority DESC);
 
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
 ('2c7f46d4f57cf9e66b03213358c7ddb5', 1, 5000000000000, 'M1', 'P1/M1.cpp', 1, 
@@ -191,9 +204,18 @@ INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES
 (f95ffc6c-aa97-40d6-b709-cb4823955213, 'Author 6', 'author6@mail.com');
 INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES 
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
+
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES 
+(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 3, 'https://github.com/zavg/linux-0.01', 1);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
+(61c9d732-1f98-40af-b201-3b20fbf7a6db, 4, 'https://github.com/304471720/CSAPI', 1);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
+(2f78a799-0e18-4eb5-bd33-83718a3257d9, 5, 'https://github.com/caged/microsis', 1);
+
 INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
 INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
 (47919e8f-7103-48a3-9514-3f2d9d49ac61, 'Author1', 'author1@mail.com');
 INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
 (41ab7373-8f24-4a03-83dc-621036d99f34, 'Author2', 'author2@mail.com');
+
