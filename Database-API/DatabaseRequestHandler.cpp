@@ -70,12 +70,12 @@ std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request
 std::vector<Hash> DatabaseRequestHandler::requestToHashes(std::string request)
 {
 	errno = 0;
-	std::vector<std::string> data = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> data = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 	std::vector<Hash> hashes = {};
 	for (int i = 1; i < data.size(); i++)
 	{
 		// Data before first delimiter.
-		Hash hash = data[i].substr(0, data[i].find('?'));
+		Hash hash = data[i].substr(0, data[i].find());
 		if (isValidHash(hash))
 		{
 			hashes.push_back(hash);
@@ -108,7 +108,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 
 	std::vector<MethodIn> methods;
 
-	std::vector<std::string> dataEntries = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 
 	// Check if all methods are valid.
 	for (int i = 1; i < dataEntries.size(); i++)
@@ -171,8 +171,8 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
-	std::string projectString = request.substr(0, request.find('\n'));
-	std::vector<std::string> projectData = Utility::splitStringOn(projectString, '?');
+	std::string projectString = request.substr(0, request.find(ENTRY_DELIMITER_CHAR));
+	std::vector<std::string> projectData = Utility::splitStringOn(projectString, FIELD_DELIMITER_CHAR);
 
 	if (projectData.size() != PROJECT_DATA_SIZE)
 	{
@@ -204,7 +204,7 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 {
 	errno = 0;
-	std::vector<std::string> methodData = Utility::splitStringOn(dataEntry, '?');
+	std::vector<std::string> methodData = Utility::splitStringOn(dataEntry, FIELD_DELIMITER_CHAR);
 
 	if (methodData.size() < METHOD_DATA_MIN_SIZE)
 	{
@@ -259,7 +259,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 
 std::string DatabaseRequestHandler::handleCheckRequest(std::string request)
 {
-	std::vector<Hash> hashes = Utility::splitStringOn(request, '\n');
+	std::vector<Hash> hashes = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 	return handleCheckRequest(hashes);
 }
 
@@ -278,7 +278,7 @@ std::string DatabaseRequestHandler::handleCheckRequest(std::vector<Hash> hashes)
 	std::vector<MethodOut> methods = getMethods(hashes);
 
 	// Return retrieved data.
-	std::string methodsStringFormat = methodsToString(methods, '?', '\n');
+	std::string methodsStringFormat = methodsToString(methods, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	if (!(methodsStringFormat == ""))
 	{
 		return HTTPStatusCodes::success(methodsStringFormat);
@@ -405,13 +405,13 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string request)
 {
 	errno = 0;
-	std::vector<std::string> projectsData = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> projectsData = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 	std::queue<std::pair<ProjectID, Version>> keyQueue;
 
 	// We fill the queue with projectKeys, which identify a project uniquely.
 	for (int i = 0; i < projectsData.size(); i++)
 	{
-		std::vector<std::string> projectData = Utility::splitStringOn(projectsData[i], '?');
+		std::vector<std::string> projectData = Utility::splitStringOn(projectsData[i], FIELD_DELIMITER_CHAR);
 		if (projectData.size() < 2)
 		{
 			errno = EILSEQ;
@@ -429,7 +429,7 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 	}
 
 	std::vector<ProjectOut> projects = getProjects(keyQueue);
-	return HTTPStatusCodes::success(projectsToString(projects, '?', '\n'));
+	return HTTPStatusCodes::success(projectsToString(projects, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR));
 }
 
 std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &keys, std::mutex &queueLock)
@@ -486,7 +486,7 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request)
 {
 	errno = 0;
-	std::vector<std::string> authorStrings = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorStrings = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 
 	std::vector<Author> authors;
 
@@ -526,7 +526,7 @@ std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Autho
 
 		for (std::string data : dataElements)
 		{
-			Utility::appendBy(chars, data, '?');
+			Utility::appendBy(chars, data, FIELD_DELIMITER_CHAR);
 		}
 
 		// We should get rid of the last dataDelimiter if something is appended to 'chars',
@@ -537,7 +537,7 @@ std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Autho
 		}
 
 		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
-		chars.push_back('\n');
+		chars.push_back(ENTRY_DELIMITER_CHAR);
 		authors.pop_back();
 	}
 	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
@@ -546,7 +546,7 @@ std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Autho
 
 Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
 {
-	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, '?');
+	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, FIELD_DELIMITER_CHAR);
 
 	Author author;
 
@@ -620,7 +620,7 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleAutho
 
 std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 {
-	std::vector<std::string> authorIds = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorIds = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 
 	std::regex re(UUID_REGEX);
 
@@ -701,7 +701,7 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleIdToA
 
 std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string request)
 {
-	std::vector<std::string> authorIds = Utility::splitStringOn(request, '\n');
+	std::vector<std::string> authorIds = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 
 	std::regex re(UUID_REGEX);
 
@@ -801,7 +801,7 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 
 		for (std::string data : dataElements)
 		{
-			Utility::appendBy(chars, data, '?');
+			Utility::appendBy(chars, data, FIELD_DELIMITER_CHAR);
 		}
 
 		// We should get rid of the last dataDelimiter if something is appended to 'chars',
@@ -812,7 +812,7 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 		}
 
 		// We end 'chars' with the methodDelimiter and indicate that we are done with 'lastMethod'.
-		chars.push_back('\n');
+		chars.push_back(ENTRY_DELIMITER_CHAR);
 		methods.pop_back();
 	}
 	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.

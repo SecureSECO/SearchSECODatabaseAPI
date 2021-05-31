@@ -28,8 +28,11 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author?author@mail.com\n";
-	std::string output = "Author?author@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "Author?author@mail.com";
+	std::string output = "";
+	Utility::appendBy(output, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author;
 	author.name = "Author";
 	author.mail = "author@mail.com";
@@ -48,7 +51,7 @@ TEST(GetAuthorIdRequest, OneRequestNoMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author?author@mail.com\n";
+	std::string request = "Author?author@mail.com";
 	std::string output = "No results found.";
 	Author author;
 	author.name = "Author";
@@ -69,11 +72,22 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
-	std::string output1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
-						  "41ab7373-8f24-4a03-83dc-621036d99f34\n";
-	std::string output2 = "Author2?author2@mail.com?41ab7373-8f24-4a03-83dc-621036d99f34\nAuthor1?author1@mail.com?"
-						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "";
+	Utility::appendBy(request, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(request, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	std::string output1 = "";
+	Utility::appendBy(output1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	std::string output2 = "";
+	Utility::appendBy(output2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author1;
 	author1.name = "Author1";
 	author1.mail = "author1@mail.com";
@@ -98,8 +112,14 @@ TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author1?author1@mail.com\nAuthor2?author2@mail.com\n";
-	std::string output = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "";
+	Utility::appendBy(request, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(request, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	std::string output = "";
+	Utility::appendBy(output, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author1;
 	author1.name = "Author1";
 	author1.mail = "author1@mail.com";
@@ -123,7 +143,7 @@ TEST(GetAuthorIdRequest, IncorrectInput)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author\n";
+	std::string request = "Author";
 	std::string output = "Error parsing author: Author";
 
 	std::string result = handler.handleRequest("auid", request, nullptr);
@@ -139,8 +159,11 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
-	std::string output = "Author?author@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
+	std::string output = "";
+	Utility::appendBy(output, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author;
 	author.name = "Author";
 	author.mail = "author@mail.com";
@@ -159,7 +182,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
 	std::string output = "No results found.";
 	Author author;
 
@@ -177,11 +200,20 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
-	std::string output1 = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\nAuthor2?author2@mail.com?"
-						  "41ab7373-8f24-4a03-83dc-621036d99f34\n";
-	std::string output2 = "Author2?author2@mail.com?41ab7373-8f24-4a03-83dc-621036d99f34\nAuthor1?author1@mail.com?"
-						  "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "";
+	Utility::appendBy(request, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output1 = "";
+	Utility::appendBy(output1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2 = "";
+	Utility::appendBy(output2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author1;
 	author1.name = "Author1";
 	author1.mail = "author1@mail.com";
@@ -204,8 +236,13 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n41ab7373-8f24-4a03-83dc-621036d99f34\n";
-	std::string output = "Author1?author1@mail.com?47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
+	std::string request = "";
+	Utility::appendBy(request, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output = "";
+	Utility::appendBy(output, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
 	Author author1;
 	author1.name = "Author1";
 	author1.mail = "author1@mail.com";
@@ -226,7 +263,7 @@ TEST(GetAuthorRequest, IncorrectInput)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "47919e8f710348a395143f2d9d49ac61\n";
+	std::string request = "47919e8f710348a395143f2d9d49ac61";
 	std::string output = "Error parsing author id: 47919e8f710348a395143f2d9d49ac61";
 
 	std::string result = handler.handleRequest("idau", request, nullptr);
@@ -250,7 +287,9 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	std::vector<MethodId> v;
 	v.push_back(method);
 
-	std::string output = "41ab7373-8f24-4a03-83dc-621036d99f34?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
+	std::string output = "";
+	Utility::appendBy(output, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
@@ -281,16 +320,27 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 	std::vector<MethodId> v2;
 	v2.push_back(method2);
 
-	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n41ab7373-8f24-"
-						  "4a03-83dc-621036d99f34?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
-	std::string output2 = "41ab7373-8f24-4a03-83dc-621036d99f34?06f73d7ab46184c55bf4742b9428a4c0?42?420\n47919e8f-7103-"
-						  "48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
+	std::string output1 = "";
+	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output1,
+					  {"41ab7373-8f24-4a03-83dc-621036d99f34", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	std::string output2 = "";
+	Utility::appendBy(output1,
+					  {"41ab7373-8f24-4a03-83dc-621036d99f34", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
 
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-													   "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	std::string inputFunction = "";
+	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
@@ -306,7 +356,7 @@ TEST(GetMethodByAuthorTests, SingleIdNoMatch)
 	std::vector<MethodId> v;
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n", nullptr);
+	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
@@ -330,12 +380,15 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("aume",
-											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
-											   nullptr);
 
-	std::string output = "41ab7373-8f24-4a03-83dc-621036d99f34?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
+	std::string inputFunction = "";
+	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
+
+	std::string output = "";
+	Utility::appendBy(output, {"41ab7373-8f24-4a03-83dc-621036d99f34", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
 	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
@@ -363,13 +416,22 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 	v.push_back(method1);
 	v.push_back(method2);
 
-	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n47919e8f-7103-"
-						  "48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
-	std::string output2 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n47919e8f-7103-"
-						  "48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
+	std::string output1 = "";
+	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output1,
+					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	std::string output2 = "";
+	Utility::appendBy(output2,
+					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(output2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61\n", nullptr);
+	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
@@ -405,14 +467,21 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v2));
-	std::string result = handler.handleRequest("aume",
-											   "47919e8f-7103-48a3-9514-3f2d9d49ac61\n"
-											   "41ab7373-8f24-4a03-83dc-621036d99f34\n",
-											   nullptr);
 
-	std::string output1 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?2c7f46d4f57cf9e66b03213358c7ddb5?42?69\n";
-	std::string output2 = "47919e8f-7103-48a3-9514-3f2d9d49ac61?06f73d7ab46184c55bf4742b9428a4c0?42?420\n";
-	std::string output3 = "41ab7373-8f24-4a03-83dc-621036d99f34?137fed017b6159acc0af30d2c6b403a5?69?420\n";
+	std::string inputFunction = "";
+	Utility::appendBy(inputFunction, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
+					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
+
+	std::string output1 = "";
+	Utility::appendBy(output1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output2 = "";
+	Utility::appendBy(output2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output3 = "";
+	Utility::appendBy(output3, {"41ab7373-8f24-4a03-83dc-621036d99f34", "137fed017b6159acc0af30d2c6b403a5", "69", "420"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
 	EXPECT_EQ(result.size(), HTTPStatusCodes::success(output1).size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
@@ -432,6 +501,6 @@ TEST(GetMethodByAuthorTests, IncorrectInput)
 
 	std::string output = "Error parsing author id: 41ab73738f244a0383dc621036d99f34";
 
-	std::string result = handler.handleRequest("aume", "41ab73738f244a0383dc621036d99f34\n", nullptr);
+	std::string result = handler.handleRequest("aume", "41ab73738f244a0383dc621036d99f34", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::clientError(output));
 }
