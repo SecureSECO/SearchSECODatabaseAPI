@@ -36,6 +36,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"

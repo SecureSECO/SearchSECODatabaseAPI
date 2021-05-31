@@ -16,6 +16,7 @@ TEST(UploadJobRequest, SingleJob)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
@@ -36,6 +37,7 @@ TEST(UploadJobRequest, MultipleJobs)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
@@ -76,6 +78,7 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";

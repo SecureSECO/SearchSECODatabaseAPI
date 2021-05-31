@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "HTTPStatus.h"
 #include <string>
 #include <cassandra.h>
 

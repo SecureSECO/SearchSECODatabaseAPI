@@ -20,6 +20,7 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	MockRaftConsensus raftConsensus;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(3));
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "gtjb";
