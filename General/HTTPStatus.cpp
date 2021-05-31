@@ -8,8 +8,6 @@ Utrecht University within the Software Project course.
 #include "HTTPStatus.h"
 #include "Utility.h"
 
-#define DELIMITER '\n'
-
 enum HTTPStatusCode
 {
 	successCode = 200,
@@ -20,7 +18,16 @@ enum HTTPStatusCode
 
 std::string constructMessage(HTTPStatusCode code, std::string message)
 {
-	return std::to_string(code) + DELIMITER + message;
+	return std::to_string(code) + HTTP_DELIMITER + message;
+}
+
+bool validCode(std::string request)
+{
+	std::string code = Utility::splitStringOn(request, HTTP_DELIMITER)[0];
+
+	return code == std::to_string(successCode) 
+		|| code == std::to_string(clientErrorCode) 
+		|| code == std::to_string(serverErrorCode);
 }
 
 std::string HTTPStatusCodes::success(std::string message)
@@ -40,10 +47,24 @@ std::string HTTPStatusCodes::serverError(std::string message)
 
 std::string HTTPStatusCodes::getCode(std::string request)
 {
-	return Utility::splitStringOn(request, '\n')[0];
+	if (validCode(request))
+	{
+		return Utility::splitStringOn(request, HTTP_DELIMITER)[0];
+	}
+	else
+	{
+		return std::to_string(serverErrorCode);
+	}
 }
 
 std::string HTTPStatusCodes::getMessage(std::string request)
 {
-	return request.substr(4, request.length() - 4);
+	if (validCode(request))
+	{
+		return request.substr(4, request.length() - 4);
+	}
+	else
+	{
+		return request;
+	}
 }
