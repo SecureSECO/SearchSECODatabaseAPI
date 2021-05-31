@@ -34,6 +34,7 @@ void DatabaseConnection::connect(std::string ip, int port)
 		cass_future_error_message(connectFuture, &message, &messageLength);
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
+		return;
 	}
 	setPreparedStatements();
 }
