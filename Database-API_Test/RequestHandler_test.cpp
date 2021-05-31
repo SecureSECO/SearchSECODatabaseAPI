@@ -16,6 +16,7 @@ TEST(GeneralTest, InitializeTest)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	EXPECT_CALL(database, connect("cassandra", 8002)).Times(1);
+	errno = 0;
 	handler.initialize(&database, &jddatabase, nullptr);
 }
 

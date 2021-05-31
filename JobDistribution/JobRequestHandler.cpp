@@ -7,15 +7,15 @@ Utrecht University within the Software Project course.
 #include "JobRequestHandler.h"
 #include "HTTPStatus.h"
 
-
 #include <iostream>
+#include <exception>
 
 JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port)
 {
 	this->raft = raft;
 	this->requestHandler = requestHandler;
 	this->database = database;
-	database->connect(ip, port);
+	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
 	crawlId = 0;
 }
@@ -32,8 +32,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		// Check if number of jobs is enough to provide the top job.
 		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 		{
-			numberOfJobs -= 1;
-			return HTTPStatusCodes::success("Spider?" +  database->getTopJob());
+			return getTopJobWithRetry();
 		}
 		// If number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
@@ -77,8 +76,14 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 		// Call to the database to upload jobs.
 		for (int i = 0; i < urls.size(); i++)
 		{
-			numberOfJobs += 1;
-			database->uploadJob(urls[i], priorities[i]);
+			if (tryUploadJobWithRetry(urls[i], priorities[i]))
+			{
+				numberOfJobs += 1;
+			}
+			else
+			{
+				return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
+			}
 		}
 		if (errno == 0)
 		{
@@ -97,7 +102,6 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 	if (raft->isLeader())
 	{
 		int id = Utility::safeStoi(data.substr(0, data.find('\n')));
-		std::cout << std::to_string(id) + "\n";
 		if (errno == 0)
 		{
 			updateCrawlId(id);
@@ -117,4 +121,64 @@ void JobRequestHandler::updateCrawlId(int id)
 {
 	crawlId = id;
 	alreadyCrawling = false;
+}
+
+void JobRequestHandler::connectWithRetry(std::string ip, int port)
+{
+	database->connect(ip, port);
+	int retries = 0;
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			database->connect(ip, port);
+			if (errno == 0)
+			{
+				return;
+			}
+			retries++;
+		}
+		throw "Unable to connect to database.";
+	}
+}
+
+std::string JobRequestHandler::getTopJobWithRetry()
+{
+	std::string url = database->getTopJob();
+	int retries = 0;
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			url = database->getTopJob();
+			if (errno == 0)
+			{
+				return HTTPStatusCodes::success("Spider?" + url);
+			}
+			retries++;
+		}
+		return HTTPStatusCodes::serverError("Unable to get job from database.");
+	}
+	numberOfJobs -= 1;
+	return HTTPStatusCodes::success("Spider?" + url);
+}
+
+bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority)
+{
+	int retries = 0;
+	database->uploadJob(url, priority);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			database->uploadJob(url, priority);
+			if (errno == 0)
+			{
+				return true;
+			}
+			retries++;
+		}
+		return false;
+	}
+	return true;
 }
