@@ -45,7 +45,6 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 		requestChars,
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	requestChars.pop_back();
 	std::string request(requestChars.begin(), requestChars.end());
 
 	std::vector<char> outputChars = {};

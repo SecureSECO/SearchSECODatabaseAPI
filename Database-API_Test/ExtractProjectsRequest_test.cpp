@@ -37,7 +37,11 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 
 	ProjectID projectID2 = 1;
 	Version version2 = 5000000000000;
-	std::string input2 = "1?5000000000000";
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"1", "5000000000000"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	std::string input2(inputChars.begin(), inputChars.end());
+
 	ProjectOut project2 = {.projectID = 1,
 						   .version = 5000000000000,
 						   .license = "L1",
@@ -46,8 +50,11 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 						   .ownerID = "68bd2db6-fe91-47d2-a134-cf82b104f547",
 						   .hashes = {"2c7f46d4f57cf9e66b03213358c7ddb5"}};
 	std::vector<ProjectOut> p2 = {project2};
-	std::string expected2 = "1?5000000000000?L1?P1?www.github.com/p1?"
-							"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+	std::vector<char> expectedChars = {};
+	Utility::appendBy(expectedChars,
+					  {"1", "5000000000000", "L1", "P1", "www.github.com/p1", "68bd2db6-fe91-47d2-a134-cf82b104f547"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string expected2(expectedChars.begin(), expectedChars.end());
 
 	EXPECT_CALL(database, searchForProject(projectID2, version2)).WillOnce(testing::Return(p2));
 	std::string output2 = handler.handleRequest("extp", input2, nullptr);
@@ -65,7 +72,11 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 
 	ProjectID projectID3 = 1;
 	Version version3 = 5000000001000;
-	std::string input3 = "1?5000000001000";
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"1", "5000000001000"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	std::string input3(inputChars.begin(), inputChars.end());
+
 	std::vector<ProjectOut> p3 = {};
 	std::string expected3 = "No results found.";
 
@@ -91,7 +102,14 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	Version version4_3 = 5000000002000;
 	ProjectID projectID4_4 = 4;
 	Version version4_4 = 5000000005000;
-	std::string input4 = "2?5000000001000\n2?5000000002000\n3?5000000002000\n4?5000000005000";
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"2", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"2", "5000000002000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"3", "5000000002000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"4", "5000000005000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input4(inputChars.begin(), inputChars.end());
+
 	ProjectOut project4_1 = {.projectID = 2,
 							 .version = 5000000001000,
 							 .license = "L2",
@@ -119,9 +137,25 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	std::vector<ProjectOut> p4_3 = {project4_2};
 	std::vector<ProjectOut> p4_4 = {project4_3};
 
-	std::string expected4_1 = "2?5000000001000?L2?P2?www.github.com/p2?68bd2db6-fe91-47d2-a134-cf82b104f547";
-	std::string expected4_2 = "3?5000000002000?L3?P3?www.github.com/p3?b2217c08-06eb-4a57-b977-7c6d72299301";
-	std::string expected4_3 = "4?5000000005000?L4?P4?www.github.com/p4?e39e0872-6856-4fa0-8d9a-278728362f43";
+	std::vector<char> expectedChars1 = {};
+	Utility::appendBy(expectedChars1,
+					  {"2", "5000000001000", "L2", "P2", "www.github.com/p2", "68bd2db6-fe91-47d2-a134-cf82b104f547"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	expectedChars1.pop_back();
+	std::string expected4_1(expectedChars1.begin(), expectedChars1.end()); 
+	std::vector<char> expectedChars2 = {};
+	Utility::appendBy(expectedChars2,
+					  {"3", "5000000002000", "L3", "P3", "www.github.com/p3", "b2217c08-06eb-4a57-b977-7c6d72299301"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	expectedChars2.pop_back();
+	std::string expected4_2(expectedChars2.begin(), expectedChars2.end());
+	std::vector<char> expectedChars3 = {};
+	Utility::appendBy(expectedChars3,
+					  {"4", "5000000005000", "L4", "P4", "www.github.com/p4", "e39e0872-6856-4fa0-8d9a-278728362f43"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	expectedChars3.pop_back();
+	std::string expected4_3(expectedChars3.begin(), expectedChars3.end());
+
 	std::vector<std::string> expected4 = {expected4_1, expected4_2, expected4_3};
 	EXPECT_CALL(database, searchForProject(projectID4_1, version4_1)).WillOnce(testing::Return(p4_1));
 	EXPECT_CALL(database, searchForProject(projectID4_2, version4_2)).WillOnce(testing::Return(p4_2));
@@ -149,7 +183,7 @@ TEST(ExtractProjectsRequestTests, TooFewArguments)
 {
 	RequestHandler handler;
 
-	std::string input5 = "0?0?\n1\n2?2";
+	std::string input5 = "1";
 	std::string expected5 =
 		"The request failed. Each project should be provided a projectID and a version (in that order).";
 
@@ -162,7 +196,9 @@ TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 {
 	RequestHandler handler;
 
-	std::string input6 = "0?0?\n-?-\n2?2";
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"-", "-"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input6(inputChars.begin(), inputChars.end());
 	std::string expected6 =
 		"The request failed. For each project, both the projectID and the version should be a long long int.";
 

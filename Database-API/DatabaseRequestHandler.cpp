@@ -75,7 +75,7 @@ std::vector<Hash> DatabaseRequestHandler::requestToHashes(std::string request)
 	for (int i = 1; i < data.size(); i++)
 	{
 		// Data before first delimiter.
-		Hash hash = data[i].substr(0, data[i].find(ENTRY_DELIMITER_CHAR));
+		Hash hash = data[i].substr(0, data[i].find(FIELD_DELIMITER_CHAR));
 		if (isValidHash(hash))
 		{
 			hashes.push_back(hash);

@@ -19,9 +19,11 @@ TEST(CrawlDataRequest, SingleJob)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";
-	//std::vector<char> requestChars = {};
-	//Utility::appendBy(requestChars, )
-	std::string request = "100\nhttps://github.com/zavg/linux-0.01?1";
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, "100", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"https://github.com/zavg/linux-0.01", "1"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
 
@@ -36,7 +38,10 @@ TEST(CrawlDataRequest, SingleJob)
 
 	std::string result2 = handler.handleRequest(requestType2, request2, nullptr);
 
-	ASSERT_EQ(result2, HTTPStatusCodes::success("Crawl?100"));
+	std::vector<char> inputFunctionChars = {};
+	Utility::appendBy(inputFunctionChars, {"Crawl", "100"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
+	ASSERT_EQ(result2, HTTPStatusCodes::success(inputFunction));
 }
 
 // Check if an invalid crawlId is handled correctly.
@@ -49,9 +54,12 @@ TEST(CrawlDataRequest, InvalidId)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";
-	std::string request = "aaa\nhttps://github.com/zavg/linux-0.01?1";
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, "aaa", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"https://github.com/zavg/linux-0.01", "1"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
-	// EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
