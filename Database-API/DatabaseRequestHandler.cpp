@@ -22,7 +22,7 @@ Utrecht University within the Software Project course.
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
 {
 	this->database = database;
-	database -> connect(ip, port);
+	connectWithRetry(ip, port);
 }
 
 std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request)
@@ -122,8 +122,10 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	}
 
 	// Only upload if project and all methods are valid to prevent partial uploads.
-	database -> addProject(project);
-
+	if (!tryUploadProjectWithRetry(project))
+	{
+		return HTTPStatusCodes::serverError("Failed to add project to database.");
+	}
 	std::queue<MethodIn> methodQueue;
 	std::mutex queueLock;
 	std::vector<std::thread> threads;
@@ -135,6 +137,10 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
 		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+		if (errno != 0)
+		{
+			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
+		}
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
@@ -163,7 +169,11 @@ void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, s
 		MethodIn method = methods.front();
 		methods.pop();
 		queueLock.unlock();
-		database->addMethod(method, project);
+		addMethodWithRetry(method, project);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+		}
 	}
 }
 
@@ -276,6 +286,10 @@ std::string DatabaseRequestHandler::handleCheckRequest(std::vector<Hash> hashes)
 
 	// Request the specified hashes.
 	std::vector<MethodOut> methods = getMethods(hashes);
+	if (errno != 0)
+	{
+		return HTTPStatusCodes::serverError("Unable to get methods from database.");
+	}
 
 	// Return retrieved data.
 	std::string methodsStringFormat = methodsToString(methods, '?', '\n');
@@ -303,6 +317,11 @@ std::vector<MethodOut> DatabaseRequestHandler::getMethods(std::vector<Hash> hash
 	{
 		std::packaged_task<std::vector<MethodOut>()> task(
 			bind(&DatabaseRequestHandler::singleHashToMethodsThread, this, ref(hashQueue), ref(queueLock)));
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		results.push_back(task.get_future());
 		threads.push_back(std::thread(move(task)));
 	}
@@ -332,6 +351,11 @@ std::vector<ProjectOut> DatabaseRequestHandler::getProjects(std::queue<std::pair
 	{
 		std::packaged_task<std::vector<ProjectOut>()> task(
 			bind(&DatabaseRequestHandler::singleSearchProjectThread, this, ref(keyQueue), ref(queueLock)));
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		results.push_back(task.get_future());
 		threads.push_back(std::thread(move(task)));
 	}
@@ -366,7 +390,12 @@ std::vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(std::qu
 		Hash hash = hashes.front();
 		hashes.pop();
 		queueLock.unlock();
-		std::vector<MethodOut> newMethods = database->hashToMethods(hash);
+		std::vector<MethodOut> newMethods = hashToMethodsWithRetry(hash);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(newMethods[j]);
@@ -429,6 +458,10 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 	}
 
 	std::vector<ProjectOut> projects = getProjects(keyQueue);
+	if (errno != 0)
+	{
+		return HTTPStatusCodes::serverError("Unable to get project(s) from the database.");
+	}
 	return HTTPStatusCodes::success(projectsToString(projects, '?', '\n'));
 }
 
@@ -449,7 +482,12 @@ std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::q
 
 		ProjectID projectID = key.first;
 		Version version = key.second;
-		std::vector<ProjectOut> newProject = database->searchForProject(projectID, version);
+		std::vector<ProjectOut> newProject = searchForProjectWithRetry(projectID, version);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		if (!newProject.empty())
 		{
 			projects.push_back(newProject[0]);
@@ -501,7 +539,10 @@ std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request
 
 	// Request the specified hashes.
 	std::vector<std::tuple<Author, std::string>> authorIDs = getAuthorIDs(authors);
-
+	if (errno != 0)
+	{
+		return HTTPStatusCodes::serverError("Unable to get authors from database.");
+	}
 	if (authorIDs.size() <= 0)
 	{
 		return HTTPStatusCodes::success("No results found.");
@@ -555,7 +596,6 @@ Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
 		errno = EILSEQ;
 		return author;
 	}
-	
 	author.name = authorData[0];
 	author.mail = authorData[1];
 
@@ -576,6 +616,11 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthorID
 	{
 		std::packaged_task<std::vector<std::tuple<Author, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleAuthorToIDThread, this, ref(authorQueue), ref(queueLock)));
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		results.push_back(task.get_future());
 		threads.push_back(std::thread(move(task)));
 	}
@@ -610,7 +655,12 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleAutho
 		Author author = authors.front();
 		authors.pop();
 		queueLock.unlock();
-		std::string newAuthorID = database->authorToId(author);
+		std::string newAuthorID = authorToIdWithRetry(author);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		if (newAuthorID != "")
 		{
 			authorIDs.push_back(make_tuple(author, newAuthorID));
@@ -634,6 +684,10 @@ std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 
 	// Request the specified hashes.
 	std::vector<std::tuple<Author, std::string>> authors = getAuthors(authorIds);
+	if (errno != 0)
+	{
+		return HTTPStatusCodes::serverError("Unable to get authors from database.");
+	}
 
 	if (authors.size() <= 0)
 	{
@@ -657,6 +711,11 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthors(
 	{
 		std::packaged_task<std::vector<std::tuple<Author, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleIdToAuthorThread, this, ref(authorIdQueue), ref(queueLock)));
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		results.push_back(task.get_future());
 		threads.push_back(std::thread(move(task)));
 	}
@@ -691,7 +750,12 @@ std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleIdToA
 		std::string id = authorIds.front();
 		authorIds.pop();
 		queueLock.unlock();
-		Author newAuthor = database->idToAuthor(id);
+		Author newAuthor = idToAuthorWithRetry(id);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		if (newAuthor.name != "" && newAuthor.mail != "")
 		{
 			authors.push_back(make_tuple(newAuthor, id));
@@ -715,6 +779,10 @@ std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string 
 
 	// Request the specified hashes.
 	std::vector<std::tuple<MethodId, std::string>> methods = getMethodsByAuthor(authorIds);
+	if (errno != 0)
+	{
+		return HTTPStatusCodes::serverError("Unable to get methods from database.");
+	}
 
 	// Return retrieved data.
 	std::string methodsStringFormat = methodIdsToString(methods);
@@ -742,6 +810,11 @@ std::vector<std::tuple<MethodId, std::string>> DatabaseRequestHandler::getMethod
 	{
 		std::packaged_task<std::vector<std::tuple<MethodId, std::string>>()> task(
 			bind(&DatabaseRequestHandler::singleAuthorToMethodsThread, this, ref(idQueue), ref(queueLock)));
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		results.push_back(task.get_future());
 		threads.push_back(std::thread(move(task)));
 	}
@@ -776,7 +849,12 @@ std::vector<std::tuple<MethodId, std::string>> DatabaseRequestHandler::singleAut
 		std::string authorId = authorIds.front();
 		authorIds.pop();
 		queueLock.unlock();
-		std::vector<MethodId> newMethods = database->authorToMethods(authorId);
+		std::vector<MethodId> newMethods = authorToMethodsWithRetry(authorId);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
 		for (int j = 0; j < newMethods.size(); j++)
 		{
 			methods.push_back(make_tuple(newMethods[j], authorId));
@@ -817,4 +895,174 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 	}
 	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
+}
+
+void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
+{
+	database->connect(ip, port);
+	int retries = 0;
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			database->connect(ip, port);
+			if (errno == 0)
+			{
+				return;
+			}
+			retries++;
+		}
+		throw "Unable to connect to database.";
+	}
+}
+
+bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
+{
+	int retries = 0;
+	database->addProject(project);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			database->addProject(project);
+			if (errno == 0)
+			{
+				return true;
+			}
+			retries++;
+		}
+		return false;
+	}
+	return true;
+}
+
+void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project)
+{
+	int retries = 0;
+	database->addMethod(method, project);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			database->addMethod(method, project);
+			if (errno == 0)
+			{
+				return;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return;
+	}
+}
+
+
+std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
+{
+	int retries = 0;
+	std::vector<MethodOut> methods;
+	methods = database->hashToMethods(hash);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			methods = database->hashToMethods(hash);
+			if (errno == 0)
+			{
+				return methods;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return {};
+	}
+	return methods;
+}
+
+std::vector<ProjectOut> DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
+{
+	int retries = 0;
+	std::vector<ProjectOut> projects;
+	projects = database->searchForProject(projectID, version);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			projects = database->searchForProject(projectID, version);
+			if (errno == 0)
+			{
+				return projects;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return {};
+	}
+	return projects;
+}
+
+std::string DatabaseRequestHandler::authorToIdWithRetry(Author author)
+{
+	int retries = 0;
+	std::string authorID;
+	authorID = database->authorToId(author);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			authorID = database->authorToId(author);
+			if (errno == 0)
+			{
+				return authorID;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return "";
+	}
+	return authorID;
+}
+
+Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
+{
+	int retries = 0;
+	Author author;
+	author = database->idToAuthor(id);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			author = database->idToAuthor(id);
+			if (errno == 0)
+			{
+				return author;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return author;
+	}
+	return author;
+}
+
+std::vector<MethodId> DatabaseRequestHandler::authorToMethodsWithRetry(std::string authorId)
+{
+	int retries = 0;
+	std::vector<MethodId> methods;
+	methods = database->authorToMethods(authorId);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			methods = database->authorToMethods(authorId);
+			if (errno == 0)
+			{
+				return methods;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return {};
+	}
+	return methods;
 }

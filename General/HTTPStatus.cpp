@@ -14,6 +14,7 @@ enum HTTPStatusCode
 {
 	successCode = 200,
 	clientErrorCode = 400,
+	serverErrorCode = 500
 };
 
 
@@ -30,6 +31,11 @@ std::string HTTPStatusCodes::success(std::string message)
 std::string HTTPStatusCodes::clientError(std::string message)
 {
 	return constructMessage(clientErrorCode, message);
+}
+
+std::string HTTPStatusCodes::serverError(std::string message)
+{
+	return constructMessage(serverErrorCode, message);
 }
 
 std::string HTTPStatusCodes::getCode(std::string request)

@@ -13,6 +13,7 @@ Utrecht University within the Software Project course.
 #define METHOD_DATA_MIN_SIZE 5
 #define HEX_CHARS "0123456789abcdef"
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
+#define MAX_RETRIES 3
 
 /// <summary>
 /// Handles requests towards database.
@@ -89,7 +90,7 @@ public:
 	/// "<project2_data>'\n'...'\n'<projectN_data>".
 	/// </returns>
 	std::string handleExtractProjectsRequest(std::string request);
-	
+
 	/// Handles a requests for retrieving the ids by the give authors.
 	/// </summary>
 	/// <param nam'="request">
@@ -374,6 +375,22 @@ private:
 	/// authorId_1?hash_1?projectId_1?version_1\nauthorId_2?hash_2?projectId_2?version_2\n...
 	/// <returns>
 	std::string methodIdsToString(std::vector<std::tuple<MethodId, std::string>> methods);
+
+	void connectWithRetry(std::string ip, int port);
+
+	bool tryUploadProjectWithRetry(ProjectIn project);
+
+	void addMethodWithRetry(MethodIn method, ProjectIn project);
+
+	std::vector<MethodOut> hashToMethodsWithRetry(Hash hash);
+
+	std::vector<ProjectOut> searchForProjectWithRetry(ProjectID projectID, Version version);
+
+	std::string authorToIdWithRetry(Author author);
+
+	Author idToAuthorWithRetry(std::string id);
+
+	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);
 
 	DatabaseHandler *database;
 };

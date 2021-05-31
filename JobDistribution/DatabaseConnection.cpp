@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 
 void DatabaseConnection::connect(std::string ip, int port)
 {
+	errno = 0;
 	CassFuture* connectFuture = NULL;
 	CassCluster* cluster = cass_cluster_new();
 	connection = cass_session_new();
@@ -32,7 +33,7 @@ void DatabaseConnection::connect(std::string ip, int port)
 		size_t messageLength;
 		cass_future_error_message(connectFuture, &message, &messageLength);
 		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
-		return;
+		errno = ENETUNREACH;
 	}
 	setPreparedStatements();
 }
@@ -60,6 +61,7 @@ void DatabaseConnection::setPreparedStatements()
 
 std::string DatabaseConnection::getTopJob()
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedGetTopJob);
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 	if (cass_future_error_code(resultFuture) == CASS_OK)
@@ -77,6 +79,10 @@ std::string DatabaseConnection::getTopJob()
 		cass_future_free(resultFuture);
 		// Delete the job that is returned.
 		deleteTopJob(id, priority);
+		if (errno != 0)
+		{
+			return "";
+		}
 		return url;
 	}
 	else
@@ -87,12 +93,14 @@ std::string DatabaseConnection::getTopJob()
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to get job: '%.*s'\n", (int)messageLength, message);
 		cass_statement_free(query);
+		errno = ENETUNREACH;
 		return "";
 	}
 }
 
 void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
 {
+	errno = 0;
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
 	cass_statement_bind_int32(query, 0, priority);
@@ -108,13 +116,14 @@ void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
 	}
-
 	cass_future_free(queryFuture);
 }
 
 int DatabaseConnection::getNumberOfJobs()
 {
+	errno = 0;
 	CassStatement* query = cass_prepared_bind(preparedAmountOfJobs);
 	CassFuture* resultFuture = cass_session_execute(connection, query);
 	if (cass_future_error_code(resultFuture) == CASS_OK)
@@ -135,13 +144,14 @@ int DatabaseConnection::getNumberOfJobs()
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to get number of jobs: '%.*s'\n", (int)messageLength, message);
 		cass_statement_free(query);
+		errno = ENETUNREACH;
 		return -1;
 	}
-
 }
 
 void DatabaseConnection::uploadJob(std::string url, int priority)
 {
+	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
 	cass_statement_bind_int32(query, 0, priority);
@@ -159,7 +169,7 @@ void DatabaseConnection::uploadJob(std::string url, int priority)
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
 	}
-
 	cass_future_free(queryFuture);
 }

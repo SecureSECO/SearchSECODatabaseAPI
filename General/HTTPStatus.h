@@ -12,6 +12,7 @@ namespace HTTPStatusCodes
 {
 	std::string success(std::string message);
 	std::string clientError(std::string message);
+	std::string serverError(std::string message);
 	std::string getCode(std::string request);
 	std::string getMessage(std::string request);
 }

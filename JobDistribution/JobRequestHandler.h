@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include <boost/shared_ptr.hpp>
 
 #define MIN_AMOUNT_JOBS 500
+#define MAX_RETRIES 3
 
 class TcpConnection;
 
@@ -84,4 +85,10 @@ private:
 	RAFTConsensus* raft;
 	RequestHandler* requestHandler;
 	DatabaseConnection* database;
+
+	void connectWithRetry(std::string ip, int port);
+
+	std::string getTopJobWithRetry();
+
+	bool tryUploadJobWithRetry(std::string url, int priority);
 };
