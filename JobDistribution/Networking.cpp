@@ -46,6 +46,7 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 
 		// Read incomming data.
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
+
 		if (len == 0 && stopOnNewLine) 
 		{
 			throw std::runtime_error("No data received, meaning the other side dropped out.");

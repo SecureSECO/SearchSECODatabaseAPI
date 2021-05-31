@@ -19,10 +19,3 @@ public:
 	MOCK_METHOD(std::string, handleRequest, (std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection), ());
 };
 
-class RequestHandlerMock2 : public RequestHandler 
-{
-public:
-	void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT) override {};
-	std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection) override {return "ok?127.0.0.1?8003\n";};
-	//std::string test() override {return "ok?127.0.0.1?8003\n";};	
-};
