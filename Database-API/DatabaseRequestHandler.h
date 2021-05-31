@@ -376,20 +376,58 @@ private:
 	/// <returns>
 	std::string methodIdsToString(std::vector<std::tuple<MethodId, std::string>> methods);
 
+	/// <summary>
+	/// Calls connect in the DatabaseHandler, if connect fails, it retries as many times as the MAX_RETRIES.
+	/// If it still fails on the last retry, the function throws an exception.
+	/// </summary>
 	void connectWithRetry(std::string ip, int port);
 
+	/// <summary>
+	/// Tries to upload project to the database, if it fails it retries as many times as the MAX_RETRIES.
+	/// If it succeeds, it returns true. If it still fails on the last retry, it returns false.
+	/// </summary>
 	bool tryUploadProjectWithRetry(ProjectIn project);
 
+	/// <summary>
+	/// Tries to add method to the database, if it fails it retries as many times as MAX_RETRIES.
+	/// If it succeeds, it adds the method to the database and puts errno on 0.
+	/// If it still fails on the last retry, it puts the errno on ENETUNREACH and returns.
+	/// </summary>
 	void addMethodWithRetry(MethodIn method, ProjectIn project);
 
+	/// <summary>
+	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as MAX_RETRIES.
+	/// If it succeeds, it returns the methods found in the database and puts the errno on 0.
+	/// If it fails, it puts the errno on ENETUNREACH and returns an empty vector.
+	/// </summary>
 	std::vector<MethodOut> hashToMethodsWithRetry(Hash hash);
 
+	/// <summary>
+	/// Tries to get projects with a given version and projectID from the database, if it fails it retries like above.
+	/// If it succeeds, it returns the projects and puts the errno on 0.
+	/// If it fails, it returns an empty vector and puts the errno on ENETUNREACH.
+	/// </summary>
 	std::vector<ProjectOut> searchForProjectWithRetry(ProjectID projectID, Version version);
 
+	/// <summary>
+	/// Tries to get authorID from the database given an author, if it fails it retries like above.
+	/// If it succeeds, it returns the id and puts errno on 0.
+	/// If it fails, it returns an empty string and puts errno on ENETUNREACH.
+	/// </summary>
 	std::string authorToIdWithRetry(Author author);
 
+	/// <summary>
+	/// Tries to get author from the database given an authorID, if it fails it retries like above.
+	/// If it succeeds, it returns the author and puts errno on 0.
+	/// If it fails, it returns an emprt author and puts errno on ENETUNREACH.
+	/// </summary>
 	Author idToAuthorWithRetry(std::string id);
 
+	/// <summary>
+	/// Tries to get methods from the database given an authorID, if it fails it retries like above.
+	/// If it succeeds, it returns the methods and puts errno on 0.
+	/// If it fails, it returns an empty vector and puts errno on ENETUNREACH.
+	/// </summary>
 	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);
 
 	DatabaseHandler *database;
