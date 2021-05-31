@@ -78,14 +78,14 @@ TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
 	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	std::string outputChars1 = {};
+	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(outputChars1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 
-	std::string outputChars2 = {};
+	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(outputChars2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
@@ -444,6 +444,7 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
+
 	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2,
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
@@ -502,10 +503,12 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	Utility::appendBy(outputChars1, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "2c7f46d4f57cf9e66b03213358c7ddb5", "42", "69"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
+
 	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "06f73d7ab46184c55bf4742b9428a4c0", "42", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
+
 	std::vector<char> outputChars3 = {};
 	Utility::appendBy(outputChars3, {"41ab7373-8f24-4a03-83dc-621036d99f34", "137fed017b6159acc0af30d2c6b403a5", "69", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);

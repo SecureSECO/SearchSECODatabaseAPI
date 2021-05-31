@@ -46,8 +46,14 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
-	std::string output = "a6aa62503e2ca3310e3a837502b80df5?0?0?Method1?"
-						 "MyProject/Method1.cpp?1?1?f1a028d7-3845-41df-bec1-2e16c49e4c35\n";
+
+	std::vector<char> outputChars = {};
+	Utility::appendBy(outputChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "Method1", "MyProject/Method1.cpp", "1", "1",
+					   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string output(outputChars.begin(), outputChars.end());
+
 	std::string authorID = "f1a028d7-3845-41df-bec1-2e16c49e4c35";
 	MethodOut method1out = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
 							.projectID = 0,
