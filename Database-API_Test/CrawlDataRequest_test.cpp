@@ -39,7 +39,8 @@ TEST(CrawlDataRequest, SingleJob)
 	std::string result2 = handler.handleRequest(requestType2, request2, nullptr);
 
 	std::vector<char> inputFunctionChars = {};
-	Utility::appendBy(inputFunctionChars, {"Crawl", "100"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	Utility::appendBy(inputFunctionChars, {"Crawl", "100"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	inputFunctionChars.pop_back();
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	ASSERT_EQ(result2, HTTPStatusCodes::success(inputFunction));
 }
