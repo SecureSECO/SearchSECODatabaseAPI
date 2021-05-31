@@ -23,12 +23,15 @@ Utrecht University within the Software Project course.
 
 using boost::asio::ip::tcp;
 
+class TcpServer;
+
 /// <summary>
 /// Handles connections with database.
 /// </summary>
 class ConnectionHandler
 {
 public:
+	~ConnectionHandler();
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
@@ -37,6 +40,7 @@ public:
 	RequestHandler* getRequestHandler() { return handler; };
 private:
 	RequestHandler* handler;
+	TcpServer* server;
 };
 
 class TcpConnection
@@ -81,6 +85,7 @@ class TcpServer
 public:
 	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler, int port);
 
+	void stop();
 private:
 
 	/// <summary>
@@ -97,4 +102,6 @@ private:
 	boost::asio::io_context& ioContext_;
 	tcp::acceptor acceptor_;
 	RequestHandler* handler;
+
+	bool stopped = false;
 };

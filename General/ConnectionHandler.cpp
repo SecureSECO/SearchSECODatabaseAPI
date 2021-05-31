@@ -8,6 +8,11 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include <chrono>
 
+ConnectionHandler::~ConnectionHandler() 
+{
+	server->stop();
+}
+
 // Connection Handler Methods.
 void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, 
 	DatabaseConnection* databaseConnection, 
@@ -15,6 +20,7 @@ void ConnectionHandler::startListen(DatabaseHandler* databaseHandler,
 	int port, 
 	RequestHandler *requestHandler)
 {
+
 	if (requestHandler == nullptr) 
 	{
 		handler = new RequestHandler();
@@ -27,7 +33,9 @@ void ConnectionHandler::startListen(DatabaseHandler* databaseHandler,
 	{
 		boost::asio::io_context ioContext;
 		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
+		this->server = &server;
 		ioContext.run();
+		
 	}
 	catch (std::exception& e)
 	{
@@ -43,6 +51,7 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 
 void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 {
+	
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
 	size_t len;
@@ -121,10 +130,20 @@ void TcpServer::startAccept()
 void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	const boost::system::error_code& error)
 {
+	if (stopped) 
+	{
+		return;
+	}
 	startAccept();
 	if (!error)
 	{
 		newConnection->start(handler, newConnection);
 	}
 
+}
+
+void TcpServer::stop() 
+{
+	stopped = true;
+	acceptor_.cancel();
 }

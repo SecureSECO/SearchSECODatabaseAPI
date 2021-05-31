@@ -5,7 +5,6 @@ Utrecht University within the Software Project course.
 */
 #pragma once
 
-#define LEADER_IPS { {"131.211.31.153", "8003"}}
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -13,6 +12,7 @@ Utrecht University within the Software Project course.
 
 #include "Networking.h"
 
+#define LEADER_IPS { {"131.211.31.153", "8003"}}
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
 #define LEADER_DROPOUT_WAIT_TIME 1000000
@@ -24,12 +24,15 @@ class RequestHandler;
 class RAFTConsensus
 {
 public:
+	~RAFTConsensus();
+
 	/// <summary>
 	/// Starts RAFT. Will try to connect to a set list of IP's where we assume the leaders are.
 	/// If none of them respond, we will assume we are the first and assume the role of leader.
 	/// </summary>
 	/// <param name="assumeLeader">If set to true, will skip the connect phase and assume that this node is the leader.</param>
-	void start(RequestHandler* requestHandler, bool assumeLeader = false);
+	void start(RequestHandler* requestHandler, bool assumeLeader = false, 
+		std::vector<std::pair<std::string, std::string>> ips = LEADER_IPS);
 
 	/// <summary>
 	/// Returns true if this node is the leader in the network.
@@ -118,6 +121,8 @@ private:
 	std::string connectionToString(boost::shared_ptr<TcpConnection> connection, std::string port);
 
 	bool leader;
+	bool stop = false;
+	bool started = false;
 	std::mutex mtx;
 
 	// Non-leader variables.
@@ -130,4 +135,6 @@ private:
 	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;
 	RequestHandler* requestHandler;
 	std::string nodeConnectionChange = "";
+
+
 };
