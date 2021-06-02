@@ -10,7 +10,7 @@ services:
       ports:
         - "8001:8001"
         - "8002:8002"
-        - "9500:9500"
+        - "8000:9500"
       environment:
         - CASSANDRA_BROADCAST_ADDRESS=${IP}
         - CASSANDRA_SEEDS=${IP},${SEEDS}
