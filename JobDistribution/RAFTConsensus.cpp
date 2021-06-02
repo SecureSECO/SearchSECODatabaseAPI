@@ -154,7 +154,6 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 {
 	if (leader) 
 	{
-
 		request = request.substr(0, request.length() - 1);
 
 		mtx.lock();
@@ -242,7 +241,7 @@ void RAFTConsensus::heartbeatSender()
 			{
 				boost::shared_ptr<TcpConnection> connection = others->at(i).first;
 				
-				boost::asio::write(connection->socket(), boost::asio::buffer(data), error);
+				connection->sendData(data, error);
 				if (error)
 				{
 					std::cout << "Error "<< error << " sending data: Connection dropped.\n";
@@ -285,7 +284,7 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 {
 	try 
 	{
-		while(true) 
+		while(!stop) 
 		{
 			connection->start(requestHandler, connection);
 		}
@@ -298,6 +297,5 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 
 std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
 {
-	return c->socket().remote_endpoint().address().to_string()
-		+ "?" + port;
+	return c->getIp() + "?" + port;
 }

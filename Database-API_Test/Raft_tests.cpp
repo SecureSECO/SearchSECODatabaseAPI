@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "Networking.h"
 #include "RequestHandlerMock.cpp"
 #include "ConnectionHandler.h"
+#include "ConnectionMock.cpp"
 
 #include <gtest/gtest.h>
 
@@ -47,4 +48,30 @@ TEST(RaftTests, ConnectToLeader)
 	raft.start(nullptr, false, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
 
 	ASSERT_TRUE(!raft.isLeader());	
+}
+
+TEST(RaftTests, BecomeLeader) 
+{
+	RAFTConsensus raft;
+	raft.start(nullptr, false, {{"127.0.0.1", "-1"}});
+
+	ASSERT_TRUE(raft.isLeader());
+}
+
+TEST(RaftTests, AcceptConnection) 
+{
+	RAFTConsensus raft;
+	raft.start(nullptr, true, {});
+
+	ASSERT_TRUE(raft.isLeader());
+
+	boost::asio::io_context iocon;
+	TcpConnectionMock* connmock = new TcpConnectionMock(iocon);
+	TcpConnection::pointer connection = TcpConnection::pointer(connmock);
+	boost::system::error_code err;
+	EXPECT_CALL((*connmock), sendData("A?127.0.0.1?-1\n", err)).Times(1);
+
+	std::string resp = raft.connectNewNode(connection, "-1\n");
+	
+	EXPECT_EQ(resp, RESPONSE_OK "?127.0.0.1?-1\n");
 }

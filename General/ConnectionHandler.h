@@ -59,11 +59,19 @@ public:
 		return socket_;
 	}
 
+	virtual std::string getIp();
+
+	virtual void sendData(const std::string &data, boost::system::error_code &error);
 
 	/// <summary>
 	/// Starts the handeling of a request. Takes in the request handler to call.
 	/// </summary>
-	void start(RequestHandler *handler, pointer thisPointer);
+	virtual void start(RequestHandler *handler, pointer thisPointer);
+protected:
+	TcpConnection(boost::asio::io_context& ioContext)
+		: socket_(ioContext)
+	{
+	}
 
 private:
 	/// <summary>
@@ -71,10 +79,6 @@ private:
 	/// </summary>
 	void readExpectedData(int& size, std::vector<char>& data, std::string& totalData, boost::system::error_code& error);
 
-	TcpConnection(boost::asio::io_context& ioContext)
-		: socket_(ioContext)
-	{
-	}
 
 	tcp::socket socket_;
 	std::string message_;

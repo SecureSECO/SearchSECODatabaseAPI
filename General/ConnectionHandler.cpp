@@ -49,6 +49,11 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 	return pointer(new TcpConnection(ioContext));
 }
 
+void TcpConnection::sendData(const std::string &data, boost::system::error_code &error) 
+{
+	boost::asio::write(socket_, boost::asio::buffer(data), error);
+}
+
 void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 {
 	
@@ -146,4 +151,10 @@ void TcpServer::stop()
 {
 	stopped = true;
 	acceptor_.cancel();
+}
+
+
+std::string TcpConnection::getIp() 
+{
+	return socket_.remote_endpoint().address().to_string();
 }
