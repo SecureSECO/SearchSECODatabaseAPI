@@ -60,18 +60,21 @@ TEST(RaftTests, BecomeLeader)
 
 TEST(RaftTests, AcceptConnection) 
 {
-	RAFTConsensus raft;
-	raft.start(nullptr, true, {});
-
-	ASSERT_TRUE(raft.isLeader());
-
 	boost::asio::io_context iocon;
 	TcpConnectionMock* connmock = new TcpConnectionMock(iocon);
-	TcpConnection::pointer connection = TcpConnection::pointer(connmock);
-	boost::system::error_code err;
-	EXPECT_CALL((*connmock), sendData("A?127.0.0.1?-1\n", err)).Times(1);
+	{
+		RAFTConsensus raft;
+		raft.start(nullptr, true, {});
 
-	std::string resp = raft.connectNewNode(connection, "-1\n");
-	
-	EXPECT_EQ(resp, RESPONSE_OK "?127.0.0.1?-1\n");
+		ASSERT_TRUE(raft.isLeader());
+
+		TcpConnection::pointer connection = TcpConnection::pointer(connmock);
+		boost::system::error_code err;
+		EXPECT_CALL((*connmock), sendData("A?127.0.0.1?-1\n", err)).Times(1);
+
+		std::string resp = raft.connectNewNode(connection, "-1\n");
+		
+		EXPECT_EQ(resp, RESPONSE_OK "?127.0.0.1?-1\n");
+	}
+	delete connmock;
 }
