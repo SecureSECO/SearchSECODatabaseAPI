@@ -212,9 +212,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 
 	for (int i = 0; i < size; i++)
 	{
-		CassUuid hash;
-		cass_uuid_from_string(project.hashes[i].c_str(), &hash);
-		cass_collection_append_uuid(hashes, hash);
+		cass_collection_append_string(hashes, project.hashes[i].c_str());
 	}
 
 	cass_statement_bind_collection_by_name(query, "hashes", hashes);
@@ -519,11 +517,10 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	{
 		while (cass_iterator_next(iterator))
 		{
-			char hash[CASS_UUID_STRING_LENGTH];
-			CassUuid hashUuid;
+			const char* hash;
+			size_t hash_size;
 			const CassValue *id = cass_iterator_get_value(iterator);
-			cass_value_get_uuid(id, &hashUuid);
-			cass_uuid_string(hashUuid, hash);
+			cass_value_get_string(id, &hash, &hash_size);
 			project.hashes.push_back(hash);
 		}
 	}
