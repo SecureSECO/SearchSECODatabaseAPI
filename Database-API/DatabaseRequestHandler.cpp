@@ -119,6 +119,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i) + ".");
 		}
 		methods.push_back(method);
+		project.hashes.push_back(method.hash);
 	}
 
 	// Only upload if project and all methods are valid to prevent partial uploads.

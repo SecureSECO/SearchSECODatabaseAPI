@@ -55,7 +55,7 @@ void DatabaseHandler::setPreparedStatements()
 	// Inserts a project into the database.
 	prepareFuture = cass_session_prepare(
 		connection,
-		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)");
+		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertProject = cass_future_get_prepared(prepareFuture);
 
@@ -205,6 +205,20 @@ void DatabaseHandler::addProject(ProjectIn project)
 	cass_statement_bind_string_by_name(query, "url", project.url.c_str());
 
 	cass_statement_bind_uuid_by_name(query, "ownerid", getAuthorId(project.owner));
+
+	int size = project.hashes.size();
+
+	CassCollection *hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+
+	for (int i = 0; i < size; i++)
+	{
+		CassUuid hash;
+		cass_uuid_from_string(project.hashes[i].c_str(), &hash);
+		cass_collection_append_uuid(hashes, hash);
+	}
+
+	cass_statement_bind_collection_by_name(query, "hashes", hashes);
+
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -497,6 +511,24 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	project.name = getString(row, "name");
 	project.url = getString(row, "url");
 	project.ownerID = getUUID(row, "ownerid");
+
+	const CassValue *set = cass_row_get_column(row, 3); // TO DO: is 3 correct?
+	CassIterator *iterator = cass_iterator_from_collection(set);
+
+	if (iterator)
+	{
+		while (cass_iterator_next(iterator))
+		{
+			char hash[CASS_UUID_STRING_LENGTH];
+			CassUuid hashUuid;
+			const CassValue *id = cass_iterator_get_value(iterator);
+			cass_value_get_uuid(id, &hashUuid);
+			cass_uuid_string(hashUuid, hash);
+			project.hashes.push_back(hash);
+		}
+	}
+
+	cass_iterator_free(iterator);
 
 	return project;
 }
