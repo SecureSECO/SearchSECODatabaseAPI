@@ -218,7 +218,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 	CassCollection *hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
 
 	// Add the hashes, but no more then HASHES_TO_INSERT_AT_ONCE
-	for (int i = 0; i < __min(HASHES_TO_INSERT_AT_ONCE, size); i++)
+	for (int i = 0; i < std::min(HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
 		cass_collection_append_string(hashes, project.hashes[i].c_str());
 	}
@@ -261,7 +261,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	CassCollection *hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
 
-	for (int i = index; i < __min(index + HASHES_TO_INSERT_AT_ONCE, size); i++)
+	for (int i = index; i < std::min(index + HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
 		cass_collection_append_string(hashes, project.hashes[i].c_str());
 	}
