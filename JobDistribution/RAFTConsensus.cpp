@@ -21,7 +21,7 @@ RAFTConsensus::~RAFTConsensus()
 	{
 		stop = true;
 		// Sleep so we know for sure the thread has stopped before we delete everything.
-		usleep(HEARTBEAT_TIME + HEARTBEAT_TIME / 10);
+		usleep(HEARTBEAT_TIME + HEARTBEAT_TIME / 5);
 	}
 }
 
@@ -219,7 +219,7 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::string request) 
 {
 	networkhandler->sendData(requestType + std::to_string(request.length()) + "\n" + request);
-	return networkhandler->receiveData();
+	return networkhandler->receiveData() + '\n';
 }
 
 void RAFTConsensus::heartbeatSender()
@@ -299,3 +299,4 @@ std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c
 {
 	return c->getIp() + "?" + port;
 }
+

@@ -6,9 +6,12 @@ Utrecht University within the Software Project course.
 
 #include "RAFTConsensus.h"
 #include "Networking.h"
+#include "RequestHandler.h"
 #include "RequestHandlerMock.cpp"
 #include "ConnectionHandler.h"
 #include "ConnectionMock.cpp"
+#include "JDDatabaseMock.cpp"
+#include "DatabaseMock.cpp"
 
 #include <gtest/gtest.h>
 
@@ -77,4 +80,35 @@ TEST(RaftTests, AcceptConnection)
 		EXPECT_EQ(resp, RESPONSE_OK "?127.0.0.1?-1\n");
 	}
 	delete connmock;
+}
+
+TEST(RaftTests, PassRequestToLeader) 
+{
+	RequestHandler handler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	RAFTConsensus raftLeader;
+	RAFTConsensus raftNonLeader;
+	ConnectionHandler listen;
+	
+	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(1).WillOnce(testing::Return(1000));
+
+	const std::string request = "gtjb";
+	const std::string requestData = "data\n";
+	const std::string response = "response\n";
+
+
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &database, &jddatabase, &raftLeader, TESTLISTENPORT, &handler);
+
+	usleep(500000);
+	raftLeader.start(&handler, false, {{"127.0.0.1", "-1"}});
+	raftNonLeader.start(nullptr, false, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
+
+	ASSERT_TRUE(raftLeader.isLeader());
+	ASSERT_TRUE(!raftNonLeader.isLeader());
+
+	EXPECT_CALL(jddatabase, getTopJob()).Times(1).WillOnce(testing::Return(response));
+
+	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider?" + response));
+	
 }
