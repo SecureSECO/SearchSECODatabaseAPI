@@ -36,6 +36,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::vector<char> requestChars = {};

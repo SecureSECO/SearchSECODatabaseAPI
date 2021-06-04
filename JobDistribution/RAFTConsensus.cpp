@@ -37,7 +37,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader)
 
 void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::string>> ips) 
 {
-	// Loop through all set IP's where we expect the leader to be
+	// Loop through all set IP's where we expect the leader to be.
 	for (auto const& x : ips)
 	{
 		try 
@@ -142,7 +142,6 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 {
 	if (leader) 
 	{
-
 		request = request.substr(0, request.length() - 1);
 
 		mtx.lock();
