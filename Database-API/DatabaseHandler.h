@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #define IP "cassandra"
 #define DBPORT 8002
 #define MAX_THREADS 32
+#define HASHES_TO_INSERT_AT_ONCE 1000
 
 using namespace types;
 
@@ -30,6 +31,11 @@ public:
 	/// Add a project to database. Takes a project as input and adds it to the database.
 	/// </summary>
 	virtual void addProject(ProjectIn project);
+
+	/// <summary>
+	/// Adds a number of hashes to a project in the database, starting at index.
+	/// </summary>
+	virtual void addHashToProject(ProjectIn project, int index);
 
 	/// <summary>
 	/// Searches for project in the database and returns them to the user. Takes primary key of project as input
@@ -162,6 +168,7 @@ private:
 	const CassPrepared *selectMethod;
 	const CassPrepared *selectProject;
 	const CassPrepared *insertProject;
+	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
