@@ -310,7 +310,7 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	std::string output(outputChars.begin(), outputChars.end());
 
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34\n", nullptr);
+	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
 
