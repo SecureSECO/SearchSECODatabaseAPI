@@ -54,7 +54,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 {
 	if (raft->isLeader())
 	{
-		// Split data on '\n', to get individual jobs.
+		// Split data on ENTRY_DELIMITER_CHAR, to get individual jobs.
 		std::vector<std::string> datasplits = Utility::splitStringOn(data, ENTRY_DELIMITER_CHAR);
 		std::vector<std::string> urls;
 		std::vector<int> priorities;

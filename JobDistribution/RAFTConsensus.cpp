@@ -257,12 +257,14 @@ void RAFTConsensus::heartbeatSender()
 
 void RAFTConsensus::dropConnection(int i) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	std::pair<boost::shared_ptr<TcpConnection>, std::string> c = others->at(i);
 	if(nodeConnectionChange != "") 
 	{
-		nodeConnectionChange += "?";
+		nodeConnectionChange += fieldDelimiter;
 	}
-	nodeConnectionChange += "R?" + connectionToString(c.first, c.second);
+	nodeConnectionChange += "R" + fieldDelimiter + connectionToString(c.first, c.second);
 
 	(*others)[i] = (*others)[others->size()-1];
 	others->pop_back();
@@ -293,6 +295,8 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 
 std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	return c->socket().remote_endpoint().address().to_string()
-		+ "?" + port;
+		+ fieldDelimiter + port;
 }
