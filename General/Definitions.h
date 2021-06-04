@@ -6,5 +6,5 @@ Utrecht University within the Software Project course.
 
 #pragma once
 
-#define FIELD_DELIMITER_CHAR '\n'
-#define ENTRY_DELIMITER_CHAR '?'
+#define FIELD_DELIMITER_CHAR '?'
+#define ENTRY_DELIMITER_CHAR '\n'
