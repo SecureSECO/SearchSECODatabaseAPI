@@ -14,6 +14,7 @@ Utrecht University within the Software Project course.
 #include <iostream>
 
 std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 // Checks if two authors are equal. I.e., they have the same contents.
 MATCHER_P(authorEqual, author, "")

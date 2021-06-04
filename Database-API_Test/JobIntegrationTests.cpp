@@ -16,9 +16,6 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <vector>
 
-std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-
 // Test if first crawl is returned and then the correct job.
 TEST(JobDatabaseIntegrationTest, GetJobRequest)
 {
