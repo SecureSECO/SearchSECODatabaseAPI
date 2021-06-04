@@ -81,9 +81,15 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::string requestType = "upld";
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?"
-						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"0", "0", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		requestChars,
+		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
