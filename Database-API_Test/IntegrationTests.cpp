@@ -627,7 +627,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string input9(inputChars.begin(), inputChars.end());
+	std::string input10(inputChars.begin(), inputChars.end());
 
 	std::string expected10 = "No results found.";
 
