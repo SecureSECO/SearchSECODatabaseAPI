@@ -6,3 +6,6 @@ Utrecht University within the Software Project course.
 
 #define FIELD_DELIMITER_CHAR '\n'
 #define ENTRY_DELIMITER_CHAR '?'
+
+std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
