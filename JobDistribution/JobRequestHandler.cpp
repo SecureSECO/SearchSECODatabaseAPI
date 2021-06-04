@@ -155,14 +155,14 @@ std::string JobRequestHandler::getTopJobWithRetry()
 			url = database->getTopJob();
 			if (errno == 0)
 			{
-				return HTTPStatusCodes::success("Spider?" + url);
+				return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
 			}
 			retries++;
 		}
 		return HTTPStatusCodes::serverError("Unable to get job from database.");
 	}
 	numberOfJobs -= 1;
-	return HTTPStatusCodes::success("Spider?" + url);
+	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
 }
 
 bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority)
