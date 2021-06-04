@@ -57,7 +57,12 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	RAFTConsensus raftConsensus;
 	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
 
-	std::string input = "https://github.com/mcostalba/Stockfish?10";
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"https://github.com/mcostalba/Stockfish", "10"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
+	std::string input(inputChars.begin(), inputChars.end());
+
 	std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
 	int jobs = jhandler->numberOfJobs;
@@ -98,6 +103,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 					  ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"https://github.com/Yiziwinnie/Home-Depot", "69"}, FIELD_DELIMITER_CHAR,
 					  ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
 	std::string input(inputChars.begin(), inputChars.end());
 
 	std::string output = handler.handleRequest("upjb", input, nullptr);
@@ -120,6 +126,7 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	Utility::appendBy(inputChars, "100", ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"https://github.com/Yiziwinnie/Bike-Sharing-in-Boston", "420"}, FIELD_DELIMITER_CHAR,
 					  ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
 	std::string input(inputChars.begin(), inputChars.end());
 	std::string output = handler.handleRequest("upcd", input, nullptr);
 
