@@ -334,7 +334,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	expectedChars = {};
+	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(expectedChars, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},

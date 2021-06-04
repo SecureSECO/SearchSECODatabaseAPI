@@ -103,12 +103,23 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 TEST(UploadRequest, MultipleMethodsSingleAuthor)
 {
 	std::string requestType = "upld";
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?"
-						  "1?1?Owner?owner@mail.com\nf3a258ba6cd26c1b7d553a493c614104?"
-						  "Method2?MyProject/Method2.cpp?11?1?Owner?owner@mail.com\n"
-						  "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?"
-						  "31?1?Owner?owner@mail.com";
+
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"0", "0", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		requestChars,
+		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		requestChars,
+		{"f3a258ba6cd26c1b7d553a493c614104", "Method2", "MyProject/Method2.cpp", "11", "1", "Owner", "owner@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		requestChars,
+		{"59bf62494932580165af0451f76be3e9", "Method3", "MyProject/Method3.cpp", "31", "1", "Owner", "owner@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
 	RequestHandler handler;
 	MockDatabase database;
@@ -129,14 +140,23 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 {
 	std::string requestType = "upld";
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
-						  "f3a258ba6cd26c1b7d553a493c614104?Method2?MyProject/Method2.cpp?999?2?"
-						  "Author 2?author2@mail.com?Owner?owner@mail.com\n"
-						  "59bf62494932580165af0451f76be3e9?Method3?MyProject/Method3.cpp?9999999?4?"
-						  "Owner?owner@mail.com?Author 2?author2@mail.com?"
-						  "Author 1?author1@mail.com?Author 3?author3@mail.com";
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "3", "Author 1",
+					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"f3a258ba6cd26c1b7d553a493c614104", "Method2", "MyProject/Method2.cpp", "999", "2", "Author 2",
+					   "author2@mail.com", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"59bf62494932580165af0451f76be3e9", "Method3", "MyProject/Method3.cpp", "9999999", "4", "Owner",
+					   "owner@mail.com", "Author 2", "author2@mail.com", "Author 1", "author1@mail.com", "Author 3",
+					   "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
 	RequestHandler handler;
 	MockDatabase database;
@@ -155,9 +175,12 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 // Tests if the program can handle an upload request with invalid project data, too many arguments.
 TEST(UploadRequest, InvalidProjectSize)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner?stars@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner", "stars@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -165,9 +188,13 @@ TEST(UploadRequest, InvalidProjectSize)
 // Tests if the program can handle an upload request with invalid project data, non-integer id.
 TEST(UploadRequest, InvalidProjectID)
 {
-	std::string request = "xabs398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"xabs398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -176,9 +203,13 @@ TEST(UploadRequest, InvalidProjectID)
 // Tests if the program can handle an upload request with invalid project data, non-integer version.
 TEST(UploadRequest, InvalidProjectVersion)
 {
-	std::string request = "398798723?xabs1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "xabs1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -186,10 +217,15 @@ TEST(UploadRequest, InvalidProjectVersion)
 // Tests if the program can handle an upload request with invalid method data, too few arguments.
 TEST(UploadRequest, InvalidMethodSizeSmall)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -197,11 +233,17 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 // Tests if the program can handle an upload request with invalid method data, too many arguments.
 TEST(UploadRequest, InvalidMethodSizeLarge)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?2?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "2", "Author 1",
+					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -209,13 +251,21 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 // Tests if the program can handle an upload request with invalid method data, invalid method hash.
 TEST(UploadRequest, InvalidMethodHash)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?3?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?MyProject/Method1.cpp?1?3?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "3", "Author 1",
+					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5xx", "Method1", "MyProject/Method1.cpp", "1", "3", "Author 1",
+					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 2."));
 }
@@ -223,11 +273,17 @@ TEST(UploadRequest, InvalidMethodHash)
 // Tests if the program can handle an upload request with invalid method data, non-integer line number.
 TEST(UploadRequest, InvalidMethodLine)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?not_an_integer?3?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "not_an_integer", "3",
+					   "Author 1", "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -236,11 +292,17 @@ TEST(UploadRequest, InvalidMethodLine)
 // Tests if the program can handle an upload request with invalid method data, non-integer number of authors.
 TEST(UploadRequest, InvalidMethodAuthorLines)
 {
-	std::string request = "398798723?1618222334?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5?Method1?MyProject/Method1.cpp?1?not_an_integer?"
-						  "Author 1?author1@mail.com?Author 2?author2@mail.com?Author 3?author3@mail.com\n";
-	RequestHandler handler;
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars,
+					  {"398798723", "1618222334", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "not_an_integer",
+					   "Author 1", "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
+	RequestHandler handler;
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
