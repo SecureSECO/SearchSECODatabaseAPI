@@ -4,6 +4,8 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#pragma once
+
 #define FIELD_DELIMITER_CHAR '\n'
 #define ENTRY_DELIMITER_CHAR '?'
 
