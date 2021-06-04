@@ -16,6 +16,7 @@ TEST(CrawlDataRequest, SingleJob)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";
@@ -49,7 +50,6 @@ TEST(CrawlDataRequest, InvalidId)
 	std::string requestType = "upcd";
 	std::string request = "aaa\nhttps://github.com/zavg/linux-0.01?1";
 
-	// EXPECT_CALL(jddatabase, updateCrawlId(100)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);

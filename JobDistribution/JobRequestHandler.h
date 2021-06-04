@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include <boost/shared_ptr.hpp>
 
 #define MIN_AMOUNT_JOBS 500
+#define MAX_RETRIES 3
 
 class TcpConnection;
 
@@ -84,4 +85,25 @@ private:
 	RAFTConsensus* raft;
 	RequestHandler* requestHandler;
 	DatabaseConnection* database;
+
+	/// <summary>
+	/// Tries to connect with database, if it fails it retries as many times as MAX_RETRIES.
+	/// If it succeeds, it connects with the database and returns.
+	/// If it still fails on the last retry, it throws an exception.
+	/// </summary>
+	void connectWithRetry(std::string ip, int port);
+
+	/// <summary>
+	/// Tries to get the top job from the database, if it fails it retries like above.
+	/// If it succeeds, it returns the url of the top job.
+	/// If it fails, it returns an error message.
+	/// </summary>
+	std::string getTopJobWithRetry();
+
+	/// <summary>
+	/// Tries to upload a job to the database, if it fails it retries like above.
+	/// If it succeeds, it returns true.
+	/// If it fails, it returns false.
+	/// </summary>
+	bool tryUploadJobWithRetry(std::string url, int priority);
 };

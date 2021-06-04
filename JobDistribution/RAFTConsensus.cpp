@@ -49,7 +49,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader,
 
 void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::string>> ips) 
 {
-	// Loop through all set IP's where we expect the leader to be
+	// Loop through all set IP's where we expect the leader to be.
 	for (auto const& x : ips)
 	{
 		try 
@@ -299,4 +299,3 @@ std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c
 {
 	return c->getIp() + "?" + port;
 }
-

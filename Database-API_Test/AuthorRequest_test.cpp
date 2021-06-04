@@ -26,6 +26,7 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "Author?author@mail.com\n";
@@ -137,6 +138,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61\n";
