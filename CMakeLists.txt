@@ -11,6 +11,7 @@ add_executable (Database-APIexe
     "General/RequestHandler.cpp" "General/RequestHandler.h"
     "General/Utility.cpp" "General/Utility.h"
     "General/HTTPStatus.cpp" "General/HTTPStatus.h"
+    "General/Definitions.h"
     "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
     "Database-API/Types.h"
     "Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"

@@ -34,14 +34,16 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		{
 			numberOfJobs -= 1;
 			std::string s = "Spider";
-			return HTTPStatusCodes::success(s.append(1, FIELD_DELIMITER_CHAR) +  database->getTopJob());
+			s += FIELD_DELIMITER_CHAR;
+			return HTTPStatusCodes::success(s + database->getTopJob());
 		}
 		// If number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
 		{
 			alreadyCrawling = true;
 			std::string s = "Crawl";
-			return HTTPStatusCodes::success(s.append(1, FIELD_DELIMITER_CHAR) + std::to_string(crawlId));
+			s += FIELD_DELIMITER_CHAR;
+			return HTTPStatusCodes::success(s + std::to_string(crawlId));
 		}
 		else
 		{

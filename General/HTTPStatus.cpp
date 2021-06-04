@@ -7,8 +7,7 @@ Utrecht University within the Software Project course.
 
 #include "HTTPStatus.h"
 #include "Utility.h"
-
-#define DELIMITER '\n'
+#include "Definitions.h"
 
 enum HTTPStatusCode
 {
@@ -19,7 +18,7 @@ enum HTTPStatusCode
 
 std::string constructMessage(HTTPStatusCode code, std::string message)
 {
-	return std::to_string(code) + DELIMITER + message;
+	return std::to_string(code) + ENTRY_DELIMITER_CHAR + message;
 }
 
 std::string HTTPStatusCodes::success(std::string message)
@@ -34,7 +33,7 @@ std::string HTTPStatusCodes::clientError(std::string message)
 
 std::string HTTPStatusCodes::getCode(std::string request)
 {
-	return Utility::splitStringOn(request, '\n')[0];
+	return Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR)[0];
 }
 
 std::string HTTPStatusCodes::getMessage(std::string request)

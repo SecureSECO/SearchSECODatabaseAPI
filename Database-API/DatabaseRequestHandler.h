@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
+#include "Definitions.h"
 #include <mutex>
 #include <queue>
 
@@ -13,8 +14,6 @@ Utrecht University within the Software Project course.
 #define METHOD_DATA_MIN_SIZE 5
 #define HEX_CHARS "0123456789abcdef"
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
-#define FIELD_DELIMITER_CHAR '?'
-#define ENTRY_DELIMITER_CHAR '\n'
 
 /// <summary>
 /// Handles requests towards database.

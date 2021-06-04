@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseMock.cpp"
 #include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
+#include "Definitions.h"
 #include <gtest/gtest.h>
 #include <vector>
 
