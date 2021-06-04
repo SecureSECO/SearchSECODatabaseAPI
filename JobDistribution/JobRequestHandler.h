@@ -12,6 +12,8 @@ Utrecht University within the Software Project course.
 #include <boost/shared_ptr.hpp>
 
 #define MIN_AMOUNT_JOBS 500
+#define FIELD_DELIMITER_CHAR '?'
+#define ENTRY_DELIMITER_CHAR '\n'
 
 class TcpConnection;
 
