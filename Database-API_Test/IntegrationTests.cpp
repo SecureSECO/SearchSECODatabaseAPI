@@ -308,7 +308,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	std::string input7(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(expecedChars,
+	Utility::appendBy(expectedChars,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000", "M1", "P1/M1.cpp", "1", "1",
 					   "68bd2db6-fe91-47d2-a134-cf82b104f547"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -334,14 +334,14 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	std::vector<char> expectedChars = {};
+	expectedChars = {};
 	Utility::appendBy(expectedChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(expectedChars, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expectedOutput1(expectedChars.begin(), expectedChars.end());
 
-	std::vector<char> expectedChars = {};
+	expectedChars = {};
 	Utility::appendBy(expectedChars, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(expectedChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
@@ -468,7 +468,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	expectedChars = {};
+	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expectedOutput(expectedChars.begin(), expectedChars.end());
@@ -576,7 +576,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input(inputChars.begin(), inputChars.end());
 
-	outputChars = {};
+	std::vector<char> outputChars = {};
 	Utility::appendBy(outputChars,
 					  {"41ab7373-8f24-4a03-83dc-621036d99f34", "137fed017b6159acc0af30d2c6b403a5", "69", "420"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
