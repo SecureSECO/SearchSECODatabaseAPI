@@ -13,6 +13,8 @@ Utrecht University within the Software Project course.
 #include <gtest/gtest.h>
 #include <iostream>
 
+std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 // Checks if two authors are equal. I.e., they have the same contents.
 MATCHER_P(authorEqual, author, "")
 {
@@ -29,7 +31,7 @@ TEST(GetAuthorIdRequest, OneRequestOneMatch)
 	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author?author@mail.com";
+	std::string request = "Author" + fieldDelimiter + "author@mail.com";
 	std::vector<char> outputChars = {};
 	Utility::appendBy(outputChars, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -53,7 +55,7 @@ TEST(GetAuthorIdRequest, OneRequestNoMatch)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	std::string request = "Author?author@mail.com";
+	std::string request = "Author" + fieldDelimiter + "author@mail.com";
 	std::string output = "No results found.";
 	Author author;
 	author.name = "Author";

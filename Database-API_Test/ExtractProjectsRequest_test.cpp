@@ -162,7 +162,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	EXPECT_CALL(database, searchForProject(projectID4_3, version4_3)).WillOnce(testing::Return(p4_3));
 	EXPECT_CALL(database, searchForProject(projectID4_4, version4_4)).WillOnce(testing::Return(p4_4));
 	std::string output4 = handler.handleRequest("extp", input4, nullptr);
-	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), '\n');
+	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
 	// Expect the status code to be succesfull.
 	EXPECT_EQ(HTTPStatusCodes::getCode(output4), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));

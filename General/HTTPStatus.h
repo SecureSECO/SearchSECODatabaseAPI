@@ -10,8 +10,6 @@ Utrecht University within the Software Project course.
 
 #include <string>
 
-#define HTTP_DELIMITER '\n'
-
 namespace HTTPStatusCodes
 {
 	std::string success(std::string message);
