@@ -10,24 +10,25 @@ Utrecht University within the Software Project course.
 #include "RAFTConsensus.h"
 #include "RequestHandler.h"
 #include "Utility.h"
+#include "TestDefinitions.h"
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
 #include <vector>
 
-std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 // Test if first crawl is returned and then the correct job.
 TEST(JobDatabaseIntegrationTest, GetJobRequest)
 {
 	// Set up:
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input = "";
 	std::string expectedOutput = "Crawl" + fieldDelimiter + "0";
@@ -47,15 +48,17 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 {
 	// Set up:
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10";
 	std::string output = handler.handleRequest("upjb", input, nullptr);
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
+	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, TEST_IP, TEST_PORT);
 	int jobs = jhandler->numberOfJobs;
 	ASSERT_EQ(jobs, 3);
 
@@ -75,16 +78,19 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 {
 	// Set up:
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input = "https://github.com/HackerPoet/Chaos-Equations" + fieldDelimiter + "42" + entryDelimiter +
 						"https://github.com/Yiziwinnie/Home-Depot" + fieldDelimiter + "69";
 	std::string output = handler.handleRequest("upjb", input, nullptr);
-	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, "127.0.0.1", 9042);
+	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, TEST_IP, TEST_PORT);
 	int jobs = jhandler->numberOfJobs;
 	ASSERT_EQ(jobs, 4);
 }
@@ -93,11 +99,14 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 {
 	// Set up:
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, "127.0.0.1", 9042);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input =
 		"100" + entryDelimiter + "https://github.com/Yiziwinnie/Bike-Sharing-in-Boston" + fieldDelimiter + "420";

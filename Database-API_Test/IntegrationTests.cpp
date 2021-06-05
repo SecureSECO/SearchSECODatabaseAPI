@@ -10,14 +10,13 @@ Utrecht University within the Software Project course.
 #include "HTTPStatus.h"
 #include "RAFTConsensus.h"
 #include "Utility.h"
+#include "TestDefinitions.h"
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <iostream>
 
-#define TESTIP "127.0.0.1"
-#define TESTPORT 9042
 
 // Tests check request functionality with a single known hash as input.
 TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
@@ -27,7 +26,7 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 
@@ -50,7 +49,7 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	std::string expectedOutput2 = "No results found.";
@@ -67,7 +66,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> input3Chars = {};
 	Utility::appendBy(input3Chars, {"8811e6bedb87e90cef39de1179f3bd2e", "137fed017b6159acc0af30d2c6b403a5"},
@@ -122,7 +121,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(
@@ -197,7 +196,7 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(
@@ -228,7 +227,7 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -295,7 +294,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"8", "5000000012000", "L7", "P8", "www.github.com/p8", "Author 10", "author10@mail.com"},
@@ -327,7 +326,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestMultipleAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -362,7 +361,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"UnknownAuthor", "unknownauthor@mail.com"}, FIELD_DELIMITER_CHAR,
@@ -383,7 +382,7 @@ TEST(DatabaseIntegrationTest, GetAuthorIdRequestSingleUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -409,7 +408,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -443,7 +442,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280";
 	std::string expectedOutput = "No results found.";
@@ -461,7 +460,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280"},
@@ -486,7 +485,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleId)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34";
 
@@ -509,7 +508,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownId)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280";
 	std::string expectedOutput = "No results found.";
@@ -527,7 +526,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIds)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -569,7 +568,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIdsOneMatch)
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"41ab7373-8f24-4a03-83dc-621036d99f34", "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280"},
@@ -597,7 +596,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
 	DatabaseConnection jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1", "5000000000000"},
@@ -623,7 +622,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
 	DatabaseConnection jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -644,7 +643,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
 	DatabaseConnection jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"101", "5000000008000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -691,7 +690,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	RequestHandler handler;
 	RAFTConsensus raftConsensus;
 	DatabaseConnection jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TESTIP, TESTPORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"2", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
