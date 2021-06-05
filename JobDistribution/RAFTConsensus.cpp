@@ -86,16 +86,20 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	networkhandler = NetworkHandler::createHandler();
 	// If the IP + port are not open, this will throw an exception sending us to the catch.
 	networkhandler->openConnection(ip, port);
-	networkhandler->sendData(
-		"conn" + std::to_string(1 + std::to_string(PORT).length()) + "\n" + std::to_string(PORT) + "\n");
+
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+	networkhandler->sendData("conn" + std::to_string(1 + std::to_string(PORT).length()) + entryDelimiter +
+							 std::to_string(PORT) + entryDelimiter);
+
 	response = networkhandler->receiveData();
-	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, '?');
+	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);
 	if (receivedLeader[0] != RESPONSE_OK) 
 	{
 		// If we get something which is not an ok, we will assume that it has send back the true leader.
 		if(receivedLeader.size() != 2) 
 		{
-			throw std::runtime_error("Incorrect response from connect request. Size was " + std::to_string(receivedLeader.size()));
+			throw std::runtime_error("Incorrect response from connect request. Size was " +
+									 std::to_string(receivedLeader.size()));
 		}
 		ip = receivedLeader[0];
 		port = receivedLeader[1];
@@ -140,6 +144,8 @@ void RAFTConsensus::listenForHeartbeat()
 
 std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	if (leader) 
 	{
 		request = request.substr(0, request.length() - 1);
@@ -148,29 +154,29 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 		std::string initialData = "";
 		for (auto con : *others) 
 		{
-			initialData += "?" + connectionToString(con.first, con.second);
+			initialData += fieldDelimiter + connectionToString(con.first, con.second);
 		}
 
 		others->push_back(std::pair<boost::shared_ptr<TcpConnection>, std::string>(connection, request));
 		if(nodeConnectionChange != "") 
 		{
-			nodeConnectionChange += "?";
+			nodeConnectionChange += fieldDelimiter;
 		}
-		nodeConnectionChange += "A?" + connectionToString(connection, request);
+		nodeConnectionChange += "A" + fieldDelimiter + connectionToString(connection, request);
 
 		mtx.unlock();
 		new std::thread(&RAFTConsensus::listenForRequests, this, connection);
 
-		std::string connectingIp = "?" + connectionToString(connection, request);
+		std::string connectingIp = fieldDelimiter + connectionToString(connection, request);
 
-		return std::string(RESPONSE_OK) + connectingIp + initialData + "\n";
+		return std::string(RESPONSE_OK) + connectingIp + initialData + entryDelimiter;
 	}
-	return leaderIp + "?" + leaderPort + "\n";
+	return leaderIp + fieldDelimiter + leaderPort + entryDelimiter;
 }
 
 void RAFTConsensus::handleHeartbeat(std::string heartbeat) 
 {
-	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, '?');
+	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, FIELD_DELIMITER_CHAR);
 	for (int i = 0; i < hbSplitted.size(); i += 3) 
 	{
 		std::pair<std::string, std::string> pairReceived = 
@@ -206,7 +212,8 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 
 std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::string request) 
 {
-	networkhandler->sendData(requestType + std::to_string(request.length()) + "\n" + request);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+	networkhandler->sendData(requestType + std::to_string(request.length()) + entryDelimiter + request);
 	return networkhandler->receiveData();
 }
 
@@ -250,12 +257,14 @@ void RAFTConsensus::heartbeatSender()
 
 void RAFTConsensus::dropConnection(int i) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	std::pair<boost::shared_ptr<TcpConnection>, std::string> c = others->at(i);
 	if(nodeConnectionChange != "") 
 	{
-		nodeConnectionChange += "?";
+		nodeConnectionChange += fieldDelimiter;
 	}
-	nodeConnectionChange += "R?" + connectionToString(c.first, c.second);
+	nodeConnectionChange += "R" + fieldDelimiter + connectionToString(c.first, c.second);
 
 	(*others)[i] = (*others)[others->size()-1];
 	others->pop_back();
@@ -263,7 +272,8 @@ void RAFTConsensus::dropConnection(int i)
 
 std::string RAFTConsensus::getHeartbeat()
 {
-	std::string hb = nodeConnectionChange + "\n";
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+	std::string hb = nodeConnectionChange + entryDelimiter;
 	nodeConnectionChange = "";
 	return hb;
 }
@@ -285,6 +295,8 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 
 std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	return c->socket().remote_endpoint().address().to_string()
-		+ "?" + port;
+		+ fieldDelimiter + port;
 }

@@ -38,7 +38,9 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		else if (alreadyCrawling == false)
 		{
 			alreadyCrawling = true;
-			return HTTPStatusCodes::success("Crawl?" + std::to_string(crawlId));
+			std::string s = "Crawl";
+			s += FIELD_DELIMITER_CHAR;
+			return HTTPStatusCodes::success(s + std::to_string(crawlId));
 		}
 		else
 		{
@@ -52,13 +54,13 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 {
 	if (raft->isLeader())
 	{
-		// Split data on '\n', to get individual jobs.
-		std::vector<std::string> datasplits = Utility::splitStringOn(data,'\n');
+		// Split data on ENTRY_DELIMITER_CHAR, to get individual jobs.
+		std::vector<std::string> datasplits = Utility::splitStringOn(data, ENTRY_DELIMITER_CHAR);
 		std::vector<std::string> urls;
 		std::vector<int> priorities;
 		for (int i = 0; i < datasplits.size(); i++)
 		{
-			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(datasplits[i],'?');
+			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(datasplits[i], FIELD_DELIMITER_CHAR);
 			std::string url = dataSecondSplit[0];
 			urls.push_back(url);
 			int priority = Utility::safeStoi(dataSecondSplit[1]);
@@ -101,7 +103,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 {
 	if (raft->isLeader())
 	{
-		int id = Utility::safeStoi(data.substr(0, data.find('\n')));
+		int id = Utility::safeStoi(data.substr(0, data.find(ENTRY_DELIMITER_CHAR)));
 		if (errno == 0)
 		{
 			updateCrawlId(id);
@@ -111,7 +113,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 			return HTTPStatusCodes::clientError("Error: invalid crawlId.");
 		}
 		// Get data after crawlId and pass it on to handleUploadRequest.
-		std::string jobdata = data.substr(data.find('\n') + 1, data.length());
+		std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
 		return handleUploadJobRequest(request, jobdata);
 	}
 	return raft->passRequestToLeader(request, data);
@@ -153,14 +155,14 @@ std::string JobRequestHandler::getTopJobWithRetry()
 			url = database->getTopJob();
 			if (errno == 0)
 			{
-				return HTTPStatusCodes::success("Spider?" + url);
+				return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
 			}
 			retries++;
 		}
 		return HTTPStatusCodes::serverError("Unable to get job from database.");
 	}
 	numberOfJobs -= 1;
-	return HTTPStatusCodes::success("Spider?" + url);
+	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
 }
 
 bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority)

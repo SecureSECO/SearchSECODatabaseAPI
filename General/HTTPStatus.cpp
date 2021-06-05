@@ -18,12 +18,12 @@ enum HTTPStatusCode
 
 std::string constructMessage(HTTPStatusCode code, std::string message)
 {
-	return std::to_string(code) + HTTP_DELIMITER + message;
+	return std::to_string(code) + ENTRY_DELIMITER_CHAR + message;
 }
 
 bool validCode(std::string request)
 {
-	std::string code = Utility::splitStringOn(request, HTTP_DELIMITER)[0];
+	std::string code = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR)[0];
 
 	return code == std::to_string(successCode) 
 		|| code == std::to_string(clientErrorCode) 
@@ -49,7 +49,7 @@ std::string HTTPStatusCodes::getCode(std::string request)
 {
 	if (validCode(request))
 	{
-		return Utility::splitStringOn(request, HTTP_DELIMITER)[0];
+		return Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR)[0];
 	}
 	else
 	{
