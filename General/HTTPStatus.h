@@ -6,9 +6,9 @@ Utrecht University within the Software Project course.
 
 #pragma once
 
-#include <string>
+#include "Definitions.h"
 
-#define HTTP_DELIMITER '\n'
+#include <string>
 
 namespace HTTPStatusCodes
 {

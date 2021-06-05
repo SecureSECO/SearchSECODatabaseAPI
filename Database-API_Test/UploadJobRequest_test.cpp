@@ -12,6 +12,8 @@ Utrecht University within the Software Project course.
 // Test for a single correct job.
 TEST(UploadJobRequest, SingleJob)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
@@ -20,7 +22,7 @@ TEST(UploadJobRequest, SingleJob)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01?1";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1";
 
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
@@ -33,6 +35,9 @@ TEST(UploadJobRequest, SingleJob)
 // Test for multiple correct jobs.
 TEST(UploadJobRequest, MultipleJobs)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+
 	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
@@ -41,7 +46,8 @@ TEST(UploadJobRequest, MultipleJobs)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01?1\nhttps://github.com/nlohmann/json/issues/1573?2";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter +
+						  "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "2";
 
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
@@ -55,6 +61,8 @@ TEST(UploadJobRequest, MultipleJobs)
 // Test for one job, but with an invalid priority.
 TEST(UploadJobRequest, OneJobInvalidPriority)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+
 	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
@@ -62,7 +70,7 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01?aaaaa";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "aaaaa";
 
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 0)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
@@ -74,6 +82,9 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 //Test for multiple jobs, where one job has an invalid priority.
 TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+
 	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
@@ -82,7 +93,7 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01?1\nhttps://github.com/nlohmann/json/issues/1573?aaaa";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter + "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "aaaa";
 
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
