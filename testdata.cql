@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS projectData.projects
   name text,
   url text,
   ownerID UUID,
-  hashes set<text>,
+  hashes set<UUID>,
   PRIMARY KEY ((projectID), version)
 ) 
 WITH CLUSTERING ORDER BY (version DESC);
@@ -106,25 +106,25 @@ INSERT INTO projectData.methods (method_hash, projectID, version, name, file, li
 
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 
 (1, 5000000000000, 'L1', 'P1', 'www.github.com/p1', 68bd2db6-fe91-47d2-a134-cf82b104f547, 
-{ '2c7f46d4f57cf9e66b03213358c7ddb5' });
+{ 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5 });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 
 (2, 5000000001000, 'L2', 'P2', 'www.github.com/p2', 68bd2db6-fe91-47d2-a134-cf82b104f547, 
-{ '06f73d7ab46184c55bf4742b9428a4c0' });
+{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0 });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 
 (3, 5000000002000, 'L3', 'P3', 'www.github.com/p3', b2217c08-06eb-4a57-b977-7c6d72299301, 
-{ '137fed017b6159acc0af30d2c6b403a5', '23920776594c85fdc30cd96f928487f1', '959ee1ee12e6d6d87a4b6ee732aed9fc' });
+{ 137fed01-7b61-59ac-c0af-30d2c6b403a5, 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 
 (4, 5000000005000, 'L4', 'P4', 'www.github.com/p4', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ '06f73d7ab46184c55bf4742b9428a4c0', '8811e6bedb87e90cef39de1179f3bd2e' });
+{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 8811e6be-db87-e90c-ef39-de1179f3bd2e });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 
 (5, 5000000007000, 'L4', 'P5', 'www.github.com/p5', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ '23920776594c85fdc30cd96f928487f1', '959ee1ee12e6d6d87a4b6ee732aed9fc', '8811e6bedb87e90cef39de1179f3bd2e' });
+{ 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 8811e6be-db87-e90c-ef39-de1179f3bd2e });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES
 (101, 5000000008000, 'L5', 'P101', 'www.github.com/p101', e39e0872-6856-4fa0-8d9a-278728362f43,
-{ '261a8712b1467bd26844de6c43c9f8f1' });
+{ 261a8712-b146-7bd2-6844-de6c43c9f8f1 });
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES
 (101, 5000000009000, 'L5', 'P101', 'www.github.com/p101', e39e0872-6856-4fa0-8d9a-278728362f43,
-{ 'ee9ae09b3a2112f5fd2a63847b74920a' });
+{ ee9ae09b-3a21-12f5-fd2a-63847b74920a });
 
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
 (68bd2db6-fe91-47d2-a134-cf82b104f547, 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 5000000000000, 1);
