@@ -25,7 +25,7 @@ enable_testing()
 
 add_executable(
   tests
-  Raft_tests.cpp
+  #Raft_tests.cpp
   Utility_test.cpp
   RequestHandler_test.cpp
   ConnectionHandler_tests.cpp

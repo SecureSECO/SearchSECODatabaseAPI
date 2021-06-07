@@ -82,7 +82,7 @@ TEST(RaftTests, AcceptConnection)
 		EXPECT_CALL((*connMock), sendData("A" + fieldDelimiter + (TESTIP "?-1") + entryDelimiter, err)).Times(1);
 
 		std::string resp = raft.connectNewNode(connection, "-1" + entryDelimiter);
-		
+
 		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TESTIP + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connMock;
