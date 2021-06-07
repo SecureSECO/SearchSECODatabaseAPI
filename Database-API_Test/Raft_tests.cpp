@@ -51,14 +51,12 @@ TEST(RaftTests, ConnectToLeader)
 		std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
 		usleep(500000); // Just to make sure the listner has started.
 
-
 		RAFTConsensus raft;
 		raft.start(nullptr, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 		ASSERT_TRUE(!raft.isLeader());	
 	}
 	usleep(500000); // Extra wait to make sure the heartbeat is going to be send.
-
 }
 
 TEST(RaftTests, BecomeLeader) 
@@ -118,5 +116,4 @@ TEST(RaftTests, PassRequestToLeader)
 	EXPECT_CALL(jddatabase, getTopJob()).Times(1).WillOnce(testing::Return(response));
 
 	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider" + fieldDelimiter + response));
-	
 }
