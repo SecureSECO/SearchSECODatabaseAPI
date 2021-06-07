@@ -33,7 +33,7 @@ WITH CLUSTERING ORDER BY (version DESC);
 CREATE TABLE IF NOT EXISTS projectData.method_by_author
 (
   authorID UUID,
-  hash text,
+  hash UUID,
   version timestamp,
   projectID bigint,
   PRIMARY KEY ((authorID), hash, version, projectID)
@@ -127,49 +127,49 @@ INSERT INTO projectData.projects (projectID, version, license, name, url, ownerI
 { 'ee9ae09b3a2112f5fd2a63847b74920a' });
 
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(68bd2db6-fe91-47d2-a134-cf82b104f547, '2c7f46d4f57cf9e66b03213358c7ddb5', 5000000000000, 1);
+(68bd2db6-fe91-47d2-a134-cf82b104f547, 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 5000000000000, 1);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(68bd2db6-fe91-47d2-a134-cf82b104f547, '06f73d7ab46184c55bf4742b9428a4c0', 4999999999000, 2);
+(68bd2db6-fe91-47d2-a134-cf82b104f547, 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 4999999999000, 2);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(b2217c08-06eb-4a57-b977-7c6d72299301, '06f73d7ab46184c55bf4742b9428a4c0', 5000000000000, 2);
+(b2217c08-06eb-4a57-b977-7c6d72299301, 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 5000000000000, 2);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(5a10bb4d-97b6-44d8-a135-f1432424a61c, '06f73d7ab46184c55bf4742b9428a4c0', 5000000001000, 2);
+(5a10bb4d-97b6-44d8-a135-f1432424a61c, 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 5000000001000, 2);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(b2217c08-06eb-4a57-b977-7c6d72299301, '137fed017b6159acc0af30d2c6b403a5', 5000000002000, 3);
+(b2217c08-06eb-4a57-b977-7c6d72299301, 137fed01-7b61-59ac-c0af-30d2c6b403a5, 5000000002000, 3);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(68bd2db6-fe91-47d2-a134-cf82b104f547, '23920776594c85fdc30cd96f928487f1', 5000000002000, 3);
+(68bd2db6-fe91-47d2-a134-cf82b104f547, 23920776-594c-85fd-c30c-d96f928487f1, 5000000002000, 3);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(b2217c08-06eb-4a57-b977-7c6d72299301, '23920776594c85fdc30cd96f928487f1', 5000000003000, 3);
+(b2217c08-06eb-4a57-b977-7c6d72299301, 23920776-594c-85fd-c30c-d96f928487f1, 5000000003000, 3);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(68bd2db6-fe91-47d2-a134-cf82b104f547, '959ee1ee12e6d6d87a4b6ee732aed9fc', 5000000003000, 3);
+(68bd2db6-fe91-47d2-a134-cf82b104f547, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 5000000003000, 3);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(d7dd6d67-76ca-414e-85c2-59adad13bd23, '959ee1ee12e6d6d87a4b6ee732aed9fc', 5000000004000, 3);
+(d7dd6d67-76ca-414e-85c2-59adad13bd23, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 5000000004000, 3);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(e39e0872-6856-4fa0-8d9a-278728362f43, '06f73d7ab46184c55bf4742b9428a4c0', 5000000005000, 4);
+(e39e0872-6856-4fa0-8d9a-278728362f43, 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 5000000005000, 4);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(f95ffc6c-aa97-40d6-b709-cb4823955213, '8811e6bedb87e90cef39de1179f3bd2e', 5000000006000, 4);
+(f95ffc6c-aa97-40d6-b709-cb4823955213, 8811e6be-db87-e90c-ef39-de1179f3bd2e, 5000000006000, 4);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(e39e0872-6856-4fa0-8d9a-278728362f43, '23920776594c85fdc30cd96f928487f1', 5000000006000, 5);
+(e39e0872-6856-4fa0-8d9a-278728362f43, 23920776-594c-85fd-c30c-d96f928487f1, 5000000006000, 5);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(f95ffc6c-aa97-40d6-b709-cb4823955213, '23920776594c85fdc30cd96f928487f1', 5000000007000, 5);
+(f95ffc6c-aa97-40d6-b709-cb4823955213, 23920776-594c-85fd-c30c-d96f928487f1, 5000000007000, 5);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(f95ffc6c-aa97-40d6-b709-cb4823955213, '959ee1ee12e6d6d87a4b6ee732aed9fc', 5000000008000, 5);
+(f95ffc6c-aa97-40d6-b709-cb4823955213, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 5000000008000, 5);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(2a84cf5a-9554-4800-bb87-6dda6715fa12, '8811e6bedb87e90cef39de1179f3bd2e', 5000000008000, 5);
+(2a84cf5a-9554-4800-bb87-6dda6715fa12, 8811e6be-db87-e90c-ef39-de1179f3bd2e, 5000000008000, 5);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(e39e0872-6856-4fa0-8d9a-278728362f43, '8811e6bedb87e90cef39de1179f3bd2e', 5000000009000, 5);
+(e39e0872-6856-4fa0-8d9a-278728362f43, 8811e6be-db87-e90c-ef39-de1179f3bd2e, 5000000009000, 5);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(e39e0872-6856-4fa0-8d9a-278728362f43, '261a8712b1467bd26844de6c43c9f8f1', 5000000008000, 101);
+(e39e0872-6856-4fa0-8d9a-278728362f43, 261a8712-b146-7bd2-6844-de6c43c9f8f1, 5000000008000, 101);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(e39e0872-6856-4fa0-8d9a-278728362f43, 'ee9ae09b3a2112f5fd2a63847b74920a', 5000000009000, 101);
+(e39e0872-6856-4fa0-8d9a-278728362f43, ee9ae09b-3a21-12f5-fd2a-63847b74920a, 5000000009000, 101);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(f95ffc6c-aa97-40d6-b709-cb4823955213, 'ee9ae09b3a2112f5fd2a63847b74920a', 5000000009000, 101);
+(f95ffc6c-aa97-40d6-b709-cb4823955213, ee9ae09b-3a21-12f5-fd2a-63847b74920a, 5000000009000, 101);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(41ab7373-8f24-4a03-83dc-621036d99f34, '137fed017b6159acc0af30d2c6b403a5', 420, 69);
+(41ab7373-8f24-4a03-83dc-621036d99f34, 137fed01-7b61-59ac-c0af-30d2c6b403a5, 420, 69);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(47919e8f-7103-48a3-9514-3f2d9d49ac61, '2c7f46d4f57cf9e66b03213358c7ddb5', 69, 42);
+(47919e8f-7103-48a3-9514-3f2d9d49ac61, 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 69, 42);
 INSERT INTO projectData.method_by_author (authorID, hash, version, projectID) VALUES
-(47919e8f-7103-48a3-9514-3f2d9d49ac61, '06f73d7ab46184c55bf4742b9428a4c0', 420, 42);
+(47919e8f-7103-48a3-9514-3f2d9d49ac61, 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 420, 42);
 
 INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES 
 (68bd2db6-fe91-47d2-a134-cf82b104f547, 'Author 1', 'author1@mail.com');
