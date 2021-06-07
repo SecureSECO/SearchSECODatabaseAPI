@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 // Controller includes
 #include "Networking.h"
+#include "Definitions.h"
 
 // External includes
 #include <boost/array.hpp>
@@ -34,7 +35,7 @@ void NetworkHandler::sendData(const char* data, int dataLength)
 	boost::asio::write(socket, boost::asio::buffer(data, dataLength));
 }
 
-std::string NetworkHandler::receiveData()
+std::string NetworkHandler::receiveData(bool stopOnNewLine)
 {
 	// The buffer we are going to return as a string.
 	std::vector<char> ret = std::vector<char>();
@@ -47,7 +48,7 @@ std::string NetworkHandler::receiveData()
 		// Read incomming data.
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
-		if (len == 0) 
+		if (len == 0 && stopOnNewLine) 
 		{
 			throw std::runtime_error("No data received, meaning the other side dropped out.");
 		}
@@ -58,7 +59,7 @@ std::string NetworkHandler::receiveData()
 			ret.push_back(buf[i]);
 		}
 
-		if (ret[ret.size()-1] == '\n')
+		if (ret[ret.size()-1] == ENTRY_DELIMITER_CHAR && stopOnNewLine || error == boost::asio::error::eof && !stopOnNewLine)
 		{
 			break; // Connection closed cleanly by peer.
 		}
@@ -70,5 +71,9 @@ std::string NetworkHandler::receiveData()
 		}
 
 	}
-	return std::string(ret.begin(), ret.end() - 1);
+	if (stopOnNewLine) 
+	{
+		return std::string(ret.begin(), ret.end() - 1);
+	}
+	return std::string(ret.begin(), ret.end());
 }

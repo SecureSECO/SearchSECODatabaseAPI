@@ -33,7 +33,12 @@ public:
 	/// </summary>
 	void openConnection(std::string server, std::string port);
 
-	std::string receiveData();
+	/// <summary>
+	/// Receives data from the other side of the connection.
+	/// </summary>
+	/// <param name="stopOnNewLine">If true, will stop listning when encountering a new line.
+	///	If false, will stop when the connection stops.</param>
+	std::string receiveData(bool stopOnNewLine = true);
 private:
 	boost::asio::io_context ioContext;
 	/// <summary>

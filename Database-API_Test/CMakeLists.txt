@@ -25,8 +25,10 @@ enable_testing()
 
 add_executable(
   tests
+  Raft_tests.cpp
   Utility_test.cpp
   RequestHandler_test.cpp
+  ConnectionHandler_tests.cpp
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
