@@ -5,6 +5,8 @@ Utrecht University within the Software Project course.
 */
 
 #include <sstream>
+#include <string>
+#include <boost/algorithm/string.hpp>
 #include "Utility.h"
 
 int Utility::safeStoi(std::string str)
@@ -93,4 +95,15 @@ std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 		substrings.push_back(item);
 	}
 	return substrings;
+}
+
+std::string Utility::hashToUuidString(std::string hash)
+{
+	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-"+ hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" + hash.substr(20, 12);
+}
+
+std::string Utility::uuidStringToHash(std::string uuid)
+{
+	boost::erase_all(uuid, "-");
+	return uuid;
 }

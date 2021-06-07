@@ -70,4 +70,8 @@ public:
 	/// The vector consisting of the substrings. A delimiter at the end of the string is ignored.
 	/// </returns>
 	static std::vector<std::string> splitStringOn(std::string str, char delimiter);
+
+	static std::string hashToUuidString(std::string hash);
+
+	static std::string uuidStringToHash(std::string uuid);
 };

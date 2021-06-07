@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseHandler.h"
+#include "Utility.h"
 #include <iostream>
 
 void DatabaseHandler::connect(std::string ip, int port)
@@ -148,7 +149,7 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	errno = 0;
 	CassUuid uuid;
-	cass_uuid_from_string(hash.c_str(), &uuid);
+	cass_uuid_from_string(Utility::hashToUuidString(hash).c_str(), &uuid);
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
@@ -229,7 +230,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 {
 	errno = 0;
 	CassUuid uuid;
-	cass_uuid_from_string(method.hash.c_str(), &uuid);
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
@@ -280,7 +281,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 {
 	errno = 0;
 	CassUuid uuid;
-	cass_uuid_from_string(method.hash.c_str(), &uuid);
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
@@ -511,7 +512,7 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 {
 	MethodOut method;
 
-	method.hash = getUUID(row, "method_hash");
+	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
 	method.methodName = getString(row, "name");
 	method.fileLocation = getString(row, "file");
 
@@ -544,7 +545,7 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 {
 	MethodId method;
 
-	method.hash = getUUID(row, "method_hash");
+	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
 	method.projectId = getInt64(row, "projectid");
 	method.version = getInt64(row, "version");
 
