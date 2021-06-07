@@ -545,7 +545,7 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 {
 	MethodId method;
 
-	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
+	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
 	method.projectId = getInt64(row, "projectid");
 	method.version = getInt64(row, "version");
 
