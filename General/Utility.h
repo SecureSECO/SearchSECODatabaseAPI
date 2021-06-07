@@ -71,7 +71,15 @@ public:
 	/// </returns>
 	static std::vector<std::string> splitStringOn(std::string str, char delimiter);
 
+	/// <summary>
+	/// Changes a string with the format of a hash to a string with the format of a uuid.
+	/// This comes down to adding 4 dashes to the string in the correct places.
+	/// </summary>
 	static std::string hashToUuidString(std::string hash);
 
+	/// <summary>
+	/// Changes a string with the format of a uuid to a string with the format of a hash.
+	/// This comes down to removing all dashes from the input string.
+	/// </summary>
 	static std::string uuidStringToHash(std::string uuid);
 };

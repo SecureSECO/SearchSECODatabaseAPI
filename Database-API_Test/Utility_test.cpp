@@ -211,3 +211,20 @@ TEST(CheckStringSplit, EndSplit)
 	ASSERT_EQ(output.size(), 1);
 	ASSERT_EQ(output[0], "line1");
 }
+
+//Checks if hashToUuidString correctly changes a hash to a uuid string when the input hash is correct.
+TEST(CheckStringConversion, correctHashToUuid)
+{
+	std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5";
+
+	std::string output = Utility::hashToUuidString(input);
+	ASSERT_EQ(output, "2c7f46d4-f57c-f9e6-6b03-213358c7ddb5");
+}
+
+TEST(CheckStringConversion, correctUuidToHash)
+{
+	std::string input = "2c7f46d4-f57c-f9e6-6b03-213358c7ddb5";
+
+	std::string output = Utility::uuidStringToHash(input);
+	ASSERT_EQ(output, "2c7f46d4f57cf9e66b03213358c7ddb5");
+}
