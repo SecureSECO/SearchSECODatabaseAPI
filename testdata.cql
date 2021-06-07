@@ -6,7 +6,7 @@ CREATE KEYSPACE IF NOT EXISTS jobs
     
 CREATE TABLE IF NOT EXISTS projectData.methods
 (
-  method_hash text,
+  method_hash UUID,
   version timestamp,
   projectID bigint,
   name text,
@@ -67,41 +67,41 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
 WITH CLUSTERING ORDER BY (priority DESC);
 
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('2c7f46d4f57cf9e66b03213358c7ddb5', 1, 5000000000000, 'M1', 'P1/M1.cpp', 1, 
+(2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 1, 5000000000000, 'M1', 'P1/M1.cpp', 1, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('06f73d7ab46184c55bf4742b9428a4c0', 2, 5000000001000, 'M2', 'P2/M2.cpp', 1, 
+(06f73d7a-b461-84c5-5bf4-742b9428a4c0, 2, 5000000001000, 'M2', 'P2/M2.cpp', 1, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547, b2217c08-06eb-4a57-b977-7c6d72299301, 
   5a10bb4d-97b6-44d8-a135-f1432424a61c });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('137fed017b6159acc0af30d2c6b403a5', 3, 5000000002000, 'M3', 'P3/M3.cpp', 1, 
+(137fed01-7b61-59ac-c0af-30d2c6b403a5, 3, 5000000002000, 'M3', 'P3/M3.cpp', 1, 
 { b2217c08-06eb-4a57-b977-7c6d72299301 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('23920776594c85fdc30cd96f928487f1', 3, 5000000003000, 'M4', 'P3/M4.cpp', 21, 
+(23920776-594c-85fd-c30c-d96f928487f1, 3, 5000000003000, 'M4', 'P3/M4.cpp', 21, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547, b2217c08-06eb-4a57-b977-7c6d72299301 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('959ee1ee12e6d6d87a4b6ee732aed9fc', 3, 5000000004000, 'M5', 'P3/M5.cpp', 41, 
+(959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 3, 5000000004000, 'M5', 'P3/M5.cpp', 41, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547, d7dd6d67-76ca-414e-85c2-59adad13bd23 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('06f73d7ab46184c55bf4742b9428a4c0', 4, 5000000005000, 'M6', 'P4/M6.cpp', 3, 
+(06f73d7a-b461-84c5-5bf4-742b9428a4c0, 4, 5000000005000, 'M6', 'P4/M6.cpp', 3, 
 { e39e0872-6856-4fa0-8d9a-278728362f43 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('8811e6bedb87e90cef39de1179f3bd2e', 4, 5000000006000, 'M7', 'P4/M7.cpp', 23, 
+(8811e6be-db87-e90c-ef39-de1179f3bd2e, 4, 5000000006000, 'M7', 'P4/M7.cpp', 23, 
 { f95ffc6c-aa97-40d6-b709-cb4823955213 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('23920776594c85fdc30cd96f928487f1', 5, 5000000007000, 'M8', 'P5/M8.cpp', 1, 
+(23920776-594c-85fd-c30c-d96f928487f1, 5, 5000000007000, 'M8', 'P5/M8.cpp', 1, 
 { e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('959ee1ee12e6d6d87a4b6ee732aed9fc', 5, 5000000008000, 'M9', 'P5/M9.cpp', 41, 
+(959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 5, 5000000008000, 'M9', 'P5/M9.cpp', 41, 
 { f95ffc6c-aa97-40d6-b709-cb4823955213 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
-('8811e6bedb87e90cef39de1179f3bd2e', 5, 5000000009000, 'M10', 'P5/M10.cpp', 61, 
+(8811e6be-db87-e90c-ef39-de1179f3bd2e, 5, 5000000009000, 'M10', 'P5/M10.cpp', 61, 
 { 2a84cf5a-9554-4800-bb87-6dda6715fa12 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES
-('261a8712b1467bd26844de6c43c9f8f1', 101, 5000000008000, 'P101', 'www.github.com/p101', 1,
+(261a8712-b146-7bd2-6844-de6c43c9f8f1, 101, 5000000008000, 'P101', 'www.github.com/p101', 1,
 { e39e0872-6856-4fa0-8d9a-278728362f43 });
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES
-('ee9ae09b3a2112f5fd2a63847b74920a', 101, 5000000009000, 'P101', 'www.github.com/p101', 41,
+(ee9ae09b-3a21-12f5-fd2a-63847b74920a, 101, 5000000009000, 'P101', 'www.github.com/p101', 41,
 { e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 });
 
 INSERT INTO projectData.projects (projectID, version, license, name, url, ownerID, hashes) VALUES 

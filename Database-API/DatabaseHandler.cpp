@@ -147,9 +147,11 @@ std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, V
 std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	errno = 0;
+	CassUuid uuid;
+	cass_uuid_from_string(hash.c_str(), &uuid);
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
-	cass_statement_bind_string_by_name(query, "method_hash", hash.c_str());
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
@@ -226,9 +228,11 @@ void DatabaseHandler::addProject(ProjectIn project)
 void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 {
 	errno = 0;
+	CassUuid uuid;
+	cass_uuid_from_string(method.hash.c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
-	cass_statement_bind_string_by_name(query, "method_hash", method.hash.c_str());
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
 
@@ -275,11 +279,13 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
 {
 	errno = 0;
+	CassUuid uuid;
+	cass_uuid_from_string(method.hash.c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
 
-	cass_statement_bind_string_by_name(query, "hash", method.hash.c_str());
+	cass_statement_bind_uuid_by_name(query, "hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
 
@@ -505,7 +511,7 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 {
 	MethodOut method;
 
-	method.hash = getString(row, "method_hash");
+	method.hash = getUUID(row, "method_hash");
 	method.methodName = getString(row, "name");
 	method.fileLocation = getString(row, "file");
 
@@ -538,7 +544,7 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 {
 	MethodId method;
 
-	method.hash = getString(row, "hash");
+	method.hash = getUUID(row, "method_hash");
 	method.projectId = getInt64(row, "projectid");
 	method.version = getInt64(row, "version");
 
