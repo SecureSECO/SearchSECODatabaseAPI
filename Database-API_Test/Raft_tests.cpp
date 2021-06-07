@@ -55,6 +55,8 @@ TEST(RaftTests, ConnectToLeader)
 	raft.start(nullptr, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 	ASSERT_TRUE(!raft.isLeader());	
+	usleep(500000); // Extra wait to make sure the heartbeat is going to be send.
+
 }
 
 TEST(RaftTests, BecomeLeader) 
