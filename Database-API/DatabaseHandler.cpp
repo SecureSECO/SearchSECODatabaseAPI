@@ -223,7 +223,9 @@ void DatabaseHandler::addProject(ProjectIn project)
 	// Add the hashes, but no more then HASHES_TO_INSERT_AT_ONCE
 	for (int i = 0; i < std::min(HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
-		cass_collection_append_string(hashes, project.hashes[i].c_str());
+		CassUuid hash;
+		cass_uuid_from_string(Utility::hashToUuidString(project.hashes[i]).c_str(), &hash);
+		cass_collection_append_uuid(hashes, hash);
 	}
 
 	cass_statement_bind_collection_by_name(query, "hashes", hashes);
