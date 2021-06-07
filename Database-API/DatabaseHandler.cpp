@@ -258,7 +258,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 
-	cass_statement_bind_int64_by_name(query, "version", project.version);	
+	cass_statement_bind_int64_by_name(query, "version", project.version);
 
 	int size = project.hashes.size();
 
@@ -266,7 +266,9 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	for (int i = index; i < std::min(index + HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
-		cass_collection_append_string(hashes, project.hashes[i].c_str());
+		CassUuid hash;
+		cass_uuid_from_string(Utility::hashToUuidString(project.hashes[i]).c_str(), &hash);
+		cass_collection_append_uuid(hashes, hash);
 	}
 
 	cass_statement_bind_collection(query, 0, hashes);
@@ -580,11 +582,12 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	{
 		while (cass_iterator_next(iterator))
 		{
-			const char* hash;
-			size_t hash_size;
+			char hash[CASS_UUID_STRING_LENGTH];
+			CassUuid hashUuid;
 			const CassValue *id = cass_iterator_get_value(iterator);
-			cass_value_get_string(id, &hash, &hash_size);
-			project.hashes.push_back(hash);
+			cass_value_get_uuid(id, &hashUuid);
+			cass_uuid_string(hashUuid, hash);
+			project.hashes.push_back(Utility::uuidStringToHash(hash));
 		}
 	}
 
