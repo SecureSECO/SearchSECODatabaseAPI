@@ -8,14 +8,34 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include <chrono>
 
-// Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft)
+ConnectionHandler::~ConnectionHandler() 
 {
+	server->stop();
+}
+
+// Connection Handler Methods.
+void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, 
+	DatabaseConnection* databaseConnection, 
+	RAFTConsensus* raft, 
+	int port, 
+	RequestHandler *requestHandler)
+{
+
+	if (requestHandler == nullptr) 
+	{
+		handler = new RequestHandler();
+	}
+	else 
+	{
+		handler = requestHandler;
+	}
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, &handler);
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
+		this->server = &server;
 		ioContext.run();
+		
 	}
 	catch (std::exception& e)
 	{
@@ -29,8 +49,14 @@ TcpConnection::pointer TcpConnection::create(boost::asio::io_context& ioContext)
 	return pointer(new TcpConnection(ioContext));
 }
 
+void TcpConnection::sendData(const std::string &data, boost::system::error_code &error) 
+{
+	boost::asio::write(socket_, boost::asio::buffer(data), error);
+}
+
 void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 {
+	
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
 	size_t len;
@@ -84,9 +110,13 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 }
 
 // TCP server Methods.
-TcpServer::TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler)
+TcpServer::TcpServer(boost::asio::io_context& ioContext, 
+	DatabaseHandler* databaseHandler, 
+	DatabaseConnection* databaseConnection, 
+	RAFTConsensus* raft, RequestHandler* handler, 
+	int port)
 	: ioContext_(ioContext),
-	acceptor_(ioContext, tcp::endpoint(tcp::v4(), PORT))
+	acceptor_(ioContext, tcp::endpoint(tcp::v4(), port))
 {
 	this->handler = handler;
 	handler->initialize(databaseHandler, databaseConnection, raft);
@@ -105,10 +135,26 @@ void TcpServer::startAccept()
 void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	const boost::system::error_code& error)
 {
+	if (stopped) 
+	{
+		return;
+	}
 	startAccept();
 	if (!error)
 	{
 		newConnection->start(handler, newConnection);
 	}
 
+}
+
+void TcpServer::stop() 
+{
+	stopped = true;
+	acceptor_.cancel();
+}
+
+
+std::string TcpConnection::getIp() 
+{
+	return socket_.remote_endpoint().address().to_string();
 }

@@ -15,14 +15,26 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <algorithm>
 
-void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader) 
+RAFTConsensus::~RAFTConsensus() 
 {
+	if (started) 
+	{
+		stop = true;
+		// Sleep so we know for sure the thread has stopped before we delete everything.
+		usleep(HEARTBEAT_TIME + HEARTBEAT_TIME / 5);
+	}
+}
+
+void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader, 
+	std::vector<std::pair<std::string, std::string>> ips) 
+{
+	started = true;
 	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
 	leader = true;
 	this->requestHandler = requestHandler;
 	if (!assumeLeader) 
 	{
-		connectToLeader(LEADER_IPS);
+		connectToLeader(ips);
 	}
 
 	if (leader) 
@@ -113,7 +125,7 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 
 void RAFTConsensus::listenForHeartbeat() 
 {
-	while (true) 
+	while (!stop) 
 	{
 		try 
 		{
@@ -214,12 +226,12 @@ std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::str
 {
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	networkhandler->sendData(requestType + std::to_string(request.length()) + entryDelimiter + request);
-	return networkhandler->receiveData();
+	return networkhandler->receiveData() + ENTRY_DELIMITER_CHAR;
 }
 
 void RAFTConsensus::heartbeatSender()
 {
-	while (true) 
+	while (!stop) 
 	{
 		usleep(HEARTBEAT_TIME);
 		mtx.lock();
@@ -236,7 +248,7 @@ void RAFTConsensus::heartbeatSender()
 			{
 				boost::shared_ptr<TcpConnection> connection = others->at(i).first;
 				
-				boost::asio::write(connection->socket(), boost::asio::buffer(data), error);
+				connection->sendData(data, error);
 				if (error)
 				{
 					std::cout << "Error "<< error << " sending data: Connection dropped.\n";
@@ -282,7 +294,7 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 {
 	try 
 	{
-		while(true) 
+		while(!stop) 
 		{
 			connection->start(requestHandler, connection);
 		}
@@ -296,7 +308,5 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
 {
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-
-	return c->socket().remote_endpoint().address().to_string()
-		+ fieldDelimiter + port;
+	return c->getIp() + fieldDelimiter + port;
 }

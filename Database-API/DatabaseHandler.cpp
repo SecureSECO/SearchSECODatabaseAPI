@@ -56,9 +56,16 @@ void DatabaseHandler::setPreparedStatements()
 	// Inserts a project into the database.
 	prepareFuture = cass_session_prepare(
 		connection,
-		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid) VALUES (?, ?, ?, ?, ?, ?)");
+		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertProject = cass_future_get_prepared(prepareFuture);
+
+	// Adds hashes to a project in the database.
+	prepareFuture = cass_session_prepare(
+		connection,
+		"UPDATE projectdata.projects SET hashes = hashes + ? WHERE projectID = ? AND version = ?");
+	rc = cass_future_error_code(prepareFuture);
+	addHashesToProject = cass_future_get_prepared(prepareFuture);
 
 	// Inserts a method into the database
 	prepareFuture =
@@ -209,6 +216,18 @@ void DatabaseHandler::addProject(ProjectIn project)
 
 	cass_statement_bind_uuid_by_name(query, "ownerid", getAuthorId(project.owner));
 
+	int size = project.hashes.size();
+
+	CassCollection *hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+
+	// Add the hashes, but no more then HASHES_TO_INSERT_AT_ONCE
+	for (int i = 0; i < std::min(HASHES_TO_INSERT_AT_ONCE, size); i++)
+	{
+		cass_collection_append_string(hashes, project.hashes[i].c_str());
+	}
+
+	cass_statement_bind_collection_by_name(query, "hashes", hashes);
+
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
 	// Statement objects can be freed immediately after being executed.
@@ -224,6 +243,55 @@ void DatabaseHandler::addProject(ProjectIn project)
 	}
 
 	cass_future_free(queryFuture);
+
+	// Add the extra hashes if necessary
+	if (size > HASHES_TO_INSERT_AT_ONCE)
+	{
+		addHashToProject(project, HASHES_TO_INSERT_AT_ONCE);
+	}
+}
+
+void DatabaseHandler::addHashToProject(ProjectIn project, int index)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(addHashesToProject);
+
+	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
+
+	cass_statement_bind_int64_by_name(query, "version", project.version);	
+
+	int size = project.hashes.size();
+
+	CassCollection *hashes = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+
+	for (int i = index; i < std::min(index + HASHES_TO_INSERT_AT_ONCE, size); i++)
+	{
+		cass_collection_append_string(hashes, project.hashes[i].c_str());
+	}
+
+	cass_statement_bind_collection(query, 0, hashes);
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+
+	cass_future_free(queryFuture);
+
+	// Recursively add hashes so long as necessary
+	if (size > index + HASHES_TO_INSERT_AT_ONCE)
+	{
+		addHashToProject(project, index + HASHES_TO_INSERT_AT_ONCE);
+	}
 }
 
 void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
@@ -504,6 +572,23 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	project.name = getString(row, "name");
 	project.url = getString(row, "url");
 	project.ownerID = getUUID(row, "ownerid");
+
+	const CassValue *set = cass_row_get_column_by_name(row, "hashes");
+	CassIterator *iterator = cass_iterator_from_collection(set);
+
+	if (iterator)
+	{
+		while (cass_iterator_next(iterator))
+		{
+			const char* hash;
+			size_t hash_size;
+			const CassValue *id = cass_iterator_get_value(iterator);
+			cass_value_get_string(id, &hash, &hash_size);
+			project.hashes.push_back(hash);
+		}
+	}
+
+	cass_iterator_free(iterator);
 
 	return project;
 }
