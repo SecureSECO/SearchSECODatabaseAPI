@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 // Controller includes
 #include "Networking.h"
+#include "Definitions.h"
 
 // External includes
 #include <boost/array.hpp>
@@ -58,7 +59,7 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 			ret.push_back(buf[i]);
 		}
 
-		if (ret[ret.size()-1] == '\n' && stopOnNewLine || error == boost::asio::error::eof && !stopOnNewLine)
+		if (ret[ret.size()-1] == ENTRY_DELIMITER_CHAR && stopOnNewLine || error == boost::asio::error::eof && !stopOnNewLine)
 		{
 			break; // Connection closed cleanly by peer.
 		}

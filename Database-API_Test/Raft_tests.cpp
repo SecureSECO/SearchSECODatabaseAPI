@@ -24,12 +24,13 @@ MATCHER_P(matcherNotNull, request, "")
 
 TEST(RaftTests, AssumeLeaderTest) 
 {
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	RequestHandlerMock handler; 
 	ConnectionHandler listen;
 	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
 	usleep(500000); // Just to make sure the listner has started.
 
-	EXPECT_CALL(handler, handleRequest("conn", "8003\n", matcherNotNull(nullptr))).Times(0);
+	EXPECT_CALL(handler, handleRequest("conn", "8003" + entryDelimiter, matcherNotNull(nullptr))).Times(0);
 
 	RAFTConsensus raft;
 	raft.start(nullptr, true, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
@@ -39,10 +40,12 @@ TEST(RaftTests, AssumeLeaderTest)
 
 TEST(RaftTests, ConnectToLeader) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	RequestHandlerMock handler; 
 	ConnectionHandler listen;
-	EXPECT_CALL(handler, handleRequest("conn", std::to_string(PORT) + "\n", matcherNotNull(nullptr))).Times(1)
-		.WillOnce(testing::Return(RESPONSE_OK + ("?127.0.0.1?" + std::to_string(PORT) + "\n")));
+	EXPECT_CALL(handler, handleRequest("conn", std::to_string(PORT) + entryDelimiter, matcherNotNull(nullptr))).Times(1)
+		.WillOnce(testing::Return(RESPONSE_OK + (fieldDelimiter + "127.0.0.1" + fieldDelimiter + std::to_string(PORT) + entryDelimiter)));
 	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
 	usleep(500000); // Just to make sure the listner has started.
 
@@ -63,6 +66,8 @@ TEST(RaftTests, BecomeLeader)
 
 TEST(RaftTests, AcceptConnection) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	boost::asio::io_context iocon;
 	TcpConnectionMock* connmock = new TcpConnectionMock(iocon);
 	{
@@ -73,17 +78,19 @@ TEST(RaftTests, AcceptConnection)
 
 		TcpConnection::pointer connection = TcpConnection::pointer(connmock);
 		boost::system::error_code err;
-		EXPECT_CALL((*connmock), sendData("A?127.0.0.1?-1\n", err)).Times(1);
+		EXPECT_CALL((*connmock), sendData("A" + fieldDelimiter + "127.0.0.1?-1" + entryDelimiter, err)).Times(1);
 
-		std::string resp = raft.connectNewNode(connection, "-1\n");
+		std::string resp = raft.connectNewNode(connection, "-1" + entryDelimiter);
 		
-		EXPECT_EQ(resp, RESPONSE_OK "?127.0.0.1?-1\n");
+		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + "127.0.0.1" + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connmock;
 }
 
 TEST(RaftTests, PassRequestToLeader) 
 {
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	RequestHandler handler; 
 	MockDatabase database;
 	MockJDDatabase jddatabase;
@@ -94,8 +101,8 @@ TEST(RaftTests, PassRequestToLeader)
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(1).WillOnce(testing::Return(1000));
 
 	const std::string request = "gtjb";
-	const std::string requestData = "data\n";
-	const std::string response = "response\n";
+	const std::string requestData = "data" + entryDelimiter;
+	const std::string response = "response" + entryDelimiter;
 
 
 	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &database, &jddatabase, &raftLeader, TESTLISTENPORT, &handler);
@@ -109,6 +116,6 @@ TEST(RaftTests, PassRequestToLeader)
 
 	EXPECT_CALL(jddatabase, getTopJob()).Times(1).WillOnce(testing::Return(response));
 
-	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider?" + response));
+	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider" + fieldDelimiter + response));
 	
 }

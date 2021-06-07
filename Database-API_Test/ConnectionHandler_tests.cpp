@@ -7,9 +7,10 @@ Utrecht University within the Software Project course.
 #include "ConnectionHandler.h"
 #include "Database-API.h"
 #include "DatabaseHandler.h"
+#include "Definitions.h"
 #include "ConnectionHandler.h"
-#include "RAFTConsensus.h"
 #include "Networking.h"
+#include "RAFTConsensus.h"
 #include "RequestHandlerMock.cpp"
 
 #include <gtest/gtest.h>
@@ -24,13 +25,22 @@ MATCHER_P(notnullptrMatcher, request, "")
 
 TEST(ConnectionHandlerIntegrationTests, basic_request)
 {
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
 
-	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
 
-	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
-										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+
+	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5" + entryDelimiter;
+
+	
+	std::vector<char> outputChars = {};
+
+	Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000" "M1", "P1/M1.cpp", "1", "1",
+									"68bd2db6-fe91-47d2-a134-cf82b104f547"},
+					 				 FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+
+	const std::string expectedOutput = std::string(outputChars.begin(), outputChars.end());
 	// Mock expectations
 	EXPECT_CALL(handler, handleRequest("chck", input, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
 
@@ -41,7 +51,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chck" + std::to_string(input.size()) +"\n");
+	n->sendData("chck" + std::to_string(input.size()) + entryDelimiter);
 	n->sendData(input);
 	std::string result = n->receiveData(false);
 
@@ -52,13 +62,18 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 
 TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 {
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
 
-	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
+	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5" + entryDelimiter;
 
-	const std::string expectedOutput = "2c7f46d4f57cf9e66b03213358c7ddb5?1?5000000000000?M1?P1/M1.cpp?1?1?"
-										"68bd2db6-fe91-47d2-a134-cf82b104f547\n";
+	std::vector<char> outputChars = {};
+
+	Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5","1","5000000000000","M1","P1/M1.cpp","1","1",
+										"68bd2db6-fe91-47d2-a134-cf82b104f547"},
+					 				 FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	const std::string expectedOutput = std::string(outputChars.begin(), outputChars.end());
 	// Mock expectations
 	EXPECT_CALL(handler, handleRequest("chck", input, notnullptrMatcher(nullptr))).Times(1).WillOnce(testing::Return(expectedOutput));
 
@@ -69,7 +84,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chck" + std::to_string(input.size()) +"\n");
+	n->sendData("chck" + std::to_string(input.size()) + entryDelimiter);
 	n->sendData(input.substr(0, 12));
 	usleep(500000);
 	n->sendData(input.substr(12));
@@ -82,10 +97,11 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 TEST(ConnectionHandlerIntegrationTests, to_big_request)
 {
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
 
-	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
+	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5" + entryDelimiter;
 
 	const std::string expectedOutput = "Request body larger than expected.";
 	
@@ -96,7 +112,7 @@ TEST(ConnectionHandlerIntegrationTests, to_big_request)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chck" + std::to_string(input.size() - 10) +"\n");
+	n->sendData("chck" + std::to_string(input.size() - 10) + entryDelimiter);
 	n->sendData(input);
 	std::string result = n->receiveData(false);
 
@@ -107,10 +123,11 @@ TEST(ConnectionHandlerIntegrationTests, to_big_request)
 
 TEST(ConnectionHandlerIntegrationTests, invalid)
 {
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
 
-	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5\n";
+	const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5" + entryDelimiter;
 
 	const std::string expectedOutput = "Error parsing command.";
 	
@@ -121,7 +138,7 @@ TEST(ConnectionHandlerIntegrationTests, invalid)
 
 	NetworkHandler* n = NetworkHandler::createHandler();
 	n->openConnection("127.0.0.1", std::to_string(TESTCONNECTPORT));
-	n->sendData("chckk\n");
+	n->sendData("chckk" + entryDelimiter);
 	n->sendData(input);
 	std::string result = n->receiveData(false);
 

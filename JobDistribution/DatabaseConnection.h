@@ -25,24 +25,24 @@ public:
 	virtual void connect(std::string ip, int port);
 
 	/// <summary>
-        /// Adds a job to the database given the url to a repository and a priority.
-        /// </summary>
+	/// Adds a job to the database given the url to a repository and a priority.
+	/// </summary>
 	virtual void uploadJob(std::string url, int priority);
 
 	/// <summary>
-        /// Retrieves the url of the first job in the jobs table and returns it.
-        /// </summary>
-        virtual std::string getTopJob();
+	/// Retrieves the url of the first job in the jobs table and returns it.
+	/// </summary>
+	virtual std::string getTopJob();
 
 	/// <summary>
-        /// Returns the amount of jobs in the jobs table.
-        /// </summary>
-        virtual int getNumberOfJobs();
+	/// Returns the amount of jobs in the jobs table.
+	/// </summary>
+	virtual int getNumberOfJobs();
 private:
 
 	/// <summary>
-        /// Deletes the first job in the jobs table given its jobid and priority.
-        /// </summary>
+	/// Deletes the first job in the jobs table given its jobid and priority.
+	/// </summary>
 	void deleteTopJob(CassUuid id, int priority);
 
 	/// <summary>
