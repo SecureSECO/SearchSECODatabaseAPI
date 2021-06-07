@@ -135,6 +135,4 @@ private:
 	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;
 	RequestHandler* requestHandler;
 	std::string nodeConnectionChange = "";
-
-
 };

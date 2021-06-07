@@ -35,7 +35,17 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	void startListen(DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, int port = PORT, RequestHandler *handler = nullptr);
+	/// <param name="databaseHandler">Handles the connection with the database for the main keyspace.</param>
+	/// <param name="databaseConnection">Handles the connection with the database for the job keyspace.</param>
+	/// <param name="raft">The raft system for the job queue.</param>
+	/// <param name="port">The port on which we will listen.</param>
+	/// <param name="handler">The request handler that will be used.
+	///	A new request handler will be made if the given request handler is a nullptr.</param>
+	void startListen(DatabaseHandler* databaseHandler, 
+		DatabaseConnection* databaseConnection, 
+		RAFTConsensus* raft, 
+		int port = PORT, 
+		RequestHandler *handler = nullptr);
 
 	RequestHandler* getRequestHandler() { return handler; };
 private:
@@ -59,8 +69,14 @@ public:
 		return socket_;
 	}
 
+	/// <summary>
+	/// Gets the ip of the other side of this connection.
+	/// </summary>
 	virtual std::string getIp();
 
+	/// <summary>
+	/// Sends the given data to the other side of the connection.
+	/// </summary>
 	virtual void sendData(const std::string &data, boost::system::error_code &error);
 
 	/// <summary>
@@ -68,6 +84,10 @@ public:
 	/// </summary>
 	virtual void start(RequestHandler *handler, pointer thisPointer);
 protected:
+	/// <summary>
+	/// Constructor. Not public because you need to use the create method.
+	/// Not private because we need this constructor for the mock.
+	/// </summary>
 	TcpConnection(boost::asio::io_context& ioContext)
 		: socket_(ioContext)
 	{

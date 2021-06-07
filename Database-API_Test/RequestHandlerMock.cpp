@@ -18,7 +18,17 @@ class RequestHandlerMock : public RequestHandler
 {
 public:
 
-	MOCK_METHOD(void, initialize, (DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port), ());
-	MOCK_METHOD(std::string, handleRequest, (std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection), ());
+	MOCK_METHOD(void, initialize, 
+		(DatabaseHandler *databaseHandler, 
+		DatabaseConnection *databaseConnection, 
+		RAFTConsensus* raft, 
+		std::string ip, 
+		int port), 
+		());
+	MOCK_METHOD(std::string, handleRequest, 
+		(std::string requestType, 
+		std::string request, 
+		boost::shared_ptr<TcpConnection> connection), 
+		());
 
 };
