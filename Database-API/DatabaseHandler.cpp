@@ -63,7 +63,7 @@ void DatabaseHandler::setPreparedStatements()
 	// Inserts a method into the database
 	prepareFuture =
 		cass_session_prepare(connection, "INSERT INTO projectdata.methods (method_hash, version, projectID, name, "
-										 "file, lineNumber ,authors) VALUES (?, ?, ?, ?, ?, ?, ?)");
+										 "file, lineNumber, authors) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertMethod = cass_future_get_prepared(prepareFuture);
 

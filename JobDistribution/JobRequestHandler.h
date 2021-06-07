@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseConnection.h"
 #include "RAFTConsensus.h"
 #include "Utility.h"
+#include "Definitions.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -33,7 +34,7 @@ public:
 	/// Handles request to upload one or more jobs with their priorities.
 	/// </summary>
 	/// <param name="data">
-	/// Consists of url and priority pairs, the url and priority are separated by a '?' and the pairs by '\n'.
+	/// Consists of url and priority pairs, the url and priority are separated by a FIELD_DELIMITER_CHAR ('?') and the pairs by ENTRY_DELIMITER_CHAR ('\n').
 	/// Data format is url1?priority1\nurl2?priority2\n...
 	/// </param>
 	/// <returns>

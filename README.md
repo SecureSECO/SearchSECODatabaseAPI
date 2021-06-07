@@ -9,15 +9,11 @@ The database can handle three different requests. Every request has a different 
 
 ### Joining
 
-You can run this program with the database using Docker. For this you will first need to install [Docker](https://docs.docker.com/get-docker/) and [Docker compose](https://docs.docker.com/compose/install/) (Included with Docker desktop on Windows). After this you should clone the repository. You should set the variables in the `.env` file. The _LOC_ is for the location of the data to store and the _IP_ is for the public IP-addres of the current computer. In order to be able to have contact with the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have you computer join the distributed database. After this the API should be listening on port `8003` for requests.
+You can run this program with the database using Docker. For this you will first need to install [Docker](https://docs.docker.com/get-docker/) and [Docker compose](https://docs.docker.com/compose/install/) (Included with Docker desktop on Windows). After this you should clone the repository. You should set the variables in the `.env` file. The _LOC_ is for the location of the data to store, _SEEDS_ is for the ips of the nodes to connect to and the _IP_ is for the public IP-addres of the current computer. In order to be able to have contact with the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have you computer join the distributed database. After this the API should be listening on port `8003` for requests.
 
 ### Leaving
 
 To stop the program you should first tell it to leave the database by using `docker exec cassandra nodetool decommision`. After this you can use `docker stop api` and `docker stop cassandra` to stop the containers.
-
-### Not joining cluster
-
-In order for you computer to not automatically join the database cluster you can remove the IP-address from the _SEEDS_ variable in `.env`.
 
 ### Running tests
 

@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
+#include "Definitions.h"
 #include <mutex>
 #include <queue>
 
@@ -27,10 +28,10 @@ public:
 	/// Handles requests which want to add one project with their corresponding methods to the database.
 	/// </summary>
 	/// <param name="request">
-	/// The request made by the user. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
-	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+	/// The request made by the user. It has the following format (where | is defined as FIELD_DELIMITER_CHAR):
+	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
+	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// Response towards user after processing the request successfully.
@@ -41,8 +42,9 @@ public:
 	/// Handles requests wanting to obtain methods with certain hashes.
 	/// </summary>
 	/// <param name="request">
-	/// The request made by the user, having the following format:
-	/// "hash_1\nhash_2\n...\nhash_N".
+	/// The request made by the user, having the following format
+	/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
+	/// "hash_1'\n'hash_2'\n'...'\n'hash_N".
 	/// </param>
 	/// <returns>
 	/// The methods which contain hashes equal to one within the request, in string format.
@@ -65,10 +67,11 @@ public:
 	/// after which it adds the project itself to the database.
 	/// </summary>
 	/// <param name="request">
-	/// The request made by the user, having the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
-	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail'\n'
+	/// The request made by the user, having the following format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
+	///  method1_author1_name|method1_author1_mail|...|method1_authorM_name|method1_authorM_mail'\n'
 	///  <method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
@@ -81,12 +84,13 @@ public:
 	/// Handles requests wanting to obtain project data from the database given their projectID and version.
 	/// </summary>
 	/// <param name="request">
-	/// The request made by the user which has the following format:
-	/// "projectID1?version1'\n'...'\n'projectIDM?versionM".
+	/// The request made by the user which has the following format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// "projectID_1|version_1'\n'...'\n'projectID_M|version_M".
 	/// </param>
 	/// <returns>
 	/// The relevant projects found in the database in string format as follows:
-	/// "projectID_1?version_1?license_1?project_name_1?url_1?owner_id1'\n'"
+	/// "projectID_1|version_1|license_1|project_name_1|url_1|owner_id1'\n'"
 	/// "<project2_data>'\n'...'\n'<projectN_data>".
 	/// </returns>
 	std::string handleExtractProjectsRequest(std::string request);
@@ -94,12 +98,13 @@ public:
 	/// Handles a requests for retrieving the ids by the give authors.
 	/// </summary>
 	/// <param nam'="request">
-	/// The request that contains the authors with the following format:
-	/// name_1?mail_1\nname_2?mail_2\n...
+	/// The request that contains the authors with the following format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// name_1|mail_1'\n'name_2|mail_2'\n'...
 	/// </param>
 	/// <returns>
 	/// A string with the author ids retrieved from the database with the following format:
-	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
 	/// </returns>
 	std::string handleGetAuthorIDRequest(std::string request);
 
@@ -107,12 +112,14 @@ public:
 	/// Handles a requests for retrieving the authors by the given ids.
 	/// </summary>
 	/// <param nam'="request">
-	/// The request that contains the author ids with the following format:
-	/// id_1\nid_2\n...
+	/// The request that contains the author ids with the following format
+	/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
+	/// id_1'\n'id_2'\n'...
 	/// </param>
 	/// <returns>
-	/// A string with the authors retrieved from the database with the following format:
-	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// A string with the authors retrieved from the database with the following format
+	/// (where | is defined as FIELD_DELIMITER_CHAR):
+	/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
 	/// </returns>
 	std::string handleGetAuthorRequest(std::string request);
 
@@ -120,12 +127,14 @@ public:
 	/// Handles requests wanting to obtain methods with certain authors.
 	/// </summary>
 	/// <param name="request">
-	/// The request made by the user, having the following format:
-	/// "authorId_1\nauthorId_2\n...".
+	/// The request made by the user, having the following format
+	/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
+	/// "authorId_1'\n'authorId_2'\n'...".
 	/// </param>
 	/// <returns>
 	/// The methods that the given author has worked on with the following format:
-	/// authorId_1?hash_1?projectId_1?version_1\nauthorId_2?hash_2?projectId_2?version_2\n...
+	/// (where | is defined as FIELD_DELIMITER_CHAR):
+	/// authorId_1|hash_1|projectId_1|version_1'\n'authorId_2|hash_2|projectId_2|version_2'\n'...
 	/// </returns>
 	std::string handleGetMethodsByAuthorRequest(std::string request);
 
@@ -135,7 +144,7 @@ private:
 	/// </summary>
 	/// <param name="request">
 	/// The relevant data to create the Project. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail".
+	/// "projectID|version|license|project_name|url|author_name|author_mail".
 	/// </param>
 	/// <returns>
 	/// A Project containing all data as provided within request.
@@ -146,9 +155,10 @@ private:
 	/// Converts a data entry to a Method (defined in Types.h).
 	/// </summary>
 	/// <param name="dataEntry">
-	/// The relevant data to create the Method. It has the following format:
-	/// "method_hash?method_name?method_fileLocation?number_of_authors?
-	///  method_author1_name?method_author1_mail?...?method_authorN_name?method_authorN_mail".
+	/// The relevant data to create the Method. It has the following format
+	/// (where | is defined as FIELD_DELIMITER_CHAR):
+	/// "method_hash|method_name|method_fileLocation|number_of_authors|
+	///  method_author1_name|method_author1_mail|...|method_authorN_name|method_authorN_mail".
 	/// </param>
 	/// <returns>
 	/// A method containing all data as provided in input.
@@ -159,10 +169,11 @@ private:
 	/// Retrieves the hashes within a request.
 	/// </summary>
 	/// <param name="request">
-	/// Represents the request made by the user. It has the following format:
-	/// "projectID?version?license?project_name?url?author_name?author_mail'\n'
-	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+	/// Represents the request made by the user. It has the following format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
+	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// The hashes of the methods given in the requests.
@@ -271,7 +282,8 @@ private:
 	/// </param>
 	/// <returns>
 	/// A string of the format:
-	/// name_1?mail_1?id_1\nname_2?mail_2?id_2\n...
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
 	/// <returns>
 	std::string authorsToString(std::vector<std::tuple<Author, std::string>> authors);
 
@@ -279,7 +291,7 @@ private:
 	/// Parses a dataentry to an author.
 	/// </summary>
 	/// <param name="dataEntry">
-	/// A string with the name and mail of an author seperated by a '?'.
+	/// A string with the name and mail of an author seperated by the FIELD_DELIMITER_CHAR.
 	/// </param>
 	/// <returns>
 	/// An author with the name and mail passed to the method.
@@ -371,8 +383,9 @@ private:
 	/// A vector of tuples containing a method and the corresponding author id.
 	/// </param>
 	/// <returns>
-	/// A string of the format:
-	/// authorId_1?hash_1?projectId_1?version_1\nauthorId_2?hash_2?projectId_2?version_2\n...
+	/// A string of the format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// authorId_1|hash_1|projectId_1|version_1'\n'authorId_2|hash_2|projectId_2|version_2'\n'...
 	/// <returns>
 	std::string methodIdsToString(std::vector<std::tuple<MethodId, std::string>> methods);
 

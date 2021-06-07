@@ -30,13 +30,21 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, HTTPStatusCodes::success("Crawl?0"));
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
+	std::string input(inputChars.begin(), inputChars.end());
+	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 
 	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result2, HTTPStatusCodes::success("Spider?https://github.com/zavg/linux-0.01"));
+	std::vector<char> input2Chars = {};
+	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	input2Chars.pop_back();
+	std::string input2(input2Chars.begin(), input2Chars.end());
+	ASSERT_EQ(result2, HTTPStatusCodes::success(input2));
 }
 
 // Test if job is returned when there are enough jobs in the database.
@@ -57,7 +65,11 @@ TEST(GetJobRequest, EnoughJobsTest)
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, HTTPStatusCodes::success("Spider?https://github.com/zavg/linux-0.01"));
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
+	std::string input(inputChars.begin(), inputChars.end());
+	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 }
 
 // Test if the right string is returned when there are no jobs in the database.
@@ -78,7 +90,12 @@ TEST(GetJobRequest, NoJobsTest)
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
-	ASSERT_EQ(result, HTTPStatusCodes::success("Crawl?0"));
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	inputChars.pop_back();
+	std::string input(inputChars.begin(), inputChars.end());
+
+	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);

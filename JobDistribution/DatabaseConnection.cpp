@@ -84,7 +84,8 @@ std::string DatabaseConnection::getTopJob()
 		{
 			return "";
 		}
-		return url;
+		std::string resultJob(url, len);
+		return resultJob;
 	}
 	else
 	{
