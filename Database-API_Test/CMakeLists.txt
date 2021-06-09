@@ -28,7 +28,7 @@ add_executable(
   #Raft_tests.cpp
   Utility_test.cpp
   RequestHandler_test.cpp
-  ConnectionHandler_tests.cpp
+  #ConnectionHandler_tests.cpp
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
