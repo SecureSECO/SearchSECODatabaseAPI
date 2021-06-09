@@ -49,7 +49,7 @@ void DatabaseConnection::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), toTimestamp(now()) - ?, ?, 1)");
 	rc = cass_future_error_code(prepareFuture);
 	preparedUploadJob = cass_future_get_prepared(prepareFuture);
 

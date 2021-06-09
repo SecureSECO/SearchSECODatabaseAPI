@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
     constant int,
     PRIMARY KEY ((constant), priority, jobid) 
 ) 
-WITH CLUSTERING ORDER BY (priority DESC);
+WITH CLUSTERING ORDER BY (priority ASC);
 
 INSERT INTO projectData.methods (method_hash, projectID, version, name, file, lineNumber, authors) VALUES 
 ('2c7f46d4f57cf9e66b03213358c7ddb5', 1, 5000000000000, 'M1', 'P1/M1.cpp', 1, 
