@@ -99,7 +99,7 @@ std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 
 std::string Utility::hashToUuidString(std::string hash)
 {
-	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-"+ hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" + hash.substr(20, 12);
+	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-" + hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" + hash.substr(20, 12);
 }
 
 std::string Utility::uuidStringToHash(std::string uuid)

@@ -155,10 +155,10 @@ std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, V
 std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	errno = 0;
-	CassUuid uuid;
-	cass_uuid_from_string(Utility::hashToUuidString(hash).c_str(), &uuid);
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
@@ -301,10 +301,10 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 {
 	errno = 0;
-	CassUuid uuid;
-	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
@@ -352,12 +352,12 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
 {
 	errno = 0;
-	CassUuid uuid;
-	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
 
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
