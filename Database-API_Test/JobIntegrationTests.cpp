@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include "TestDefinitions.h"
 #include <algorithm>
+#include <chrono>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
@@ -56,7 +57,9 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	RAFTConsensus raftConsensus;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
-	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10";
+	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + 
+		std::to_string(std::chrono::duration_cast< std::chrono::milliseconds >(
+		std::chrono::system_clock::now().time_since_epoch()).count());
 	std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, TEST_IP, TEST_PORT);
 	int jobs = jhandler->numberOfJobs;
