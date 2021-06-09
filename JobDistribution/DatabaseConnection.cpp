@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "DatabaseConnection.h"
 #include <iostream>
+#include <chrono>
 
 void DatabaseConnection::connect(std::string ip, int port)
 {
@@ -156,8 +157,8 @@ void DatabaseConnection::uploadJob(std::string url, long long priority)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	cass_statement_bind_int64(query, 0, duration_cast< milliseconds >(
-    system_clock::now().time_since_epoch()).count() - priority);
+	cass_statement_bind_int64(query, 0, std::chrono::duration_cast< std::chrono::milliseconds >(
+    std::chrono::system_clock::now().time_since_epoch()).count() - priority);
 
 	cass_statement_bind_string(query, 1, url.c_str());
 

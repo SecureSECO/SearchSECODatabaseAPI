@@ -27,7 +27,7 @@ public:
 	/// <summary>
 	/// Adds a job to the database given the url to a repository and a priority.
 	/// </summary>
-	virtual void uploadJob(std::string url, int priority);
+	virtual void uploadJob(std::string url, long long priority);
 
 	/// <summary>
 	/// Retrieves the url of the first job in the jobs table and returns it.
