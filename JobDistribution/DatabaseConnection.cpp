@@ -73,7 +73,7 @@ std::string DatabaseConnection::getTopJob()
 		const char *url;
 		size_t len;
 		CassUuid id;
-		long long priority;
+		cass_int64_t priority;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
 		cass_value_get_int64(cass_row_get_column_by_name(row, "priority"), &priority);
