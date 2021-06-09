@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseHandler.h"
+#include "Utility.h"
 #include <iostream>
 
 void DatabaseHandler::connect(std::string ip, int port)
@@ -156,7 +157,9 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 	errno = 0;
 	CassStatement* query = cass_prepared_bind(selectMethod);
 
-	cass_statement_bind_string_by_name(query, "method_hash", hash.c_str());
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(hash).c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
@@ -220,7 +223,9 @@ void DatabaseHandler::addProject(ProjectIn project)
 	// Add the hashes, but no more then HASHES_TO_INSERT_AT_ONCE
 	for (int i = 0; i < std::min(HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
-		cass_collection_append_string(hashes, project.hashes[i].c_str());
+		CassUuid hash;
+		cass_uuid_from_string(Utility::hashToUuidString(project.hashes[i]).c_str(), &hash);
+		cass_collection_append_uuid(hashes, hash);
 	}
 
 	cass_statement_bind_collection_by_name(query, "hashes", hashes);
@@ -255,7 +260,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 
-	cass_statement_bind_int64_by_name(query, "version", project.version);	
+	cass_statement_bind_int64_by_name(query, "version", project.version);
 
 	int size = project.hashes.size();
 
@@ -263,7 +268,9 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	for (int i = index; i < std::min(index + HASHES_TO_INSERT_AT_ONCE, size); i++)
 	{
-		cass_collection_append_string(hashes, project.hashes[i].c_str());
+		CassUuid hash;
+		cass_uuid_from_string(Utility::hashToUuidString(project.hashes[i]).c_str(), &hash);
+		cass_collection_append_uuid(hashes, hash);
 	}
 
 	cass_statement_bind_collection(query, 0, hashes);
@@ -296,7 +303,9 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
-	cass_statement_bind_string_by_name(query, "method_hash", method.hash.c_str());
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
 
@@ -347,7 +356,9 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
 
-	cass_statement_bind_string_by_name(query, "hash", method.hash.c_str());
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "hash", uuid);
 
 	cass_statement_bind_int64_by_name(query, "version", project.version);
 
@@ -573,11 +584,12 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	{
 		while (cass_iterator_next(iterator))
 		{
-			const char* hash;
-			size_t hash_size;
+			char hash[CASS_UUID_STRING_LENGTH];
+			CassUuid hashUuid;
 			const CassValue *id = cass_iterator_get_value(iterator);
-			cass_value_get_string(id, &hash, &hash_size);
-			project.hashes.push_back(hash);
+			cass_value_get_uuid(id, &hashUuid);
+			cass_uuid_string(hashUuid, hash);
+			project.hashes.push_back(Utility::uuidStringToHash(hash));
 		}
 	}
 
@@ -590,7 +602,7 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 {
 	MethodOut method;
 
-	method.hash = getString(row, "method_hash");
+	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
 	method.methodName = getString(row, "name");
 	method.fileLocation = getString(row, "file");
 
@@ -623,7 +635,7 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 {
 	MethodId method;
 
-	method.hash = getString(row, "hash");
+	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
 	method.projectId = getInt64(row, "projectid");
 	method.version = getInt64(row, "version");
 
