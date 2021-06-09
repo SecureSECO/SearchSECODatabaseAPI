@@ -57,7 +57,7 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	RAFTConsensus raftConsensus;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
-	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10");
+	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10";
 	std::string output = handler.handleRequest("upjb", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, TEST_IP, TEST_PORT);
 	int jobs = jhandler->numberOfJobs;
