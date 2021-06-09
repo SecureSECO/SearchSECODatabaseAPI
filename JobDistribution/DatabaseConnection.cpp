@@ -49,7 +49,7 @@ void DatabaseConnection::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), (toTimestamp(now()) - ?), ?, 1)");
+	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
 	rc = cass_future_error_code(prepareFuture);
 	preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
@@ -151,30 +151,24 @@ int DatabaseConnection::getNumberOfJobs()
 	}
 }
 
-void DatabaseConnection::uploadJob(std::string url, int priority)
+void DatabaseConnection::uploadJob(std::string url, long long priority)
 {
 	errno = 0;
-	std::cout << "Test1" << std::endl;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	std::cout << "Test2" << std::endl;
-	cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_int64(query, 0, duration_cast< milliseconds >(
+    system_clock::now().time_since_epoch()).count() - priority);
 
-	std::cout << "Test3" << std::endl;
 	cass_statement_bind_string(query, 1, url.c_str());
 
-	std::cout << "Test4" << std::endl;
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
-	std::cout << "Test5" << std::endl;
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
 
-	std::cout << "Test6" << std::endl;
 	// This will block until the query has finished.
 	CassError rc = cass_future_error_code(queryFuture);
 
-	std::cout << "Test7" << std::endl;
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
