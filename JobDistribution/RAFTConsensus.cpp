@@ -66,7 +66,7 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			leaderIp = ip;
 			leaderPort = port;
 			leader = false;
-			std::cout << "Found leader " + ip + " " + port + std::endl;
+			std::cout << "Found leader " + ip + " " + port << std::endl;
 			break;
 		}
 		catch (std::exception const& ex) 
