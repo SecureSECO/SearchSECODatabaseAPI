@@ -52,6 +52,12 @@ void DatabaseHandler::setPreparedStatements()
 		cass_session_prepare(connection, "SELECT * FROM projectdata.projects WHERE projectID = ? AND version = ?");
 	rc = cass_future_error_code(prepareFuture);
 	selectProject = cass_future_get_prepared(prepareFuture);
+	
+	// Selects the previous version of some project.
+	prepareFuture = cass_session_prepare(
+		connection, "SELECT * FROM projectdata.projects WHERE projectID = ? AND version < ? LIMIT 1");
+	rc = cass_future_error_code(prepareFuture);
+	selectPrevProject = cass_future_get_prepared(prepareFuture);
 
 	// Inserts a project into the database.
 	prepareFuture = cass_session_prepare(
@@ -251,6 +257,46 @@ void DatabaseHandler::addProject(ProjectIn project)
 	{
 		addHashToProject(project, HASHES_TO_INSERT_AT_ONCE);
 	}
+}
+
+
+ProjectOut DatabaseHandler::prevProject(ProjectID projectID, Version version)
+{
+	CassStatement *query = cass_prepared_bind(selectPrevProject);
+	cass_statement_bind_int64_by_name(query, "projectID", projectID);
+	cass_statement_bind_int64_by_name(query, "version", version);
+
+	CassFuture *resultFuture = cass_session_execute(connection, query);
+
+	ProjectOut project;
+	if (cass_future_error_code(resultFuture) == CASS_OK)
+	{
+		const CassResult *result = cass_future_get_result(resultFuture);
+		CassIterator *iterator = cass_iterator_from_result(result);
+
+		if (cass_iterator_next(iterator))
+		{
+			const CassRow *row = cass_iterator_get_row(iterator);
+			project = getProject(row);
+		}
+
+		cass_iterator_free(iterator);
+		cass_result_free(result);
+	}
+	else
+	{
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
+	}
+
+	cass_statement_free(query);
+	cass_future_free(resultFuture);
+
+	return project;
 }
 
 void DatabaseHandler::addHashToProject(ProjectIn project, int index)

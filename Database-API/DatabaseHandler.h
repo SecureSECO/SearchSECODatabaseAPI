@@ -45,6 +45,15 @@ public:
 	virtual std::vector<ProjectOut> searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
+	/// Retrieves the previous version of the project present in the database.
+	/// </summary>
+	/// <returns>
+	/// If present, returns the previous version of a project with the same projectID.
+	/// Else, returns an empty project.
+	/// </returns>
+	virtual ProjectOut prevProject(ProjectID projectID, Version version);
+
+	/// <summary>
 	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
 	/// the database with information of the project.
 	/// </summary>
@@ -167,6 +176,7 @@ private:
 	/// </summary>
 	const CassPrepared *selectMethod;
 	const CassPrepared *selectProject;
+	const CassPrepared *selectPrevProject;
 	const CassPrepared *insertProject;
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
