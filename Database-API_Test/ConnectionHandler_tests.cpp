@@ -16,7 +16,6 @@ Utrecht University within the Software Project course.
 #include <gtest/gtest.h>
 #include <thread>
 
-#define TESTCONNECTPORT 9043
 #define TESTIP "127.0.0.1"
 
 MATCHER_P(notnullptrMatcher, request, "") 
@@ -26,6 +25,7 @@ MATCHER_P(notnullptrMatcher, request, "")
 
 TEST(ConnectionHandlerIntegrationTests, basic_request)
 {
+	const int TESTCONNECTPORT = 9044;
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
@@ -59,6 +59,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 
 TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 {
+	const int TESTCONNECTPORT = 9045;
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
@@ -94,6 +95,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 TEST(ConnectionHandlerIntegrationTests, too_big_request)
 {
+	const int TESTCONNECTPORT = 9046;
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
@@ -120,6 +122,7 @@ TEST(ConnectionHandlerIntegrationTests, too_big_request)
 
 TEST(ConnectionHandlerIntegrationTests, invalid)
 {
+	const int TESTCONNECTPORT = 9047;
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	// Set up.
 	RequestHandlerMock handler; 
