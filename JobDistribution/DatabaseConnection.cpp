@@ -101,12 +101,12 @@ std::string DatabaseConnection::getTopJob()
 	}
 }
 
-void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
+void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 {
 	errno = 0;
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_int64(query, 0, priority);
 	cass_statement_bind_uuid(query, 1, id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);

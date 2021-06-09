@@ -43,7 +43,7 @@ private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
 	/// </summary>
-	void deleteTopJob(CassUuid id, int priority);
+	void deleteTopJob(CassUuid id, cass_int64_t priority);
 
 	/// <summary>
 	/// Creates prepared queries for later use.
