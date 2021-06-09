@@ -87,34 +87,3 @@ TEST(RaftTests, AcceptConnection)
 	}
 	delete connMock;
 }
-
-// This test crashes 10% of the time, so for now it is commented out.
-// TEST(RaftTests, PassRequestToLeader) 
-// {
-// 	RequestHandler handler; 
-// 	MockDatabase database;
-// 	MockJDDatabase jddatabase;
-// 	RAFTConsensus raftLeader;
-// 	RAFTConsensus raftNonLeader;
-// 	ConnectionHandler listen;
-	
-// 	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(1).WillOnce(testing::Return(1000));
-
-// 	const std::string request = "gtjb";
-// 	const std::string requestData = "data" + entryDelimiter;
-// 	const std::string response = "response" + entryDelimiter;
-
-
-// 	std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, &database, &jddatabase, &raftLeader, TESTLISTENPORT, &handler);
-
-// 	usleep(500000);
-// 	raftLeader.start(&handler, false, {{TESTIP, "-1"}});
-// 	raftNonLeader.start(nullptr, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
-
-// 	ASSERT_TRUE(raftLeader.isLeader());
-// 	ASSERT_TRUE(!raftNonLeader.isLeader());
-
-// 	EXPECT_CALL(jddatabase, getTopJob()).Times(1).WillOnce(testing::Return(response));
-
-// 	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider" + fieldDelimiter + response));
-// }
