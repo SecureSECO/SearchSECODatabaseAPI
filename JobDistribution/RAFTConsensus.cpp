@@ -66,12 +66,12 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			leaderIp = ip;
 			leaderPort = port;
 			leader = false;
-			std::cout << "Found leader " + ip + " " + port + "\n";
+			std::cout << "Found leader " + ip + " " + port + std::endl;
 			break;
 		}
 		catch (std::exception const& ex) 
 		{
-			std::cout << ex.what() << "\n";
+			std::cout << ex.what() << std::endl;
 			delete networkhandler;
 			continue;
 		}
@@ -138,13 +138,14 @@ void RAFTConsensus::listenForHeartbeat()
 			nonLeaderNodes.clear();
 			if (newLeader.first == myIp && newLeader.second == myPort)
 			{ 
+				std::cout << "Old leader dropped, we are the next in line, so we are now the leader." << std::endl;
 				// We are next in the list, so we are going to assume leadership.
 				delete others;
 				start(requestHandler, true);
 				return;
 			}
 			usleep(LEADER_DROPOUT_WAIT_TIME);
-			std::cout << "Attempt connection with new leader.";
+			std::cout << "Attempt connection with new leader." << std::endl;
 			connectToLeader({newLeader});
 			if(leader) 
 			{
@@ -217,16 +218,31 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 		}
 		else 
 		{
-			std::cout << "Incorrect heartbeat\n";
+			std::cout << "Incorrect heartbeat" << std::endl;
 		}
 	}
 }
 
 std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::string request) 
 {
-	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	networkhandler->sendData(requestType + std::to_string(request.length()) + entryDelimiter + request);
-	return networkhandler->receiveData() + ENTRY_DELIMITER_CHAR;
+	std::string received = "";
+
+	try 
+	{
+		std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+		NetworkHandler* networking = NetworkHandler::createHandler();
+
+		networking->openConnection(leaderIp, leaderPort);
+		networking->sendData(requestType + std::to_string(request.length()) + entryDelimiter + request);
+
+		received = networking->receiveData(false);
+		delete networking;
+	}
+	catch(std::exception const& ex) 
+	{
+		std::cout << "Receive data gave an error" << std::endl;
+	}
+	return received;
 }
 
 void RAFTConsensus::heartbeatSender()
@@ -251,14 +267,14 @@ void RAFTConsensus::heartbeatSender()
 				connection->sendData(data, error);
 				if (error)
 				{
-					std::cout << "Error "<< error << " sending data: Connection dropped.\n";
+					std::cout << "Error "<< error << " sending data: Connection dropped." << std::endl;
 					dropConnection(i);
 				}
 			}
 			catch(std::exception const& ex)
 			{
 				// If an error occured, we will assume the connection has dropped.
-				std::cout << "Connection dropped.\n";
+				std::cout << "Connection dropped." << std::endl;
 				dropConnection(i);
 				
 			}
