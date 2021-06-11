@@ -142,7 +142,7 @@ void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	startAccept();
 	if (!error)
 	{
-		newConnection->start(handler, newConnection);
+		new std::thread(&TcpConnection::start, newConnection, handler, newConnection);
 	}
 
 }
