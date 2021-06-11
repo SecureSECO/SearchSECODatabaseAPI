@@ -29,6 +29,13 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 {
 	if (raft->isLeader())
 	{
+		auto currentTime = std::chrono::duration_cast< std::chrono::seconds >(
+    	std::chrono::system_clock::now().time_since_epoch()).count();
+		bool alreadyCrawling = true;
+		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS) 
+		{
+			alreadyCrawling = false;
+		}
 		// Check if number of jobs is enough to provide the top job.
 		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 		{
@@ -37,7 +44,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		// If number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
 		{
-			alreadyCrawling = true;
+			alreadyCrawling = currentTime;
 			std::string s = "Crawl";
 			s += FIELD_DELIMITER_CHAR;
 			return HTTPStatusCodes::success(s + std::to_string(crawlId));
@@ -122,7 +129,8 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 void JobRequestHandler::updateCrawlId(int id)
 {
 	crawlId = id;
-	alreadyCrawling = false;
+	timeLastCrawl = std::chrono::duration_cast< std::chrono::seconds >(
+    	std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 void JobRequestHandler::connectWithRetry(std::string ip, int port)

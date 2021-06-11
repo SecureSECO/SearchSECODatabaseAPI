@@ -14,6 +14,7 @@ Utrecht University within the Software Project course.
 
 #define MIN_AMOUNT_JOBS 500
 #define MAX_RETRIES 3
+#define CRAWL_TIMEOUT_SECONDS 150
 
 class TcpConnection;
 
@@ -73,7 +74,8 @@ public:
 	/// </summary>
 	int numberOfJobs;
 	int crawlId;
-	bool alreadyCrawling = false;
+	// bool alreadyCrawling = false;
+	long long timeLastCrawl = -1;
 
 	/// <summary>
 	/// Updates the crawlId when crawl data is uploaded to the database.
