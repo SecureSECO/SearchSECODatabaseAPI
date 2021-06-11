@@ -65,7 +65,7 @@ public:
 	/// <returns>
 	/// A string representing the author id.
 	/// </returns>
-	virtual std::string authorToId(Author author);
+	virtual std::string authorToIdString(Author author);
 
 	/// <summary>
 	/// Given an author id retrieves the corresponding author.
@@ -111,12 +111,6 @@ private:
 	MethodId getMethodId(const CassRow *row);
 
 	/// <summary>
-	/// Retrieves the author ID corresponding to the given author.
-	/// Also creates a new author if the author does not yet exist.
-	/// <summary>
-	CassUuid getAuthorId(Author author);
-
-	/// <summary>
 	/// Retrieves the author id corresponding to the given author.
 	/// </summary>
 	/// <param name="author">
@@ -125,12 +119,12 @@ private:
 	/// <returns>
 	/// The id of the author.
 	/// </returns>
-	virtual CassUuid retrieveAuthorId(Author author);
+	virtual CassUuid computeAuthorIdOfAuthor(Author author);
 
 	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
-	CassUuid createAuthor(Author author);
+	CassUuid createAuthorIfNotExists(Author author);
 
 	/// <summary>
 	/// Retrieves a string from a row. Takes in the row and the name of the column.
@@ -172,8 +166,6 @@ private:
 	const CassPrepared *insertMethod;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
-	const CassPrepared *selectIdByAuthor;
-	const CassPrepared *insertIdByAuthor;
 	const CassPrepared *insertAuthorById;
 	const CassPrepared *selectAuthorById;
 };

@@ -95,19 +95,6 @@ public:
 	/// </returns>
 	std::string handleExtractProjectsRequest(std::string request);
 
-	/// Handles a requests for retrieving the ids by the give authors.
-	/// </summary>
-	/// <param nam'="request">
-	/// The request that contains the authors with the following format
-	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-	/// name_1|mail_1'\n'name_2|mail_2'\n'...
-	/// </param>
-	/// <returns>
-	/// A string with the author ids retrieved from the database with the following format:
-	/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
-	/// </returns>
-	std::string handleGetAuthorIDRequest(std::string request);
-
 	/// <summary>
 	/// Handles a requests for retrieving the authors by the given ids.
 	/// </summary>
@@ -299,32 +286,6 @@ private:
 	Author datanEntryToAuthor(std::string dataEntry);
 
 	/// <summary>
-	/// Retrieves the id corresponding to the authors given as input using the database.
-	/// </summary>
-	/// <param name="authors">
-	/// A vector of strings representing authors.
-	/// </param>
-	/// <returns>
-	/// A vector consisting of tuples with an author and the corresponding id.
-	/// </returns>
-	std::vector<std::tuple<Author, std::string>> getAuthorIDs(std::vector<Author> authors);
-
-	/// <summary>
-	/// Handles a single thread of retrieving author ids from the database.
-	/// </summary>
-	/// <param name="authors">
-	/// The queue with authors that have to be checked.
-	/// </param>
-	/// <param name="queueLock">
-	/// The lock for the queue with authors.
-	/// </param>
-	/// <returns>
-	/// A vector consisting of tuples with an author and the corresponding id.
-	/// </returns>
-	std::vector<std::tuple<Author, std::string>> singleAuthorToIDThread(std::queue<Author> &authors,
-																		std::mutex &queueLock);	
-
-	/// <summary>
 	/// Retrieves the authors corresponding to the ids given as input using the database.
 	/// </summary>
 	/// <param name="authorIds">
@@ -421,13 +382,6 @@ private:
 	/// If it fails, it returns an empty vector and puts the errno on ENETUNREACH.
 	/// </summary>
 	std::vector<ProjectOut> searchForProjectWithRetry(ProjectID projectID, Version version);
-
-	/// <summary>
-	/// Tries to get authorID from the database given an author, if it fails it retries like above.
-	/// If it succeeds, it returns the id and puts errno on 0.
-	/// If it fails, it returns an empty string and puts errno on ENETUNREACH.
-	/// </summary>
-	std::string authorToIdWithRetry(Author author);
 
 	/// <summary>
 	/// Tries to get author from the database given an authorID, if it fails it retries like above.

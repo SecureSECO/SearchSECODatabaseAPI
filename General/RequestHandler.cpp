@@ -47,9 +47,6 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 		case eExtractProjects:
 			result = dbrh->handleExtractProjectsRequest(request);
 			break;
-		case eGetAuthorID:
-			result = dbrh->handleGetAuthorIDRequest(request);
-			break;
 		case eGetAuthor:
 			result = dbrh->handleGetAuthorRequest(request);
 			break;
@@ -109,10 +106,6 @@ eRequestType RequestHandler::getERequestType(std::string requestType)
 	else if (requestType == "extp")
 	{
 		return eExtractProjects;
-	}
-	else if (requestType == "auid")
-	{
-		return eGetAuthorID;
 	}
 	else if (requestType == "idau")
 	{

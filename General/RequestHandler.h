@@ -29,7 +29,6 @@ enum eRequestType
 	eUploadCrawlData,
 	eGetTopJob,
 	eExtractProjects,
-	eGetAuthorID,
 	eGetAuthor,
 	eGetMethodByAuthor,
 	eUnknown
