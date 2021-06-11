@@ -56,7 +56,6 @@ TEST(RaftTests, ConnectToLeader)
 
 		ASSERT_TRUE(!raft.isLeader());
 	}
-	usleep(500000); // Extra wait to make sure the heartbeat is going to be send.
 }
 
 TEST(RaftTests, BecomeLeader)
@@ -85,4 +84,35 @@ TEST(RaftTests, AcceptConnection)
 		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TESTIP + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connMock;
+}
+
+TEST(RaftTests, PassRequestToLeader) 
+{
+	RequestHandler handler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	RAFTConsensus raftLeader;
+	RAFTConsensus raftNonLeader;
+	ConnectionHandler listen;
+	
+	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(1).WillOnce(testing::Return(1000));
+
+	const std::string request = "gtjb";
+	const std::string requestData = "data\n";
+	const std::string response = "response\n";
+
+
+	std::thread* t = new std::thread(&ConnectionHandler::startListen, &listen, &database, &jddatabase, &raftLeader, TESTLISTENPORT, &handler);
+
+	usleep(500000);
+	raftLeader.start(&handler, false, {{"127.0.0.1", "-1"}});
+	raftNonLeader.start(nullptr, false, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
+
+	ASSERT_TRUE(raftLeader.isLeader());
+	ASSERT_TRUE(!raftNonLeader.isLeader());
+
+	EXPECT_CALL(jddatabase, getTopJob()).Times(1).WillOnce(testing::Return(response));
+
+	ASSERT_EQ(raftNonLeader.passRequestToLeader(request, requestData), HTTPStatusCodes::success("Spider?" + response));
+	
 }
