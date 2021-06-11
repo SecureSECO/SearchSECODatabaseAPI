@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include "TestDefinitions.h"
 #include <algorithm>
+#include <chrono>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
