@@ -74,7 +74,6 @@ public:
 	/// </summary>
 	int numberOfJobs;
 	int crawlId;
-	// bool alreadyCrawling = false;
 	long long timeLastCrawl = -1;
 
 	/// <summary>
