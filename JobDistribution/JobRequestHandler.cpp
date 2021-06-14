@@ -17,7 +17,9 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
 	this->database = database;
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
+	std::cout << "Print debug1\n";
 	timeLastRecount = Utility::getCurrentTimeSeconds();
+	std::cout << "Print debug2\n";
 	crawlId = 0;
 }
 
