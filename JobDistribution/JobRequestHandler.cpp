@@ -143,6 +143,7 @@ void JobRequestHandler::updateCrawlId(int id)
 
 void JobRequestHandler::connectWithRetry(std::string ip, int port)
 {
+	errno = 0;
 	database->connect(ip, port);
 	int retries = 0;
 	if (errno != 0)
@@ -158,6 +159,7 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 		}
 		throw "Unable to connect to database.";
 	}
+	errno = 0;
 }
 
 std::string JobRequestHandler::getTopJobWithRetry()
