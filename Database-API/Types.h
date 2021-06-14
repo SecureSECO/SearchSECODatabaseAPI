@@ -85,7 +85,7 @@ public:
 	std::string license;
 	std::string name;
 	std::string url;
-	Author owner;
+	Author owner = Author("","");
 	std::vector<Hash> hashes;
 };
 

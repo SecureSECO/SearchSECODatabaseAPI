@@ -206,8 +206,7 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 	project.license    = projectData[2];
 	project.name       = projectData[3];
 	project.url        = projectData[4];
-	project.owner.name = projectData[5];
-	project.owner.mail = projectData[6];
+	project.owner = Author(projectData[5], projectData[6]);
 
 	return project;
 }
