@@ -28,6 +28,12 @@ MATCHER_P(matcherNotNull, request, "")
 
 TEST(RaftTests, AssumeLeaderTest)
 {
+	RequestHandler raftHandler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	raftHandler.initialize(&database, &jddatabase, nullptr);
+
+
 	RequestHandlerMock handler;
 	ConnectionHandler listen;
 	std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
@@ -36,13 +42,18 @@ TEST(RaftTests, AssumeLeaderTest)
 	EXPECT_CALL(handler, handleRequest("conn", "8003" + entryDelimiter, matcherNotNull(nullptr))).Times(0);
 
 	RAFTConsensus raft;
-	raft.start(nullptr, true, {{TESTIP, std::to_string(TESTLISTENPORT)}});
+	raft.start(raftHandler, true, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 	ASSERT_TRUE(raft.isLeader());
 }
 
 TEST(RaftTests, ConnectToLeader)
 {
+	RequestHandler raftHandler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	raftHandler.initialize(&database, &jddatabase, nullptr);
+
 	RequestHandlerMock handler;
 	{
 		ConnectionHandler listen;
@@ -52,7 +63,7 @@ TEST(RaftTests, ConnectToLeader)
 		usleep(500000); // Just to make sure the listner has started.
 
 		RAFTConsensus raft;
-		raft.start(nullptr, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
+		raft.start(raftHandler, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 		ASSERT_TRUE(!raft.isLeader());
 	}
@@ -60,8 +71,13 @@ TEST(RaftTests, ConnectToLeader)
 
 TEST(RaftTests, BecomeLeader)
 {
+	RequestHandler raftHandler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	raftHandler.initialize(&database, &jddatabase, nullptr);
+
 	RAFTConsensus raft;
-	raft.start(nullptr, false, {{TESTIP, "-1"}});
+	raft.start(raftHandler, false, {{TESTIP, "-1"}});
 
 	ASSERT_TRUE(raft.isLeader());
 }
