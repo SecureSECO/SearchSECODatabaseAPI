@@ -42,7 +42,7 @@ TEST(RaftTests, AssumeLeaderTest)
 	EXPECT_CALL(handler, handleRequest("conn", "8003" + entryDelimiter, matcherNotNull(nullptr))).Times(0);
 
 	RAFTConsensus raft;
-	raft.start(raftHandler, true, {{TESTIP, std::to_string(TESTLISTENPORT)}});
+	raft.start(&raftHandler, true, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 	ASSERT_TRUE(raft.isLeader());
 }
@@ -63,7 +63,7 @@ TEST(RaftTests, ConnectToLeader)
 		usleep(500000); // Just to make sure the listner has started.
 
 		RAFTConsensus raft;
-		raft.start(raftHandler, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
+		raft.start(&raftHandler, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
 
 		ASSERT_TRUE(!raft.isLeader());
 	}
@@ -77,7 +77,7 @@ TEST(RaftTests, BecomeLeader)
 	raftHandler.initialize(&database, &jddatabase, nullptr);
 
 	RAFTConsensus raft;
-	raft.start(raftHandler, false, {{TESTIP, "-1"}});
+	raft.start(&raftHandler, false, {{TESTIP, "-1"}});
 
 	ASSERT_TRUE(raft.isLeader());
 }
