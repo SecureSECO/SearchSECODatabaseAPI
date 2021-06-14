@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "RAFTConsensus.h"
 #include "Networking.h"
 #include "ConnectionHandler.h"
+#include "JobRequestHandler.h"
 #include "Utility.h"
 
 #include <vector>
@@ -66,7 +67,6 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			leaderIp = ip;
 			leaderPort = port;
 			leader = false;
-			std::cout << "Found leader " + ip + " " + port << std::endl;
 			break;
 		}
 		catch (std::exception const& ex) 
@@ -190,7 +190,21 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 void RAFTConsensus::handleHeartbeat(std::string heartbeat) 
 {
 	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, FIELD_DELIMITER_CHAR);
-	for (int i = 0; i < hbSplitted.size(); i += 3) 
+
+	if (hbSplitted.size() == 0) 
+	{
+		return;
+	}
+	int crawlid = Utility::safeStoi(hbSplitted[0]);
+	if (errno == 0) 
+	{
+		requestHandler->getJobRequestHandler()->crawlId = crawlid;
+	}
+	else 
+	{
+		std::cout << "Error parsing crawlid from heartbeat.\n";
+	}
+	for (int i = 1; i < hbSplitted.size(); i += 3) 
 	{
 		std::pair<std::string, std::string> pairReceived = 
 			std::pair<std::string, std::string>(hbSplitted[i+1], hbSplitted[i+2]);
@@ -256,7 +270,6 @@ void RAFTConsensus::heartbeatSender()
 		boost::system::error_code error;
 		// Going from back to front, so we don't have to worry as much about connections
 		// being added or removed while we are in this loop.
-		
 		mtx.lock();
 		for (int i = others->size() - 1; i >= 0; i--) 
 		{
@@ -300,8 +313,11 @@ void RAFTConsensus::dropConnection(int i)
 
 std::string RAFTConsensus::getHeartbeat()
 {
+	JobRequestHandler* jrh = requestHandler->getJobRequestHandler();
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	std::string hb = nodeConnectionChange + entryDelimiter;
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string hb = std::to_string(requestHandler->getJobRequestHandler()->crawlId) + 
+		fieldDelimiter + nodeConnectionChange + entryDelimiter;
 	nodeConnectionChange = "";
 	return hb;
 }

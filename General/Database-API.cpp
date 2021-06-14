@@ -22,7 +22,6 @@ int main()
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	raft.start(listen.getRequestHandler());
 	listen.startListen(&databaseHandler, &databaseConnection, &raft);
 
 	return 0;

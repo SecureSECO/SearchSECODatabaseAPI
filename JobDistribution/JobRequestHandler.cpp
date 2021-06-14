@@ -17,6 +17,7 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
 	this->database = database;
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
+	timeLastRecount = Utility::getCurrentTimeSeconds();
 	crawlId = 0;
 }
 
@@ -29,8 +30,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 {
 	if (raft->isLeader())
 	{
-		auto currentTime = std::chrono::duration_cast< std::chrono::seconds >(
-    	std::chrono::system_clock::now().time_since_epoch()).count();
+		auto currentTime = Utility::getCurrentTimeSeconds();
 		bool alreadyCrawling = true;
 		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS) 
 		{
@@ -94,6 +94,13 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 				return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
 			}
 		}
+
+		long long timeNow = Utility::getCurrentTimeSeconds();
+		if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME) 
+		{
+			numberOfJobs = database->getNumberOfJobs();
+		}
+
 		if (errno == 0)
 		{
 			return HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue.");

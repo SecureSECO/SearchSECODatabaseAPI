@@ -69,10 +69,14 @@ TEST(RaftTests, BecomeLeader)
 TEST(RaftTests, AcceptConnection)
 {
 	boost::asio::io_context ioCon;
+	RequestHandler handler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase, nullptr);
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
 		RAFTConsensus raft;
-		raft.start(nullptr, true, {});
+		raft.start(&handler, true, {});
 
 		ASSERT_TRUE(raft.isLeader());
 
@@ -106,7 +110,7 @@ TEST(RaftTests, PassRequestToLeader)
 
 	usleep(500000);
 	raftLeader.start(&handler, false, {{"127.0.0.1", "-1"}});
-	raftNonLeader.start(nullptr, false, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
+	raftNonLeader.start(&handler, false, {{"127.0.0.1", std::to_string(TESTLISTENPORT)}});
 
 	ASSERT_TRUE(raftLeader.isLeader());
 	ASSERT_TRUE(!raftNonLeader.isLeader());

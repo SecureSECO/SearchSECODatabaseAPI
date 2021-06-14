@@ -12,7 +12,7 @@ Utrecht University within the Software Project course.
 
 #include "Networking.h"
 
-#define LEADER_IPS { {"131.211.31.153", "8003"}}
+#define LEADER_IPS { {"127.0.0.1", "8003"}}
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
 #define LEADER_DROPOUT_WAIT_TIME 1000000

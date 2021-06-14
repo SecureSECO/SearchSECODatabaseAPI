@@ -4,6 +4,7 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include <chrono>
 #include <sstream>
 #include <string>
 #include <boost/algorithm/string.hpp>
@@ -106,4 +107,16 @@ std::string Utility::uuidStringToHash(std::string uuid)
 {
 	boost::erase_all(uuid, "-");
 	return uuid;
+}
+
+long long Utility::getCurrentTimeSeconds() 
+{
+	return std::chrono::duration_cast< std::chrono::seconds >(
+    	std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+long long Utility::getCurrentTimeMilliSeconds() 
+{
+	return std::chrono::duration_cast< std::chrono::milliseconds >(
+    	std::chrono::system_clock::now().time_since_epoch()).count();
 }

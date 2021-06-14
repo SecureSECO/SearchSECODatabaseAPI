@@ -5,6 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseConnection.h"
+#include "Utility.h"
 #include <iostream>
 #include <chrono>
 
@@ -157,8 +158,7 @@ void DatabaseConnection::uploadJob(std::string url, long long priority)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	auto currentTime = std::chrono::duration_cast< std::chrono::milliseconds >(
-    	std::chrono::system_clock::now().time_since_epoch()).count();
+	auto currentTime = Utility::getCurrentTimeMilliSeconds();
 
 	cass_statement_bind_int64(query, 0, currentTime - priority);
 
