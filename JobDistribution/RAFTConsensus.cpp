@@ -313,10 +313,11 @@ void RAFTConsensus::dropConnection(int i)
 
 std::string RAFTConsensus::getHeartbeat()
 {
-	JobRequestHandler* jrh = requestHandler->getJobRequestHandler();
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-	std::string hb = std::to_string(requestHandler->getJobRequestHandler()->crawlId) + 
+	JobRequestHandler* jrh = requestHandler->getJobRequestHandler();
+
+	std::string hb = std::to_string(jrh->crawlId) + 
 		fieldDelimiter + nodeConnectionChange + entryDelimiter;
 	nodeConnectionChange = "";
 	return hb;
