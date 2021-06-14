@@ -16,7 +16,7 @@ class MockJDDatabase : public DatabaseConnection
 {
 public:
 	MOCK_METHOD(void, connect, (std::string ip, int port), ());
-	MOCK_METHOD(void, uploadJob, (std::string url, int priority), ());
+	MOCK_METHOD(void, uploadJob, (std::string url, long long priority), ());
 	MOCK_METHOD(std::string, getTopJob, (), ());
 	MOCK_METHOD(int, getNumberOfJobs, (), ());
 };
