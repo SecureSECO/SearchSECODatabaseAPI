@@ -459,19 +459,6 @@ Author DatabaseHandler::idToAuthor(std::string id)
 	return author;
 }
 
-std::string DatabaseHandler::authorToIdString(Author author)
-{
-	CassUuid authorID = computeAuthorIdOfAuthor(author);
-
-	if (errno == 0)
-	{
-		char result[CASS_UUID_STRING_LENGTH];
-		cass_uuid_string(authorID, result);
-		return result;
-	}
-	return "";
-}
-
 CassUuid DatabaseHandler::computeAuthorIdOfAuthor(Author author)
 {
 	std::string methodHash = md5(author.name + " " + author.mail);

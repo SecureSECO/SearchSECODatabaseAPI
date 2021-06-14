@@ -57,17 +57,6 @@ public:
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
 	/// <summary>
-	/// Given an author returns the id of that author.
-	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
-	/// </param>
-	/// <returns>
-	/// A string representing the author id.
-	/// </returns>
-	virtual std::string authorToIdString(Author author);
-
-	/// <summary>
 	/// Given an author id retrieves the corresponding author.
 	/// </summary>
 	/// <param name="id">
