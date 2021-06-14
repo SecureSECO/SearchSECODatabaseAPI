@@ -24,6 +24,7 @@ void ConnectionHandler::startListen(DatabaseHandler* databaseHandler,
 	if (requestHandler == nullptr) 
 	{
 		handler = new RequestHandler();
+		raft->start(handler);
 	}
 	else 
 	{

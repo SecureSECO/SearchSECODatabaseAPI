@@ -801,6 +801,7 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 {
 	int retries = 0;
+	errno = 0;
 	database->connect(ip, port);
 	if (errno != 0)
 	{
@@ -815,6 +816,7 @@ void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 		}
 		throw "Unable to connect to database.";
 	}
+	errno = 0;
 }
 
 bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
