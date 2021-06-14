@@ -72,6 +72,7 @@ struct ProjectIn
 public:
 	ProjectID projectID;
 	Version version;
+	std::string versionHash;
 	std::string license;
 	std::string name;
 	std::string url;

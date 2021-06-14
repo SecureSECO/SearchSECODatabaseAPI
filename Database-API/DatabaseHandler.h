@@ -60,7 +60,7 @@ public:
 	/// <param name="changed">
 	/// A boolean representing if the method is changed compared to the previous version of the project.
 	/// </param>
-	virtual void addMethod(MethodIn method, ProjectIn project, bool changed);
+	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion);
 
 	/// <summary>
 	/// Retrieves the method from the method table in the database with the given hash, projectID, version and fileLocation, 
@@ -128,6 +128,10 @@ private:
 	/// </summary>
 	MethodId getMethodId(const CassRow *row);
 
+	void addNewMethod(MethodIn method, ProjectIn project);
+
+	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
+
 	/// <summary>
 	/// Retrieves the author ID corresponding to the given author.
 	/// Also creates a new author if the author does not yet exist.
@@ -183,14 +187,14 @@ private:
 	/// <summary>
 	/// The prepared statements that can be executed.
 	/// </summary>
-	const CassPrepared *selectMethod;
+	const CassPrepared *selectMethods;
 	const CassPrepared *selectProject;
 	const CassPrepared *selectPrevProject;
 	const CassPrepared *insertProject;
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
-	const CassPrepared *updateMethod;
-	const CassPrepared *retrieveMethod;
+	const CassPrepared *updateMethods;
+	const CassPrepared *selectMethod;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *selectIdByAuthor;

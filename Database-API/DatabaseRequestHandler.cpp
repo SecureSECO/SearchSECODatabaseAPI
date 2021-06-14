@@ -99,40 +99,32 @@ bool DatabaseRequestHandler::isValidHash(Hash hash)
 
 std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 {
+	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
+
 	// Check if project is valid.
-	ProjectIn project = requestToProject(request);
+	ProjectIn project = requestToProject(dataEntries[0]);
 	if (errno != 0)
 	{
 		// Project could not be parsed.
 		return HTTPStatusCodes::clientError("Error parsing project data.");
 	}
 
+	std::vector<std::string> unchangedFiles = Utility::splitStringOn(dataEntries[1], FIELD_DELIMITER_CHAR);
+
 	ProjectOut prevProject = database->prevProject(project.projectID, project.version);
-	ProjectOut currProject = prevProject;
-	std::vector<Hash> prevHashes = prevProject.hashes;
 
-	std::vector<MethodIn> changedMethods;
-	std::vector<MethodIn> unchangedMethods;
+	std::vector<MethodIn> methods;
 
-	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
-
-	for (int i = 1; i < dataEntries.size(); i++)
+	for (int i = 2; i < dataEntries.size(); i++)
 	{
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i) + ".");
 		}
+		
+		methods.push_back(method);
 
-		// If the hash of the method is inside the old project, the method has not changed.
-		if (std::find(prevHashes.begin(), prevHashes.end(), method.hash) != prevHashes.end())
-		{
-			unchangedMethods.push_back(method);
-		}
-		else // The method is changed / new.
-		{
-			changedMethods.push_back(method);
-		}
 		project.hashes.push_back(method.hash);
 		// TO DO: Methods that are not present in the new version should be updated in the previous project (endVersion should be set to 
 	}
@@ -142,21 +134,18 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	{
 		return HTTPStatusCodes::serverError("Failed to add project to database.");
 	}
-	std::queue<std::pair<MethodIn, bool>> methodChangeQueue;
+
+	std::queue<MethodIn> methodQueue;
 	std::mutex queueLock;
 	std::vector<std::thread> threads;
 
-	for (MethodIn method : unchangedMethods)
+	for (MethodIn method : methods)
 	{
-		methodChangeQueue.push(std::make_pair(method, false));
-	}
-	for (MethodIn method : changedMethods)
-	{
-		methodChangeQueue.push(std::make_pair(method, true));
+		methodQueue.push(method);
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodChangeQueue), ref(queueLock), project));
+		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project, prevProject.version));
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
@@ -176,7 +165,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	}
 }
 
-void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project)
+void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion)
 {
 	while (true)
 	{
@@ -186,12 +175,10 @@ void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, s
 			queueLock.unlock();
 			return;
 		}
-		std::pair<MethodIn, bool> methodDetails = methods.front();
+		MethodIn method = methods.front();
 		methods.pop();
 		queueLock.unlock();
-		MethodIn method = methodDetails.first;
-		bool changed = methodDetails.second;
-		addMethodWithRetry(method, project, changed);
+		addMethodWithRetry(method, project, prevVersion);
 		if (errno != 0)
 		{
 			errno = ENETUNREACH;
@@ -203,8 +190,7 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 {
 	errno = 0;
 	// We retrieve the project information (projectData).
-	std::string projectString = request.substr(0, request.find(ENTRY_DELIMITER_CHAR));
-	std::vector<std::string> projectData = Utility::splitStringOn(projectString, FIELD_DELIMITER_CHAR);
+	std::vector<std::string> projectData = Utility::splitStringOn(request, FIELD_DELIMITER_CHAR);
 
 	if (projectData.size() != PROJECT_DATA_SIZE)
 	{
@@ -224,11 +210,12 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 	{
 		return ProjectIn();
 	}
-	project.license    = projectData[2];
-	project.name       = projectData[3];
-	project.url        = projectData[4];
-	project.owner.name = projectData[5];
-	project.owner.mail = projectData[6];
+	project.versionHash = projectData[2];
+	project.license     = projectData[3];
+	project.name        = projectData[4];
+	project.url         = projectData[5];
+	project.owner.name  = projectData[6];
+	project.owner.mail  = projectData[7];
 
 	return project;
 }
@@ -958,19 +945,25 @@ bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 	return true;
 }
 
-void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project, bool changed, int retries)
+void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion)
 {
+	int retries = 0;
 	errno = 0;
-	database->addMethod(method, project, changed);
+	database->addMethod(method, project, prevVersion);
 
 	if (errno != 0)
 	{
-		if (retries <= 0)
+		while (retries < MAX_RETRIES)
 		{
-			errno = ENETUNREACH;
-			return;
+			database->addMethod(method, project, prevVersion);
+			if (errno == 0)
+			{
+				return;
+			}
+			retries++;
 		}
-		return addMethodWithRetry(method, project, changed, retries - 1);
+		errno = ENETUNREACH;
+		return;
 	}
 }
 

@@ -45,7 +45,7 @@ void DatabaseHandler::setPreparedStatements()
 	CassFuture *prepareFuture =
 		cass_session_prepare(connection, "SELECT * FROM projectdata.methods WHERE method_hash = ?");
 	CassError rc = cass_future_error_code(prepareFuture);
-	selectMethod = cass_future_get_prepared(prepareFuture);
+	selectMethods = cass_future_get_prepared(prepareFuture);
 
 	// Selects all projects with a given projectID and version.
 	prepareFuture =
@@ -55,43 +55,43 @@ void DatabaseHandler::setPreparedStatements()
 	
 	// Selects the previous version of some project.
 	prepareFuture = cass_session_prepare(
-		connection, "SELECT * FROM projectdata.projects WHERE projectID = ? AND version < ? LIMIT 1");
+		connection, "SELECT * FROM projectdata.projects WHERE projectID = ? AND versiontime < ? LIMIT 1");
 	rc = cass_future_error_code(prepareFuture);
 	selectPrevProject = cass_future_get_prepared(prepareFuture);
 
 	// Inserts a project into the database.
 	prepareFuture = cass_session_prepare(
 		connection,
-		"INSERT INTO projectdata.projects (projectID, version, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		"INSERT INTO projectdata.projects (projectID, versiontime, versionhash, license, name, url, ownerid, hashes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertProject = cass_future_get_prepared(prepareFuture);
 
 	// Adds hashes to a project in the database.
 	prepareFuture = cass_session_prepare(
 		connection,
-		"UPDATE projectdata.projects SET hashes = hashes + ? WHERE projectID = ? AND version = ?");
+		"UPDATE projectdata.projects SET hashes = hashes + ? WHERE projectID = ? AND versiontime = ?");
 	rc = cass_future_error_code(prepareFuture);
 	addHashesToProject = cass_future_get_prepared(prepareFuture);
 
 	// Inserts a method into the database
 	prepareFuture =
-		cass_session_prepare(connection, "INSERT INTO projectdata.methods (method_hash, version, projectID, name, "
-										 "file, lineNumber, authors) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		cass_session_prepare(connection, "INSERT INTO projectdata.methods (method_hash, projectID, startversiontime, file, startversionhash, endversiontime, endversionhash, name, "
+										 "lineNumber, authors) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 	rc = cass_future_error_code(prepareFuture);
 	insertMethod = cass_future_get_prepared(prepareFuture);
 
 	// Updates a method in the database
 	prepareFuture =
-		cass_session_prepare(connection, "UPDATE projectdata.methods SET name = ?, lineNumber = ?, authors = ?"
-										 "WHERE method_hash = ? AND projectID = ? AND startVersion = ? AND file = ?");
+		cass_session_prepare(connection, "UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?, name = ?, lineNumber = ?, authors = ?"
+										 "WHERE method_hash = ? AND projectID = ? AND file = ? AND startVersionTime = ?");
 	rc = cass_future_error_code(prepareFuture);
-	updateMethod = cass_future_get_prepared(prepareFuture);
+	updateMethods = cass_future_get_prepared(prepareFuture);
 
 	// Retrieves a method from the database
 	prepareFuture = cass_session_prepare(
-		connection, "SELECT * FROM projectdata.methods WHERE hash = ? AND projectID = ? AND file = ?");
+		connection, "SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
 	rc = cass_future_error_code(prepareFuture);
-	retrieveMethod = cass_future_get_prepared(prepareFuture);
+	selectMethod = cass_future_get_prepared(prepareFuture);
 
 	// Inserts a method by author.
 	prepareFuture = cass_session_prepare(
@@ -225,8 +225,8 @@ void DatabaseHandler::addProject(ProjectIn project)
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 
-	cass_statement_bind_int64_by_name(query, "version", project.version);
-
+	cass_statement_bind_int64_by_name(query, "versiontime", project.version);
+	cass_statement_bind_string_by_name(query, "versionhash", project.versionHash.c_str());
 	cass_statement_bind_string_by_name(query, "license", project.license.c_str());
 
 	cass_statement_bind_string_by_name(query, "name", project.name.c_str());
@@ -260,6 +260,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 	if (rc != 0)
 	{
 		printf("Query result: %s\n", cass_error_desc(rc));
+		std::cout << cass_error_desc(rc) << std::endl;
 		errno = ENETUNREACH;
 	}
 
@@ -277,7 +278,7 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID, Version version)
 {
 	CassStatement *query = cass_prepared_bind(selectPrevProject);
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
-	cass_statement_bind_int64_by_name(query, "version", version);
+	cass_statement_bind_int64_by_name(query, "versiontime", version);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
@@ -285,15 +286,12 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID, Version version)
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);
-		CassIterator *iterator = cass_iterator_from_result(result);
 
-		if (cass_iterator_next(iterator))
+		if (cass_result_row_count(result) >= 1)
 		{
-			const CassRow *row = cass_iterator_get_row(iterator);
+			const CassRow *row = cass_result_first_row(result);
 			project = getProject(row);
 		}
-
-		cass_iterator_free(iterator);
 		cass_result_free(result);
 	}
 	else
@@ -302,7 +300,7 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID, Version version)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to get previous project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -319,7 +317,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 
-	cass_statement_bind_int64_by_name(query, "version", project.version);
+	cass_statement_bind_int64_by_name(query, "versiontime", project.version);
 
 	int size = project.hashes.size();
 
@@ -357,26 +355,90 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 	}
 }
 
-void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, bool present)
+void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long prevVersion)
 {
 	errno = 0;
 
-	CassStatement *query;
-	if (present)
+	CassStatement *query = cass_prepared_bind(selectMethod);
+
+	std::string hashUUID = Utility::hashToUuidString(method.hash);
+
+	CassUuid uuid;
+	cass_uuid_from_string(hashUUID.c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
+	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
+	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	bool newMethod = true;
+
+	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
-		query = cass_prepared_bind(updateMethod);
+		const CassResult *result = cass_future_get_result(queryFuture);
+
+		CassIterator *iterator = cass_iterator_from_result(result);
+
+		// Add matches to result list.
+		while (cass_iterator_next(iterator))
+		{
+			const CassRow *row = cass_iterator_get_row(iterator);
+			
+			long long endVersion = getInt64(row, "endVersionTime");
+
+			if (endVersion == prevVersion)
+			{
+				newMethod = false;
+				long long startVersion = getInt64(row, "startVersionTime");
+				updateMethod(method, project, startVersion);
+			}
+		}
+
+		cass_iterator_free(iterator);
+		cass_result_free(result);
 	}
 	else
 	{
-		query = cass_prepared_bind(insertMethod);
-		cass_statement_bind_int64_by_name(query, "startVersion", project.version);
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to get previous project: '%.*s'\n", (int)messageLength, message);
+		errno = ENETUNREACH;
 	}
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Unable to retrieve previous method: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+
+	if (newMethod)
+	{
+		addNewMethod(method, project);
+	}	
+
+	cass_future_free(queryFuture);
+}
+
+void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(insertMethod);
 
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
-
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
-	cass_statement_bind_int64_by_name(query, "version", project.version);
+	cass_statement_bind_int64_by_name(query, "startversiontime", project.version);
+	cass_statement_bind_string_by_name(query, "startversionhash", project.versionHash.c_str());
+	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
+	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
 	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
@@ -407,18 +469,70 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, bool present
 
 	if (rc != 0)
 	{
-		printf("Query result: %s\n", cass_error_desc(rc));
+		printf("Unable to insert new method: %s\n", cass_error_desc(rc));
 		errno = ENETUNREACH;
 	}
 
 	cass_future_free(queryFuture);
 }
 
+void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long startVersion)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(updateMethods);
+
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
+	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
+	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
+	cass_statement_bind_int64_by_name(query, "startversiontime", startVersion);
+
+	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
+	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
+	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
+	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
+
+	int size = method.authors.size();
+
+	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+
+	for (int i = 0; i < size; i++)
+	{
+		CassUuid authorID = getAuthorId(method.authors[i]);
+		cass_collection_append_uuid(authors, authorID);
+		addMethodByAuthor(authorID, method, project);
+	}
+
+	cass_statement_bind_collection_by_name(query, "authors", authors);
+
+	cass_collection_free(authors);
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Unable to update method: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+
+	cass_future_free(queryFuture);
+}
+
+
 MethodOut DatabaseHandler::retrieveMethod(Hash hash, ProjectID projectID, Version startVersion,
 										  std::string fileLocation)
 {
 	errno = 0;
-	CassStatement *query = cass_prepared_bind()
+	//CassStatement *query = cass_prepared_bind()
+	MethodOut method;
+	return method;
 }
 
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)

@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 #include <mutex>
 #include <queue>
 
-#define PROJECT_DATA_SIZE 7
+#define PROJECT_DATA_SIZE 8
 #define METHOD_DATA_MIN_SIZE 5
 #define HEX_CHARS "0123456789abcdef"
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
@@ -272,7 +272,7 @@ private:
 	/// The project the methods are part of.
 	/// </param>
 	/// <returns></returns>
-	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project);
+	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion);
 
 	/// <summary>
 	/// Parses a list of authors with ids to a string to be returned.
@@ -409,7 +409,7 @@ private:
 	/// <param name="present">
 	/// A boolean that is true if and only if the method is present in the previous version of the project.
 	/// </param>
-	void addMethodWithRetry(MethodIn method, bool present, ProjectIn project, int retries = MAX_RETRIES);
+	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion);
 
 	/// <summary>
 	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as MAX_RETRIES.
