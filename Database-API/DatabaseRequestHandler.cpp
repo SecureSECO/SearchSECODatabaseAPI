@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <sstream>
 #include <ctime>
 #include <regex>
@@ -106,11 +107,15 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		return HTTPStatusCodes::clientError("Error parsing project data.");
 	}
 
-	std::vector<MethodIn> methods;
+	ProjectOut prevProject = database->prevProject(project.projectID, project.version);
+	ProjectOut currProject = prevProject;
+	std::vector<Hash> prevHashes = prevProject.hashes;
+
+	std::vector<MethodIn> changedMethods;
+	std::vector<MethodIn> unchangedMethods;
 
 	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 
-	// Check if all methods are valid.
 	for (int i = 1; i < dataEntries.size(); i++)
 	{
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
@@ -118,8 +123,18 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		{
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i) + ".");
 		}
-		methods.push_back(method);
+
+		// If the hash of the method is inside the old project, the method has not changed.
+		if (std::find(prevHashes.begin(), prevHashes.end(), method.hash) != prevHashes.end())
+		{
+			unchangedMethods.push_back(method);
+		}
+		else // The method is changed / new.
+		{
+			changedMethods.push_back(method);
+		}
 		project.hashes.push_back(method.hash);
+		// TO DO: Methods that are not present in the new version should be updated in the previous project (endVersion should be set to 
 	}
 
 	// Only upload if project and all methods are valid to prevent partial uploads.
@@ -127,17 +142,21 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	{
 		return HTTPStatusCodes::serverError("Failed to add project to database.");
 	}
-	std::queue<MethodIn> methodQueue;
+	std::queue<std::pair<MethodIn, bool>> methodChangeQueue;
 	std::mutex queueLock;
 	std::vector<std::thread> threads;
 
-	for (MethodIn method : methods)
+	for (MethodIn method : unchangedMethods)
 	{
-		methodQueue.push(method);
+		methodChangeQueue.push(std::make_pair(method, false));
+	}
+	for (MethodIn method : changedMethods)
+	{
+		methodChangeQueue.push(std::make_pair(method, true));
 	}
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue), ref(queueLock), project));
+		threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodChangeQueue), ref(queueLock), project));
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
@@ -167,10 +186,12 @@ void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, s
 			queueLock.unlock();
 			return;
 		}
-		MethodIn method = methods.front();
+		std::pair<MethodIn, bool> methodDetails = methods.front();
 		methods.pop();
 		queueLock.unlock();
-		addMethodWithRetry(method, project);
+		MethodIn method = methodDetails.first;
+		bool changed = methodDetails.second;
+		addMethodWithRetry(method, project, changed);
 		if (errno != 0)
 		{
 			errno = ENETUNREACH;
@@ -937,23 +958,19 @@ bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 	return true;
 }
 
-void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project)
+void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project, bool changed, int retries)
 {
-	int retries = 0;
-	database->addMethod(method, project);
+	errno = 0;
+	database->addMethod(method, project, changed);
+
 	if (errno != 0)
 	{
-		while (retries < MAX_RETRIES)
+		if (retries <= 0)
 		{
-			database->addMethod(method, project);
-			if (errno == 0)
-			{
-				return;
-			}
-			retries++;
+			errno = ENETUNREACH;
+			return;
 		}
-		errno = ENETUNREACH;
-		return;
+		return addMethodWithRetry(method, project, changed, retries - 1);
 	}
 }
 

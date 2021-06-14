@@ -55,9 +55,18 @@ public:
 
 	/// <summary>
 	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
-	/// the database with information of the project.
+	/// the database with information of the project. 
 	/// </summary>
-	virtual void addMethod(MethodIn method, ProjectIn project);
+	/// <param name="changed">
+	/// A boolean representing if the method is changed compared to the previous version of the project.
+	/// </param>
+	virtual void addMethod(MethodIn method, ProjectIn project, bool changed);
+
+	/// <summary>
+	/// Retrieves the method from the method table in the database with the given hash, projectID, version and fileLocation, 
+	/// if it exists. Otherwise returns an empty method.
+	/// </summary>
+	virtual MethodOut retrieveMethod(Hash hash, ProjectID projectID, Version version, std::string fileLocation);
 
 	/// <summary>
 	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
@@ -180,6 +189,8 @@ private:
 	const CassPrepared *insertProject;
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
+	const CassPrepared *updateMethod;
+	const CassPrepared *retrieveMethod;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *selectIdByAuthor;

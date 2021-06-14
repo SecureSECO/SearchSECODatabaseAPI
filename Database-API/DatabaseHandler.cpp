@@ -80,6 +80,19 @@ void DatabaseHandler::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	insertMethod = cass_future_get_prepared(prepareFuture);
 
+	// Updates a method in the database
+	prepareFuture =
+		cass_session_prepare(connection, "UPDATE projectdata.methods SET name = ?, lineNumber = ?, authors = ?"
+										 "WHERE method_hash = ? AND projectID = ? AND startVersion = ? AND file = ?");
+	rc = cass_future_error_code(prepareFuture);
+	updateMethod = cass_future_get_prepared(prepareFuture);
+
+	// Retrieves a method from the database
+	prepareFuture = cass_session_prepare(
+		connection, "SELECT * FROM projectdata.methods WHERE hash = ? AND projectID = ? AND file = ?");
+	rc = cass_future_error_code(prepareFuture);
+	retrieveMethod = cass_future_get_prepared(prepareFuture);
+
 	// Inserts a method by author.
 	prepareFuture = cass_session_prepare(
 		connection,
@@ -344,23 +357,29 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 	}
 }
 
-void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
+void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, bool present)
 {
 	errno = 0;
-	CassStatement *query = cass_prepared_bind(insertMethod);
+
+	CassStatement *query;
+	if (present)
+	{
+		query = cass_prepared_bind(updateMethod);
+	}
+	else
+	{
+		query = cass_prepared_bind(insertMethod);
+		cass_statement_bind_int64_by_name(query, "startVersion", project.version);
+	}
 
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
+
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
-
 	cass_statement_bind_int64_by_name(query, "version", project.version);
-
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
-
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
-
 	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
-
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 
 	int size = method.authors.size();
@@ -393,6 +412,13 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project)
 	}
 
 	cass_future_free(queryFuture);
+}
+
+MethodOut DatabaseHandler::retrieveMethod(Hash hash, ProjectID projectID, Version startVersion,
+										  std::string fileLocation)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind()
 }
 
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)

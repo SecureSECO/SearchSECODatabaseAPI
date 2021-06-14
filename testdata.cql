@@ -1,46 +1,45 @@
-CREATE KEYSPACE IF NOT EXISTS projectData
-    WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
-
-CREATE KEYSPACE IF NOT EXISTS jobs
+CREATE KEYSPACE projectData
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
     
-CREATE TABLE IF NOT EXISTS projectData.methods
+CREATE TABLE projectData.methods
 (
-  method_hash UUID,
-  version timestamp,
+  method_hash text,
   projectID bigint,
-  name text,
+  startVersion text,
   file text,
+  endVersion text,
+  name text,
   lineNumber int,
   authors set<UUID>,
-  PRIMARY KEY ((method_hash), version, projectID)
-) 
-WITH CLUSTERING ORDER BY (version DESC, projectID ASC);
+  PRIMARY KEY ((method_hash), projectID, startVersion, file)
+)
+WITH CLUSTERING ORDER BY (projectID ASC, startVersion DESC, file ASC);
     
-CREATE TABLE IF NOT EXISTS projectData.projects
+CREATE TABLE projectData.projects
 (
   projectID bigint,
-  version timestamp,
+  versionTime timestamp,
+  versionHash text,
   license text,
   name text,
   url text,
   ownerID UUID,
-  hashes set<UUID>,
-  PRIMARY KEY ((projectID), version)
-) 
+  hashes set<text>,
+  PRIMARY KEY ((projectID), versionTime)
+)
 WITH CLUSTERING ORDER BY (version DESC);
 
-CREATE TABLE IF NOT EXISTS projectData.method_by_author
+CREATE TABLE projectData.method_by_author
 (
   authorID UUID,
-  hash UUID,
+  hash text,
   version timestamp,
   projectID bigint,
   PRIMARY KEY ((authorID), hash, version, projectID)
 )
 WITH CLUSTERING ORDER BY (hash ASC, version DESC, projectID ASC);
 
-CREATE TABLE IF NOT EXISTS projectData.author_by_id
+CREATE TABLE projectData.author_by_id
 (
   authorID UUID,
   name text,
@@ -48,7 +47,7 @@ CREATE TABLE IF NOT EXISTS projectData.author_by_id
   PRIMARY KEY (authorID)
 );
 
-CREATE TABLE IF NOT EXISTS projectData.id_by_author
+CREATE TABLE projectData.id_by_author
 (
   name text,
   mail text,
@@ -56,6 +55,9 @@ CREATE TABLE IF NOT EXISTS projectData.id_by_author
   PRIMARY KEY ((name, mail))
 );
 
+CREATE KEYSPACE IF NOT EXISTS jobs
+    WITH replication = {'class': 'NetworkTopologyStrategy', 'dc131.211.31.153' : '1', 'dc138.201.216.223' : '1', 'dc95.217.155.82' : '1'};
+    
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
     jobid UUID,

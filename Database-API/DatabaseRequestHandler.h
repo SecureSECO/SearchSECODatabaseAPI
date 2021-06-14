@@ -406,7 +406,10 @@ private:
 	/// If it succeeds, it adds the method to the database and puts errno on 0.
 	/// If it still fails on the last retry, it puts the errno on ENETUNREACH and returns.
 	/// </summary>
-	void addMethodWithRetry(MethodIn method, ProjectIn project);
+	/// <param name="present">
+	/// A boolean that is true if and only if the method is present in the previous version of the project.
+	/// </param>
+	void addMethodWithRetry(MethodIn method, bool present, ProjectIn project, int retries = MAX_RETRIES);
 
 	/// <summary>
 	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as MAX_RETRIES.
