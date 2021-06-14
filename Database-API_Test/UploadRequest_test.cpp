@@ -11,7 +11,7 @@ Utrecht University within the Software Project course.
 #include <vector>
 
 // Test input part 1:
-Author owner("Owner", "owner@mail.com"); = { .name = .mail =  };
+Author owner("Owner", "owner@mail.com");
 std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5",
 			"f3a258ba6cd26c1b7d553a493c614104",
 			"59bf62494932580165af0451f76be3e9" };
