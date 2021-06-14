@@ -31,17 +31,11 @@ TEST(RaftTests, AssumeLeaderTest)
 	RequestHandler raftHandler; 
 	MockDatabase database;
 	MockJDDatabase jddatabase;
-	std::cout << "test1\n";
 	raftHandler.initialize(&database, &jddatabase, nullptr);
-	std::cout << "test2\n";
-
 
 	RequestHandlerMock handler;
-	std::cout << "test3\n";
 	ConnectionHandler listen;
-	std::cout << "test4\n";
 	std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
-	std::cout << "test5\n";
 	usleep(500000); // Just to make sure the listner has started.
 
 	EXPECT_CALL(handler, handleRequest("conn", "8003" + entryDelimiter, matcherNotNull(nullptr))).Times(0);
