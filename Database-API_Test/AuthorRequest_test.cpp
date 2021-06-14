@@ -37,9 +37,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
-	Author author;
-	author.name = "Author";
-	author.mail = "author@mail.com";
+	Author author("Author", "author@mail.com");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
@@ -57,7 +55,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
 	std::string output = "No results found.";
-	Author author;
+	Author author("","");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
@@ -91,12 +89,8 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
 
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
-	author2.name = "Author2";
-	author2.mail = "author2@mail.com";
+	Author author1("Author1", "author1@mail.com");
+	Author author2("Author2", "author2@mail.com");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
@@ -122,10 +116,8 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
+	Author author1("Author1", "author1@mail.com");
+	Author author2("", "");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));

@@ -7,7 +7,6 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include "Utility.h"
 #include <iostream>
-#include "md5/md5.h"
 
 void DatabaseHandler::connect(std::string ip, int port)
 {
@@ -427,7 +426,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	Author author;
+	Author author("","");
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -436,9 +435,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 		if (cass_result_row_count(result) >= 1)
 		{
 			const CassRow *row = cass_result_first_row(result);
-
-			author.name = getString(row, "name");
-			author.mail = getString(row, "mail");
+			author = Author(getString(row, "name"), getString(row, "mail"));
 		}
 
 		cass_result_free(result);
@@ -459,18 +456,10 @@ Author DatabaseHandler::idToAuthor(std::string id)
 	return author;
 }
 
-CassUuid DatabaseHandler::computeAuthorIdOfAuthor(Author author)
-{
-	std::string methodHash = md5(author.name + " " + author.mail);
-	CassUuid uuid;
-	cass_uuid_from_string(Utility::hashToUuidString(methodHash).c_str(), &uuid);
-	
-	return uuid;
-}
-
 CassUuid DatabaseHandler::createAuthorIfNotExists(Author author)
 {
-	CassUuid authorId = computeAuthorIdOfAuthor(author);
+	CassUuid authorId;
+	cass_uuid_from_string(Utility::hashToUuidString(author.id).c_str(), &authorId);
 
 	CassStatement *insertQuery2 = cass_prepared_bind(insertAuthorById);
 

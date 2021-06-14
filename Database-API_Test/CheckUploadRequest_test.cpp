@@ -63,7 +63,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 							.fileLocation = "MyProject/Method1.cpp",
 							.lineNumber = 1,
 							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
-	Author author = {.name = "Owner", .mail = "owner@mail.com"};
+	Author author("Owner", "owner@mail.com");
 	ProjectIn project = {.projectID = 0,
 						 .version = 0,
 						 .license = "MyLicense",

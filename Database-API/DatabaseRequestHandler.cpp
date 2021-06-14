@@ -258,9 +258,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
-		Author author;
-		author.name = methodData[5 + 2 * i];
-		author.mail = methodData[6 + 2 * i];
+		Author author(methodData[5 + 2 * i],methodData[6 + 2 * i]);
 		authors.push_back(author);
 	}
 	method.authors = authors;
@@ -560,15 +558,14 @@ Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
 {
 	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, FIELD_DELIMITER_CHAR);
 
-	Author author;
-
 	if (authorData.size() != 2)
 	{
 		errno = EILSEQ;
+		Author author("","");
 		return author;
 	}
-	author.name = authorData[0];
-	author.mail = authorData[1];
+
+	Author author(authorData[0], authorData[1]);
 
 	return author;
 }
@@ -909,7 +906,7 @@ std::vector<ProjectOut> DatabaseRequestHandler::searchForProjectWithRetry(Projec
 Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
 {
 	int retries = 0;
-	Author author;
+	Author author("","");
 	author = database->idToAuthor(id);
 	if (errno != 0)
 	{

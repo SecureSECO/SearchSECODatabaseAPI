@@ -100,17 +100,6 @@ private:
 	MethodId getMethodId(const CassRow *row);
 
 	/// <summary>
-	/// Retrieves the author id corresponding to the given author.
-	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
-	/// </param>
-	/// <returns>
-	/// The id of the author.
-	/// </returns>
-	virtual CassUuid computeAuthorIdOfAuthor(Author author);
-
-	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
 	CassUuid createAuthorIfNotExists(Author author);

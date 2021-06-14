@@ -9,6 +9,8 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <vector>
 
+#include "md5/md5.h"
+
 namespace types {
 
 typedef std::string AuthorID;
@@ -24,6 +26,14 @@ struct Author
 public:
 	std::string name;
 	std::string mail;
+	std::string id;
+	Author(std::string name, std::string mail) :
+	name(name),
+	mail(mail)
+	{
+		
+		id = md5(name + " " + mail);
+	}
 };
 
 
