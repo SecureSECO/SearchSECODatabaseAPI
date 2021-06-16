@@ -55,5 +55,8 @@ setup_target_for_coverage_lcov(
         EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../Database-API_Test/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
+# Copy .env file
+configure_file(".env" ".env" COPYONLY)
+
 # Include sub-projects.
 add_subdirectory ("Database-API_Test")

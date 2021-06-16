@@ -34,7 +34,7 @@ TEST(RaftTests, BecomeLeader)
 	raftHandler.initialize(&database, &jddatabase, nullptr);
 	{
 		RAFTConsensus raft;
-		raft.start(&raftHandler, false, {{TESTIP, "-1"}});
+		raft.start(&raftHandler, {{TESTIP, "-1"}}, false);
 
 		ASSERT_TRUE(raft.isLeader());
 	}
@@ -50,7 +50,7 @@ TEST(RaftTests, AcceptConnection)
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
 		RAFTConsensus raft;
-		raft.start(&handler, true, {});
+		raft.start(&handler, {}, true);
 
 		ASSERT_TRUE(raft.isLeader());
 
@@ -62,4 +62,13 @@ TEST(RaftTests, AcceptConnection)
 		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TESTIP + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connMock;
+}
+
+TEST(RaftTests, ReadIpsFromFile) 
+{
+	RAFTConsensus raft;
+	auto ips = raft.getIps("dotenvTestfile.txt");
+	std::string port = std::to_string(PORT);
+	std::vector<std::pair<std::string, std::string>> expectedOutput = {{"127.0.0.1", port}, {"127.0.0.2", port}};
+	ASSERT_EQ(ips, expectedOutput);
 }

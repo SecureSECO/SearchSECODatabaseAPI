@@ -10,11 +10,12 @@ Utrecht University within the Software Project course.
 #include "JobRequestHandler.h"
 #include "Utility.h"
 
-#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <thread>
-#include <iostream>
-#include <algorithm>
+#include <vector>
 
 RAFTConsensus::~RAFTConsensus() 
 {
@@ -26,8 +27,38 @@ RAFTConsensus::~RAFTConsensus()
 	}
 }
 
-void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader, 
-	std::vector<std::pair<std::string, std::string>> ips) 
+std::vector<std::pair<std::string, std::string>> RAFTConsensus::getIps(std::string file) 
+{
+	std::ifstream fileHandler;
+	fileHandler.open(file);
+	
+	if (!fileHandler.is_open()) 
+	{
+		std::cout << "Unable to open .env file." << std::endl;
+		return {};
+	}
+	std::string line;
+	while (std::getline(fileHandler, line)) 
+	{
+		auto lineSplitted = Utility::splitStringOn(line, '=');
+		if (lineSplitted.size() >= 2 && lineSplitted[0] == "SEEDS") 
+		{
+			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');
+			std::vector<std::pair<std::string, std::string>> output = {};
+			for (std::string ip : ipsSplitted) 
+			{
+				output.push_back(std::pair<std::string, std::string>(ip, std::to_string(PORT)));
+			}
+			return output;
+		}
+	}
+	std::cout << "No SEEDS entry found in .env file or SEEDS entry was empty." << std::endl;
+	return {};
+}
+
+void RAFTConsensus::start(RequestHandler* requestHandler, 
+	std::vector<std::pair<std::string, std::string>> ips, 
+	bool assumeLeader) 
 {
 	started = true;
 	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
@@ -141,7 +172,7 @@ void RAFTConsensus::listenForHeartbeat()
 				std::cout << "Old leader dropped, we are the next in line, so we are now the leader." << std::endl;
 				// We are next in the list, so we are going to assume leadership.
 				delete others;
-				start(requestHandler, true);
+				start(requestHandler, {}, true);
 				return;
 			}
 			usleep(LEADER_DROPOUT_WAIT_TIME);
