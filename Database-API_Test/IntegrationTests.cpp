@@ -75,26 +75,29 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	std::string input3(input3Chars.begin(), input3Chars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"137fed017b6159acc0af30d2c6b403a5", "3", "5000000002000", "2d8b3b65caf0e9168a39be667be24861", "5000000002000", "2d8b3b65caf0e9168a39be667be24861",  "M3", "P3/M3.cpp", "1", "1", "b2217c08-06eb-4a57-b977-7c6d72299301"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"137fed017b6159acc0af30d2c6b403a5", "3", "5000000002000", "2d8b3b65caf0e9168a39be667be24861",
+					   "5000000002000", "8a04d1e679548a35a6feec48321cac81", "M3", "P3/M3.cpp", "1", "1",
+					   "b2217c08-06eb-4a57-b977-7c6d72299301"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput3_1(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"8811e6bedb87e90cef39de1179f3bd2e", "4", "5000000006000", "6415e258c077e5cf3f98982d8050e941", "5000000006000", "6415e258c077e5cf3f98982d8050e941", "M7", "P4/M7.cpp", "23", "1",
+					  {"8811e6bedb87e90cef39de1179f3bd2e", "4", "5000000006000", "6415e258c077e5cf3f98982d8050e941",
+					   "5000000006000", "6415e258c077e5cf3f98982d8050e941", "M7", "P4/M7.cpp", "23", "1",
 					   "f95ffc6c-aa97-40d6-b709-cb4823955213"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput3_2(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"8811e6bedb87e90cef39de1179f3bd2e", "5", "5000000009000", "5000000009000", "M10", "P5/M10.cpp", "61", "1", "2a84cf5a-9554-4800-bb87-6dda6715fa12"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"8811e6bedb87e90cef39de1179f3bd2e", "5", "5000000009000", "63308e3dbf0aba36ecaf66d5f51b6d2b",
+					   "5000000009000", "63308e3dbf0aba36ecaf66d5f51b6d2b", "M10", "P5/M10.cpp", "61", "1",
+					   "2a84cf5a-9554-4800-bb87-6dda6715fa12"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput3_3(expectedChars.begin(), expectedChars.end());
 	std::vector<std::string> expectedOutputs3 = {expectedOutput3_1, expectedOutput3_2, expectedOutput3_3};
@@ -133,7 +136,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"23920776594c85fdc30cd96f928487f1", "3", "5000000003000", "5000000003000", "M4", "P3/M4.cpp", "21", "2",
+					  {"23920776594c85fdc30cd96f928487f1", "3", "5000000003000", "e7b60fac745437880c1ccb8c4dd29f0f",
+					   "5000000004000", "8a04d1e679548a35a6feec48321cac81", "M4", "P3/M4.cpp", "21", "2",
 					   "68bd2db6-fe91-47d2-a134-cf82b104f547", "b2217c08-06eb-4a57-b977-7c6d72299301"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
@@ -141,7 +145,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"23920776594c85fdc30cd96f928487f1", "3", "5000000003000", "5000000003000", "M4", "P3/M4.cpp", "21", "2",
+					  {"23920776594c85fdc30cd96f928487f1", "3", "5000000003000", "e7b60fac745437880c1ccb8c4dd29f0f",
+					   "5000000004000", "8a04d1e679548a35a6feec48321cac81", "M4", "P3/M4.cpp", "21", "2",
 					   "b2217c08-06eb-4a57-b977-7c6d72299301", "68bd2db6-fe91-47d2-a134-cf82b104f547"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
@@ -149,7 +154,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"23920776594c85fdc30cd96f928487f1", "5", "5000000007000", "5000000007000", "M8", "P5/M8.cpp", "1", "2",
+					  {"23920776594c85fdc30cd96f928487f1", "5", "5000000007000", "e35706965bfee40184ae6b4f38c1c81d",
+					   "5000000009000", "63308e3dbf0aba36ecaf66d5f51b6d2b", "M8", "P5/M8.cpp", "1", "2",
 					   "e39e0872-6856-4fa0-8d9a-278728362f43", "f95ffc6c-aa97-40d6-b709-cb4823955213"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
@@ -157,7 +163,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"23920776594c85fdc30cd96f928487f1", "5", "5000000007000", "5000000007000", "M8", "P5/M8.cpp", "1", "2",
+					  {"23920776594c85fdc30cd96f928487f1", "5", "5000000007000", "e35706965bfee40184ae6b4f38c1c81d",
+					   "5000000009000", "63308e3dbf0aba36ecaf66d5f51b6d2b", "M8", "P5/M8.cpp", "1", "2",
 					   "f95ffc6c-aa97-40d6-b709-cb4823955213", "e39e0872-6856-4fa0-8d9a-278728362f43"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
@@ -165,7 +172,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"137fed017b6159acc0af30d2c6b403a5", "3", "5000000002000", "5000000002000", "M3", "P3/M3.cpp", "1", "1",
+					  {"137fed017b6159acc0af30d2c6b403a5", "3", "5000000002000", "2d8b3b65caf0e9168a39be667be24861",
+					   "5000000004000", "8a04d1e679548a35a6feec48321cac81", "M3", "P3/M3.cpp", "1", "1",
 					   "b2217c08-06eb-4a57-b977-7c6d72299301"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
@@ -300,16 +308,20 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"8", "5000000012000", "L7", "P8", "www.github.com/p8", "Author 10", "author10@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5", "M14", "P8/M14.cpp", "1", "1", "Author 10", "author10@mail.com"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars,
-					  {"d0b33728458eec4279cb91ee865414d5", "M15", "P8/M15.cpp", "41", "1", "Author 10", "author10@mail.com"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		inputChars,
+		{"2c7f46d4f57cf9e66b03213358c7ddb5", "M14", "P8/M14.cpp", "1", "1", "Author 10", "author10@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		inputChars,
+		{"d0b33728458eec4279cb91ee865414d5", "M15", "P8/M15.cpp", "41", "1", "Author 10", "author10@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input7(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000", "9e350b124404f40a114509910619f641", "5000000000000", "9e350b124404f40a114509910619f641", "M1", "P1/M1.cpp", "1", "1",
+					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000", "9e350b124404f40a114509910619f641",
+					   "5000000000000", "9e350b124404f40a114509910619f641", "M1", "P1/M1.cpp", "1", "1",
 					   "68bd2db6-fe91-47d2-a134-cf82b104f547"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expectedOutput7(expectedChars.begin(), expectedChars.end());
