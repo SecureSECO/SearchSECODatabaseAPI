@@ -14,10 +14,10 @@ Utrecht University within the Software Project course.
 
 int main()
 {
-	RAFTConsensus raft;
 	usleep(45000000);
 	std::cout << "Connecting now" << std::endl;
 
+	RAFTConsensus raft;
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
