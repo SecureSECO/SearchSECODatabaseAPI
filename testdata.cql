@@ -1,3 +1,5 @@
+use system; select data_center from local;
+
 CREATE KEYSPACE IF NOT EXISTS projectData
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
     
