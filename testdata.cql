@@ -1,5 +1,3 @@
-use system; select data_center from local;
-
 CREATE KEYSPACE IF NOT EXISTS projectData
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
     
@@ -60,7 +58,7 @@ CREATE TABLE IF NOT EXISTS projectData.id_by_author
 );
 
 CREATE KEYSPACE IF NOT EXISTS jobs
-    WITH replication = {'class': 'NetworkTopologyStrategy', 'Cassandra' : 1};
+    WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1' : 1};
     
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
