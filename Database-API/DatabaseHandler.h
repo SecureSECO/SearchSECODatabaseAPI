@@ -80,14 +80,14 @@ public:
 	/// <returns>
 	/// A list of hashes that are updated.
 	/// </returns>
-	virtual std::vector<Hash> updateUnchangedFiles(std::vector<Hash> hashes, std::vector<string> files, Project project,
+	virtual std::vector<Hash> updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project,
 										   long long prevVersion);
 
 	/// <summary>
 	/// Retrieves the method from the method table in the database with the given hash, projectID, version and fileLocation, 
 	/// if it exists. Otherwise returns an empty method.
 	/// </summary>
-	virtual MethodOut retrieveMethod(Hash hash, ProjectID projectID, Version version, std::string fileLocation);
+	//virtual MethodOut retrieveMethod(Hash hash, ProjectID projectID, Version version, std::string fileLocation);
 
 	/// <summary>
 	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
@@ -204,6 +204,8 @@ private:
 	/// Create the prepared statements to be executed later.
 	/// </summary>
 	void setPreparedStatements();
+
+	const CassPrepared *prepareStatement(std::string query);
 
 	/// <summary>
 	/// The prepared statements that can be executed.

@@ -141,10 +141,10 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	for (Hash hash : prevHashes)
 	{
 		currentHashes.push_back(hash);
-		if (currentHashes.size() >= HASHES_SIZE_MAX)
+		if (currentHashes.size() >= HASHES_MAX_SIZE)
 		{
 			hashesList.push_back(currentHashes);
-			currentHashes.clear()
+			currentHashes.clear();
 		}
 	}
 	if (currentHashes.size() > 0)
@@ -155,7 +155,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	for (std::string file : unchangedFiles)
 	{
 		currentFiles.push_back(file);
-		if (currentFiles.size() >= FILES_SIZE_MAX)
+		if (currentFiles.size() >= FILES_MAX_SIZE)
 		{
 			filesList.push_back(currentFiles);
 			currentFiles.clear();
@@ -202,19 +202,38 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		threads[i].join();
 	}
 	threads.clear();
+	std::vector<std::future<std::vector<Hash>>> results;
 
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push_back(std::thread(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread, this, ref(hashFileQueue), ref(queueLock), project, prevProject.version);
+		std::packaged_task<std::vector<Hash>()> task(bind(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread,
+														  this, ref(hashFileQueue), ref(queueLock), project,
+														  prevProject.version));
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
 		}
+		results.push_back(task.get_future());
+		threads.push_back(std::thread(move(task)));
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
 		threads[i].join();
 	}
+	std::vector<Hash> unchangeHashes = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		std::vector<Hash> newHashes = results[i].get();
+
+		for (int j = 0; j < newHashes.size(); j++)
+		{
+			unchangeHashes.push_back(newHashes[j]);
+		}
+	}
+
+	project.hashes = unchangeHashes;
+
+	database -> addHashToProject(project, 0);
 
 	if (errno == 0)
 	{
@@ -227,7 +246,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 }
 
 void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, 
-												long long prevVersion, std::vector<Hash> unchangedHashes)
+												long long prevVersion)
 {
 	while (true)
 	{

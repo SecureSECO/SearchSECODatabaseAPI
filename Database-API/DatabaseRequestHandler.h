@@ -16,7 +16,7 @@ Utrecht University within the Software Project course.
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
 #define MAX_RETRIES 3
 #define HASHES_MAX_SIZE 1000
-#define FILES_MAX_SIZE = 500
+#define FILES_MAX_SIZE 500
 
 /// <summary>
 /// Handles requests towards database.

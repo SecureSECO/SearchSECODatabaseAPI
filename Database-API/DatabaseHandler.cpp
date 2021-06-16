@@ -68,7 +68,7 @@ void DatabaseHandler::setPreparedStatements()
 	selectMethod = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
 
 	// Retrieves the methods with specified hash and file.
-	selectUnchangedMethods = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash IN ? AND projectid = ? AND file IN ?");
+	selectUnchangedMethods = prepareStatement("SELECT method_hash, projectid, file, startversiontime, endversiontime, linenumber, name FROM projectdata.methods WHERE method_hash IN ? AND projectID = ? AND file IN ?");
 
 	// Inserts a method by author.
 	insertMethodByAuthor = prepareStatement("INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)");
@@ -89,11 +89,18 @@ void DatabaseHandler::setPreparedStatements()
 	selectAuthorById = prepareStatement("SELECT * FROM projectdata.author_by_id WHERE authorid = ?");
 }
 
-CassPrepared* DatabaseHandler::prepareStatement(std::string query)
+const CassPrepared* DatabaseHandler::prepareStatement(std::string query)
 {
-	CassFuture *prepareFuture =	cass_session_prepare(connection, query);
+	CassFuture *prepareFuture =	cass_session_prepare(connection, query.c_str());
 	CassError rc = cass_future_error_code(prepareFuture);
-	CassPrepared *result = cass_future_get_prepared(prepareFuture);
+	if (rc != 0)
+	{
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(prepareFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to prepare query: '%.*s'\n", (int)messageLength, message);
+	}
+	const CassPrepared *result = cass_future_get_prepared(prepareFuture);
 	cass_future_free(prepareFuture);
 	return result;
 }
@@ -322,7 +329,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 	}
 }
 
-void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long prevVersion, bool newMethod)
+void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long prevVersion)
 {
 	errno = 0;
 
@@ -337,6 +344,8 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	bool newMethod;
 
 	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
@@ -490,17 +499,17 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	cass_future_free(queryFuture);
 }
 
-std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<string> files, Project project, long long prevVersion)
+std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion)
 {
 	errno = 0;
 
 	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
 
-	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
+	cass_statement_bind_int64(query, 1, project.projectID);
 
 	int size = hashes.size();
 
-	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
 
 	for (int i = 0; i < size; i++)
 	{
@@ -509,20 +518,20 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 		cass_collection_append_uuid(hashesCollection, hash);
 	}
 
-	cass_statement_bind_collection_by_name(query, "method_hash", hashesCollection);
+	cass_statement_bind_collection(query, 0, hashesCollection);
 
 	cass_collection_free(hashesCollection);
 
 	size = files.size();
 
-	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
 
 	for (int i = 0; i < size; i++)
 	{
-		cass_collection_append_string(filesCollection, files[i]);
+		cass_collection_append_string(filesCollection, files[i].c_str());
 	}
 
-	cass_statement_bind_collection_by_name(query, "file", filesCollection);
+	cass_statement_bind_collection(query, 2, filesCollection);
 
 	cass_collection_free(filesCollection);
 
@@ -546,7 +555,12 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 			if (endVersion == prevVersion)
 			{
 				long long startVersion = getInt64(row, "startVersionTime");
-				Method method = getMethod(row)
+				MethodOut methodOut = getMethod(row);
+				MethodIn method;
+				method.hash = methodOut.hash;
+				method.fileLocation = methodOut.fileLocation;
+				method.methodName = methodOut.methodName;
+				method.lineNumber = methodOut.lineNumber;
 				updateMethod(method, project, startVersion);
 				resultHashes.push_back(Utility::uuidStringToHash(getUUID(row, "method_hash")));
 			}
@@ -561,7 +575,7 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(queryFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to get previous project: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to get unchanged methods: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -573,16 +587,13 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 	if (rc != 0)
 	{
-		printf("Unable to retrieve previous method: %s\n", cass_error_desc(rc));
+		printf("Unable to retrieve unchanged methods: %s\n", cass_error_desc(rc));
 		errno = ENETUNREACH;
 	}
 
-	if (newMethod)
-	{
-		addNewMethod(method, project);
-	}	
-
 	cass_future_free(queryFuture);
+
+	return resultHashes;
 }
 
 void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
@@ -807,7 +818,7 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 {
 	ProjectOut project;
 	project.projectID = getInt64(row, "projectID");
-	project.version = getInt64(row, "version");
+	project.version = getInt64(row, "versiontime");
 	project.license = getString(row, "license");
 	project.name = getString(row, "name");
 	project.url = getString(row, "url");
