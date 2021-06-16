@@ -54,6 +54,10 @@ public:
 	///	If we are not the leader, we will return the leader of the network.</returns>
 	virtual std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
 
+	/// <summary>
+	/// Reads the given file and gets the ips out of it.
+	/// </summary>
+	/// <returns>List of ips with port.</returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
 private:
 	/// <summary>
