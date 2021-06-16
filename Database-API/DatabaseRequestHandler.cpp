@@ -205,7 +205,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 
 	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		threads.push(std::thread(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread, this, ref(hashFileQueue), ref(queueLock), project, prevProject.version);
+		threads.push_back(std::thread(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread, this, ref(hashFileQueue), ref(queueLock), project, prevProject.version);
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
