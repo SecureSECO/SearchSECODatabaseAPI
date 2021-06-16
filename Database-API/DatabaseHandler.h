@@ -63,6 +63,27 @@ public:
 	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion);
 
 	/// <summary>
+	/// Updates the methods in the previous version of the project that are in an unchanged file.
+	/// </summary>
+	/// <param name="hashes">
+	/// A List of hashes to check.
+	/// </param>
+	/// <param name="files">
+	/// A List of files to check.
+	/// </param>
+	/// <param name="project">
+	/// The added project for the project ID and new version.
+	/// </param>
+	/// <param name="prevVersion">
+	/// The previous version of the project to check whether it is a correct result.
+	/// </param>
+	/// <returns>
+	/// A list of hashes that are updated.
+	/// </returns>
+	virtual std::vector<Hash> updateUnchangedFiles(std::vector<Hash> hashes, std::vector<string> files, Project project,
+										   long long prevVersion);
+
+	/// <summary>
 	/// Retrieves the method from the method table in the database with the given hash, projectID, version and fileLocation, 
 	/// if it exists. Otherwise returns an empty method.
 	/// </summary>
@@ -195,6 +216,7 @@ private:
 	const CassPrepared *insertMethod;
 	const CassPrepared *updateMethods;
 	const CassPrepared *selectMethod;
+	const CassPrepared *selectUnchangedMethods;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *selectIdByAuthor;

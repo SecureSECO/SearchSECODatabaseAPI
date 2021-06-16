@@ -126,7 +126,53 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		methods.push_back(method);
 
 		project.hashes.push_back(method.hash);
-		// TO DO: Methods that are not present in the new version should be updated in the previous project (endVersion should be set to 
+	}
+
+	// Also, for each hash in the previous version, check if it corresponds to a method in an unchanged file.
+	// If so, the method is unchanged which means that the endversion should be updated.
+	std::vector<Hash> prevHashes = prevProject.hashes;
+
+	std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> hashFileQueue;
+	std::vector<std::vector<Hash>> hashesList;
+	std::vector<std::vector<std::string>> filesList;
+	std::vector<Hash> currentHashes;
+	std::vector<std::string> currentFiles;
+
+	for (Hash hash : prevHashes)
+	{
+		currentHashes.push_back(hash);
+		if (currentHashes.size() >= HASHES_SIZE_MAX)
+		{
+			hashesList.push_back(currentHashes);
+			currentHashes.clear()
+		}
+	}
+	if (currentHashes.size() > 0)
+	{
+		hashesList.push_back(currentHashes);
+	}
+
+	for (std::string file : unchangedFiles)
+	{
+		currentFiles.push_back(file);
+		if (currentFiles.size() >= FILES_SIZE_MAX)
+		{
+			filesList.push_back(currentFiles);
+			currentFiles.clear();
+		}
+	}
+	if (currentFiles.size() > 0)
+	{
+		filesList.push_back(currentFiles);
+	}
+
+	for (std::vector<Hash> hashes : hashesList)
+	{
+		for (std::vector<std::string> files : filesList)
+		{
+			std::pair<std::vector<Hash>, std::vector<std::string>> hashFilePair = std::make_pair(hashes, files);
+			hashFileQueue.push(hashFilePair);
+		}
 	}
 
 	// Only upload if project and all methods are valid to prevent partial uploads.
@@ -155,6 +201,21 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	{
 		threads[i].join();
 	}
+	threads.clear();
+
+	for (int i = 0; i < MAX_THREADS; i++)
+	{
+		threads.push(std::thread(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread, this, ref(hashFileQueue), ref(queueLock), project, prevProject.version);
+		if (errno != 0)
+		{
+			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
+		}
+	}
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].join();
+	}
+
 	if (errno == 0)
 	{
 		return HTTPStatusCodes::success("Your project has been successfully added to the database.");
@@ -165,7 +226,8 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	}
 }
 
-void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion)
+void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, 
+												long long prevVersion, std::vector<Hash> unchangedHashes)
 {
 	while (true)
 	{
@@ -182,6 +244,33 @@ void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, s
 		if (errno != 0)
 		{
 			errno = ENETUNREACH;
+		}
+	}
+}
+
+std::vector<Hash> DatabaseRequestHandler::singleUpdateUnchangedFilesThread(std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> &hashFiles, std::mutex &queueLock, ProjectIn project, long long prevVersion)
+{
+	std::vector<Hash> hashes;
+	while (true)
+	{
+		queueLock.lock();
+		if (hashFiles.size() <= 0)
+		{
+			queueLock.unlock();
+			return hashes;
+		}
+		std::pair<std::vector<Hash>, std::vector<std::string>> hashFile = hashFiles.front();
+		hashFiles.pop();
+		queueLock.unlock();
+		std::vector<Hash> unchangedHashes = updateUnchangedFilesWithRetry(hashFile, project, prevVersion);
+		if (errno != 0)
+		{
+			errno = ENETUNREACH;
+			return {};
+		}
+		for (int j = 0; j < unchangedHashes.size(); j++)
+		{
+			hashes.push_back(unchangedHashes[j]);
 		}
 	}
 }
@@ -965,6 +1054,28 @@ void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn proje
 		errno = ENETUNREACH;
 		return;
 	}
+}
+
+std::vector<Hash> DatabaseRequestHandler::updateUnchangedFilesWithRetry(std::pair<std::vector<Hash>, std::vector<std::string>> hashFile, ProjectIn project, long long prevVersion)
+{
+	int retries = 0;
+	std::vector<Hash> hashes;
+	hashes = database->updateUnchangedFiles(hashFile.first, hashFile.second, project, prevVersion);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			hashes = database->updateUnchangedFiles(hashFile.first, hashFile.second, project, prevVersion);
+			if (errno == 0)
+			{
+				return hashes;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+		return {};
+	}
+	return hashes;
 }
 
 

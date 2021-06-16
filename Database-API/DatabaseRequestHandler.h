@@ -15,6 +15,8 @@ Utrecht University within the Software Project course.
 #define HEX_CHARS "0123456789abcdef"
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
 #define MAX_RETRIES 3
+#define HASHES_MAX_SIZE 1000
+#define FILES_MAX_SIZE = 500
 
 /// <summary>
 /// Handles requests towards database.
@@ -275,6 +277,18 @@ private:
 	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion);
 
 	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="hashFiles"></param>
+	/// <param name="queueLock"></param>
+	/// <param name="project"></param>
+	/// <param name="prevVersion"></param>
+	/// <returns></returns>
+	std::vector<Hash>
+	singleUpdateUnchangedFilesThread(std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> &hashFiles,
+									 std::mutex &queueLock, ProjectIn project, long long prevVersion);
+
+	/// <summary>
 	/// Parses a list of authors with ids to a string to be returned.
 	/// </summary>
 	/// <param name="authors">
@@ -410,6 +424,12 @@ private:
 	/// A boolean that is true if and only if the method is present in the previous version of the project.
 	/// </param>
 	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	std::vector<Hash> updateUnchangedFilesWithRetry(std::pair<std::vector<Hash>, std::vector<std::string>> hashFile,
+													ProjectIn project, long long prevVersion);
 
 	/// <summary>
 	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as MAX_RETRIES.
