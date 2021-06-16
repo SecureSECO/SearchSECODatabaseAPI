@@ -50,5 +50,9 @@ target_link_libraries(
 )
 target_link_libraries(tests /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
 
+# Copying it twice, because the pipeline expects it to be somewhere else then running it localy.
+configure_file("dotenvTestfile.txt" "dotenvTestfile.txt" COPYONLY)
+configure_file("dotenvTestfile.txt" "Database-API_Test/dotenvTestfile.txt" COPYONLY)
+
 include(GoogleTest)
 gtest_discover_tests(tests)

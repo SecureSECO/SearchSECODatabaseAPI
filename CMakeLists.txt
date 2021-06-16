@@ -57,9 +57,6 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # Copy .env file
 configure_file(".env" ".env" COPYONLY)
-# Copying it twice, because the pipeline expects it to be somewhere else then running it localy.
-configure_file("dotenvTestfile.txt" "dotenvTestfile.txt" COPYONLY)
-configure_file("dotenvTestfile.txt" "Database-API_Test/dotenvTestfile.txt" COPYONLY)
 
 # Include sub-projects.
 add_subdirectory ("Database-API_Test")
