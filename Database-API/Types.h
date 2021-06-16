@@ -49,9 +49,12 @@ struct MethodOut
 public:
 	Hash hash;
 	ProjectID projectID;
-	Version version;
-	std::string methodName;
 	std::string fileLocation;
+	Version startVersion;
+	std::string startVersionHash;
+	Version endVersion;
+	std::string endVersionHash;
+	std::string methodName;	
 	int lineNumber;
 	std::vector<AuthorID> authorIDs;
 };
@@ -61,7 +64,8 @@ struct MethodId
 public:
 	Hash hash;
 	ProjectID projectId;
-	Version version;
+	std::string fileLocation;
+	Version startVersion;
 };
 
 /// <summary>
@@ -88,6 +92,7 @@ struct ProjectOut
 public:
 	ProjectID projectID;
 	Version version;
+	std::string versionHash;
 	std::string license;
 	std::string name;
 	std::string url;

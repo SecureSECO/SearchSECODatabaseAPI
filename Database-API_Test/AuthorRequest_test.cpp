@@ -299,7 +299,7 @@ TEST(GetMethodByAuthorTests, SingleIdRequest)
 	MethodId method;
 	method.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	method.projectId = 42;
-	method.version = 69;
+	method.startVersion = 69;
 
 	std::vector<MethodId> v;
 	v.push_back(method);
@@ -326,12 +326,12 @@ TEST(GetMethodByAuthorTests, MultipleIdRequest)
 	MethodId method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	method1.projectId = 42;
-	method1.version = 69;
+	method1.startVersion = 69;
 
 	MethodId method2;
 	method2.hash = "06f73d7ab46184c55bf4742b9428a4c0";
 	method2.projectId = 42;
-	method2.version = 420;
+	method2.startVersion = 420;
 
 	std::vector<MethodId> v1;
 	v1.push_back(method1);
@@ -395,7 +395,7 @@ TEST(GetMethodByAuthorTests, MultipleIdOneMatch)
 	MethodId method;
 	method.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	method.projectId = 42;
-	method.version = 69;
+	method.startVersion = 69;
 
 	std::vector<MethodId> v;
 	std::vector<MethodId> v2;
@@ -430,12 +430,12 @@ TEST(GetMethodByAuthorTests, OneIdMultipleMatches)
 	MethodId method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	method1.projectId = 42;
-	method1.version = 69;
+	method1.startVersion = 69;
 
 	MethodId method2;
 	method2.hash = "06f73d7ab46184c55bf4742b9428a4c0";
 	method2.projectId = 42;
-	method2.version = 420;
+	method2.startVersion = 420;
 
 	std::vector<MethodId> v;
 	v.push_back(method1);
@@ -475,17 +475,17 @@ TEST(GetMethodByAuthorTests, MultipleIdsMultipleMatches)
 	MethodId method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
 	method1.projectId = 42;
-	method1.version = 69;
+	method1.startVersion = 69;
 
 	MethodId method2;
 	method2.hash = "06f73d7ab46184c55bf4742b9428a4c0";
 	method2.projectId = 42;
-	method2.version = 420;
+	method2.startVersion = 420;
 
 	MethodId method3;
 	method3.hash = "137fed017b6159acc0af30d2c6b403a5";
 	method3.projectId = 69;
-	method3.version = 420;
+	method3.startVersion = 420;
 
 	std::vector<MethodId> v1;
 	std::vector<MethodId> v2;

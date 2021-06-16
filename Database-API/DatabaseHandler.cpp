@@ -45,7 +45,7 @@ void DatabaseHandler::setPreparedStatements()
 	selectMethods = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ?");
 
 	// Selects all projects with a given projectID and version.
-	selectProject = prepareStatement("SELECT * FROM projectdata.projects WHERE projectID = ? AND version = ?");
+	selectProject = prepareStatement("SELECT * FROM projectdata.projects WHERE projectID = ? AND versiontime = ?");
 	
 	// Selects the previous version of some project.
 	selectPrevProject = prepareStatement("SELECT * FROM projectdata.projects WHERE projectID = ? AND versiontime < ? LIMIT 1");
@@ -61,14 +61,18 @@ void DatabaseHandler::setPreparedStatements()
 									"lineNumber, authors) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 	// Updates a method in the database.
-	updateMethods = prepareStatement("UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?, name = ?, lineNumber = ?, authors = ?"
+	updateMethods = prepareStatement("UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?, name = ?, lineNumber = ?, authors = authors + ?"
+									 "WHERE method_hash = ? AND projectID = ? AND file = ? AND startVersionTime = ?");
+
+	// Updates a method in the database.
+	updateUnchangedMethods = prepareStatement("UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?"
 									 "WHERE method_hash = ? AND projectID = ? AND file = ? AND startVersionTime = ?");
 
 	// Retrieves a method from the database.
 	selectMethod = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
 
 	// Retrieves the methods with specified hash and file.
-	selectUnchangedMethods = prepareStatement("SELECT method_hash, projectid, file, startversiontime, endversiontime, linenumber, name FROM projectdata.methods WHERE method_hash IN ? AND projectID = ? AND file IN ?");
+	selectUnchangedMethods = prepareStatement("SELECT method_hash, projectid, file, startversiontime, endversiontime, linenumber, name, startversionhash, endversionhash FROM projectdata.methods WHERE method_hash IN ? AND projectID = ? AND file IN ?");
 
 	// Inserts a method by author.
 	insertMethodByAuthor = prepareStatement("INSERT INTO projectdata.method_by_author (authorID, hash, version, projectID) VALUES (?, ?, ?, ?)");
@@ -105,28 +109,29 @@ const CassPrepared* DatabaseHandler::prepareStatement(std::string query)
 	return result;
 }
 
-std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, Version version)
+ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version version)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectProject);
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
-	cass_statement_bind_int64_by_name(query, "version", version);
+	cass_statement_bind_int64_by_name(query, "versiontime", version);
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
-	std::vector<ProjectOut> projects = {};
+	ProjectOut project = {};
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);
-		CassIterator *iterator = cass_iterator_from_result(result);
 
-		// Add matches to result list.
-		while(cass_iterator_next(iterator))
+		if (cass_result_row_count(result) >= 1)
 		{
-			const CassRow *row = cass_iterator_get_row(iterator);
-			projects.push_back(getProject(row));
-		}
+			const CassRow *row = cass_result_first_row(result);
 
-		cass_iterator_free(iterator);
+			project = getProject(row);
+		}
+		else
+		{
+			errno = ERANGE;
+		}
 		cass_result_free(result);
 	}
 	else
@@ -142,7 +147,7 @@ std::vector<ProjectOut> DatabaseHandler::searchForProject(ProjectID projectID, V
 	cass_statement_free(query);
 	cass_future_free(resultFuture);
 
-	return projects;
+	return project;
 }
 
 std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
@@ -198,15 +203,11 @@ void DatabaseHandler::addProject(ProjectIn project)
 	CassStatement *query = cass_prepared_bind(insertProject);
 
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
-
 	cass_statement_bind_int64_by_name(query, "versiontime", project.version);
 	cass_statement_bind_string_by_name(query, "versionhash", project.versionHash.c_str());
 	cass_statement_bind_string_by_name(query, "license", project.license.c_str());
-
 	cass_statement_bind_string_by_name(query, "name", project.name.c_str());
-
 	cass_statement_bind_string_by_name(query, "url", project.url.c_str());
-
 	cass_statement_bind_uuid_by_name(query, "ownerid", getAuthorId(project.owner));
 
 	int size = project.hashes.size();
@@ -304,7 +305,7 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 		cass_collection_append_uuid(hashes, hash);
 	}
 
-	cass_statement_bind_collection(query, 0, hashes);
+	cass_statement_bind_collection_by_name(query, "hashes", hashes);
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -453,6 +454,8 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project)
 void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long startVersion)
 {
 	errno = 0;
+
+	std::cout << "Actually updating method" << std::endl;
 	CassStatement *query = cass_prepared_bind(updateMethods);
 
 	CassUuid uuid;
@@ -467,6 +470,8 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 
+	std::cout << "Bound the parameters" << std::endl;
+
 	int size = method.authors.size();
 
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
@@ -480,7 +485,43 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 
 	cass_statement_bind_collection_by_name(query, "authors", authors);
 
+	std::cout << "Bound the authors" << std::endl;
+
 	cass_collection_free(authors);
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Unable to update method: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+
+	cass_future_free(queryFuture);
+}
+
+void DatabaseHandler::updateUnchangedMethod(MethodIn method, ProjectIn project, long long startVersion)
+{
+	errno = 0;
+
+	std::cout << "Actually updating method" << std::endl;
+	CassStatement *query = cass_prepared_bind(updateUnchangedMethods);
+
+	CassUuid uuid;
+	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
+	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
+	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
+	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
+	cass_statement_bind_int64_by_name(query, "startversiontime", startVersion);
+
+	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
+	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -502,10 +543,12 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion)
 {
 	errno = 0;
-
+	std::cout << "Updating unchanged files" << std::endl;
 	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
 
-	cass_statement_bind_int64(query, 1, project.projectID);
+	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
+
+	std::cout << "Bound the project id." << std::endl;
 
 	int size = hashes.size();
 
@@ -522,6 +565,8 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 	cass_collection_free(hashesCollection);
 
+	std::cout << "Bound the hashes" << std::endl;
+
 	size = files.size();
 
 	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
@@ -535,7 +580,11 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 	cass_collection_free(filesCollection);
 
+	std::cout << "Bound the files" << std::endl;
+
 	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	std::cout << "Executed the query" << std::endl;
 
 	std::vector<Hash> resultHashes;
 
@@ -554,15 +603,13 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 			if (endVersion == prevVersion)
 			{
-				long long startVersion = getInt64(row, "startVersionTime");
-				MethodOut methodOut = getMethod(row);
+				std::cout << "Updating method" << std::endl;
+				long long startVersion = getInt64(row, "startversiontime");
 				MethodIn method;
-				method.hash = methodOut.hash;
-				method.fileLocation = methodOut.fileLocation;
-				method.methodName = methodOut.methodName;
-				method.lineNumber = methodOut.lineNumber;
+				method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
+				method.fileLocation = getString(row, "file");
 				updateMethod(method, project, startVersion);
-				resultHashes.push_back(Utility::uuidStringToHash(getUUID(row, "method_hash")));
+				resultHashes.push_back(method.hash);
 			}
 		}
 
@@ -606,10 +653,9 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "hash", uuid);
-
-	cass_statement_bind_int64_by_name(query, "version", project.version);
-
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
+	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
+	cass_statement_bind_int64_by_name(query, "startversiontime", project.version);
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -819,6 +865,7 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	ProjectOut project;
 	project.projectID = getInt64(row, "projectID");
 	project.version = getInt64(row, "versiontime");
+	project.versionHash = getString(row, "versionHash");
 	project.license = getString(row, "license");
 	project.name = getString(row, "name");
 	project.url = getString(row, "url");
@@ -855,9 +902,12 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 
 	method.lineNumber = getInt32(row, "lineNumber");
 	method.projectID = getInt64(row, "projectID");
-	method.version = getInt64(row, "version");
+	method.startVersion = getInt64(row, "startversiontime");
+	method.startVersionHash = getString(row, "startversionhash");
+	method.endVersion = getInt64(row, "endversiontime");
+	method.endVersionHash = getString(row, "endversionhash");
 
-	const CassValue *set = cass_row_get_column(row, 3);
+	const CassValue *set = cass_row_get_column_by_name(row, "authors");
 	CassIterator *iterator = cass_iterator_from_collection(set);
 
 	if (iterator)
@@ -884,7 +934,8 @@ MethodId DatabaseHandler::getMethodId(const CassRow *row)
 
 	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
 	method.projectId = getInt64(row, "projectid");
-	method.version = getInt64(row, "version");
+	method.startVersion = getInt64(row, "startversiontime");
+	method.fileLocation = getString(row, "file");
 
 	return method;
 }

@@ -42,7 +42,7 @@ public:
 	/// consisting of projectID and version. Returns the project corresponding to the input, if it exists.
 	/// If no entry can be found, simply returns an empty vector.
 	/// </summary>
-	virtual std::vector<ProjectOut> searchForProject(ProjectID projectID, Version version);
+	virtual ProjectOut searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
 	/// Retrieves the previous version of the project present in the database.
@@ -153,6 +153,8 @@ private:
 
 	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
 
+	void updateUnchangedMethod(MethodIn method, ProjectIn project, long long startVersion);
+
 	/// <summary>
 	/// Retrieves the author ID corresponding to the given author.
 	/// Also creates a new author if the author does not yet exist.
@@ -217,6 +219,7 @@ private:
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
 	const CassPrepared *updateMethods;
+	const CassPrepared *updateUnchangedMethods;
 	const CassPrepared *selectMethod;
 	const CassPrepared *selectUnchangedMethods;
 	const CassPrepared *insertMethodByAuthor;

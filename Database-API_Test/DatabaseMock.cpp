@@ -20,7 +20,7 @@ public:
 	MOCK_METHOD(void, connect, (std::string ip, int port), ());
 	MOCK_METHOD(void, addProject, (ProjectIn project), ());
 	MOCK_METHOD(void, addMethod, (MethodIn method, ProjectIn project), ());
-	MOCK_METHOD(std::vector<ProjectOut>, searchForProject, (ProjectID projectID, Version version), ());
+	MOCK_METHOD(ProjectOut, searchForProject, (ProjectID projectID, Version version), ());
 	MOCK_METHOD(std::vector<MethodOut>, hashToMethods, (std::string hash), ());
 	MOCK_METHOD(std::string, authorToId, (Author author), ());
 	MOCK_METHOD(Author, idToAuthor, (std::string id), ());

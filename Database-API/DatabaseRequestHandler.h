@@ -443,7 +443,7 @@ private:
 	/// If it succeeds, it returns the projects and puts the errno on 0.
 	/// If it fails, it returns an empty vector and puts the errno on ENETUNREACH.
 	/// </summary>
-	std::vector<ProjectOut> searchForProjectWithRetry(ProjectID projectID, Version version);
+	ProjectOut searchForProjectWithRetry(ProjectID projectID, Version version);
 
 	/// <summary>
 	/// Tries to get authorID from the database given an author, if it fails it retries like above.
