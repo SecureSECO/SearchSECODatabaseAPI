@@ -44,6 +44,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 					  {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
 					   "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
 		requestChars,
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
@@ -100,6 +102,8 @@ TEST(CheckUploadRequest, HashConversionError)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
 					   "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5xx", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 

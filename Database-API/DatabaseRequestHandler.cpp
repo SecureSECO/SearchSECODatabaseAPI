@@ -126,7 +126,11 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		prevProject = database->searchForProject(project.projectID, prevVersion);
 		if (errno != 0)
 		{
-			return HTTPStatusCodes::serverError("Could not find the previous project.");
+			if (errno == ERANGE)
+			{
+				return HTTPStatusCodes::serverError("The database does not contain the provided version of the database.");
+			}
+			return HTTPStatusCodes::serverError("An error occurred while trying to locate the previous version of the project.");
 		}
 	}
 
@@ -1141,6 +1145,7 @@ std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 
 ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
 {
+	errno = 0;
 	int retries = 0;
 	ProjectOut project;
 	project = database->searchForProject(projectID, version);
@@ -1149,7 +1154,7 @@ ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID
 		while (retries < MAX_RETRIES)
 		{
 			project = database->searchForProject(projectID, version);
-			if (errno == 0)
+			if (errno == 0 || errno == ERANGE)
 			{
 				return project;
 			}

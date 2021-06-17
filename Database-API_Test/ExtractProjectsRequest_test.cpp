@@ -82,7 +82,7 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 	ProjectOut p3;
 	std::string expected3 = "No results found.";
 
-	EXPECT_CALL(database, searchForProject(projectID3, version3)).WillOnce(testing::Return(p3));
+	EXPECT_CALL(database, searchForProject(projectID3, version3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, p3));
 	std::string output3 = handler.handleRequest("extp", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
