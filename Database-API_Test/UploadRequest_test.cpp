@@ -88,6 +88,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 		requestChars,
 		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
 		requestChars,
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
@@ -112,6 +113,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 		requestChars,
 		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
 		requestChars,
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
@@ -150,6 +152,7 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "3", "Author 1",
 					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
@@ -202,6 +205,7 @@ TEST(UploadRequest, InvalidProjectID)
 					  {"xabs398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
 					   "MyUrl", "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
 	RequestHandler handler;
@@ -218,6 +222,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 					  {"398798723", "xabs1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
 					   "MyUrl", "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
 	RequestHandler handler;
@@ -233,6 +238,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
@@ -250,6 +256,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "2", "Author 1",
 					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
@@ -269,6 +276,7 @@ TEST(UploadRequest, InvalidMethodHash)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "3", "Author 1",
 					   "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
@@ -292,6 +300,7 @@ TEST(UploadRequest, InvalidMethodLine)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "not_an_integer", "3",
 					   "Author 1", "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
@@ -312,6 +321,7 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
 					   "Owner", "owner@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "not_an_integer",
 					   "Author 1", "author1@mail.com", "Author 2", "author2@mail.com", "Author 3", "author3@mail.com"},
