@@ -222,7 +222,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	}
 }
 
-std::vector<std::vector<std::string>> toChunks(std::vector<std::string> list, int chunkSize)
+std::vector<std::vector<std::string>> DatabaseRequestHandler::toChunks(std::vector<std::string> list, int chunkSize)
 {
 	std::vector<std::string> currentChunk = {};
 	std::vector<std::vector<std::string>> chunks = {};
@@ -244,7 +244,8 @@ std::vector<std::vector<std::string>> toChunks(std::vector<std::string> list, in
 }
 
 std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>>
-cartesianProductQueue(std::vector<std::vector<std::string>> firstList, std::vector<std::vector<std::string>> secondList)
+DatabaseRequestHandler::cartesianProductQueue(std::vector<std::vector<std::string>> firstList,
+											  std::vector<std::vector<std::string>> secondList)
 {
 	std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>> pairQueue;
 	for (std::vector<std::string> firstElem : firstList)
