@@ -466,5 +466,11 @@ private:
 	/// </summary>
 	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);
 
+	std::vector<std::vector<std::string>> toChunks(std::vector<std::string> list, int chunkSize)
+
+	std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>>
+	cartesianProductQueue(std::vector<std::vector<std::string>> firstList,
+						  std::vector<std::vector<std::string>> secondList)
+
 	DatabaseHandler *database;
 };
