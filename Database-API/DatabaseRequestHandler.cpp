@@ -178,7 +178,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		threads[i].join();
 	}
 
-	if (!newMethod)
+	if (!newProject)
 	{
 		threads.clear();
 		std::vector<std::future<std::vector<Hash>>> results;
