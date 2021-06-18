@@ -512,8 +512,28 @@ private:
 	/// </summary>
 	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);
 
+	/// <summary>
+	/// Splits a list into multiple chunks of size at most equal to the chunkSize.
+	/// </summary>
+	/// <param name="list">
+	/// The list that has to be splitted into parts.
+	/// </param>
+	/// <param name="chunkSize">
+	/// The maximum size of a single chunk.
+	/// </param>
 	std::vector<std::vector<std::string>> toChunks(std::vector<std::string> list, int chunkSize);
 
+	/// <summary>
+	/// Forms a queue of the elements in the cartesian product of two containers of strings.
+	/// Here the cartesian product of two containers K and L consists of all pairs <k, l>
+	/// where k in K and l in L.
+	/// </summary>
+	/// <param name="firstList">
+	/// The list of the left parts of the pairs. It has the role of the container K.
+	/// </param>
+	/// <param name="secondList">
+	/// The list of the right parts of the pairs. It has the role of the container L.
+	/// </param>
 	std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>>
 	cartesianProductQueue(std::vector<std::vector<std::string>> firstList,
 						  std::vector<std::vector<std::string>> secondList);
