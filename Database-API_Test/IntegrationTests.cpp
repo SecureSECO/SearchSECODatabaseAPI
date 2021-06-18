@@ -908,9 +908,10 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 	}
 }
 
-TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFiles)
+TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 {
 	// Set up.
+	errno = 0;
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
@@ -918,38 +919,155 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFiles)
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
-					  {"1", "5000000010000", "L1a", "P1a", "www.github.com/p1a", "Author 1", "autho1@mail.com"},
+					  {"1", "5000000002000", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	inputChars.push_back(ENTRY_DELIMITER_CHAR);
-	inputChars.push_back(ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(
-		inputChars, {"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Special Author 1", "specialauthor1@mail.com"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string input5_1(inputChars.begin(), inputChars.end());
+	Utility::appendBy(inputChars, "5000000001000", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars,
+					  {"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Special Author 1",
+					   "specialauthor1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input(inputChars.begin(), inputChars.end());
 
-	std::string input5_2 = "2807dac8e9f49ee4a24e14560c5d187a";
-	std::string expectedOutput5_1 = "Your project has been successfully added to the database.";
+	std::string input2 = "2807dac8e9f49ee4a24e14560c5d187a";
+	std::string expectedOutput = "Your project has been successfully added to the database.";
 
-	// Test if the updated project is uploaded correctly. (There should be a new project with projectID 1 and version 5000000010000, 
-	// with both the unchanged method and the added method with the correct start- and endVersion).
+	// Begin test:
+	std::string output = handler.handleRequest("upld", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+
+	// Test if the updated project is uploaded correctly. (There should be a new project with projectID 1 and version
+	// 5000000020000, with only the new method with the correct start- and endVersion).
+	ProjectOut project = database->searchForProject(1, 5000000002000);
+	ASSERT_EQ(project.hashes.size(), 1);
 
 	// First check if the added method contains the correct start- and endVersion.
-	std::vector<char> authorChars = {};
-	Utility::appendBy(authorChars,
-					  {"Special Author 1", "specialauthor1@mail.com"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string author(authorChars.begin(), authorChars.end());
-	std::string authorData = handler.handleRequest("auid", author);
-	std::vector<std::string> authorDataEntries = Utility::splitStringOn(authorData, ENTRY_DELIMITER_CHAR);
-	std::string authorID = Utility::splitStringOn(authorDataEntries, FIELD_DELIMITER_CHAR)[2];
-
-	std::string methodData = handler.handleRequest("chck", "2807dac8e9f49ee4a24e14560c5d187a");
-	std::string methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
+	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::vector<std::string> methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
 
 	ASSERT_EQ(methodDataEntries.size(), 1);
-	
+
 	std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[0], FIELD_DELIMITER_CHAR);
-	
-	ASSERT_EQ(methodDataFields[3], "5000000010000");
-	ASSERT_EQ(methodDataFields[5], "5000000010000");
+
+	ASSERT_EQ(methodDataFields[2], "5000000002000");
+	ASSERT_EQ(methodDataFields[4], "5000000002000");
+}
+
+TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithNonExistingUnchangedFiles)
+{
+	// Set up.
+	errno = 0;
+	DatabaseHandler database;
+	DatabaseConnection jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars,
+					  {"1", "5000000010000", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "5000000001000", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"P1/M1.cpp", "P1/UnknownFile.cpp"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars,
+					  {"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Special Author 1",
+					   "specialauthor1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input(inputChars.begin(), inputChars.end());
+
+	std::string input2 = "2807dac8e9f49ee4a24e14560c5d187a";
+	std::string expectedOutput = "Your project has been successfully added to the database.";
+
+	// Begin test:
+	std::string output = handler.handleRequest("upld", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+
+	// Test if the updated project is uploaded correctly. (There should be a new project with projectID 1 and version
+	// 5000000020000, with both the unchanged method and the added method with the correct start- and endVersion).
+	ProjectOut project = database->searchForProject(1, 5000000020000);
+	ASSERT_EQ(project.hashes.size(), 2);
+
+	// First check if the added method contains the correct start- and endVersion.
+	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::vector<std::string> methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
+
+	ASSERT_EQ(methodDataEntries.size(), 1);
+
+	std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[0], FIELD_DELIMITER_CHAR);
+
+	ASSERT_EQ(methodDataFields[2], "5000000010000");
+	ASSERT_EQ(methodDataFields[4], "5000000010000");
+
+	// Now also check if the unchanged method contained the correct start- and endVersion.
+	methodData = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
+	methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
+
+	for (int i = 0; i < methodDataEntries.size(); i++)
+	{
+		std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[i], FIELD_DELIMITER_CHAR);
+		if (methodDataFields[0] == "1")
+		{
+			ASSERT_EQ(methodDataFields[2], "5000000001000");
+			ASSERT_EQ(methodDataFields[4], "5000000010000");
+		}
+	}
+}
+
+TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithNonExistingUnchangedFile)
+{
+	// Set up.
+	errno = 0;
+	DatabaseHandler database;
+	DatabaseConnection jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars,
+					  {"1", "5000000020000", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "5000000001000", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"P1/M1.cpp", "P1/UnknownFile.cpp"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars,
+					  {"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Special Author 1",
+					   "specialauthor1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input(inputChars.begin(), inputChars.end());
+
+	std::string input2 = "2807dac8e9f49ee4a24e14560c5d187a";
+	std::string input3 = "2c7f46d4f57cf9e66b03213358c7ddb5";
+	std::string expectedOutput = "Your project has been successfully added to the database.";
+
+	// Begin test:
+	std::string output = handler.handleRequest("upld", input, nullptr);
+	ASSERT_EQ(output, expectedOutput);
+
+	// Test if the updated project is uploaded correctly. (There should be a new project with projectID 1 and version
+	// 5000000020000, with both the unchanged method and the added method with the correct start- and endVersion).
+	ProjectOut project = database->searchForProject(1, 5000000020000);
+	ASSERT_EQ(project.hashes.size(), 2);
+
+	// First check if the added method contains the correct start- and endVersion.
+	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::vector<std::string> methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
+
+	ASSERT_EQ(methodDataEntries.size(), 1);
+
+	std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[0], FIELD_DELIMITER_CHAR);
+
+	ASSERT_EQ(methodDataFields[2], "5000000020000");
+	ASSERT_EQ(methodDataFields[4], "5000000020000");
+
+	// Now also check if the unchanged method contained the correct start- and endVersion.
+	methodData = handler.handleRequest("chck", input3, nullptr);
+	methodDataEntries = Utility::splitStringOn(methodData, ENTRY_DELIMITER_CHAR);
+
+	for (int i = 0; i < methodDataEntries.size(); i++)
+	{
+		std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[i], FIELD_DELIMITER_CHAR);
+		if (methodDataFields[0] == "1")
+		{
+			ASSERT_EQ(methodDataFields[2], "5000000001000");
+			ASSERT_EQ(methodDataFields[4], "5000000020000");
+		}
+	}
 }
