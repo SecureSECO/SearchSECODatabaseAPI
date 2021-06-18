@@ -57,6 +57,7 @@ public:
 	std::string methodName;	
 	int lineNumber;
 	std::vector<AuthorID> authorIDs;
+	long long parserVersion;
 };
 
 struct MethodId
@@ -82,6 +83,7 @@ public:
 	std::string url;
 	Author owner;
 	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 
 /// <summary>
@@ -98,5 +100,6 @@ public:
 	std::string url;
 	AuthorID ownerID;
 	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 }

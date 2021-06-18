@@ -51,7 +51,7 @@ public:
 	/// If present, returns the previous version of a project with the same projectID.
 	/// Else, returns an empty project.
 	/// </returns>
-	virtual ProjectOut prevProject(ProjectID projectID, Version version);
+	virtual ProjectOut prevProject(ProjectID projectID);
 
 	/// <summary>
 	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
@@ -60,7 +60,7 @@ public:
 	/// <param name="changed">
 	/// A boolean representing if the method is changed compared to the previous version of the project.
 	/// </param>
-	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion);
+	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject);
 
 	/// <summary>
 	/// Updates the methods in the previous version of the project that are in an unchanged file.
@@ -149,7 +149,7 @@ private:
 	/// </summary>
 	MethodId getMethodId(const CassRow *row);
 
-	void addNewMethod(MethodIn method, ProjectIn project);
+	void addNewMethod(MethodIn method, ProjectIn project, long long parserVersion);
 
 	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
 

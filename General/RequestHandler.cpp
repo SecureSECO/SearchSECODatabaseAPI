@@ -56,6 +56,8 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 		case eGetMethodByAuthor:
 			result = dbrh->handleGetMethodsByAuthorRequest(request);
 			break;
+		case eGetPrevProjectsRequest:
+			result = dbrh->handlePrevProjectsRequest(request);
 		case eUnknown:
 			result = handleUnknownRequest();
 			break;
@@ -122,7 +124,11 @@ eRequestType RequestHandler::getERequestType(std::string requestType)
 	{
 		return eGetMethodByAuthor;
 	}
-	else
+	else if(requestType == "gppr")
+	{
+		return eGetPrevProjectsRequest;
+	}
+	 else
 	{
 		return eUnknown;
 	}

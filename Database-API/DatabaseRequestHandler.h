@@ -31,7 +31,9 @@ public:
 	/// </summary>
 	/// <param name="request">
 	/// The request made by the user. It has the following format (where | is defined as FIELD_DELIMITER_CHAR):
-	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
+	///  prevVersion'\n'
+	///  unchangedfile1|unchangedfile2|...|unchangedfileM`\n`
 	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
 	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
@@ -96,6 +98,22 @@ public:
 	/// "<project2_data>'\n'...'\n'<projectN_data>".
 	/// </returns>
 	std::string handleExtractProjectsRequest(std::string request);
+
+	/// <summary>
+	/// Handles requests wanting to obtain project data from a the database from a previous version given their 
+	/// projectID.
+	/// </summary>
+	/// <param name="request">
+	/// The request made by the user which has the following format
+	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// "projectID_1'\n'...'\n'projectID_M".
+	/// </param>
+	/// <returns>
+	/// The relevant projects found in the database in string format as follows:
+	/// "projectID_1|version_1|license_1|project_name_1|url_1|owner_id1'\n'"
+	/// "<project2_data>'\n'...'\n'<projectN_data>".
+	/// </returns>
+	std::string handlePrevProjectsRequest(std::string request);
 
 	/// Handles a requests for retrieving the ids by the give authors.
 	/// </summary>
@@ -233,6 +251,18 @@ private:
 	/// </returns>
 	std::vector<ProjectOut> getProjects(std::queue<std::pair<ProjectID, Version>> keys);
 
+	
+	/// <summary>
+	/// Retrieves the previous projects corresponding to the projectKeys given as input (in a queue) using the database.
+	/// </summary>
+	/// <param name="keys">
+	/// A queue of projectKeys, which are pairs of projectIDs and versions.
+	/// </param>
+	/// <returns>
+	/// All projects in the database corresponding to one of the keys in the queue 'keys'.
+	/// </returns>
+	std::vector<ProjectOut> getPrevProjects(std::queue<ProjectID> projectQueue);
+
 	/// <summary>
 	/// Handles a single thread of checking hashes with the database.
 	/// </summary>
@@ -262,6 +292,20 @@ private:
 	std::vector<ProjectOut> singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &projectKeyQueue, std::mutex &queueLock);
 
 	/// <summary>
+	/// Handles a single thread of checking hashes (of the previous projects for the given versions) with the database.
+	/// </summary>
+	/// <param name="hashes">
+	/// The queue with hashes that have to be checked.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock for the queue with hashes.
+	/// </param>
+	/// <returns>
+	/// The previous projects found by a single thread inside a vector.
+	/// </returns>
+	std::vector<ProjectOut> singlePrevProjectThread(std::queue<ProjectID> &projectIDs, std::mutex &queueLock);
+
+	/// <summary>
 	/// Handles a single thread of uploading methods to the database.
 	/// </summary>
 	/// <param name="hashes">
@@ -274,7 +318,7 @@ private:
 	/// The project the methods are part of.
 	/// </param>
 	/// <returns></returns>
-	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion);
+	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion, bool newProject);
 
 	/// <summary>
 	/// 
@@ -423,7 +467,7 @@ private:
 	/// <param name="present">
 	/// A boolean that is true if and only if the method is present in the previous version of the project.
 	/// </param>
-	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion);
+	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, bool newProject);
 
 	/// <summary>
 	/// 

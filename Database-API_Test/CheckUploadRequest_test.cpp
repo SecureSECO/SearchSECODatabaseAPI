@@ -54,7 +54,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 
 	std::vector<char> outputChars = {};
 	Utility::appendBy(outputChars,
-					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "Method1", "MyProject/Method1.cpp", "1", "1",
+					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "0",
+					   "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "Method1", "MyProject/Method1.cpp", "1", "1",
 					   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
@@ -88,7 +89,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	v.push_back(method1out);
 
 	EXPECT_CALL(database, addProject(projectEqual(project))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project))).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, true)).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));

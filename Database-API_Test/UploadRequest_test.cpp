@@ -97,7 +97,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
@@ -136,9 +136,9 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1))).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
@@ -177,9 +177,9 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2))).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
