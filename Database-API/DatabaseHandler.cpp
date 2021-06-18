@@ -154,7 +154,7 @@ ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version versio
 std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	errno = 0;
-	CassStatement* query = cass_prepared_bind(selectMethod);
+	CassStatement* query = cass_prepared_bind(selectMethods);
 
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(hash).c_str(), &uuid);
@@ -267,6 +267,10 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID)
 		{
 			const CassRow *row = cass_result_first_row(result);
 			project = getProject(row);
+		}
+		else
+		{
+			errno = ERANGE;
 		}
 		cass_result_free(result);
 	}
@@ -406,7 +410,6 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long parserVersion)
 {
 	std::cout << "Actually adding method" << std::endl;
-	std::cout << "Actually adding method blablabla" << std::endl;
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
@@ -414,13 +417,13 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
+	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 	cass_statement_bind_int64_by_name(query, "startversiontime", project.version);
+	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
 	cass_statement_bind_string_by_name(query, "startversionhash", project.versionHash.c_str());
 	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
 	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
-	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
-	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 	cass_statement_bind_int64_by_name(query, "parserversion", parserVersion);
 

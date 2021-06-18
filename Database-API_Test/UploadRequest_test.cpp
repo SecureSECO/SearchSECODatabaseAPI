@@ -17,7 +17,7 @@ std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5",
 			"59bf62494932580165af0451f76be3e9" };
 ProjectIn projectT1 = { .projectID = 0, .version = 0, .versionHash = "42ea965b1f326f878bebcda51c7fb4b2", .license = "MyLicense",
 			.name = "MyProject", .url = "MyUrl", .owner = owner,
-			.hashes = { } };
+			.hashes = { }, .parserVersion = 1};
 MethodIn methodT1_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
 			.methodName = "Method1",
 			.fileLocation = "MyProject/Method1.cpp",
@@ -37,7 +37,7 @@ Author author2 = { .name = "Author 2", .mail = "author2@mail.com" };
 Author author3 = { .name = "Author 3", .mail = "author3@mail.com" };
 ProjectIn projectT2 = { .projectID = 398798723, .version = 1618222334, .versionHash = "05a647eeb4954187fa5ac00942054cdc",
 			  .license = "MyLicense", .name = "MyProject",
-			  .url = "MyUrl", .owner = owner, .hashes = { } };
+			  .url = "MyUrl", .owner = owner, .hashes = { }, .parserVersion = 1 };
 MethodIn methodT2_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
 			.methodName = "Method1",
 			.fileLocation = "MyProject/Method1.cpp",
@@ -60,7 +60,8 @@ MATCHER_P(projectEqual, project, "")
 		&& arg.name       == project.name
 		&& arg.url        == project.url
 		&& arg.owner.name == project.owner.name
-		&& arg.owner.mail == project.owner.mail;
+		&& arg.owner.mail == project.owner.mail
+		&& arg.parserVersion == project.parserVersion;
 }
 
 // Checks if two methods are equal. I.e., they have the same contents.
@@ -86,7 +87,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(
 		requestChars,
-		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com", "1"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -97,7 +98,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
@@ -112,7 +113,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(
 		requestChars,
-		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com", "1"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -136,9 +137,9 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, true)).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1), -1, true)).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1), -1, 1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, 1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
@@ -152,7 +153,7 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -177,9 +178,9 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2), -1, true)).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2), -1, true)).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2), -1, 1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2), -1, 1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, 1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
@@ -191,7 +192,7 @@ TEST(UploadRequest, InvalidProjectSize)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner", "stars@mail.com"},
+					   "Owner", "owner", "stars@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -208,7 +209,7 @@ TEST(UploadRequest, InvalidProjectID)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"xabs398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
-					   "MyUrl", "Owner", "owner@mail.com"},
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -226,7 +227,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "xabs1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
-					   "MyUrl", "Owner", "owner@mail.com"},
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -243,7 +244,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -262,7 +263,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -283,7 +284,7 @@ TEST(UploadRequest, InvalidMethodHash)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -308,7 +309,7 @@ TEST(UploadRequest, InvalidMethodLine)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -330,7 +331,7 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com"},
+					   "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);

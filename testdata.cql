@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS projectData.methods
   name text,
   lineNumber int,
   authors set<UUID>,
+  parserversion bigint,
   PRIMARY KEY ((method_hash), projectID, file, startVersionTime)
 )
 WITH CLUSTERING ORDER BY (projectID ASC, file ASC, startVersionTime DESC);
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS projectData.projects
   url text,
   ownerID UUID,
   hashes set<UUID>,
+  parserversion bigint,
   PRIMARY KEY ((projectID), versionTime)
 )
 WITH CLUSTERING ORDER BY (versionTime DESC);
@@ -71,80 +73,80 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
 ) 
 WITH CLUSTERING ORDER BY (priority DESC);
 
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 1, 5000000000000, '9e350b124404f40a114509910619f641', 5000000000000, '9e350b124404f40a114509910619f641', 'M1', 'P1/M1.cpp', 1, 
-{ 68bd2db6-fe91-47d2-a134-cf82b104f547 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ 68bd2db6-fe91-47d2-a134-cf82b104f547 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (06f73d7a-b461-84c5-5bf4-742b9428a4c0, 2, 5000000001000, '9d075dfba5c2a903ff1f542ea729ae8b', 5000000001000, '9d075dfba5c2a903ff1f542ea729ae8b', 'M2', 'P2/M2.cpp', 1, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547, b2217c08-06eb-4a57-b977-7c6d72299301, 
-  5a10bb4d-97b6-44d8-a135-f1432424a61c });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+  5a10bb4d-97b6-44d8-a135-f1432424a61c }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (137fed01-7b61-59ac-c0af-30d2c6b403a5, 3, 5000000002000, '2d8b3b65caf0e9168a39be667be24861', 5000000004000, '8a04d1e679548a35a6feec48321cac81', 'M3', 'P3/M3.cpp', 1, 
-{ b2217c08-06eb-4a57-b977-7c6d72299301 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ b2217c08-06eb-4a57-b977-7c6d72299301 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (23920776-594c-85fd-c30c-d96f928487f1, 3, 5000000003000, 'e7b60fac745437880c1ccb8c4dd29f0f', 5000000004000, '8a04d1e679548a35a6feec48321cac81', 'M4', 'P3/M4.cpp', 21, 
-{ 68bd2db6-fe91-47d2-a134-cf82b104f547, b2217c08-06eb-4a57-b977-7c6d72299301 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ 68bd2db6-fe91-47d2-a134-cf82b104f547, b2217c08-06eb-4a57-b977-7c6d72299301 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 3, 5000000004000, '8a04d1e679548a35a6feec48321cac81', 5000000004000, '8a04d1e679548a35a6feec48321cac81', 'M5', 'P3/M5.cpp', 41, 
-{ 68bd2db6-fe91-47d2-a134-cf82b104f547, d7dd6d67-76ca-414e-85c2-59adad13bd23 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ 68bd2db6-fe91-47d2-a134-cf82b104f547, d7dd6d67-76ca-414e-85c2-59adad13bd23 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (06f73d7a-b461-84c5-5bf4-742b9428a4c0, 4, 5000000005000, '70966cd9481793ab85a409374a66f36b', 5000000006000, '6415e258c077e5cf3f98982d8050e941', 'M6', 'P4/M6.cpp', 3, 
-{ e39e0872-6856-4fa0-8d9a-278728362f43 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ e39e0872-6856-4fa0-8d9a-278728362f43 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (8811e6be-db87-e90c-ef39-de1179f3bd2e, 4, 5000000006000, '6415e258c077e5cf3f98982d8050e941', 5000000006000, '6415e258c077e5cf3f98982d8050e941', 'M7', 'P4/M7.cpp', 23, 
-{ f95ffc6c-aa97-40d6-b709-cb4823955213 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ f95ffc6c-aa97-40d6-b709-cb4823955213 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (23920776-594c-85fd-c30c-d96f928487f1, 5, 5000000007000, 'e35706965bfee40184ae6b4f38c1c81d', 5000000009000, '63308e3dbf0aba36ecaf66d5f51b6d2b', 'M8', 'P5/M8.cpp', 1, 
-{ e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 5, 5000000008000, '9120d38cee8bea61f5759d40a4b8e19e', 5000000009000, '63308e3dbf0aba36ecaf66d5f51b6d2b', 'M9', 'P5/M9.cpp', 41, 
-{ f95ffc6c-aa97-40d6-b709-cb4823955213 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES 
+{ f95ffc6c-aa97-40d6-b709-cb4823955213 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (8811e6be-db87-e90c-ef39-de1179f3bd2e, 5, 5000000009000, '63308e3dbf0aba36ecaf66d5f51b6d2b', 5000000009000, '63308e3dbf0aba36ecaf66d5f51b6d2b', 'M10', 'P5/M10.cpp', 61, 
-{ 2a84cf5a-9554-4800-bb87-6dda6715fa12 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES
+{ 2a84cf5a-9554-4800-bb87-6dda6715fa12 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES
 (261a8712-b146-7bd2-6844-de6c43c9f8f1, 101, 5000000008000, '429ae78a6b15630c0ce5114d02b0c55f', 5000000009000, '8be58ce8426f941e1f856bf5e4e14492', 'M101', 'P101/M101.cpp', 1,
-{ e39e0872-6856-4fa0-8d9a-278728362f43 });
-INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors) VALUES
+{ e39e0872-6856-4fa0-8d9a-278728362f43 }, 1);
+INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES
 (ee9ae09b-3a21-12f5-fd2a-63847b74920a, 101, 5000000009000, '8be58ce8426f941e1f856bf5e4e14492', 5000000009000, '8be58ce8426f941e1f856bf5e4e14492', 'M101', 'P101/M101.cpp', 41,
-{ e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 });
+{ e39e0872-6856-4fa0-8d9a-278728362f43, f95ffc6c-aa97-40d6-b709-cb4823955213 }, 1);
 
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (1, 5000000000000, '9e350b124404f40a114509910619f641', 'L1', 'P1', 'www.github.com/p1', 68bd2db6-fe91-47d2-a134-cf82b104f547, 
-{ 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (2, 5000000001000, '9d075dfba5c2a903ff1f542ea729ae8b', 'L2', 'P2', 'www.github.com/p2', 68bd2db6-fe91-47d2-a134-cf82b104f547, 
-{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (3, 5000000002000, '2d8b3b65caf0e9168a39be667be24861', 'L3', 'P3', 'www.github.com/p3', b2217c08-06eb-4a57-b977-7c6d72299301, 
-{ 137fed01-7b61-59ac-c0af-30d2c6b403a5 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 137fed01-7b61-59ac-c0af-30d2c6b403a5 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (3, 5000000003000, 'e7b60fac745437880c1ccb8c4dd29f0f', 'L3', 'P3', 'www.github.com/p3', b2217c08-06eb-4a57-b977-7c6d72299301, 
-{ 137fed01-7b61-59ac-c0af-30d2c6b403a5, 23920776-594c-85fd-c30c-d96f928487f1 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 137fed01-7b61-59ac-c0af-30d2c6b403a5, 23920776-594c-85fd-c30c-d96f928487f1 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (3, 5000000004000, '8a04d1e679548a35a6feec48321cac81', 'L3', 'P3', 'www.github.com/p3', b2217c08-06eb-4a57-b977-7c6d72299301, 
-{ 137fed01-7b61-59ac-c0af-30d2c6b403a5, 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 137fed01-7b61-59ac-c0af-30d2c6b403a5, 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (4, 5000000005000, '70966cd9481793ab85a409374a66f36b', 'L4', 'P4', 'www.github.com/p4', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (4, 5000000006000, '6415e258c077e5cf3f98982d8050e941', 'L4', 'P4', 'www.github.com/p4', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 8811e6be-db87-e90c-ef39-de1179f3bd2e });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 06f73d7a-b461-84c5-5bf4-742b9428a4c0, 8811e6be-db87-e90c-ef39-de1179f3bd2e }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (5, 5000000007000, 'e35706965bfee40184ae6b4f38c1c81d', 'L4', 'P5', 'www.github.com/p5', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ 23920776-594c-85fd-c30c-d96f928487f1 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 23920776-594c-85fd-c30c-d96f928487f1 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (5, 5000000008000, '9120d38cee8bea61f5759d40a4b8e19e', 'L4', 'P5', 'www.github.com/p5', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES 
+{ 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES 
 (5, 5000000009000, '63308e3dbf0aba36ecaf66d5f51b6d2b', 'L4', 'P5', 'www.github.com/p5', e39e0872-6856-4fa0-8d9a-278728362f43, 
-{ 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 8811e6be-db87-e90c-ef39-de1179f3bd2e });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES
+{ 23920776-594c-85fd-c30c-d96f928487f1, 959ee1ee-12e6-d6d8-7a4b-6ee732aed9fc, 8811e6be-db87-e90c-ef39-de1179f3bd2e }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES
 (101, 5000000008000, '429ae78a6b15630c0ce5114d02b0c55f', 'L5', 'P101', 'www.github.com/p101', e39e0872-6856-4fa0-8d9a-278728362f43,
-{ 261a8712-b146-7bd2-6844-de6c43c9f8f1 });
-INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes) VALUES
+{ 261a8712-b146-7bd2-6844-de6c43c9f8f1 }, 1);
+INSERT INTO projectData.projects (projectID, versionTime, versionHash, license, name, url, ownerID, hashes, parserversion) VALUES
 (101, 5000000009000, '8be58ce8426f941e1f856bf5e4e14492', 'L5', 'P101', 'www.github.com/p101', e39e0872-6856-4fa0-8d9a-278728362f43,
-{ 261a8712-b146-7bd2-6844-de6c43c9f8f1, ee9ae09b-3a21-12f5-fd2a-63847b74920a });
+{ 261a8712-b146-7bd2-6844-de6c43c9f8f1, ee9ae09b-3a21-12f5-fd2a-63847b74920a }, 1);
 
 INSERT INTO projectData.method_by_author (authorID, hash, startVersionTime, projectID, file) VALUES
 (68bd2db6-fe91-47d2-a134-cf82b104f547, 2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 5000000000000, 1, 'P1/M1.cpp');

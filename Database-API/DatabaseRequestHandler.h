@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 #include <mutex>
 #include <queue>
 
-#define PROJECT_DATA_SIZE 8
+#define PROJECT_DATA_SIZE 9
 #define METHOD_DATA_MIN_SIZE 5
 #define HEX_CHARS "0123456789abcdef"
 #define UUID_REGEX "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
@@ -73,7 +73,7 @@ public:
 	/// <param name="request">
 	/// The request made by the user, having the following format
 	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
 	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
 	///  method1_author1_name|method1_author1_mail|...|method1_authorM_name|method1_authorM_mail'\n'
 	///  <method2_data>'\n'...'\n'<methodN_data>".
@@ -164,7 +164,7 @@ private:
 	/// </summary>
 	/// <param name="request">
 	/// The relevant data to create the Project. It has the following format:
-	/// "projectID|version|license|project_name|url|author_name|author_mail".
+	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion".
 	/// </param>
 	/// <returns>
 	/// A Project containing all data as provided within request.
@@ -191,7 +191,7 @@ private:
 	/// <param name="request">
 	/// Represents the request made by the user. It has the following format
 	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-	/// "projectID|version|license|project_name|url|author_name|author_mail'\n'
+	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
 	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
 	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
@@ -318,7 +318,8 @@ private:
 	/// The project the methods are part of.
 	/// </param>
 	/// <returns></returns>
-	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, long long prevVersion, bool newProject);
+	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project,
+							long long prevVersion, long long parserVersion, bool newProject);
 
 	/// <summary>
 	/// 
@@ -467,7 +468,8 @@ private:
 	/// <param name="present">
 	/// A boolean that is true if and only if the method is present in the previous version of the project.
 	/// </param>
-	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, bool newProject);
+	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion,
+							bool newProject);
 
 	/// <summary>
 	/// 

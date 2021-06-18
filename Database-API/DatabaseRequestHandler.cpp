@@ -135,7 +135,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		{
 			if (errno == ERANGE)
 			{
-				return HTTPStatusCodes::serverError("The database does not contain the provided version of the database.");
+				return HTTPStatusCodes::serverError("The database does not contain the provided version of the project.");
 			}
 			return HTTPStatusCodes::serverError("An error occurred while trying to locate the previous version of the project.");
 		}
@@ -613,7 +613,7 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 		// authorTotal and all the authorIDs.
 		std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
 												 endVersion, endVersionHash, name,		   fileLocation,
-												 lineNumber, authorTotal, parserVersion};
+												 lineNumber, parserVersion,  authorTotal};
 		dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
 
 		// Append 'chars' by the special dataElements separated by special characters.
@@ -655,6 +655,10 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 	{
 		return HTTPStatusCodes::serverError("Unable to get project(s) from the database.");
 	}
+	if (projects.size() <= 0)
+	{
+		return HTTPStatusCodes::success("No results found.");
+	}
 	return HTTPStatusCodes::success(projectsToString(projects, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR));
 }
 
@@ -677,10 +681,15 @@ std::string DatabaseRequestHandler::handlePrevProjectsRequest(std::string reques
 	}
 	std::vector<ProjectOut> projects = getPrevProjects(projectQueue);
 
-	if (errno != 0)
+	if (errno != 0 && errno != ERANGE)
 	{
 		return HTTPStatusCodes::serverError("Unable to get project(s) from the database.");
 	}
+	if (projects.size() <= 0)
+	{
+		return HTTPStatusCodes::success("No results found.");
+	}
+	
 	return HTTPStatusCodes::success(projectsToString(projects, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR));
 }
 
@@ -701,12 +710,15 @@ std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::que
 		queueLock.unlock();
 
 		ProjectOut newProject = database->prevProject(projectID);
-		if (errno != 0)
+		if (errno != 0 && errno != ERANGE)
 		{
 			errno = ENETUNREACH;
-			return {};
+			return projects;
 		}
-		projects.push_back(newProject);
+		if (errno != ERANGE)
+		{
+			projects.push_back(newProject);
+		}
 	}
 }
 
@@ -732,7 +744,10 @@ std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::q
 		{
 			return projects;
 		}
-		projects.push_back(newProject);
+		if (errno != ERANGE)
+		{
+			projects.push_back(newProject);
+		}
 	}
 }
 
@@ -753,7 +768,7 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 		std::string hashesTotal = std::to_string(hashes.size());
 		std::string parserVersion = std::to_string(projects[i].parserVersion);
 
-		std::vector<std::string> dataElements = {projectID, version, versionHash, license, name, url, ownerID};
+		std::vector<std::string> dataElements = {projectID, version, versionHash, license, name, url, ownerID, parserVersion};
 		Utility::appendBy(chars, dataElements, dataDelimiter, projectDelimiter);
 	}
 	std::string result(chars.begin(), chars.end());
@@ -1188,12 +1203,12 @@ void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn proje
 	int retries = 0;
 	database->addMethod(method, project, prevVersion, parserVersion, newProject);
 
-	if (errno != 0)
+	if (errno != 0 && errno != ERANGE)
 	{
 		while (retries < MAX_RETRIES)
 		{
 			database->addMethod(method, project, prevVersion, parserVersion, newProject);
-			if (errno == 0)
+			if (errno == 0 && errno != ERANGE)
 			{
 				return;
 			}

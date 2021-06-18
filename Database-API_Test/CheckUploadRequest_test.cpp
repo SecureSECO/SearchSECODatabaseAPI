@@ -42,7 +42,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
-					   "owner@mail.com"},
+					   "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -56,7 +56,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	Utility::appendBy(outputChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "0",
 					   "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "Method1", "MyProject/Method1.cpp", "1", "1",
-					   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
@@ -70,7 +70,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 							.endVersionHash = "dfa59d94e44092eddd3cfba13f032aaa035de3d0",
 							.methodName = "Method1",
 							.lineNumber = 1,
-							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
+							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+							.parserVersion = 1,};
 	Author author = {.name = "Owner", .mail = "owner@mail.com"};
 	ProjectIn project = {.projectID = 0,
 						 .version = 0,
@@ -79,7 +80,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 						 .name = "MyProject",
 						 .url = "MyUrl",
 						 .owner = author,
-						 .hashes = {}};
+						 .hashes = {},
+						 .parserVersion = 1};
 	MethodIn method1in = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
 						  .methodName = "Method1",
 						  .fileLocation = "MyProject/Method1.cpp",
@@ -89,7 +91,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	v.push_back(method1out);
 
 	EXPECT_CALL(database, addProject(projectEqual(project))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, true)).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
@@ -102,7 +104,8 @@ TEST(CheckUploadRequest, HashConversionError)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
-					   "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+					   "owner@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5xx", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);

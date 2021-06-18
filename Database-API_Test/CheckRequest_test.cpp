@@ -17,7 +17,8 @@ MethodOut testMethod1 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
 						 .endVersionHash = "1e134519e9365151e9fa7e4aadf981e115a74421",
 						 .methodName = "TestMethod1",
 						 .lineNumber = 69,
-						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+						 .parserVersion = 1};
 
 MethodOut testMethod2 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
 						 .projectID = 3,
@@ -28,7 +29,8 @@ MethodOut testMethod2 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
 						 .endVersionHash = "1e134519e9365151e9fa7e4aadf981e115a74422",
 						 .methodName = "TestMethod2",
 						 .lineNumber = 42,
-						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"}};
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+						 .parserVersion = 1};
 
 MethodOut testMethod3 = {.hash = "137fed017b6159acc0af30d2c6b403a5",
 						 .projectID = 5,
@@ -40,7 +42,8 @@ MethodOut testMethod3 = {.hash = "137fed017b6159acc0af30d2c6b403a5",
 						 .methodName = "TestMethod3",
 						 .lineNumber = 420,
 						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
-									   "5a726b9e-6173-4fc1-831b-54f98f6e760c"}};
+									   "5a726b9e-6173-4fc1-831b-54f98f6e760c"},
+						 .parserVersion = 1};
 
 MethodOut testMethod4 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
 						 .projectID = 7,
@@ -51,7 +54,8 @@ MethodOut testMethod4 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",
 						 .endVersionHash = "1e134519e9465151e9fa7e4aadf981e115a84422",
 						 .methodName = "TestMethod4",
 						 .lineNumber = 69,
-						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+						 .parserVersion = 1};
 
 MethodOut testMethod5 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
 						 .projectID = 9,
@@ -62,7 +66,8 @@ MethodOut testMethod5 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
 						 .endVersionHash = "1e134519e9765151e9fa7e4aadf981e115a84422",
 						 .methodName = "TestMethod5",
 						 .lineNumber = 42,
-						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"}};
+						 .authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+						 .parserVersion = 1};
 
 // Checks if the program works when a check request is sent providing a single hash.
 TEST(CheckRequestTests, SingleHashRequest)
@@ -78,7 +83,7 @@ TEST(CheckRequestTests, SingleHashRequest)
 	Utility::appendBy(outputChars1,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "1e134519e9365151e9fa7e4aadf981e115a74421", "2",
 					   "1e134519e9365151e9fa7e4aadf981e115a74421", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 
@@ -118,21 +123,21 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	Utility::appendBy(outputChars1,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "1e134519e9365151e9fa7e4aadf981e115a74421", "2",
 					   "1e134519e9365151e9fa7e4aadf981e115a74421", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2,
 					  {"06f73d7ab46184c55bf4742b9428a4c0", "3", "4", "1e134519e9365151e9fa7e4aadf981e115a74422", "4",
 					   "1e134519e9365151e9fa7e4aadf981e115a74422", "TestMethod2", "Test3/Test4/TestFile2.cpp", "42",
-					   "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+					   "1", "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
 	std::vector<char> outputChars3 = {};
 	Utility::appendBy(outputChars3,
 					  {"137fed017b6159acc0af30d2c6b403a5", "5", "6", "1e134519e9365151e9fa7e4aadf981e115a84422", "6",
 					   "1e134519e9365151e9fa7e4aadf981e115a84422", "TestMethod3", "Test5/Test6/TestFile3.cpp", "420",
-					   "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
+					   "1", "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
 					   "5a726b9e-6173-4fc1-831b-54f98f6e760c"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output3(outputChars3.begin(), outputChars3.end());
@@ -184,21 +189,21 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 	Utility::appendBy(outputChars1,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "1e134519e9365151e9fa7e4aadf981e115a74421", "2",
 					   "1e134519e9365151e9fa7e4aadf981e115a74421", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2,
 					  {"06f73d7ab46184c55bf4742b9428a4c0", "3", "4", "1e134519e9365151e9fa7e4aadf981e115a74422", "4",
 					   "1e134519e9365151e9fa7e4aadf981e115a74422", "TestMethod2", "Test3/Test4/TestFile2.cpp", "42",
-					   "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+					   "1", "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
 	std::vector<char> outputChars3 = {};
 	Utility::appendBy(outputChars3,
 					  {"137fed017b6159acc0af30d2c6b403a5", "5", "6", "1e134519e9365151e9fa7e4aadf981e115a84422", "6",
 					   "1e134519e9365151e9fa7e4aadf981e115a84422", "TestMethod3", "Test5/Test6/TestFile3.cpp", "420",
-					   "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
+					   "1", "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
 					   "5a726b9e-6173-4fc1-831b-54f98f6e760c"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output3(outputChars3.begin(), outputChars3.end());
@@ -227,14 +232,14 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 	Utility::appendBy(outputChars1,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "1e134519e9365151e9fa7e4aadf981e115a74421", "2",
 					   "1e134519e9365151e9fa7e4aadf981e115a74421", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 	std::vector<char> outputChars4 = {};
 	Utility::appendBy(outputChars4,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "7", "8", "1e134519e9465151e9fa7e4aadf981e115a84422", "8",
 					   "1e134519e9465151e9fa7e4aadf981e115a84422", "TestMethod4", "Test7/Test8/TestFile4.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output4(outputChars4.begin(), outputChars4.end());
 
@@ -275,21 +280,21 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	Utility::appendBy(outputChars1,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "2", "1e134519e9365151e9fa7e4aadf981e115a74421", "2",
 					   "1e134519e9365151e9fa7e4aadf981e115a74421", "TestMethod1", "Test1/Test2/TestFile1.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output1(outputChars1.begin(), outputChars1.end());
 	std::vector<char> outputChars2 = {};
 	Utility::appendBy(outputChars2,
 					  {"06f73d7ab46184c55bf4742b9428a4c0", "3", "4", "1e134519e9365151e9fa7e4aadf981e115a74422", "4",
 					   "1e134519e9365151e9fa7e4aadf981e115a74422", "TestMethod2", "Test3/Test4/TestFile2.cpp", "42",
-					   "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+					   "1", "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
 	std::vector<char> outputChars3 = {};
 	Utility::appendBy(outputChars3,
 					  {"137fed017b6159acc0af30d2c6b403a5", "5", "6", "1e134519e9365151e9fa7e4aadf981e115a84422", "6",
 					   "1e134519e9365151e9fa7e4aadf981e115a84422", "TestMethod3", "Test5/Test6/TestFile3.cpp", "420",
-					   "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
+					   "1", "3", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "fa37bbe0-ef68-4653-800c-d5bf30dcc7ef",
 					   "5a726b9e-6173-4fc1-831b-54f98f6e760c"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output3(outputChars3.begin(), outputChars3.end());
@@ -297,14 +302,14 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	Utility::appendBy(outputChars4,
 					  {"2c7f46d4f57cf9e66b03213358c7ddb5", "7", "8", "1e134519e9465151e9fa7e4aadf981e115a84422", "8",
 					   "1e134519e9465151e9fa7e4aadf981e115a84422", "TestMethod4", "Test7/Test8/TestFile4.cpp", "69",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "1", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output4(outputChars4.begin(), outputChars4.end());
 	std::vector<char> outputChars5 = {};
 	Utility::appendBy(outputChars5,
 					  {"06f73d7ab46184c55bf4742b9428a4c0", "9", "10", "1e134519e9765151e9fa7e4aadf981e115a84422", "10",
 					   "1e134519e9765151e9fa7e4aadf981e115a84422", "TestMethod5", "Test9/Test10/TestFile5.cpp", "42",
-					   "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
+					   "1", "2", "f1a028d7-3845-41df-bec1-2e16c49e4c35", "8b55fa97-5442-48f7-969c-793664388264"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output5(outputChars5.begin(), outputChars5.end());
 
