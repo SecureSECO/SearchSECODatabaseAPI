@@ -204,32 +204,10 @@ INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES
 INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES 
 (41ab7373-8f24-4a03-83dc-621036d99f34, 'Author2', 'author2@mail.com');
 
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES
-(68bd2db6-fe91-47d2-a134-cf82b104f547, 'Author 1', 'author1@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(b2217c08-06eb-4a57-b977-7c6d72299301, 'Author 2', 'author2@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(5a10bb4d-97b6-44d8-a135-f1432424a61c, 'Author 3', 'author3@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(d7dd6d67-76ca-414e-85c2-59adad13bd23, 'Author 4', 'author4@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(e39e0872-6856-4fa0-8d9a-278728362f43, 'Author 5', 'author5@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(f95ffc6c-aa97-40d6-b709-cb4823955213, 'Author 6', 'author6@mail.com');
-INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES 
-(2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
-
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES 
 (5bcd0d08-ded0-4134-b165-1c7d0352c15e, 500000000000000, 'https://github.com/zavg/linux-0.01', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
 (61c9d732-1f98-40af-b201-3b20fbf7a6db, 400000000000000, 'https://github.com/304471720/CSAPI', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
 (2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1);
-
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(47919e8f-7103-48a3-9514-3f2d9d49ac61, 'Author1', 'author1@mail.com');
-INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
-(41ab7373-8f24-4a03-83dc-621036d99f34, 'Author2', 'author2@mail.com');
 
