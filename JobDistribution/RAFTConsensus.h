@@ -12,7 +12,6 @@ Utrecht University within the Software Project course.
 
 #include "Networking.h"
 
-#define LEADER_IPS { {"131.211.31.153", "8003"}}
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
 #define LEADER_DROPOUT_WAIT_TIME 1000000
@@ -31,8 +30,9 @@ public:
 	/// If none of them respond, we will assume we are the first and assume the role of leader.
 	/// </summary>
 	/// <param name="assumeLeader">If set to true, will skip the connect phase and assume that this node is the leader.</param>
-	void start(RequestHandler* requestHandler, bool assumeLeader = false, 
-		std::vector<std::pair<std::string, std::string>> ips = LEADER_IPS);
+	void start(RequestHandler* requestHandler, 
+		std::vector<std::pair<std::string, std::string>> ips, 
+		bool assumeLeader = false);
 
 	/// <summary>
 	/// Returns true if this node is the leader in the network.
@@ -53,6 +53,12 @@ public:
 	/// <returns>If we are the leader, we will return ok and the initial data.
 	///	If we are not the leader, we will return the leader of the network.</returns>
 	virtual std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
+
+	/// <summary>
+	/// Reads the given file and gets the ips out of it.
+	/// </summary>
+	/// <returns>List of ips with port.</returns>
+	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
 private:
 	/// <summary>
 	/// Will try to set up a connection with the leader.

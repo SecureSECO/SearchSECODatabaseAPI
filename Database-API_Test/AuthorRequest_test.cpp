@@ -21,144 +21,6 @@ MATCHER_P(authorEqual, author, "")
 	return arg.name == author.name && arg.mail == author.mail;
 }
 
-// Tests if program correctly retrieves an author id with one request and one (hard-coded) match.
-TEST(GetAuthorIdRequest, OneRequestOneMatch)
-{
-	MockDatabase database;
-	RequestHandler handler;
-	MockRaftConsensus raftConsensus;
-	MockJDDatabase jddatabase;
-	errno = 0;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
-
-	std::string request = "Author" + fieldDel + "author@mail.com";
-	std::vector<char> outputChars = {};
-	Utility::appendBy(outputChars, {"Author", "author@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output(outputChars.begin(), outputChars.end());
-
-	Author author;
-	author.name = "Author";
-	author.mail = "author@mail.com";
-
-	EXPECT_CALL(database, authorToId(authorEqual(author))).WillOnce(testing::Return("47919e8f-7103-48a3-9514-3f2d9d49ac61"));
-	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, HTTPStatusCodes::success(output));
-}
-
-// Tests if program correctly retrieves an author id with one request and no match.
-TEST(GetAuthorIdRequest, OneRequestNoMatch)
-{
-	MockDatabase database;
-	RequestHandler handler;
-	MockRaftConsensus raftConsensus;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
-
-	std::string request = "Author" + fieldDel + "author@mail.com";
-	std::string output = "No results found.";
-	Author author;
-	author.name = "Author";
-	author.mail = "author@mail.com";
-
-	EXPECT_CALL(database, authorToId(authorEqual(author)))
-		.WillOnce(testing::Return(""));
-	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, HTTPStatusCodes::success(output));
-}
-
-// Tests if program correctly retrieves an author id with multiple requests and one match per request.
-TEST(GetAuthorIdRequest, MultipleRequestMultipleMatch)
-{
-	MockDatabase database;
-	RequestHandler handler;
-	MockRaftConsensus raftConsensus;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
-
-	std::vector<char> requestChars = {};
-	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string request(requestChars.begin(), requestChars.end());
-
-	std::vector<char> outputChars1 = {};
-	Utility::appendBy(outputChars1, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(outputChars1, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output1(outputChars1.begin(), outputChars1.end());
-
-	std::vector<char> outputChars2 = {};
-	Utility::appendBy(outputChars2, {"Author2", "author2@mail.com", "41ab7373-8f24-4a03-83dc-621036d99f34"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(outputChars2, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output2(outputChars2.begin(), outputChars2.end());
-
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
-	author2.name = "Author2";
-	author2.mail = "author2@mail.com";
-
-	EXPECT_CALL(database, authorToId(authorEqual(author1)))
-		.WillOnce(testing::Return("47919e8f-7103-48a3-9514-3f2d9d49ac61"));
-	EXPECT_CALL(database, authorToId(authorEqual(author2)))
-		.WillOnce(testing::Return("41ab7373-8f24-4a03-83dc-621036d99f34"));
-	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
-}
-
-// Tests if program correctly retrieves an author id with multiple requests and one match total.
-TEST(GetAuthorIdRequest, MultipleRequestOneMatch)
-{
-	MockDatabase database;
-	RequestHandler handler;
-	MockRaftConsensus raftConsensus;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
-
-	std::vector<char> requestChars = {};
-	Utility::appendBy(requestChars, {"Author1", "author1@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(requestChars, {"Author2", "author2@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string request(requestChars.begin(), requestChars.end());
-
-	std::vector<char> outputChars = {};
-	Utility::appendBy(outputChars, {"Author1", "author1@mail.com", "47919e8f-7103-48a3-9514-3f2d9d49ac61"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	std::string output(outputChars.begin(), outputChars.end());
-
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
-	author2.name = "Author2";
-	author2.mail = "author2@mail.com";
-
-	EXPECT_CALL(database, authorToId(authorEqual(author1)))
-		.WillOnce(testing::Return("47919e8f-7103-48a3-9514-3f2d9d49ac61"));
-	EXPECT_CALL(database, authorToId(authorEqual(author2))).WillOnce(testing::Return(""));
-	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, HTTPStatusCodes::success(output));
-}
-
-// Tests whether an error message is returned when only one argument is given.
-TEST(GetAuthorIdRequest, IncorrectInput)
-{
-	MockDatabase database;
-	RequestHandler handler;
-	MockRaftConsensus raftConsensus;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
-
-	std::string request = "Author";
-	std::string output = "Error parsing author: Author";
-
-	std::string result = handler.handleRequest("auid", request, nullptr);
-	ASSERT_EQ(result, HTTPStatusCodes::clientError(output));
-}
-
 // Tests if program correctly retrieves an author with one request and one (hard-coded) match.
 TEST(GetAuthorRequest, OneRequestOneMatch)
 {
@@ -175,9 +37,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
-	Author author;
-	author.name = "Author";
-	author.mail = "author@mail.com";
+	Author author("Author", "author@mail.com");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
@@ -195,7 +55,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
 	std::string output = "No results found.";
-	Author author;
+	Author author("","");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 	std::string result = handler.handleRequest("idau", request, nullptr);
@@ -229,12 +89,8 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output2(outputChars2.begin(), outputChars2.end());
 
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
-	author2.name = "Author2";
-	author2.mail = "author2@mail.com";
+	Author author1("Author1", "author1@mail.com");
+	Author author2("Author2", "author2@mail.com");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
@@ -260,10 +116,8 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
-	Author author1;
-	author1.name = "Author1";
-	author1.mail = "author1@mail.com";
-	Author author2;
+	Author author1("Author1", "author1@mail.com");
+	Author author2("", "");
 
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));

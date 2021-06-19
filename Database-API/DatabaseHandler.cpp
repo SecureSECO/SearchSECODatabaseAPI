@@ -83,7 +83,7 @@ void DatabaseHandler::setPreparedStatements()
 	insertIdByAuthor = prepareStatement("INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)");
 
 	// Inserts an author into the author_by_id table.
-	insertAuthorById = prepareStatement("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?)");
+	insertAuthorById = prepareStatement("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?) IF NOT EXISTS");
 
 	// Selects an author from the author_by_id table.
 	selectAuthorById = prepareStatement("SELECT * FROM projectdata.author_by_id WHERE authorid = ?");
@@ -205,7 +205,7 @@ void DatabaseHandler::addProject(ProjectIn project)
 	cass_statement_bind_string_by_name(query, "license", project.license.c_str());
 	cass_statement_bind_string_by_name(query, "name", project.name.c_str());
 	cass_statement_bind_string_by_name(query, "url", project.url.c_str());
-	cass_statement_bind_uuid_by_name(query, "ownerid", getAuthorId(project.owner));
+	cass_statement_bind_uuid_by_name(query, "ownerid", createAuthorIfNotExists(project.owner));
 	cass_statement_bind_int64_by_name(query, "parserversion", project.parserVersion);
 
 	int size = project.hashes.size();
@@ -484,7 +484,7 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 
 	for (int i = 0; i < size; i++)
 	{
-		CassUuid authorID = getAuthorId(method.authors[i]);
+		CassUuid authorID = createAuthorIfNotExists(method.authors[i]);
 		cass_collection_append_uuid(authors, authorID);
 		addMethodByAuthor(authorID, method, project);
 	}
@@ -703,7 +703,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
-	Author author;
+	Author author("","");
 
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
@@ -712,9 +712,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 		if (cass_result_row_count(result) >= 1)
 		{
 			const CassRow *row = cass_result_first_row(result);
-
-			author.name = getString(row, "name");
-			author.mail = getString(row, "mail");
+			author = Author(getString(row, "name"), getString(row, "mail"));
 		}
 
 		cass_result_free(result);
@@ -735,90 +733,10 @@ Author DatabaseHandler::idToAuthor(std::string id)
 	return author;
 }
 
-CassUuid DatabaseHandler::getAuthorId(Author author)
+CassUuid DatabaseHandler::createAuthorIfNotExists(Author author)
 {
-	CassUuid authorID = retrieveAuthorId(author);
-	if (errno != 0)
-	{
-		authorID = createAuthor(author);
-		errno = 0;
-	}
-	return authorID;
-}
-
-std::string DatabaseHandler::authorToId(Author author)
-{
-	CassUuid authorID = retrieveAuthorId(author);
-
-	if (errno == 0)
-	{
-		char result[CASS_UUID_STRING_LENGTH];
-		cass_uuid_string(authorID, result);
-		return result;
-	}
-	return "";
-}
-
-CassUuid DatabaseHandler::retrieveAuthorId(Author author)
-{
-	errno = 0;
-	CassStatement *query = cass_prepared_bind(selectIdByAuthor);
-
-	cass_statement_bind_string_by_name(query, "name", author.name.c_str());
-	cass_statement_bind_string_by_name(query, "mail", author.mail.c_str());
-	CassFuture *queryFuture = cass_session_execute(connection, query);
-
 	CassUuid authorId;
-
-	if (cass_future_error_code(queryFuture) == CASS_OK)
-	{
-		const CassResult *result = cass_future_get_result(queryFuture);
-
-		if (cass_result_row_count(result) >= 1)
-		{
-			const CassRow *row = cass_result_first_row(result);
-			const CassValue *id = cass_row_get_column(row, 0);
-			cass_value_get_uuid(id, &authorId);
-		}
-		else
-		{
-			errno = ERANGE;
-		}
-
-		cass_result_free(result);
-	}
-	else
-	{
-		// Handle error.
-		const char *message;
-		size_t messageLength;
-		cass_future_error_message(queryFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
-		errno = ENETUNREACH;
-	}
-
-	cass_statement_free(query);
-	cass_future_free(queryFuture);
-
-	return authorId;
-}
-
-CassUuid DatabaseHandler::createAuthor(Author author)
-{
-	CassStatement *insertQuery = cass_prepared_bind(insertIdByAuthor);
-
-	cass_statement_bind_string_by_name(insertQuery, "name", author.name.c_str());
-	cass_statement_bind_string_by_name(insertQuery, "mail", author.mail.c_str());
-
-	CassFuture *future = cass_session_execute(connection, insertQuery);
-
-	cass_future_wait(future);
-
-	cass_statement_free(insertQuery);
-
-	cass_future_free(future);
-
-	CassUuid authorId = retrieveAuthorId(author);
+	cass_uuid_from_string(Utility::hashToUuidString(author.id).c_str(), &authorId);
 
 	CassStatement *insertQuery2 = cass_prepared_bind(insertAuthorById);
 

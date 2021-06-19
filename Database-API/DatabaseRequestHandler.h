@@ -369,32 +369,6 @@ private:
 	Author datanEntryToAuthor(std::string dataEntry);
 
 	/// <summary>
-	/// Retrieves the id corresponding to the authors given as input using the database.
-	/// </summary>
-	/// <param name="authors">
-	/// A vector of strings representing authors.
-	/// </param>
-	/// <returns>
-	/// A vector consisting of tuples with an author and the corresponding id.
-	/// </returns>
-	std::vector<std::tuple<Author, std::string>> getAuthorIDs(std::vector<Author> authors);
-
-	/// <summary>
-	/// Handles a single thread of retrieving author ids from the database.
-	/// </summary>
-	/// <param name="authors">
-	/// The queue with authors that have to be checked.
-	/// </param>
-	/// <param name="queueLock">
-	/// The lock for the queue with authors.
-	/// </param>
-	/// <returns>
-	/// A vector consisting of tuples with an author and the corresponding id.
-	/// </returns>
-	std::vector<std::tuple<Author, std::string>> singleAuthorToIDThread(std::queue<Author> &authors,
-																		std::mutex &queueLock);	
-
-	/// <summary>
 	/// Retrieves the authors corresponding to the ids given as input using the database.
 	/// </summary>
 	/// <param name="authorIds">

@@ -72,7 +72,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 							.lineNumber = 1,
 							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 							.parserVersion = 1,};
-	Author author = {.name = "Owner", .mail = "owner@mail.com"};
+	Author author("Owner", "owner@mail.com");
 	ProjectIn project = {.projectID = 0,
 						 .version = 0,
 						 .versionHash = "dfa59d94e44092eddd3cfba13f032aaa035de3d0",

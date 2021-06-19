@@ -11,7 +11,7 @@ Utrecht University within the Software Project course.
 #include <vector>
 
 // Test input part 1:
-Author owner = { .name = "Owner", .mail = "owner@mail.com" };
+Author owner("Owner", "owner@mail.com");
 std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5",
 			"f3a258ba6cd26c1b7d553a493c614104",
 			"59bf62494932580165af0451f76be3e9" };
@@ -32,9 +32,9 @@ MethodIn methodT1_3 = { .hash = "59bf62494932580165af0451f76be3e9",
 			.lineNumber = 31, .authors = { owner } };
 
 // Test input part 2:
-Author author1 = { .name = "Author 1", .mail = "author1@mail.com" };
-Author author2 = { .name = "Author 2", .mail = "author2@mail.com" };
-Author author3 = { .name = "Author 3", .mail = "author3@mail.com" };
+Author author1("Author 1", "author1@mail.com");
+Author author2("Author 2", "author2@mail.com");
+Author author3("Author 3", "author3@mail.com");
 ProjectIn projectT2 = { .projectID = 398798723, .version = 1618222334, .versionHash = "05a647eeb4954187fa5ac00942054cdc",
 			  .license = "MyLicense", .name = "MyProject",
 			  .url = "MyUrl", .owner = owner, .hashes = { }, .parserVersion = 1 };

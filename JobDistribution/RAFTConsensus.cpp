@@ -7,13 +7,15 @@ Utrecht University within the Software Project course.
 #include "RAFTConsensus.h"
 #include "Networking.h"
 #include "ConnectionHandler.h"
+#include "JobRequestHandler.h"
 #include "Utility.h"
 
-#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <thread>
-#include <iostream>
-#include <algorithm>
+#include <vector>
 
 RAFTConsensus::~RAFTConsensus() 
 {
@@ -25,8 +27,38 @@ RAFTConsensus::~RAFTConsensus()
 	}
 }
 
-void RAFTConsensus::start(RequestHandler* requestHandler, bool assumeLeader, 
-	std::vector<std::pair<std::string, std::string>> ips) 
+std::vector<std::pair<std::string, std::string>> RAFTConsensus::getIps(std::string file) 
+{
+	std::ifstream fileHandler;
+	fileHandler.open(file);
+	
+	if (!fileHandler.is_open()) 
+	{
+		std::cout << "Unable to open .env file." << std::endl;
+		return {};
+	}
+	std::string line;
+	while (std::getline(fileHandler, line)) 
+	{
+		auto lineSplitted = Utility::splitStringOn(line, '=');
+		if (lineSplitted.size() >= 2 && lineSplitted[0] == "SEEDS") 
+		{
+			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');
+			std::vector<std::pair<std::string, std::string>> output = {};
+			for (std::string ip : ipsSplitted) 
+			{
+				output.push_back(std::pair<std::string, std::string>(ip, std::to_string(PORT)));
+			}
+			return output;
+		}
+	}
+	std::cout << "No SEEDS entry found in .env file or SEEDS entry was empty." << std::endl;
+	return {};
+}
+
+void RAFTConsensus::start(RequestHandler* requestHandler, 
+	std::vector<std::pair<std::string, std::string>> ips, 
+	bool assumeLeader) 
 {
 	started = true;
 	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
@@ -66,7 +98,6 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			leaderIp = ip;
 			leaderPort = port;
 			leader = false;
-			std::cout << "Found leader " + ip + " " + port << std::endl;
 			break;
 		}
 		catch (std::exception const& ex) 
@@ -141,7 +172,7 @@ void RAFTConsensus::listenForHeartbeat()
 				std::cout << "Old leader dropped, we are the next in line, so we are now the leader." << std::endl;
 				// We are next in the list, so we are going to assume leadership.
 				delete others;
-				start(requestHandler, true);
+				start(requestHandler, {}, true);
 				return;
 			}
 			usleep(LEADER_DROPOUT_WAIT_TIME);
@@ -190,7 +221,21 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 void RAFTConsensus::handleHeartbeat(std::string heartbeat) 
 {
 	std::vector<std::string> hbSplitted = Utility::splitStringOn(heartbeat, FIELD_DELIMITER_CHAR);
-	for (int i = 0; i < hbSplitted.size(); i += 3) 
+
+	if (hbSplitted.size() == 0) 
+	{
+		return;
+	}
+	int crawlid = Utility::safeStoi(hbSplitted[0]);
+	if (errno == 0) 
+	{
+		requestHandler->getJobRequestHandler()->crawlId = crawlid;
+	}
+	else 
+	{
+		std::cout << "Error parsing crawlid from heartbeat.\n";
+	}
+	for (int i = 1; i < hbSplitted.size(); i += 3) 
 	{
 		std::pair<std::string, std::string> pairReceived = 
 			std::pair<std::string, std::string>(hbSplitted[i+1], hbSplitted[i+2]);
@@ -256,7 +301,6 @@ void RAFTConsensus::heartbeatSender()
 		boost::system::error_code error;
 		// Going from back to front, so we don't have to worry as much about connections
 		// being added or removed while we are in this loop.
-		
 		mtx.lock();
 		for (int i = others->size() - 1; i >= 0; i--) 
 		{
@@ -301,7 +345,11 @@ void RAFTConsensus::dropConnection(int i)
 std::string RAFTConsensus::getHeartbeat()
 {
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	std::string hb = nodeConnectionChange + entryDelimiter;
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	JobRequestHandler* jrh = requestHandler->getJobRequestHandler();
+
+	std::string hb = std::to_string(jrh->crawlId) + 
+		fieldDelimiter + nodeConnectionChange + entryDelimiter;
 	nodeConnectionChange = "";
 	return hb;
 }

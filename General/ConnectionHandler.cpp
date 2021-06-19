@@ -24,6 +24,7 @@ void ConnectionHandler::startListen(DatabaseHandler* databaseHandler,
 	if (requestHandler == nullptr) 
 	{
 		handler = new RequestHandler();
+		raft->start(handler, raft->getIps());
 	}
 	else 
 	{
@@ -142,7 +143,7 @@ void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	startAccept();
 	if (!error)
 	{
-		newConnection->start(handler, newConnection);
+		new std::thread(&TcpConnection::start, newConnection, handler, newConnection);
 	}
 
 }

@@ -108,17 +108,6 @@ public:
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
 	/// <summary>
-	/// Given an author returns the id of that author.
-	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
-	/// </param>
-	/// <returns>
-	/// A string representing the author id.
-	/// </returns>
-	virtual std::string authorToId(Author author);
-
-	/// <summary>
 	/// Given an author id retrieves the corresponding author.
 	/// </summary>
 	/// <param name="id">
@@ -210,7 +199,7 @@ private:
 	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
-	CassUuid createAuthor(Author author);
+	CassUuid createAuthorIfNotExists(Author author);
 
 	/// <summary>
 	/// Retrieves a string from a row. Takes in the row and the name of the column.
@@ -269,8 +258,6 @@ private:
 	const CassPrepared *selectUnchangedMethods;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
-	const CassPrepared *selectIdByAuthor;
-	const CassPrepared *insertIdByAuthor;
 	const CassPrepared *insertAuthorById;
 	const CassPrepared *selectAuthorById;
 };

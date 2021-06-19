@@ -353,8 +353,7 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 	project.license			= projectData[3];
 	project.name			= projectData[4];
 	project.url				= projectData[5];
-	project.owner.name		= projectData[6];
-	project.owner.mail		= projectData[7];
+	project.owner = Author(projectData[6], projectData[7]);
 	project.parserVersion	= Utility::safeStoll(projectData[8]);
 	if (errno != 0)
 	{
@@ -410,9 +409,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 
 	for (int i = 0; i < numberOfAuthors; i++)
 	{
-		Author author;
-		author.name = methodData[5 + 2 * i];
-		author.mail = methodData[6 + 2 * i];
+		Author author(methodData[5 + 2 * i],methodData[6 + 2 * i]);
 		authors.push_back(author);
 	}
 	method.authors = authors;
@@ -783,36 +780,6 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 	}
 }
 
-std::string DatabaseRequestHandler::handleGetAuthorIDRequest(std::string request)
-{
-	errno = 0;
-	std::vector<std::string> authorStrings = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
-
-	std::vector<Author> authors;
-
-	for (int i = 0; i < authorStrings.size(); i++)
-	{
-		authors.push_back(datanEntryToAuthor(authorStrings[i]));
-		if (errno != 0)
-		{
-			return HTTPStatusCodes::clientError("Error parsing author: " + authorStrings[i]);
-		}
-	}
-
-	// Request the specified hashes.
-	std::vector<std::tuple<Author, std::string>> authorIDs = getAuthorIDs(authors);
-	if (errno != 0)
-	{
-		return HTTPStatusCodes::serverError("Unable to get authors from database.");
-	}
-	if (authorIDs.size() <= 0)
-	{
-		return HTTPStatusCodes::success("No results found.");
-	}
-
-	return HTTPStatusCodes::success(authorsToString(authorIDs));
-}
-
 std::string DatabaseRequestHandler::authorsToString(std::vector<std::tuple<Author, std::string>> authors)
 {
 	std::vector<char> chars = {};
@@ -851,83 +818,16 @@ Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
 {
 	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, FIELD_DELIMITER_CHAR);
 
-	Author author;
-
 	if (authorData.size() != 2)
 	{
 		errno = EILSEQ;
+		Author author("","");
 		return author;
 	}
-	author.name = authorData[0];
-	author.mail = authorData[1];
+
+	Author author(authorData[0], authorData[1]);
 
 	return author;
-}
-
-std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::getAuthorIDs(std::vector<Author> authors)
-{
-	std::vector<std::future<std::vector<std::tuple<Author, std::string>>>> results;
-	std::vector<std::thread> threads;
-	std::queue<Author> authorQueue;
-	std::mutex queueLock;
-	for (int i = 0; i < authors.size(); i++)
-	{
-		authorQueue.push(authors[i]);
-	}
-	for (int i = 0; i < MAX_THREADS; i++)
-	{
-		std::packaged_task<std::vector<std::tuple<Author, std::string>>()> task(
-			bind(&DatabaseRequestHandler::singleAuthorToIDThread, this, ref(authorQueue), ref(queueLock)));
-		if (errno != 0)
-		{
-			errno = ENETUNREACH;
-			return {};
-		}
-		results.push_back(task.get_future());
-		threads.push_back(std::thread(move(task)));
-	}
-	for (int i = 0; i < threads.size(); i++)
-	{
-		threads[i].join();
-	}
-	std::vector<std::tuple<Author, std::string>> authorIDs;
-	for (int i = 0; i < results.size(); i++)
-	{
-		std::vector<std::tuple<Author, std::string>> newAuthorIDs = results[i].get();
-
-		for (int j = 0; j < newAuthorIDs.size(); j++)
-		{
-			authorIDs.push_back(newAuthorIDs[j]);
-		}
-	}
-	return authorIDs;
-}
-
-std::vector<std::tuple<Author, std::string>> DatabaseRequestHandler::singleAuthorToIDThread(std::queue<Author> &authors, std::mutex &queueLock)
-{
-	std::vector<std::tuple<Author, std::string>> authorIDs;
-	while (true)
-	{
-		queueLock.lock();
-		if (authors.size() <= 0)
-		{
-			queueLock.unlock();
-			return authorIDs;
-		}
-		Author author = authors.front();
-		authors.pop();
-		queueLock.unlock();
-		std::string newAuthorID = authorToIdWithRetry(author);
-		if (errno != 0)
-		{
-			errno = ENETUNREACH;
-			return {};
-		}
-		if (newAuthorID != "")
-		{
-			authorIDs.push_back(make_tuple(author, newAuthorID));
-		}
-	}
 }
 
 std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
@@ -1162,6 +1062,7 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 {
 	int retries = 0;
+	errno = 0;
 	database->connect(ip, port);
 	if (errno != 0)
 	{
@@ -1176,6 +1077,7 @@ void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 		}
 		throw "Unable to connect to database.";
 	}
+	errno = 0;
 }
 
 bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
@@ -1287,32 +1189,10 @@ ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID
 	return project;
 }
 
-std::string DatabaseRequestHandler::authorToIdWithRetry(Author author)
-{
-	int retries = 0;
-	std::string authorID;
-	authorID = database->authorToId(author);
-	if (errno != 0)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			authorID = database->authorToId(author);
-			if (errno == 0)
-			{
-				return authorID;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-		return "";
-	}
-	return authorID;
-}
-
 Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
 {
 	int retries = 0;
-	Author author;
+	Author author("","");
 	author = database->idToAuthor(id);
 	if (errno != 0)
 	{

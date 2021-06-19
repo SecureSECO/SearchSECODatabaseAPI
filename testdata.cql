@@ -66,12 +66,12 @@ CREATE KEYSPACE IF NOT EXISTS jobs
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
     jobid UUID,
-    priority int,
+    priority bigint,
     url text,
     constant int,
     PRIMARY KEY ((constant), priority, jobid) 
 ) 
-WITH CLUSTERING ORDER BY (priority DESC);
+WITH CLUSTERING ORDER BY (priority ASC);
 
 INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 1, 5000000000000, '9e350b124404f40a114509910619f641', 5000000000000, '9e350b124404f40a114509910619f641', 'M1', 'P1/M1.cpp', 1, 
@@ -228,11 +228,11 @@ INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');
 
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES 
-(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 3, 'https://github.com/zavg/linux-0.01', 1);
+(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 500000000000000, 'https://github.com/zavg/linux-0.01', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(61c9d732-1f98-40af-b201-3b20fbf7a6db, 4, 'https://github.com/304471720/CSAPI', 1);
+(61c9d732-1f98-40af-b201-3b20fbf7a6db, 400000000000000, 'https://github.com/304471720/CSAPI', 1);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(2f78a799-0e18-4eb5-bd33-83718a3257d9, 5, 'https://github.com/caged/microsis', 1);
+(2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1);
 
 INSERT INTO projectData.id_by_author (authorID, name, mail) VALUES 
 (2a84cf5a-9554-4800-bb87-6dda6715fa12, 'Author 7', 'author7@mail.com');

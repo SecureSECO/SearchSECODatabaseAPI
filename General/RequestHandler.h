@@ -29,7 +29,6 @@ enum eRequestType
 	eUploadCrawlData,
 	eGetTopJob,
 	eExtractProjects,
-	eGetAuthorID,
 	eGetAuthor,
 	eGetMethodByAuthor,
 	eGetPrevProjectsRequest,
@@ -63,6 +62,11 @@ public:
 	/// Response towards user after processing the request successfully.
 	/// </returns>
 	virtual std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection);
+
+	JobRequestHandler* getJobRequestHandler() 
+	{
+		return jrh;
+	} 
 private:
 
 	/// <summary>

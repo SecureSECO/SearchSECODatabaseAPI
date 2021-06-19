@@ -5,7 +5,9 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseConnection.h"
+#include "Utility.h"
 #include <iostream>
+#include <chrono>
 
 void DatabaseConnection::connect(std::string ip, int port)
 {
@@ -72,10 +74,10 @@ std::string DatabaseConnection::getTopJob()
 		const char *url;
 		size_t len;
 		CassUuid id;
-		int priority;
+		cass_int64_t priority;
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
-		cass_value_get_int32(cass_row_get_column_by_name(row, "priority"), &priority);
+		cass_value_get_int64(cass_row_get_column_by_name(row, "priority"), &priority);
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
 		// Delete the job that is returned.
@@ -100,12 +102,12 @@ std::string DatabaseConnection::getTopJob()
 	}
 }
 
-void DatabaseConnection::deleteTopJob(CassUuid id, int priority)
+void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 {
 	errno = 0;
 	CassStatement* query = cass_prepared_bind(preparedDeleteTopJob);
 
-	cass_statement_bind_int32(query, 0, priority);
+	cass_statement_bind_int64(query, 0, priority);
 	cass_statement_bind_uuid(query, 1, id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
@@ -151,12 +153,14 @@ int DatabaseConnection::getNumberOfJobs()
 	}
 }
 
-void DatabaseConnection::uploadJob(std::string url, int priority)
+void DatabaseConnection::uploadJob(std::string url, long long priority)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	cass_statement_bind_int32(query, 0, priority);
+	auto currentTime = Utility::getCurrentTimeMilliSeconds();
+
+	cass_statement_bind_int64(query, 0, currentTime - priority);
 
 	cass_statement_bind_string(query, 1, url.c_str());
 
