@@ -1011,7 +1011,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 	}
 }
 
-TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithMultipleAndNonExistingUnchangedFiles)
+TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchangedPossiblyNonExistentFiles)
 {
 	// Set up.
 	errno = 0;
@@ -1024,7 +1024,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithMultipleAndNonExisti
 	Utility::appendBy(inputChars,
 					  {"3", "5000000020000", "f51ef5f3bbg8580adc4c633e63c6cca9779c81a7", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, "5000000003000", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "5000000004000", ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"P3/M3.cpp", "P3/M4.cpp", "P1/UnknownFile.cpp"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars,
 					  {"2808dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Author 1", "author1@mail.com"},
@@ -1034,6 +1034,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithMultipleAndNonExisti
 	std::string input2 = "2808dac8e9f49ee4a24e14560c5d187a";
 	std::string input3 = "137fed017b6159acc0af30d2c6b403a5";
 	std::string input4 = "23920776594c85fdc30cd96f928487f1";
+	std::string input5 = "959ee1ee12e6d6d87a4b6ee732aed9fc";
 	std::string expectedOutput = "Your project has been successfully added to the database.";
 
 	// Begin test:
@@ -1043,7 +1044,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithMultipleAndNonExisti
 	// Test if the updated project is uploaded correctly. (There should be a new project with projectID 1 and version
 	// 5000000020000, with both the unchanged method and the added methods with the correct start- and endVersion).
 	ProjectOut project = database.searchForProject(3, 5000000020000);
-	ASSERT_EQ(project.hashes.size(), 2);
+	ASSERT_EQ(project.hashes.size(), 3);
 
 	// First check if the added method contains the correct start- and endVersion.
 	std::string methodData = handler.handleRequest("chck", input2, nullptr);
@@ -1080,6 +1081,20 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithMultipleAndNonExisti
 		{
 			ASSERT_EQ(methodDataFields[2], "5000000003000");
 			ASSERT_EQ(methodDataFields[4], "5000000020000");
+		}
+	}
+
+	// Finally, check that a method inside a changed file contains the correct start- and endVersion.
+	methodData = handler.handleRequest("chck", input5, nullptr);
+	methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
+
+	for (int i = 0; i < methodDataEntries.size(); i++)
+	{
+		methodDataFields = Utility::splitStringOn(methodDataEntries[i], FIELD_DELIMITER_CHAR);
+		if (methodDataFields[0] == "3")
+		{
+			ASSERT_EQ(methodDataFields[2], "5000000004000");
+			ASSERT_EQ(methodDataFields[4], "5000000004000");
 		}
 	}
 }
