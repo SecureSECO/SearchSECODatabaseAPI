@@ -157,14 +157,20 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		return HTTPStatusCodes::serverError("Failed to add project to database.");
 	}
 
-	std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> hashFileQueue;
-	if (!newProject)
+	handleUploadThreads(project, methodQueue, newProject, prevProject, unchangedFiles);
+	if (errno != 0)
 	{
-		std::vector<std::vector<Hash>> hashesList = toChunks(prevProject.hashes, HASHES_MAX_SIZE);
-		std::vector<std::vector<std::string>> filesList = toChunks(unchangedFiles, FILES_MAX_SIZE);
-		hashFileQueue = cartesianProductQueue(hashesList, filesList);
+		return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
 	}
+	else
+	{
+		return HTTPStatusCodes::success("Your project has been successfully added to the database.");
+	}
+}
 
+void DatabaseRequestHandler::handleUploadThreads(ProjectIn project, std::queue<MethodIn> methodQueue, bool newProject,
+												 ProjectOut prevProject, std::vector<std::string> unchangedFiles)
+{
 	std::mutex queueLock;
 	std::vector<std::thread> threads;
 	for (int i = 0; i < MAX_THREADS; i++)
@@ -177,11 +183,12 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		else
 		{
 			threads.push_back(std::thread(&DatabaseRequestHandler::singleUploadThread, this, ref(methodQueue),
-										  ref(queueLock), project, prevProject.version, project.parserVersion, newProject));
+										  ref(queueLock), project, prevProject.version, project.parserVersion,
+										  newProject));
 		}
 		if (errno != 0)
 		{
-			return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
+			return;
 		}
 	}
 	for (int i = 0; i < threads.size(); i++)
@@ -192,45 +199,53 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	if (!newProject)
 	{
 		threads.clear();
-		std::vector<std::future<std::vector<Hash>>> results;
-		for (int i = 0; i < MAX_THREADS; i++)
-		{
-			std::packaged_task<std::vector<Hash>()> task(bind(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread,
-															  this, ref(hashFileQueue), ref(queueLock), project,
-															  prevProject.version));
-			if (errno != 0)
-			{
-				return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
-			}
-			results.push_back(task.get_future());
-			threads.push_back(std::thread(move(task)));
-		}
-		for (int i = 0; i < threads.size(); i++)
-		{
-			threads[i].join();
-		}
-		std::vector<Hash> unchangedHashes = {};
-		for (int i = 0; i < results.size(); i++)
-		{
-			std::vector<Hash> newHashes = results[i].get();
+		handleUpdateUnchangedFilesThreads(project, prevProject, unchangedFiles);
+	}
+}
 
-			for (int j = 0; j < newHashes.size(); j++)
-			{
-				unchangedHashes.push_back(newHashes[j]);
-			}
-		}
+void DatabaseRequestHandler::handleUpdateUnchangedFilesThreads(ProjectIn project, ProjectOut prevProject,
+															   std::vector<std::string> unchangedFiles)
+{
+	std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> hashFileQueue;
+	std::vector<std::vector<Hash>> hashesList = toChunks(prevProject.hashes, HASHES_MAX_SIZE);
+	std::vector<std::vector<std::string>> filesList = toChunks(unchangedFiles, FILES_MAX_SIZE);
+	hashFileQueue = cartesianProductQueue(hashesList, filesList);
 
-		project.hashes = unchangedHashes;
-		database->addHashToProject(project, 0);
-	}
-	if (errno == 0)
+	std::mutex queueLock;
+	std::vector<std::thread> threads;
+
+	std::vector<std::future<std::vector<Hash>>> results;
+	for (int i = 0; i < MAX_THREADS; i++)
 	{
-		return HTTPStatusCodes::success("Your project has been successfully added to the database.");
+		std::packaged_task<std::vector<Hash>()> task(bind(&DatabaseRequestHandler::singleUpdateUnchangedFilesThread,
+														  this, ref(hashFileQueue), ref(queueLock), project,
+														  prevProject.version));
+		if (errno != 0)
+		{
+			return;
+		}
+		results.push_back(task.get_future());
+		threads.push_back(std::thread(move(task)));
 	}
-	else
+	for (int i = 0; i < threads.size(); i++)
 	{
-		return HTTPStatusCodes::clientError("An unexpected error occurred.");
+		threads[i].join();
 	}
+	threads.clear();
+
+	std::vector<Hash> unchangedHashes = {};
+	for (int i = 0; i < results.size(); i++)
+	{
+		std::vector<Hash> newHashes = results[i].get();
+
+		for (int j = 0; j < newHashes.size(); j++)
+		{
+			unchangedHashes.push_back(newHashes[j]);
+		}
+	}
+
+	project.hashes = unchangedHashes;
+	database->addHashToProject(project, 0);
 }
 
 std::vector<std::vector<std::string>> DatabaseRequestHandler::toChunks(std::vector<std::string> list, int chunkSize)

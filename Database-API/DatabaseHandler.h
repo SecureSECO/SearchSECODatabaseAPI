@@ -243,6 +243,4 @@ private:
 	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *insertAuthorById;
 	const CassPrepared *selectAuthorById;
-	const CassPrepared *selectIdByAuthor;
-	const CassPrepared *insertIdByAuthor;
 };

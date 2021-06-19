@@ -76,12 +76,6 @@ void DatabaseHandler::setPreparedStatements()
 	// Selects a method by a given authorid.
 	selectMethodByAuthor = prepareStatement("SELECT * FROM projectdata.method_by_author WHERE authorid = ?");
 
-	// Selects the authorID corresponding to given name and mail.
-	selectIdByAuthor = prepareStatement("SELECT authorID FROM projectdata.id_by_author WHERE name = ? AND mail = ?");
-
-	// Inserts a new author into the id_by_author table. Also generated the id for this author.
-	insertIdByAuthor = prepareStatement("INSERT INTO projectdata.id_by_author (authorID, name, mail) VALUES (uuid(), ?, ?)");
-
 	// Inserts an author into the author_by_id table.
 	insertAuthorById = prepareStatement("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?) IF NOT EXISTS");
 

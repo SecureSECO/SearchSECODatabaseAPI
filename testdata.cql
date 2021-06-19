@@ -52,14 +52,6 @@ CREATE TABLE IF NOT EXISTS projectData.author_by_id
   PRIMARY KEY (authorID)
 );
 
-CREATE TABLE IF NOT EXISTS projectData.id_by_author
-(
-  name text,
-  mail text,
-  authorID UUID,
-  PRIMARY KEY ((name, mail))
-);
-
 CREATE KEYSPACE IF NOT EXISTS jobs
     WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1' : 1};
     

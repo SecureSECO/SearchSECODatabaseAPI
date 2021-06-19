@@ -115,19 +115,6 @@ public:
 	/// </returns>
 	std::string handlePrevProjectsRequest(std::string request);
 
-	/// Handles a requests for retrieving the ids by the give authors.
-	/// </summary>
-	/// <param nam'="request">
-	/// The request that contains the authors with the following format
-	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-	/// name_1|mail_1'\n'name_2|mail_2'\n'...
-	/// </param>
-	/// <returns>
-	/// A string with the author ids retrieved from the database with the following format:
-	/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
-	/// </returns>
-	std::string handleGetAuthorIDRequest(std::string request);
-
 	/// <summary>
 	/// Handles a requests for retrieving the authors by the given ids.
 	/// </summary>
@@ -306,9 +293,30 @@ private:
 	std::vector<ProjectOut> singlePrevProjectThread(std::queue<ProjectID> &projectIDs, std::mutex &queueLock);
 
 	/// <summary>
+	/// Handles the threads used to upload methods to the database.
+	/// </summary>
+	/// <param name="project">
+	/// The project the methods are part of.
+	/// </param>
+	/// <param name="methodQueue">
+	/// The queue of methods that have to be uploaded.
+	/// </param>
+	/// <param name="newProject">
+	/// Boolean which is true if and only if the project is new.
+	/// </param>
+	/// <param name="prevProject">
+	/// The previous version of the project.
+	/// </param>
+	/// <param name="unchangedFiles">
+	/// The files that did not change compared to the previous version of the project.
+	/// </param>
+	void handleUploadThreads(ProjectIn project, std::queue<MethodIn> methodQueue, bool newProject,
+							 ProjectOut prevProject, std::vector<std::string> unchangedFiles);
+
+	/// <summary>
 	/// Handles a single thread of uploading methods to the database.
 	/// </summary>
-	/// <param name="hashes">
+	/// <param name="methods">
 	/// The queue with methods that have to be added to the databse.
 	/// </param>
 	/// <param name="queueLock">
@@ -317,9 +325,32 @@ private:
 	/// <param name="project">
 	/// The project the methods are part of.
 	/// </param>
-	/// <returns></returns>
+	/// <param name="prevVersion">
+	/// The previous version of the project.
+	/// </param>
+	/// <param name="parserVersion">
+	/// The version of the parser.
+	/// </param>
+	/// <param name="newProject">
+	/// Boolean which is true if and only if the project is marked as new.
+	/// </param>
 	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project,
 							long long prevVersion, long long parserVersion, bool newProject);
+
+	/// <summary>
+	/// Handles the threads used to update methods in unchanged files.
+	/// </summary>
+	/// <param name="project">
+	/// The project to be added/updated to the database.
+	/// </param>
+	/// <param name="prevProject">
+	/// The previous/latest version of the project.
+	/// </param>
+	/// <param name="unchangedFiles">
+	/// The files that did not change in comparison with the previous version of the project.
+	/// </param>
+	void handleUpdateUnchangedFilesThreads(ProjectIn project, ProjectOut prevProject,
+										   std::vector<std::string> unchangedFiles);
 
 	/// <summary>
 	/// Handles a single thread of updating methods in unchanged files.
