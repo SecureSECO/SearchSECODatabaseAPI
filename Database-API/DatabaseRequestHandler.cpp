@@ -721,9 +721,7 @@ std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::que
 		ProjectOut newProject = database->prevProject(projectID);
 		if (newProject.projectID != -1)
 		{
-			queueLock.lock();
 			projects.push_back(newProject);
-			queueLock.unlock();
 		}
 		return projects;
 	}
