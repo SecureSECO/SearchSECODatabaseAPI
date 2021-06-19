@@ -180,23 +180,6 @@ private:
 	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
 
 	/// <summary>
-	/// Retrieves the author ID corresponding to the given author.
-	/// Also creates a new author if the author does not yet exist.
-	/// <summary>
-	CassUuid getAuthorId(Author author);
-
-	/// <summary>
-	/// Retrieves the author id corresponding to the given author.
-	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
-	/// </param>
-	/// <returns>
-	/// The id of the author.
-	/// </returns>
-	virtual CassUuid retrieveAuthorId(Author author);
-
-	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
 	CassUuid createAuthorIfNotExists(Author author);
@@ -260,4 +243,6 @@ private:
 	const CassPrepared *selectMethodByAuthor;
 	const CassPrepared *insertAuthorById;
 	const CassPrepared *selectAuthorById;
+	const CassPrepared *selectIdByAuthor;
+	const CassPrepared *insertIdByAuthor;
 };

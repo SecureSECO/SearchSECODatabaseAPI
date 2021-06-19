@@ -100,8 +100,6 @@ bool DatabaseRequestHandler::isValidHash(Hash hash)
 std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 {
 	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
-	std::cout << "Request split" << std::endl;
-	std::cout << std::to_string(dataEntries.size()) << std::endl;
 	// Check if project is valid.
 	ProjectIn project = requestToProject(dataEntries[0]);
 	if (errno != 0)
@@ -118,7 +116,6 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	std::vector<std::string> unchangedFiles;
 	ProjectOut prevProject;
 	bool newProject = true;
-	std::cout << std::to_string(dataEntries.size()) << std::endl;
 	if (dataEntries[1] != "")
 	{
 		long long prevVersion = Utility::safeStoll(dataEntries[1]);

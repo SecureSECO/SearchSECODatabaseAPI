@@ -108,7 +108,6 @@ const CassPrepared* DatabaseHandler::prepareStatement(std::string query)
 ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version version)
 {
 	errno = 0;
-	std::cout << "Searching for project" << std::endl;
 	CassStatement *query = cass_prepared_bind(selectProject);
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
 	cass_statement_bind_int64_by_name(query, "versiontime", version);
@@ -405,11 +404,9 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 
 void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long parserVersion)
 {
-	std::cout << "Actually adding method" << std::endl;
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
-	std::cout << "Finished binding prepared statement to query" << std::endl;
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
@@ -423,24 +420,21 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 	cass_statement_bind_int64_by_name(query, "parserversion", parserVersion);
 
-	std::cout << "Finished binding query (without authors)" << std::endl;
 	int size = method.authors.size();
 
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
 
 	for (int i = 0; i < size; i++)
 	{
-		CassUuid authorID = getAuthorId(method.authors[i]);
+		CassUuid authorID = createAuthorIfNotExists(method.authors[i]);
 		cass_collection_append_uuid(authors, authorID);
 		addMethodByAuthor(authorID, method, project);
 	}
 
 	cass_statement_bind_collection_by_name(query, "authors", authors);
 	cass_collection_free(authors);
-	std::cout << "Finished binding query (with authors)" << std::endl;
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
-	std::cout << "Query executed." << std::endl;
 
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
@@ -461,7 +455,6 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 {
 	errno = 0;
 
-	std::cout << "Actually updating method" << std::endl;
 	CassStatement *query = cass_prepared_bind(updateMethods);
 
 	CassUuid uuid;
@@ -476,8 +469,6 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 
-	std::cout << "Bound the parameters" << std::endl;
-
 	int size = method.authors.size();
 
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
@@ -490,8 +481,6 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	}
 
 	cass_statement_bind_collection_by_name(query, "authors", authors);
-
-	std::cout << "Bound the authors" << std::endl;
 
 	cass_collection_free(authors);
 
@@ -515,12 +504,9 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion)
 {
 	errno = 0;
-	std::cout << "Updating unchanged files" << std::endl;
+
 	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
-
 	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
-
-	std::cout << "Bound the project id." << std::endl;
 
 	int size = hashes.size();
 
@@ -537,8 +523,6 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 	cass_collection_free(hashesCollection);
 
-	std::cout << "Bound the hashes" << std::endl;
-
 	size = files.size();
 
 	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
@@ -552,11 +536,7 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 	cass_collection_free(filesCollection);
 
-	std::cout << "Bound the files" << std::endl;
-
 	CassFuture *queryFuture = cass_session_execute(connection, query);
-
-	std::cout << "Executed the query" << std::endl;
 
 	std::vector<Hash> resultHashes;
 
@@ -575,7 +555,6 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 
 			if (endVersion == prevVersion)
 			{
-				std::cout << "Updating method" << std::endl;
 				long long startVersion = getInt64(row, "startversiontime");
 				MethodIn method;
 				method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
