@@ -59,21 +59,17 @@ void DatabaseHandler::setPreparedStatements()
 	// Inserts a method into the database.
 	insertMethod = prepareStatement("INSERT INTO projectdata.methods (method_hash, projectID, startversiontime, file, startversionhash, endversiontime, endversionhash, name, "
 									"lineNumber, authors, parserversion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-	std::cout << "insertMethod statement is prepared." << std::endl;
+
 	// Updates a method in the database.
 	updateMethods = prepareStatement("UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?, name = ?, lineNumber = ?, authors = authors + ?"
 									 "WHERE method_hash = ? AND projectID = ? AND file = ? AND startVersionTime = ?");
-	std::cout << "updateMethods statement is prepared." << std::endl;
-	// Updates a method in the database.
-	updateUnchangedMethods = prepareStatement("UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?"
-									 "WHERE method_hash = ? AND projectID = ? AND file = ? AND startVersionTime = ?");
-	std::cout << "updateUnchangedMethods statement is prepared." << std::endl;
+
 	// Retrieves a method from the database.
 	selectMethod = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
 
 	// Retrieves the methods with specified hash and file.
 	selectUnchangedMethods = prepareStatement("SELECT method_hash, projectid, file, startversiontime, endversiontime, linenumber, name, startversionhash, endversionhash FROM projectdata.methods WHERE method_hash IN ? AND projectID = ? AND file IN ?");
-	std::cout << "selectUnchangedMethods statement is prepared." << std::endl;
+
 	// Inserts a method by author.
 	insertMethodByAuthor = prepareStatement("INSERT INTO projectdata.method_by_author (authorID, hash, startversiontime, file, projectID) VALUES (?, ?, ?, ?, ?)");
 
@@ -366,7 +362,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 
 				long long endVersion = getInt64(row, "endVersionTime");
 
-				if (!newProject && endVersion == prevVersion)
+				if (endVersion == prevVersion)
 				{
 					newMethod = false;
 					long long startVersion = getInt64(row, "startVersionTime");
@@ -498,40 +494,6 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	std::cout << "Bound the authors" << std::endl;
 
 	cass_collection_free(authors);
-
-	CassFuture *queryFuture = cass_session_execute(connection, query);
-
-	// Statement objects can be freed immediately after being executed.
-	cass_statement_free(query);
-
-	// This will block until the query has finished.
-	CassError rc = cass_future_error_code(queryFuture);
-
-	if (rc != 0)
-	{
-		printf("Unable to update method: %s\n", cass_error_desc(rc));
-		errno = ENETUNREACH;
-	}
-
-	cass_future_free(queryFuture);
-}
-
-void DatabaseHandler::updateUnchangedMethod(MethodIn method, ProjectIn project, long long startVersion)
-{
-	errno = 0;
-
-	std::cout << "Actually updating method" << std::endl;
-	CassStatement *query = cass_prepared_bind(updateUnchangedMethods);
-
-	CassUuid uuid;
-	cass_uuid_from_string(Utility::hashToUuidString(method.hash).c_str(), &uuid);
-	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
-	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
-	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
-	cass_statement_bind_int64_by_name(query, "startversiontime", startVersion);
-
-	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
-	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 

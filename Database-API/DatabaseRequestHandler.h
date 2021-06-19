@@ -160,7 +160,7 @@ public:
 
 private:
 	/// <summary>
-	/// Converts a request to a Project (defined in Types.h).
+	/// Converts a request to a ProjectIn (defined in Types.h).
 	/// </summary>
 	/// <param name="request">
 	/// The relevant data to create the Project. It has the following format:
@@ -172,7 +172,7 @@ private:
 	ProjectIn requestToProject(std::string request);
 
 	/// <summary>
-	/// Converts a data entry to a Method (defined in Types.h).
+	/// Converts a data entry to a MethodIn (defined in Types.h).
 	/// </summary>
 	/// <param name="dataEntry">
 	/// The relevant data to create the Method. It has the following format
@@ -322,13 +322,24 @@ private:
 							long long prevVersion, long long parserVersion, bool newProject);
 
 	/// <summary>
-	/// 
+	/// Handles a single thread of updating methods in unchanged files.
 	/// </summary>
-	/// <param name="hashFiles"></param>
-	/// <param name="queueLock"></param>
-	/// <param name="project"></param>
-	/// <param name="prevVersion"></param>
-	/// <returns></returns>
+	/// <param name="hashFiles">
+	/// A queue of pairs of hashes and fileLocations.
+	/// </param>
+	/// <param name="queueLock">
+	/// The lock used for the queue 'hashFiles'
+	/// in order to do multiple queries concurrently.
+	/// </param>
+	/// <param name="project">
+	/// The project corresponding to the hashes and fileLocations.
+	/// </param>
+	/// <param name="prevVersion">
+	/// The previous/latest version of the project.
+	/// </param>
+	/// <returns>
+	/// The hashes in the queue 'hashFiles' that are in fact part of the unchanged files.
+	/// </returns>
 	std::vector<Hash>
 	singleUpdateUnchangedFilesThread(std::queue<std::pair<std::vector<Hash>, std::vector<std::string>>> &hashFiles,
 									 std::mutex &queueLock, ProjectIn project, long long prevVersion);
@@ -462,52 +473,58 @@ private:
 
 	/// <summary>
 	/// Tries to add method to the database, if it fails it retries as many times as MAX_RETRIES.
-	/// If it succeeds, it adds the method to the database and puts errno on 0.
+	/// If it succeeds, it adds the method to the database.
 	/// If it still fails on the last retry, it puts the errno on ENETUNREACH and returns.
 	/// </summary>
-	/// <param name="present">
-	/// A boolean that is true if and only if the method is present in the previous version of the project.
+	/// <param name="newProject">
+	/// A boolean to different new projects from changed projects.
+	/// The value is true if and only if the project is new.
 	/// </param>
 	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion,
 							bool newProject);
 
 	/// <summary>
-	/// 
+	/// Tries to update the methods in the previous version of the project that are in an unchanged file.
 	/// </summary>
+	/// <returns>
+	/// The hashes that correspond to methods that have been changed, used to add these hashes 
+	/// to the project afterwards. If it fails to establish the hashes, puts the errno on ENETUNREACH 
+	/// and returns empty vector.
+	/// </returns>
 	std::vector<Hash> updateUnchangedFilesWithRetry(std::pair<std::vector<Hash>, std::vector<std::string>> hashFile,
 													ProjectIn project, long long prevVersion);
 
 	/// <summary>
-	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as MAX_RETRIES.
-	/// If it succeeds, it returns the methods found in the database and puts the errno on 0.
+	/// Tries to get all methods with a given hash from the database, if it fails it retries as many times as 
+	/// MAX_RETRIES. If it succeeds, it returns the methods found in the database.
 	/// If it fails, it puts the errno on ENETUNREACH and returns an empty vector.
 	/// </summary>
 	std::vector<MethodOut> hashToMethodsWithRetry(Hash hash);
 
 	/// <summary>
 	/// Tries to get projects with a given version and projectID from the database, if it fails it retries like above.
-	/// If it succeeds, it returns the projects and puts the errno on 0.
+	/// If it succeeds, it returns the projects.
 	/// If it fails, it returns an empty vector and puts the errno on ENETUNREACH.
 	/// </summary>
 	ProjectOut searchForProjectWithRetry(ProjectID projectID, Version version);
 
 	/// <summary>
 	/// Tries to get authorID from the database given an author, if it fails it retries like above.
-	/// If it succeeds, it returns the id and puts errno on 0.
+	/// If it succeeds, it returns the id.
 	/// If it fails, it returns an empty string and puts errno on ENETUNREACH.
 	/// </summary>
 	std::string authorToIdWithRetry(Author author);
 
 	/// <summary>
 	/// Tries to get author from the database given an authorID, if it fails it retries like above.
-	/// If it succeeds, it returns the author and puts errno on 0.
+	/// If it succeeds, it returns the author.
 	/// If it fails, it returns an emprt author and puts errno on ENETUNREACH.
 	/// </summary>
 	Author idToAuthorWithRetry(std::string id);
 
 	/// <summary>
 	/// Tries to get methods from the database given an authorID, if it fails it retries like above.
-	/// If it succeeds, it returns the methods and puts errno on 0.
+	/// If it succeeds, it returns the methods.
 	/// If it fails, it returns an empty vector and puts errno on ENETUNREACH.
 	/// </summary>
 	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);

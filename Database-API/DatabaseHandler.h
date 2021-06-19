@@ -45,20 +45,33 @@ public:
 	virtual ProjectOut searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
-	/// Retrieves the previous version of the project present in the database.
+	/// Retrieves the previous/latest version of the project present in the database.
 	/// </summary>
 	/// <returns>
-	/// If present, returns the previous version of a project with the same projectID.
-	/// Else, returns an empty project.
+	/// If present, returns the previous/latest version of a project with the same projectID.
+	/// Else, sets the errno to ERANGE and returns an empty project.
 	/// </returns>
 	virtual ProjectOut prevProject(ProjectID projectID);
 
 	/// <summary>
-	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
+	/// Add/update a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
 	/// the database with information of the project. 
 	/// </summary>
-	/// <param name="changed">
-	/// A boolean representing if the method is changed compared to the previous version of the project.
+	/// <param name="method">
+	/// The method to be added/updated.
+	/// </param>
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="prevVersion">
+	/// The previous version of the project.
+	/// </param>
+	/// <param name="parserVersion">
+	/// The version of the parser.
+	/// </param>
+	/// <param name="newProject">
+	/// A boolean value used to differentiate a new project from a changed project.
+	/// The value is true if and only if the project is new.
 	/// </param>
 	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject);
 
@@ -66,13 +79,13 @@ public:
 	/// Updates the methods in the previous version of the project that are in an unchanged file.
 	/// </summary>
 	/// <param name="hashes">
-	/// A List of hashes to check.
+	/// A list of hashes to check.
 	/// </param>
 	/// <param name="files">
-	/// A List of files to check.
+	/// A list of files to check.
 	/// </param>
 	/// <param name="project">
-	/// The added project for the project ID and new version.
+	/// The added project for the projectID and new version.
 	/// </param>
 	/// <param name="prevVersion">
 	/// The previous version of the project to check whether it is a correct result.
@@ -84,15 +97,14 @@ public:
 										   long long prevVersion);
 
 	/// <summary>
-	/// Retrieves the method from the method table in the database with the given hash, projectID, version and fileLocation, 
-	/// if it exists. Otherwise returns an empty method.
+	/// Given a hash, return all methods with that hash.
 	/// </summary>
-	//virtual MethodOut retrieveMethod(Hash hash, ProjectID projectID, Version version, std::string fileLocation);
-
-	/// <summary>
-	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
-	/// the hash.
-	/// </summary>
+	/// <param name="hash">
+	/// The hash to be checked.
+	/// </param>
+	/// <returns>
+	/// All methods with the inputted hash.
+	/// </returns>
 	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
 	/// <summary>
@@ -149,11 +161,34 @@ private:
 	/// </summary>
 	MethodId getMethodId(const CassRow *row);
 
+	/// <summary>
+	/// A function that is used to add new methods to the database.
+	/// </summary>
+	/// <param name="method">
+	/// The method to be inputted into the database.
+	/// </param>
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="parserVersion">
+	/// The version of the parser.
+	/// </param>
 	void addNewMethod(MethodIn method, ProjectIn project, long long parserVersion);
 
+	/// <summary>
+	/// A function that is used to update methods that were already in the database.
+	/// More precisely, updates endVersionTime and -Hash, methodName, lineNumber and authors.
+	/// </summary>
+	/// <param name="method">
+	/// The method to be updated.
+	/// </param>
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="startVersion">
+	/// The startVersionTime of the method to be updated.
+	/// </param>
 	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
-
-	void updateUnchangedMethod(MethodIn method, ProjectIn project, long long startVersion);
 
 	/// <summary>
 	/// Retrieves the author ID corresponding to the given author.
@@ -207,6 +242,16 @@ private:
 	/// </summary>
 	void setPreparedStatements();
 
+	/// <summary>
+	/// Prepares a specified statement (query) to be executed later.
+	/// </summary>
+	/// <param name="query">
+	/// A string containing the CQL-query to be executed later.
+	/// Question marks are used to indicate positions to be bound at a later stage.
+	/// </param>
+	/// <returns>
+	/// The constant prepared statement that allows us to execute the query given as input.
+	/// </returns>
 	const CassPrepared *prepareStatement(std::string query);
 
 	/// <summary>
