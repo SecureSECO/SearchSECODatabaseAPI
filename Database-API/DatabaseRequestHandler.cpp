@@ -719,15 +719,13 @@ std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::que
 		queueLock.unlock();
 
 		ProjectOut newProject = database->prevProject(projectID);
-		if (errno != 0 && errno != ERANGE)
+		if (newProject.projectID != -1)
 		{
-			errno = ENETUNREACH;
-			return projects;
-		}
-		if (errno != ERANGE)
-		{
+			queueLock.lock();
 			projects.push_back(newProject);
+			queueLock.unlock();
 		}
+		return projects;
 	}
 }
 

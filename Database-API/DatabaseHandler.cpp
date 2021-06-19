@@ -248,6 +248,7 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID)
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 
 	ProjectOut project;
+	project.projectID = -1;
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);

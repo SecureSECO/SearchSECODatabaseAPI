@@ -104,7 +104,8 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	// Test:
 	std::string output3 = handler.handleRequest("chck", input3, nullptr);
-	std::vector<std::string> entries3 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output3), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> entries3 =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(output3), ENTRY_DELIMITER_CHAR);
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries3.size(), 3);
@@ -208,9 +209,10 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(
-		inputChars, {"6", "5000000010000", "e9c81d6c65846876fba53dede0cf6d72dbc04b57", "L5", "P6", "www.github.com/p6", "Author 8", "author8@mail.com", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars,
+					  {"6", "5000000010000", "e9c81d6c65846876fba53dede0cf6d72dbc04b57", "L5", "P6",
+					   "www.github.com/p6", "Author 8", "author8@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
@@ -242,7 +244,8 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
-					  {"7", "5000000011000", "9f0d5304769444a78d1b31b39e56333b2116dd23", "L6", "P7", "www.github.com/p7", "Author 9", "author9@mail.com", "1"},
+					  {"7", "5000000011000", "9f0d5304769444a78d1b31b39e56333b2116dd23", "L6", "P7",
+					   "www.github.com/p7", "Author 9", "author9@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -310,7 +313,9 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"8", "5000000012000", "75936085c8bf9ea33be61ba51c96ee1abd5c38a3", "L7", "P8", "www.github.com/p8", "Author 10", "author10@mail.com", "1"},
+	Utility::appendBy(inputChars,
+					  {"8", "5000000012000", "75936085c8bf9ea33be61ba51c96ee1abd5c38a3", "L7", "P8",
+					   "www.github.com/p8", "Author 10", "author10@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -542,7 +547,8 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 
 	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"1", "5000000000000", "9e350b124404f40a114509910619f641", "L1", "P1", "www.github.com/p1", "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
+					  {"1", "5000000000000", "9e350b124404f40a114509910619f641", "L1", "P1", "www.github.com/p1",
+					   "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expected9(expectedChars.begin(), expectedChars.end());
 
@@ -588,18 +594,18 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	std::string input11(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"101", "5000000008000", "429ae78a6b15630c0ce5114d02b0c55f", "L5", "P101", "www.github.com/p101", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"101", "5000000008000", "429ae78a6b15630c0ce5114d02b0c55f", "L5", "P101", "www.github.com/p101",
+					   "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput11_1(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"101", "5000000009000", "8be58ce8426f941e1f856bf5e4e14492", "L5", "P101", "www.github.com/p101", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"101", "5000000009000", "8be58ce8426f941e1f856bf5e4e14492", "L5", "P101", "www.github.com/p101",
+					   "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput11_2(expectedChars.begin(), expectedChars.end());
 
@@ -637,22 +643,25 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	std::string input12(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(
-		expectedChars, {"2", "5000000001000", "9d075dfba5c2a903ff1f542ea729ae8b", "L2", "P2", "www.github.com/p2", "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"2", "5000000001000", "9d075dfba5c2a903ff1f542ea729ae8b", "L2", "P2", "www.github.com/p2",
+					   "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_1(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"3", "5000000002000", "2d8b3b65caf0e9168a39be667be24861", "L3", "P3", "www.github.com/p3", "b2217c08-06eb-4a57-b977-7c6d72299301", "1"},
+					  {"3", "5000000002000", "2d8b3b65caf0e9168a39be667be24861", "L3", "P3", "www.github.com/p3",
+					   "b2217c08-06eb-4a57-b977-7c6d72299301", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_2(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"4", "5000000005000", "70966cd9481793ab85a409374a66f36b", "L4", "P4", "www.github.com/p4", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
+					  {"4", "5000000005000", "70966cd9481793ab85a409374a66f36b", "L4", "P4", "www.github.com/p4",
+					   "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_3(expectedChars.begin(), expectedChars.end());
@@ -693,7 +702,8 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestSingleExistingProject)
 
 	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"1", "5000000000000", "9e350b124404f40a114509910619f641", "L1", "P1", "www.github.com/p1", "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
+					  {"1", "5000000000000", "9e350b124404f40a114509910619f641", "L1", "P1", "www.github.com/p1",
+					   "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expected9(expectedChars.begin(), expectedChars.end());
 
@@ -734,40 +744,19 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestOneProjectMultipleVersions)
 	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"101"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"101"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "101", ENTRY_DELIMITER_CHAR);
 	std::string input11(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"101", "5000000008000", "429ae78a6b15630c0ce5114d02b0c55f", "L5", "P101", "www.github.com/p101", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	expectedChars.pop_back();
-	std::string expectedOutput11_1(expectedChars.begin(), expectedChars.end());
-
-	expectedChars = {};
-	Utility::appendBy(
-		expectedChars,
-		{"101", "5000000009000", "8be58ce8426f941e1f856bf5e4e14492", "L5", "P101", "www.github.com/p101", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	expectedChars.pop_back();
-	std::string expectedOutput11_2(expectedChars.begin(), expectedChars.end());
-
-	std::vector<std::string> expectedOutputs11 = {expectedOutput11_1, expectedOutput11_2};
+	Utility::appendBy(expectedChars,
+					  {"101", "5000000009000", "8be58ce8426f941e1f856bf5e4e14492", "L5", "P101", "www.github.com/p101",
+					   "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string expected(expectedChars.begin(), expectedChars.end());
 
 	// Test:
 	std::string output11 = handler.handleRequest("gppr", input11, nullptr);
-	std::vector<std::string> entries11 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output11), ENTRY_DELIMITER_CHAR);
-
-	ASSERT_EQ(entries11.size(), 2);
-
-	for (int i = 0; i < entries11.size(); i++)
-	{
-		std::vector<std::string>::iterator index11 =
-			std::find(expectedOutputs11.begin(), expectedOutputs11.end(), entries11[i]);
-		ASSERT_NE(index11, expectedOutputs11.end());
-	}
+	ASSERT_EQ(output11, HTTPStatusCodes::success(expected));
 }
 
 // Tests extract projects request with different projects.
@@ -781,8 +770,8 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"2"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"17938729387"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"2"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"3"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"4"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input12(inputChars.begin(), inputChars.end());
@@ -803,7 +792,8 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"4", "5000000006000", "6415e258c077e5cf3f98982d8050e941", "L4", "P4", "www.github.com/p4", "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
+					  {"4", "5000000006000", "6415e258c077e5cf3f98982d8050e941", "L4", "P4", "www.github.com/p4",
+					   "e39e0872-6856-4fa0-8d9a-278728362f43", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_3(expectedChars.begin(), expectedChars.end());

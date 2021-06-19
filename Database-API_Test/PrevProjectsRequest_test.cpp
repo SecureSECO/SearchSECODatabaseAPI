@@ -35,10 +35,9 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID2 = 1;
-	Version version2 = 5000000000000;
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"1", "5000000000000"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"1"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
 	std::string input2(inputChars.begin(), inputChars.end());
 
 	ProjectOut project2 = {.projectID = 1,
@@ -49,7 +48,6 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 						   .url = "www.github.com/p1",
 						   .ownerID = "68bd2db6-fe91-47d2-a134-cf82b104f547",
 						   .hashes = {"2c7f46d4f57cf9e66b03213358c7ddb5"}};
-	ProjectOut p2 = project2;
 	std::vector<char> expectedChars = {};
 	Utility::appendBy(expectedChars,
 					  {"1", "4000000000000", "9e350b124404f40a114509910619f641", "L1", "P1", "www.github.com/p1",
@@ -57,7 +55,7 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string expected2(expectedChars.begin(), expectedChars.end());
 
-	EXPECT_CALL(database, prevProject(projectID2, version2)).WillOnce(testing::Return(p2));
+	EXPECT_CALL(database, prevProject(projectID2)).WillOnce(testing::Return(project2));
 	std::string output2 = handler.handleRequest("gppr", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
@@ -71,17 +69,17 @@ TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
-	ProjectID projectID3 = 1;
-	Version version3 = 5000000001000;
+	ProjectID projectID3 = 2497301;
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"1", "5000000001000"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"2497301"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
 	std::string input3(inputChars.begin(), inputChars.end());
 
-	ProjectOut p3;
+	ProjectOut project;
+	project.projectID = -1;
 	std::string expected3 = "No results found.";
 
-	EXPECT_CALL(database, prevProject(projectID3, version3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, p3));
+	EXPECT_CALL(database, prevProject(projectID3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, project));
 	std::string output3 = handler.handleRequest("gppr", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
@@ -105,10 +103,7 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 	Version version4_4 = 5000000005001;
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"2", "5000000001001"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"2", "4000000002001"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"3", "5000000002001"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"4", "5000000005001"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"2", "3", "9274487", "4"}, ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input4(inputChars.begin(), inputChars.end());
 
 	ProjectOut project4_1 = {.projectID = 2,
@@ -129,6 +124,7 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 							 .hashes = {"137fed017b6159acc0af30d2c6b403a5", "23920776594c85fdc30cd96f928487f1",
 										"959ee1ee12e6d6d87a4b6ee732aed9fc"}};
 	ProjectOut project4_3;
+	project4_3.projectID = -1;
 	ProjectOut project4_4 = {.projectID = 4,
 							 .version = 5000000005000,
 							 .versionHash = "70966cd9481793ab85a409374a66f36b",
@@ -137,7 +133,6 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 							 .url = "www.github.com/p4",
 							 .ownerID = "e39e0872-6856-4fa0-8d9a-278728362f43",
 							 .hashes = {"06f73d7ab46184c55bf4742b9428a4c0", "8811e6bedb87e90cef39de1179f3bd2e"}};
-
 	std::vector<char> expectedChars1 = {};
 	Utility::appendBy(expectedChars1,
 					  {"2", "5000000001000", "9d075dfba5c2a903ff1f542ea729ae8b", "L2", "P2", "www.github.com/p2",
@@ -161,10 +156,9 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 	std::string expected4_3(expectedChars3.begin(), expectedChars3.end());
 
 	std::vector<std::string> expected4 = {expected4_1, expected4_2, expected4_3};
-	EXPECT_CALL(database, prevProject(projectID4_1, version4_1)).WillOnce(testing::Return(project4_1));
-	EXPECT_CALL(database, prevProject(projectID4_2, version4_2)).WillOnce(testing::Return(project4_2));
-	EXPECT_CALL(database, prevProject(projectID4_3, version4_3))
-		.WillOnce(testing::SetErrnoAndReturn(ERANGE, project4_3));
+	EXPECT_CALL(database, prevProject(projectID4_1)).WillOnce(testing::Return(project4_1));
+	EXPECT_CALL(database, prevProject(projectID4_2)).WillOnce(testing::Return(project4_2));
+	EXPECT_CALL(database, prevProject(projectID4_3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, project4_3));
 	EXPECT_CALL(database, prevProject(projectID4_4, version4_4)).WillOnce(testing::Return(project4_4));
 	std::string output4 = handler.handleRequest("gppr", input4, nullptr);
 	std::vector<std::string> entries4 =

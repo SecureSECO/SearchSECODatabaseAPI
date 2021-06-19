@@ -22,7 +22,7 @@ public:
 	MOCK_METHOD(void, addHashToProject, (ProjectIn project, int index), ());
 	MOCK_METHOD(void, addMethod, (MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject), ());
 	MOCK_METHOD(ProjectOut, searchForProject, (ProjectID projectID, Version version), ());
-	MOCK_METHOD(ProjectOut, prevProject, (ProjectID projectID, Version version), ());
+	MOCK_METHOD(ProjectOut, prevProject, (ProjectID projectID), ());
 	MOCK_METHOD(std::vector<Hash>, updateUnchangedFiles,
 				(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion),
 				());
