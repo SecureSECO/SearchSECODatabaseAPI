@@ -31,6 +31,7 @@ enum eRequestType
 	eExtractProjects,
 	eGetAuthor,
 	eGetMethodByAuthor,
+	eGetPrevProjectsRequest,
 	eUnknown
 };
 

@@ -37,7 +37,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 		const std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5" + entryDelimiter;
 		
 		std::vector<char> outputChars = {};
-		Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000" "M1", "P1/M1.cpp", "1", "1",
+		Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000", "M1", "P1/M1.cpp", "1", "1",
 										"68bd2db6-fe91-47d2-a134-cf82b104f547"},
 										FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 
@@ -78,7 +78,7 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 
 		std::vector<char> outputChars = {};
 
-		Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5","1","5000000000000","M1","P1/M1.cpp","1","1",
+		Utility::appendBy(outputChars, {"2c7f46d4f57cf9e66b03213358c7ddb5", "1", "5000000000000", "M1", "P1/M1.cpp", "1", "1",
 										"68bd2db6-fe91-47d2-a134-cf82b104f547"},
 										FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 		const std::string expectedOutput = std::string(outputChars.begin(), outputChars.end());

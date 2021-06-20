@@ -35,7 +35,6 @@ add_executable(
   AuthorRequest_test.cpp
   IntegrationTests.cpp
   JobIntegrationTests.cpp
-  Utility_test.cpp
   UploadJobRequest_test.cpp
   JobRequestHandler_test.cpp
   GetJobRequest_test.cpp

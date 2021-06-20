@@ -14,8 +14,7 @@ Utrecht University within the Software Project course.
 
 int main()
 {
-	usleep(45000000);
-	std::cout << "Connecting now" << std::endl;
+	std::cout << "Starting the API." << std::endl;
 
 	RAFTConsensus raft;
 	ConnectionHandler listen;
