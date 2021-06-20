@@ -690,7 +690,7 @@ std::string DatabaseRequestHandler::handlePrevProjectsRequest(std::string reques
 	}
 	std::vector<ProjectOut> projects = getPrevProjects(projectQueue);
 
-	if (errno != 0 && errno != ERANGE)
+	if (errno == ENETUNREACH)
 	{
 		return HTTPStatusCodes::serverError("Unable to get project(s) from the database.");
 	}
@@ -718,7 +718,7 @@ std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::que
 		projectIDs.pop();
 		queueLock.unlock();
 
-		ProjectOut newProject = database->prevProject(projectID);
+		ProjectOut newProject = getPrevProjectWithRetry(projectID);
 		if (newProject.projectID != -1)
 		{
 			projects.push_back(newProject);
@@ -1177,7 +1177,6 @@ std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 
 ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
 {
-	errno = 0;
 	int retries = 0;
 	ProjectOut project;
 	project = database->searchForProject(projectID, version);
@@ -1187,6 +1186,27 @@ ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID
 		{
 			project = database->searchForProject(projectID, version);
 			if (errno == 0 || errno == ERANGE)
+			{
+				return project;
+			}
+			retries++;
+		}
+		errno = ENETUNREACH;
+	}
+	return project;
+}
+
+ProjectOut DatabaseRequestHandler::getPrevProjectWithRetry(ProjectID projectID)
+{
+	int retries = 0;
+	ProjectOut project;
+	project = database->prevProject(projectID);
+	if (errno != 0)
+	{
+		while (retries < MAX_RETRIES)
+		{
+			project = database->prevProject(projectID);
+			if (errno == 0)
 			{
 				return project;
 			}

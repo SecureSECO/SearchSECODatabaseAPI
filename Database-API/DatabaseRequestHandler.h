@@ -489,6 +489,18 @@ private:
 							bool newProject);
 
 	/// <summary>
+	/// Tries to obtain the previous/latest version of the relevant project.
+	/// If it succeeds, either returns the project found, or returns an empty project with projectID = -1,
+	/// if there is no such project inside the database.
+	/// If it still fails on the last retry, it returns an empty project (with projectID = -1) 
+	/// and set the errno on ENETUNREACH.
+	/// </summary>
+	/// <param name="projectID">
+	/// The projectID of the project to be searched for.
+	/// </param>
+	ProjectOut getPrevProjectWithRetry(ProjectID projectID);
+	
+	/// <summary>
 	/// Tries to update the methods in the previous version of the project that are in an unchanged file.
 	/// </summary>
 	/// <returns>

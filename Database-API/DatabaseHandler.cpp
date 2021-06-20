@@ -258,10 +258,7 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID)
 			const CassRow *row = cass_result_first_row(result);
 			project = getProject(row);
 		}
-		else
-		{
-			errno = ERANGE;
-		}
+
 		cass_result_free(result);
 	}
 	else
@@ -345,27 +342,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 		CassFuture *queryFuture = cass_session_execute(connection, query);
 		if (cass_future_error_code(queryFuture) == CASS_OK)
 		{
-			const CassResult *result = cass_future_get_result(queryFuture);
-
-			CassIterator *iterator = cass_iterator_from_result(result);
-
-			// Add matches to result list.
-			while (cass_iterator_next(iterator))
-			{
-				const CassRow *row = cass_iterator_get_row(iterator);
-
-				long long endVersion = getInt64(row, "endVersionTime");
-
-				if (endVersion == prevVersion)
-				{
-					newMethod = false;
-					long long startVersion = getInt64(row, "startVersionTime");
-					updateMethod(method, project, startVersion);
-				}
-			}
-
-			cass_iterator_free(iterator);
-			cass_result_free(result);
+			handleSelectMethodQueryResult(queryFuture, method, project, prevVersion, parserVersion, &newMethod);
 		}
 		else
 		{
@@ -395,6 +372,32 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 	{
 		addNewMethod(method, project, parserVersion);
 	}	
+}
+
+void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, MethodIn method, ProjectIn project,
+											long long prevVersion, long long parserVersion, bool newMethod)
+{
+	const CassResult *result = cass_future_get_result(queryFuture);
+
+	CassIterator *iterator = cass_iterator_from_result(result);
+
+	// Add matches to result list.
+	while (cass_iterator_next(iterator))
+	{
+		const CassRow *row = cass_iterator_get_row(iterator);
+
+		long long endVersion = getInt64(row, "endVersionTime");
+
+		if (endVersion == prevVersion)
+		{
+			newMethod = false;
+			long long startVersion = getInt64(row, "startVersionTime");
+			updateMethod(method, project, startVersion);
+		}
+	}
+
+	cass_iterator_free(iterator);
+	cass_result_free(result);
 }
 
 void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long parserVersion)
@@ -500,67 +503,13 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 {
 	errno = 0;
 
-	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
-	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
-
-	int size = hashes.size();
-
-	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
-
-	for (int i = 0; i < size; i++)
-	{
-		CassUuid hash;
-		cass_uuid_from_string(Utility::hashToUuidString(hashes[i]).c_str(), &hash);
-		cass_collection_append_uuid(hashesCollection, hash);
-	}
-
-	cass_statement_bind_collection(query, 0, hashesCollection);
-
-	cass_collection_free(hashesCollection);
-
-	size = files.size();
-
-	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, size);
-
-	for (int i = 0; i < size; i++)
-	{
-		cass_collection_append_string(filesCollection, files[i].c_str());
-	}
-
-	cass_statement_bind_collection(query, 2, filesCollection);
-
-	cass_collection_free(filesCollection);
-
-	CassFuture *queryFuture = cass_session_execute(connection, query);
+	CassFuture *queryFuture = executeSelectUnchangedMethodsQuery(hashes, files, project);
 
 	std::vector<Hash> resultHashes;
 
 	if (cass_future_error_code(queryFuture) == CASS_OK)
 	{
-		const CassResult *result = cass_future_get_result(queryFuture);
-
-		CassIterator *iterator = cass_iterator_from_result(result);
-
-		// Add matches to result list.
-		while (cass_iterator_next(iterator))
-		{
-			const CassRow *row = cass_iterator_get_row(iterator);
-			
-			long long endVersion = getInt64(row, "endVersionTime");
-
-			if (endVersion == prevVersion)
-			{
-				long long startVersion = getInt64(row, "startversiontime");
-				MethodIn method;
-				method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
-				method.fileLocation = getString(row, "file");
-				updateMethod(method, project, startVersion);
-				resultHashes.push_back(method.hash);
-			}
-		}
-
-		cass_iterator_free(iterator);
-		cass_result_free(result);
+		resultHashes = handleSelectUnchangedMethodsResult(queryFuture, project, prevVersion);
 	}
 	else
 	{
@@ -571,9 +520,6 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 		fprintf(stderr, "Unable to get unchanged methods: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
-
-	// Statement objects can be freed immediately after being executed.
-	cass_statement_free(query);
 
 	// This will block until the query has finished.
 	CassError rc = cass_future_error_code(queryFuture);
@@ -589,8 +535,76 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 	return resultHashes;
 }
 
-void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
+std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture *queryFuture, ProjectIn project,
+																	  long long prevVersion)
 {
+	std::vector<Hash> hashes;
+	const CassResult *result = cass_future_get_result(queryFuture);
+	CassIterator *iterator = cass_iterator_from_result(result);
+
+	// Add matches to result list.
+	while (cass_iterator_next(iterator))
+	{
+		const CassRow *row = cass_iterator_get_row(iterator);
+
+		long long endVersion = getInt64(row, "endVersionTime");
+
+		if (endVersion == prevVersion)
+		{
+			long long startVersion = getInt64(row, "startversiontime");
+			MethodIn method;
+			method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
+			method.fileLocation = getString(row, "file");
+			updateMethod(method, project, startVersion);
+			hashes.push_back(method.hash);
+		}
+	}
+
+	cass_iterator_free(iterator);
+	cass_result_free(result);
+
+	return hashes;
+}
+
+	CassFuture *DatabaseHandler::executeSelectUnchangedMethodsQuery(std::vector<Hash> hashes,
+																std::vector<std::string> files, ProjectIn project)
+{
+	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
+	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
+
+	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, hashes.size());
+
+	for (int i = 0; i < hashes.size(); i++)
+	{
+		CassUuid hash;
+		cass_uuid_from_string(Utility::hashToUuidString(hashes[i]).c_str(), &hash);
+		cass_collection_append_uuid(hashesCollection, hash);
+	}
+
+	cass_statement_bind_collection(query, 0, hashesCollection);
+
+	cass_collection_free(hashesCollection);
+
+	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, files.size());
+
+	for (int i = 0; i < files.size(); i++)
+	{
+		cass_collection_append_string(filesCollection, files[i].c_str());
+	}
+
+	cass_statement_bind_collection(query, 2, filesCollection);
+	cass_collection_free(filesCollection);
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	return queryFuture;
+}
+
+void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, ProjectIn project)
+	{
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 

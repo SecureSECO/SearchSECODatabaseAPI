@@ -180,6 +180,24 @@ private:
 	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
 
 	/// <summary>
+	/// Handles the result obtained by performing the select method query.
+	/// </summary>
+	void handleSelectMethodQueryResult(CassFuture *queryFuture, MethodIn method, ProjectIn project,
+									   long long prevVersion, long long parserVersion, bool newProject);
+
+	/// <summary>
+	/// Handles the result obtained by performing the select unchanged methods query. 
+	/// Returns the hashes corresponding to unchanged methods.
+	/// </summary>
+	std::vector<Hash> handleSelectUnchangedMethodsResult(CassFuture *queryFuture, ProjectIn project,
+											long long prevVersion);
+
+	/// <summary>
+	/// Executes the query performed to select the unchanged methods.
+	/// </summary>
+	CassFuture *executeSelectUnchangedMethodsQuery(std::vector<Hash> hashes, std::vector<std::string> files,
+												   ProjectIn project);
+	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
 	CassUuid createAuthorIfNotExists(Author author);
