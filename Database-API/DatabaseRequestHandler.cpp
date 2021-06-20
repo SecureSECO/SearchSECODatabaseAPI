@@ -749,7 +749,7 @@ std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::q
 		{
 			return projects;
 		}
-		if (errno != ERANGE)
+		else if (errno != ERANGE)
 		{
 			projects.push_back(newProject);
 		}
@@ -1177,6 +1177,7 @@ std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 
 ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
 {
+	errno = 0;
 	int retries = 0;
 	ProjectOut project;
 	project = database->searchForProject(projectID, version);
