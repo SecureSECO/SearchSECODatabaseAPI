@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include "Utility.h"
 #include <iostream>
+#include <unistd.h>
 
 void DatabaseHandler::connect(std::string ip, int port)
 {
@@ -22,6 +23,8 @@ void DatabaseHandler::connect(std::string ip, int port)
 	cass_cluster_set_consistency(cluster, CASS_CONSISTENCY_QUORUM);
 	cass_cluster_set_num_threads_io(cluster, MAX_THREADS);
 
+	std::cout << "Connecting to the database." << std::endl;
+
 	// Provide the cluster object as configuration to connect the session.
 	connectFuture = cass_session_connect_keyspace(connection, cluster, "projectdata");
 
@@ -29,12 +32,23 @@ void DatabaseHandler::connect(std::string ip, int port)
 
 	if (rc != CASS_OK)
 	{
-		// Display connection error message.
-		const char *message;
-		size_t messageLength;
-		cass_future_error_message(connectFuture, &message, &messageLength);
-		fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
-		errno = ENETUNREACH;
+		std::cout << "Could not connect to the database." << std::endl;
+		usleep(45000000);
+		std::cout << "Retrying now." << std::endl;
+
+		connectFuture = cass_session_connect_keyspace(connection, cluster, "projectdata");
+
+		CassError rc = cass_future_error_code(connectFuture);
+
+		if (rc != CASS_OK)
+		{
+			// Display connection error message.
+			const char *message;
+			size_t messageLength;
+			cass_future_error_message(connectFuture, &message, &messageLength);
+			fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
+			errno = ENETUNREACH;
+		}
 	}
 	setPreparedStatements();
 }
