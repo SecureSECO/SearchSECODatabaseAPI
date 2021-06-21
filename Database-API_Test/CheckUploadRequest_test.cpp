@@ -40,8 +40,12 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::vector<char> requestChars = {};
-	Utility::appendBy(requestChars, {"0", "0", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com"},
+	Utility::appendBy(requestChars,
+					  {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
+					   "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
 		requestChars,
 		{"a6aa62503e2ca3310e3a837502b80df5", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"},
@@ -50,27 +54,34 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 
 	std::vector<char> outputChars = {};
 	Utility::appendBy(outputChars,
-					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "Method1", "MyProject/Method1.cpp", "1", "1",
-					   "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "0",
+					   "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "Method1", "MyProject/Method1.cpp", "1", "1",
+					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 
 	std::string authorID = "f1a028d7-3845-41df-bec1-2e16c49e4c35";
 	MethodOut method1out = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
 							.projectID = 0,
-							.version = 0,
-							.methodName = "Method1",
 							.fileLocation = "MyProject/Method1.cpp",
+							.startVersion = 0,
+							.startVersionHash = "dfa59d94e44092eddd3cfba13f032aaa035de3d0",
+							.endVersion = 0,
+							.endVersionHash = "dfa59d94e44092eddd3cfba13f032aaa035de3d0",
+							.methodName = "Method1",
 							.lineNumber = 1,
-							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"}};
-	Author author = {.name = "Owner", .mail = "owner@mail.com"};
+							.authorIDs = {"f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+							.parserVersion = 1,};
+	Author author("Owner", "owner@mail.com");
 	ProjectIn project = {.projectID = 0,
 						 .version = 0,
+						 .versionHash = "dfa59d94e44092eddd3cfba13f032aaa035de3d0",
 						 .license = "MyLicense",
 						 .name = "MyProject",
 						 .url = "MyUrl",
 						 .owner = author,
-						 .hashes = {}};
+						 .hashes = {},
+						 .parserVersion = 1};
 	MethodIn method1in = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
 						  .methodName = "Method1",
 						  .fileLocation = "MyProject/Method1.cpp",
@@ -80,7 +91,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	v.push_back(method1out);
 
 	EXPECT_CALL(database, addProject(projectEqual(project))).Times(1);
-	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project))).Times(1);
+	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
@@ -91,9 +102,14 @@ TEST(CheckUploadRequest, HashConversionError)
 {
 	RequestHandler handler;
 
-	std::string request = "0?0?MyLicense?MyProject?MyUrl?Owner?owner@mail.com\n"
-						  "a6aa62503e2ca3310e3a837502b80df5xx?Method1?"
-						  "MyProject/Method1.cpp?1?1?Owner?owner@mail.com";
+	std::vector<char> requestChars = {};
+	Utility::appendBy(requestChars, {"0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "MyLicense", "MyProject", "MyUrl", "Owner",
+					   "owner@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
+	requestChars.push_back(ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5xx", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string request(requestChars.begin(), requestChars.end());
 
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing hashes."));

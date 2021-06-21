@@ -47,14 +47,14 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 		case eExtractProjects:
 			result = dbrh->handleExtractProjectsRequest(request);
 			break;
-		case eGetAuthorID:
-			result = dbrh->handleGetAuthorIDRequest(request);
-			break;
 		case eGetAuthor:
 			result = dbrh->handleGetAuthorRequest(request);
 			break;
 		case eGetMethodByAuthor:
 			result = dbrh->handleGetMethodsByAuthorRequest(request);
+			break;
+		case eGetPrevProjectsRequest:
+			result = dbrh->handlePrevProjectsRequest(request);
 			break;
 		case eUnknown:
 			result = handleUnknownRequest();
@@ -110,10 +110,6 @@ eRequestType RequestHandler::getERequestType(std::string requestType)
 	{
 		return eExtractProjects;
 	}
-	else if (requestType == "auid")
-	{
-		return eGetAuthorID;
-	}
 	else if (requestType == "idau")
 	{
 		return eGetAuthor;
@@ -121,6 +117,10 @@ eRequestType RequestHandler::getERequestType(std::string requestType)
 	else if (requestType == "aume")
 	{
 		return eGetMethodByAuthor;
+	}
+	else if (requestType == "gppr")
+	{
+		return eGetPrevProjectsRequest;
 	}
 	else
 	{

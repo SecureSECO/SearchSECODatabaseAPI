@@ -82,4 +82,13 @@ public:
 	/// This comes down to removing all dashes from the input string.
 	/// </summary>
 	static std::string uuidStringToHash(std::string uuid);
+
+	/// <summary>
+	/// Gets the current time sinds epoch in seconds.
+	/// </summary>
+	static long long getCurrentTimeSeconds();
+	/// <summary>
+	/// Gets the current time sinds epoch in Milliseconds.
+	/// </summary>
+	static long long getCurrentTimeMilliSeconds();
 };

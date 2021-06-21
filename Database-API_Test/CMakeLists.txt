@@ -28,7 +28,6 @@ add_executable(
   Raft_tests.cpp
   Utility_test.cpp
   RequestHandler_test.cpp
-  ConnectionHandler_tests.cpp
   CheckRequest_test.cpp
   UploadRequest_test.cpp
   CheckUploadRequest_test.cpp
@@ -36,7 +35,6 @@ add_executable(
   AuthorRequest_test.cpp
   IntegrationTests.cpp
   JobIntegrationTests.cpp
-  Utility_test.cpp
   UploadJobRequest_test.cpp
   JobRequestHandler_test.cpp
   GetJobRequest_test.cpp
@@ -50,6 +48,10 @@ target_link_libraries(
   "Database-API-library"
 )
 target_link_libraries(tests /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
+
+# Copying it twice, because the pipeline expects it to be somewhere else then running it localy.
+configure_file("../dotenvTestfile.txt" "dotenvTestfile.txt" COPYONLY)
+configure_file("../dotenvTestfile.txt" "../dotenvTestfile.txt" COPYONLY)
 
 include(GoogleTest)
 gtest_discover_tests(tests)

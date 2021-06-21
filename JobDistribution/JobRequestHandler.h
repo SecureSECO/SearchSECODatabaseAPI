@@ -14,6 +14,8 @@ Utrecht University within the Software Project course.
 
 #define MIN_AMOUNT_JOBS 500
 #define MAX_RETRIES 3
+#define CRAWL_TIMEOUT_SECONDS 150
+#define RECOUNT_WAIT_TIME 600
 
 class TcpConnection;
 
@@ -73,7 +75,7 @@ public:
 	/// </summary>
 	int numberOfJobs;
 	int crawlId;
-	bool alreadyCrawling = false;
+	long long timeLastCrawl = -1;
 
 	/// <summary>
 	/// Updates the crawlId when crawl data is uploaded to the database.
@@ -107,4 +109,6 @@ private:
 	/// If it fails, it returns false.
 	/// </summary>
 	bool tryUploadJobWithRetry(std::string url, int priority);
+
+	long long timeLastRecount = -1;
 };

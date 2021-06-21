@@ -14,15 +14,13 @@ Utrecht University within the Software Project course.
 
 int main()
 {
-	usleep(45000000);
-	std::cout << "Connecting now" << std::endl;
+	std::cout << "Starting the API." << std::endl;
 
 	RAFTConsensus raft;
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	raft.start(listen.getRequestHandler());
 	listen.startListen(&databaseHandler, &databaseConnection, &raft);
 
 	return 0;

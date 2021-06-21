@@ -26,54 +26,31 @@ MATCHER_P(matcherNotNull, request, "")
 	return arg != nullptr;
 }
 
-TEST(RaftTests, AssumeLeaderTest)
-{
-	RequestHandlerMock handler;
-	ConnectionHandler listen;
-	std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
-	usleep(500000); // Just to make sure the listner has started.
-
-	EXPECT_CALL(handler, handleRequest("conn", "8003" + entryDelimiter, matcherNotNull(nullptr))).Times(0);
-
-	RAFTConsensus raft;
-	raft.start(nullptr, true, {{TESTIP, std::to_string(TESTLISTENPORT)}});
-
-	ASSERT_TRUE(raft.isLeader());
-}
-
-TEST(RaftTests, ConnectToLeader)
-{
-	RequestHandlerMock handler;
-	{
-		ConnectionHandler listen;
-		EXPECT_CALL(handler, handleRequest("conn", std::to_string(PORT) + entryDelimiter, matcherNotNull(nullptr))).Times(1)
-			.WillOnce(testing::Return(RESPONSE_OK + (fieldDelimiter + TESTIP + fieldDelimiter + std::to_string(PORT) + entryDelimiter)));
-		std::thread* tread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTLISTENPORT, &handler);
-		usleep(500000); // Just to make sure the listner has started.
-
-		RAFTConsensus raft;
-		raft.start(nullptr, false, {{TESTIP, std::to_string(TESTLISTENPORT)}});
-
-		ASSERT_TRUE(!raft.isLeader());
-	}
-	usleep(500000); // Extra wait to make sure the heartbeat is going to be send.
-}
-
 TEST(RaftTests, BecomeLeader)
 {
-	RAFTConsensus raft;
-	raft.start(nullptr, false, {{TESTIP, "-1"}});
+	RequestHandler raftHandler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	raftHandler.initialize(&database, &jddatabase, nullptr);
+	{
+		RAFTConsensus raft;
+		raft.start(&raftHandler, {{TESTIP, "-1"}}, false);
 
-	ASSERT_TRUE(raft.isLeader());
+		ASSERT_TRUE(raft.isLeader());
+	}
 }
 
 TEST(RaftTests, AcceptConnection)
 {
 	boost::asio::io_context ioCon;
+	RequestHandler handler; 
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	handler.initialize(&database, &jddatabase, nullptr);
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
 		RAFTConsensus raft;
-		raft.start(nullptr, true, {});
+		raft.start(&handler, {}, true);
 
 		ASSERT_TRUE(raft.isLeader());
 
@@ -85,4 +62,13 @@ TEST(RaftTests, AcceptConnection)
 		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TESTIP + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connMock;
+}
+
+TEST(RaftTests, ReadIpsFromFile) 
+{
+	RAFTConsensus raft;
+	auto ips = raft.getIps("dotenvTestfile.txt");
+	std::string port = std::to_string(PORT);
+	std::vector<std::pair<std::string, std::string>> expectedOutput = {{"127.0.0.1", port}, {"127.0.0.2", port}};
+	ASSERT_EQ(ips, expectedOutput);
 }

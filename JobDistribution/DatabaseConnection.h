@@ -27,7 +27,7 @@ public:
 	/// <summary>
 	/// Adds a job to the database given the url to a repository and a priority.
 	/// </summary>
-	virtual void uploadJob(std::string url, int priority);
+	virtual void uploadJob(std::string url, long long priority);
 
 	/// <summary>
 	/// Retrieves the url of the first job in the jobs table and returns it.
@@ -43,7 +43,7 @@ private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
 	/// </summary>
-	void deleteTopJob(CassUuid id, int priority);
+	void deleteTopJob(CassUuid id, cass_int64_t priority);
 
 	/// <summary>
 	/// Creates prepared queries for later use.

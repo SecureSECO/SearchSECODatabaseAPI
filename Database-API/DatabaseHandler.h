@@ -42,30 +42,70 @@ public:
 	/// consisting of projectID and version. Returns the project corresponding to the input, if it exists.
 	/// If no entry can be found, simply returns an empty vector.
 	/// </summary>
-	virtual std::vector<ProjectOut> searchForProject(ProjectID projectID, Version version);
+	virtual ProjectOut searchForProject(ProjectID projectID, Version version);
 
 	/// <summary>
-	/// Add a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
-	/// the database with information of the project.
+	/// Retrieves the previous/latest version of the project present in the database.
 	/// </summary>
-	virtual void addMethod(MethodIn method, ProjectIn project);
+	/// <returns>
+	/// If present, returns the previous/latest version of a project with the same projectID.
+	/// Else, sets the errno to ERANGE and returns an empty project.
+	/// </returns>
+	virtual ProjectOut prevProject(ProjectID projectID);
 
 	/// <summary>
-	/// Given a hash, return all methods with that hash. Takes a hash as input and outputs a list of methods that match
-	/// the hash.
+	/// Add/update a method to the tables methods and method_by_author. Takes in a method and a project and adds the method to
+	/// the database with information of the project. 
 	/// </summary>
-	virtual std::vector<MethodOut> hashToMethods(std::string hash);
+	/// <param name="method">
+	/// The method to be added/updated.
+	/// </param>
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="prevVersion">
+	/// The previous version of the project.
+	/// </param>
+	/// <param name="parserVersion">
+	/// The version of the parser.
+	/// </param>
+	/// <param name="newProject">
+	/// A boolean value used to differentiate a new project from a changed project.
+	/// The value is true if and only if the project is new.
+	/// </param>
+	virtual void addMethod(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject);
 
 	/// <summary>
-	/// Given an author returns the id of that author.
+	/// Updates the methods in the previous version of the project that are in an unchanged file.
 	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
+	/// <param name="hashes">
+	/// A list of hashes to check.
+	/// </param>
+	/// <param name="files">
+	/// A list of files to check.
+	/// </param>
+	/// <param name="project">
+	/// The added project for the projectID and new version.
+	/// </param>
+	/// <param name="prevVersion">
+	/// The previous version of the project to check whether it is a correct result.
 	/// </param>
 	/// <returns>
-	/// A string representing the author id.
+	/// A list of hashes that are updated.
 	/// </returns>
-	virtual std::string authorToId(Author author);
+	virtual std::vector<Hash> updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project,
+										   long long prevVersion);
+
+	/// <summary>
+	/// Given a hash, return all methods with that hash.
+	/// </summary>
+	/// <param name="hash">
+	/// The hash to be checked.
+	/// </param>
+	/// <returns>
+	/// All methods with the inputted hash.
+	/// </returns>
+	virtual std::vector<MethodOut> hashToMethods(std::string hash);
 
 	/// <summary>
 	/// Given an author id retrieves the corresponding author.
@@ -111,26 +151,56 @@ private:
 	MethodId getMethodId(const CassRow *row);
 
 	/// <summary>
-	/// Retrieves the author ID corresponding to the given author.
-	/// Also creates a new author if the author does not yet exist.
-	/// <summary>
-	CassUuid getAuthorId(Author author);
-
-	/// <summary>
-	/// Retrieves the author id corresponding to the given author.
+	/// A function that is used to add new methods to the database.
 	/// </summary>
-	/// <param name="author">
-	/// The author to retrieve the id for.
+	/// <param name="method">
+	/// The method to be inputted into the database.
 	/// </param>
-	/// <returns>
-	/// The id of the author.
-	/// </returns>
-	virtual CassUuid retrieveAuthorId(Author author);
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="parserVersion">
+	/// The version of the parser.
+	/// </param>
+	void addNewMethod(MethodIn method, ProjectIn project, long long parserVersion);
 
+	/// <summary>
+	/// A function that is used to update methods that were already in the database.
+	/// More precisely, updates endVersionTime and -Hash, methodName, lineNumber and authors.
+	/// </summary>
+	/// <param name="method">
+	/// The method to be updated.
+	/// </param>
+	/// <param name="project">
+	/// The project in which the method is located.
+	/// </param>
+	/// <param name="startVersion">
+	/// The startVersionTime of the method to be updated.
+	/// </param>
+	void updateMethod(MethodIn method, ProjectIn project, long long startVersion);
+
+	/// <summary>
+	/// Handles the result obtained by performing the select method query.
+	/// </summary>
+	void handleSelectMethodQueryResult(CassFuture *queryFuture, MethodIn method, ProjectIn project,
+									   long long prevVersion, long long parserVersion, bool newProject);
+
+	/// <summary>
+	/// Handles the result obtained by performing the select unchanged methods query. 
+	/// Returns the hashes corresponding to unchanged methods.
+	/// </summary>
+	std::vector<Hash> handleSelectUnchangedMethodsResult(CassFuture *queryFuture, ProjectIn project,
+											long long prevVersion);
+
+	/// <summary>
+	/// Executes the query performed to select the unchanged methods.
+	/// </summary>
+	CassFuture *executeSelectUnchangedMethodsQuery(std::vector<Hash> hashes, std::vector<std::string> files,
+												   ProjectIn project);
 	/// <summary>
 	/// Creates a new author and adds it to the database. Takes in the author to add.
 	/// </summary>
-	CassUuid createAuthor(Author author);
+	CassUuid createAuthorIfNotExists(Author author);
 
 	/// <summary>
 	/// Retrieves a string from a row. Takes in the row and the name of the column.
@@ -163,17 +233,32 @@ private:
 	void setPreparedStatements();
 
 	/// <summary>
+	/// Prepares a specified statement (query) to be executed later.
+	/// </summary>
+	/// <param name="query">
+	/// A string containing the CQL-query to be executed later.
+	/// Question marks are used to indicate positions to be bound at a later stage.
+	/// </param>
+	/// <returns>
+	/// The constant prepared statement that allows us to execute the query given as input.
+	/// </returns>
+	const CassPrepared *prepareStatement(std::string query);
+
+	/// <summary>
 	/// The prepared statements that can be executed.
 	/// </summary>
-	const CassPrepared *selectMethod;
+	const CassPrepared *selectMethods;
 	const CassPrepared *selectProject;
+	const CassPrepared *selectPrevProject;
 	const CassPrepared *insertProject;
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
+	const CassPrepared *updateMethods;
+	const CassPrepared *updateUnchangedMethods;
+	const CassPrepared *selectMethod;
+	const CassPrepared *selectUnchangedMethods;
 	const CassPrepared *insertMethodByAuthor;
 	const CassPrepared *selectMethodByAuthor;
-	const CassPrepared *selectIdByAuthor;
-	const CassPrepared *insertIdByAuthor;
 	const CassPrepared *insertAuthorById;
 	const CassPrepared *selectAuthorById;
 };

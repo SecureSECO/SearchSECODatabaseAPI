@@ -19,6 +19,7 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
 	this->database = database;
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
+	timeLastRecount = Utility::getCurrentTimeSeconds();
 	crawlId = 0;
 }
 
@@ -31,6 +32,12 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 {
 	if (raft->isLeader())
 	{
+		auto currentTime = Utility::getCurrentTimeSeconds();
+		bool alreadyCrawling = true;
+		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS) 
+		{
+			alreadyCrawling = false;
+		}
 		// Check if number of jobs is enough to provide the top job.
 		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 		{
@@ -39,7 +46,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		// If number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
 		{
-			alreadyCrawling = true;
+			timeLastCrawl = currentTime;
 			std::string s = "Crawl";
 			s += FIELD_DELIMITER_CHAR;
 			return HTTPStatusCodes::success(s + std::to_string(crawlId));
@@ -89,6 +96,13 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 				return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
 			}
 		}
+
+		long long timeNow = Utility::getCurrentTimeSeconds();
+		if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME) 
+		{
+			numberOfJobs = database->getNumberOfJobs();
+		}
+
 		if (errno == 0)
 		{
 			return HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue.");
@@ -124,11 +138,12 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 void JobRequestHandler::updateCrawlId(int id)
 {
 	crawlId = id;
-	alreadyCrawling = false;
+	timeLastCrawl = -1;
 }
 
 void JobRequestHandler::connectWithRetry(std::string ip, int port)
 {
+	errno = 0;
 	database->connect(ip, port);
 	int retries = 0;
 	if (errno != 0)
@@ -145,6 +160,7 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 		}
 		throw "Unable to connect to database.";
 	}
+	errno = 0;
 }
 
 std::string JobRequestHandler::getTopJobWithRetry()

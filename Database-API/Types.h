@@ -9,6 +9,8 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <vector>
 
+#include "md5/md5.h"
+
 namespace types {
 
 typedef std::string AuthorID;
@@ -24,6 +26,14 @@ struct Author
 public:
 	std::string name;
 	std::string mail;
+	std::string id;
+	Author(std::string name, std::string mail) :
+	name(name),
+	mail(mail)
+	{
+		
+		id = md5(name + " " + mail);
+	}
 };
 
 
@@ -49,11 +59,15 @@ struct MethodOut
 public:
 	Hash hash;
 	ProjectID projectID;
-	Version version;
-	std::string methodName;
 	std::string fileLocation;
+	Version startVersion;
+	std::string startVersionHash;
+	Version endVersion;
+	std::string endVersionHash;
+	std::string methodName;	
 	int lineNumber;
 	std::vector<AuthorID> authorIDs;
+	long long parserVersion;
 };
 
 struct MethodId
@@ -61,7 +75,8 @@ struct MethodId
 public:
 	Hash hash;
 	ProjectID projectId;
-	Version version;
+	std::string fileLocation;
+	Version startVersion;
 };
 
 /// <summary>
@@ -72,11 +87,13 @@ struct ProjectIn
 public:
 	ProjectID projectID;
 	Version version;
+	std::string versionHash;
 	std::string license;
 	std::string name;
 	std::string url;
-	Author owner;
+	Author owner = Author("","");
 	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 
 /// <summary>
@@ -87,10 +104,12 @@ struct ProjectOut
 public:
 	ProjectID projectID;
 	Version version;
+	std::string versionHash;
 	std::string license;
 	std::string name;
 	std::string url;
 	AuthorID ownerID;
 	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 }

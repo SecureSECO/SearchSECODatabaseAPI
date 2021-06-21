@@ -15,6 +15,7 @@ add_executable (Database-APIexe
     "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
     "Database-API/Types.h"
     "Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
+    "General/md5/md5.cpp" "General/md5/md5.h"
     "JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
     "JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
     "JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
@@ -28,6 +29,7 @@ add_library(Database-API-library
     "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
     "Database-API/Types.h"
     "Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
+    "General/md5/md5.cpp" "General/md5/md5.h"
     "JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
     "JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
     "JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
@@ -52,6 +54,9 @@ setup_target_for_coverage_lcov(
         EXECUTABLE tests
         EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../Database-API_Test/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
+
+# Copy .env file
+configure_file(".env" ".env" COPYONLY)
 
 # Include sub-projects.
 add_subdirectory ("Database-API_Test")
