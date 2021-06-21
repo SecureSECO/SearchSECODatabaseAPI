@@ -547,30 +547,30 @@ private:
 	std::vector<MethodId> authorToMethodsWithRetry(std::string authorId);
 
 	/// <summary>
-	/// Splits a list into multiple chunks of size at most equal to the chunkSize.
+	/// Splits a list of arbitrary type into multiple chunks of size at most equal to the chunkSize.
 	/// </summary>
 	/// <param name="list">
-	/// The list that has to be splitted into parts.
+	/// A list of elements of some type T that has to be split into multiple chunks.
 	/// </param>
 	/// <param name="chunkSize">
 	/// The maximum size of a single chunk.
 	/// </param>
-	std::vector<std::vector<std::string>> toChunks(std::vector<std::string> list, int chunkSize);
+	template <class T> std::vector<std::vector<T>> toChunks(std::vector<T> list, int chunkSize);
 
 	/// <summary>
-	/// Forms a queue of the elements in the cartesian product of two containers of strings.
-	/// Here the cartesian product of two containers K and L consists of all pairs <k, l>
+	/// Forms a queue of the elements in the cartesian product of two vectors of type T1 and T2 respectively.
+	/// Here the cartesian product of two vectors K and L consists of all pairs <k, l>
 	/// where k in K and l in L.
 	/// </summary>
-	/// <param name="firstList">
-	/// The list of the left parts of the pairs. It has the role of the container K.
+	/// <param name="listT1">
+	/// A list of elements of type T1. It has the role of the container K.
 	/// </param>
-	/// <param name="secondList">
-	/// The list of the right parts of the pairs. It has the role of the container L.
+	/// <param name="listT2">
+	/// A list of elements of type T2. It has the role of container L.
 	/// </param>
-	std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>>
-	cartesianProductQueue(std::vector<std::vector<std::string>> firstList,
-						  std::vector<std::vector<std::string>> secondList);
+	template <class T1, class T2>
+	std::queue<std::pair<std::vector<T1>, std::vector<T2>>> cartesianProductQueue(std::vector<std::vector<T1>> listT1,
+																				  std::vector<std::vector<T2>> listT2);
 
 	DatabaseHandler *database;
 };

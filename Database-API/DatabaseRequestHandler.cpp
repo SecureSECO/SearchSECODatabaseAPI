@@ -250,11 +250,11 @@ void DatabaseRequestHandler::handleUpdateUnchangedFilesThreads(ProjectIn project
 	database->addHashToProject(project, 0);
 }
 
-std::vector<std::vector<std::string>> DatabaseRequestHandler::toChunks(std::vector<std::string> list, int chunkSize)
+template <class T> std::vector<std::vector<T>> DatabaseRequestHandler::toChunks(std::vector<T> list, int chunkSize)
 {
-	std::vector<std::string> currentChunk = {};
-	std::vector<std::vector<std::string>> chunks = {};
-	for (std::string element : list)
+	std::vector<T> currentChunk = {};
+	std::vector<std::vector<T>> chunks = {};
+	for (T element : list)
 	{
 		currentChunk.push_back(element);
 		if (currentChunk.size() >= chunkSize)
@@ -271,16 +271,15 @@ std::vector<std::vector<std::string>> DatabaseRequestHandler::toChunks(std::vect
 	return chunks;
 }
 
-std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>>
-DatabaseRequestHandler::cartesianProductQueue(std::vector<std::vector<std::string>> firstList,
-											  std::vector<std::vector<std::string>> secondList)
+template <class T1, class T2> std::queue<std::pair<std::vector<T1>, std::vector<T2>>>
+DatabaseRequestHandler::cartesianProductQueue(std::vector<std::vector<T1>> listT1, std::vector<std::vector<T2>> listT2)
 {
-	std::queue<std::pair<std::vector<std::string>, std::vector<std::string>>> pairQueue;
-	for (std::vector<std::string> firstElem : firstList)
+	std::queue<std::pair<std::vector<T1>, std::vector<T2>>> pairQueue;
+	for (std::vector<T1> elemT1 : listT1)
 	{
-		for (std::vector<std::string> secondElem : secondList)
+		for (std::vector<T2> elemT2 : listT2)
 		{
-			pairQueue.push(std::make_pair(firstElem, secondElem));
+			pairQueue.push(std::make_pair(elemT1, elemT2));
 		}
 	}
 
