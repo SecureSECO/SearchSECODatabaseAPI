@@ -7,6 +7,8 @@ Utrecht University within the Software Project course.
 #include "JobRequestHandler.h"
 #include "HTTPStatus.h"
 
+#include <unistd.h>
+#include <math.h>
 #include <iostream>
 #include <exception>
 
@@ -133,6 +135,7 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * 1000000);
 			database->connect(ip, port);
 			if (errno == 0)
 			{
@@ -152,6 +155,7 @@ std::string JobRequestHandler::getTopJobWithRetry()
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * 1000000);
 			url = database->getTopJob();
 			if (errno == 0)
 			{
@@ -173,6 +177,7 @@ bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * 1000000);
 			database->uploadJob(url, priority);
 			if (errno == 0)
 			{
