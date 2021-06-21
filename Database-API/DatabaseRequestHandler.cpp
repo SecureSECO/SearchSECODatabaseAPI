@@ -15,6 +15,8 @@ Utrecht University within the Software Project course.
 #include <future>
 #include <utility>
 #include <functional>
+#include <math.h>
+#include <unistd.h>
 
 #include "DatabaseRequestHandler.h"
 #include "HTTPStatus.h"
@@ -1076,6 +1078,7 @@ void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->connect(ip, port);
 			if (errno == 0)
 			{
@@ -1096,6 +1099,7 @@ bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->addProject(project);
 			if (errno == 0)
 			{
@@ -1117,6 +1121,7 @@ void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn proje
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->addMethod(method, project, prevVersion, parserVersion, newProject);
 			if (errno == 0 && errno != ERANGE)
 			{
@@ -1139,6 +1144,7 @@ std::vector<Hash> DatabaseRequestHandler::updateUnchangedFilesWithRetry(std::pai
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			hashes = database->updateUnchangedFiles(hashFile.first, hashFile.second, project, prevVersion);
 			if (errno == 0)
 			{
@@ -1162,6 +1168,7 @@ std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			methods = database->hashToMethods(hash);
 			if (errno == 0)
 			{
@@ -1185,6 +1192,7 @@ ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			project = database->searchForProject(projectID, version);
 			if (errno == 0 || errno == ERANGE)
 			{
@@ -1206,6 +1214,7 @@ ProjectOut DatabaseRequestHandler::getPrevProjectWithRetry(ProjectID projectID)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			project = database->prevProject(projectID);
 			if (errno == 0)
 			{
@@ -1227,6 +1236,7 @@ Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			author = database->idToAuthor(id);
 			if (errno == 0)
 			{
@@ -1249,6 +1259,7 @@ std::vector<MethodId> DatabaseRequestHandler::authorToMethodsWithRetry(std::stri
 	{
 		while (retries < MAX_RETRIES)
 		{
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			methods = database->authorToMethods(authorId);
 			if (errno == 0)
 			{
