@@ -908,7 +908,7 @@ void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->connect(ip, port);
 			if (errno == 0)
 			{
@@ -928,7 +928,7 @@ bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->addProject(project);
 			if (errno == 0)
 			{
@@ -949,7 +949,7 @@ void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn proje
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			database->addMethod(method, project);
 			if (errno == 0)
 			{
@@ -972,7 +972,7 @@ std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			methods = database->hashToMethods(hash);
 			if (errno == 0)
 			{
@@ -995,7 +995,7 @@ std::vector<ProjectOut> DatabaseRequestHandler::searchForProjectWithRetry(Projec
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			projects = database->searchForProject(projectID, version);
 			if (errno == 0)
 			{
@@ -1018,7 +1018,7 @@ std::string DatabaseRequestHandler::authorToIdWithRetry(Author author)
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			authorID = database->authorToId(author);
 			if (errno == 0)
 			{
@@ -1041,7 +1041,7 @@ Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			author = database->idToAuthor(id);
 			if (errno == 0)
 			{
@@ -1064,7 +1064,7 @@ std::vector<MethodId> DatabaseRequestHandler::authorToMethodsWithRetry(std::stri
 	{
 		while (retries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * 1000000);
+			usleep(pow(2,retries) * RETRY_SLEEP);
 			methods = database->authorToMethods(authorId);
 			if (errno == 0)
 			{
