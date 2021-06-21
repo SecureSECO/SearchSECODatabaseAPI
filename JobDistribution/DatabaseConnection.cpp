@@ -172,9 +172,9 @@ void DatabaseConnection::uploadJob(std::string url, long long priority)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	auto currentTime = Utility::getCurrentTimeMilliSeconds();
-
-	cass_statement_bind_int64(query, 0, currentTime - priority);
+	long long currentTime = Utility::getCurrentTimeMilliSeconds();
+	long long resultPriority = currentTime - priority;
+	cass_statement_bind_int64(query, 0, resultPriority);
 
 	cass_statement_bind_string(query, 1, url.c_str());
 
