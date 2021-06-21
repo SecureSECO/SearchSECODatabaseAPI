@@ -27,11 +27,14 @@ public:
 	std::string name;
 	std::string mail;
 	std::string id;
+	Author() : name(""), mail(""), id("")
+	{
+	}
+
 	Author(std::string name, std::string mail) :
 	name(name),
 	mail(mail)
 	{
-		
 		id = md5(name + " " + mail);
 	}
 };

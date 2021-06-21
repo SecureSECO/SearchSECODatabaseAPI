@@ -26,6 +26,10 @@ DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::s
 {
 	this->database = database;
 	connectWithRetry(ip, port);
+	if (errno != 0)
+	{
+		throw "Unable to connect to the database.";
+	}
 }
 
 std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request)
@@ -1068,206 +1072,116 @@ std::string DatabaseRequestHandler::methodIdsToString(std::vector<std::tuple<Met
 	return result;
 }
 
-void DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
+template <class T> T DatabaseRequestHandler::queryWithRetry(std::function<T()> function)
 {
-	int retries = 0;
 	errno = 0;
-	database->connect(ip, port);
-	if (errno != 0)
+	int retries = 0;
+	T items;
+	do
 	{
-		while (retries < MAX_RETRIES)
+		items = function();
+		if (errno != 0 && errno != ERANGE)
 		{
 			usleep(pow(2,retries) * RETRY_SLEEP);
-			database->connect(ip, port);
-			if (errno == 0)
-			{
-				return;
-			}
 			retries++;
 		}
-		throw "Unable to connect to database.";
+	} 
+	while (errno != 0 && errno != ERANGE && retries <= MAX_RETRIES);
+	if (retries > MAX_RETRIES)
+	{
+		errno = ENETUNREACH;
+		//return NULL;
 	}
-	errno = 0;
+	return items;
+}
+
+std::tuple<> DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
+{
+	std::function<std::tuple<>()> function = [ip, port, this]()
+	{
+		this->database->connect(ip, port);
+		return std::make_tuple();
+	};
+	return queryWithRetry<std::tuple<>>(function);
 }
 
 bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 {
-	int retries = 0;
-	database->addProject(project);
-	if (errno != 0)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			database->addProject(project);
-			if (errno == 0)
-			{
-				return true;
-			}
-			retries++;
-		}
-		return false;
-	}
-	return true;
+	std::function<bool()> function = [project, this]()
+	{ 
+		return this->database->addProject(project); 
+	};
+	return queryWithRetry<bool>(function);
 }
 
-void DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject)
+std::tuple<> DatabaseRequestHandler::addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion,
+												long long parserVersion, bool newProject)
 {
-	int retries = 0;
-	database->addMethod(method, project, prevVersion, parserVersion, newProject);
-
-	if (errno != 0 && errno != ERANGE)
+	std::function<std::tuple<>()> function = [method, project, prevVersion, parserVersion, newProject, this]()
 	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			database->addMethod(method, project, prevVersion, parserVersion, newProject);
-			if (errno == 0 && errno != ERANGE)
-			{
-				return;
-			}
-			retries++;
-			errno = 0;
-		}
-		errno = ENETUNREACH;
-		return;
-	}
+		this->database->addMethod(method, project, prevVersion, parserVersion, newProject);
+		return std::make_tuple();
+	};
+	return queryWithRetry<std::tuple<>>(function);
 }
 
-std::vector<Hash> DatabaseRequestHandler::updateUnchangedFilesWithRetry(std::pair<std::vector<Hash>, std::vector<std::string>> hashFile, ProjectIn project, long long prevVersion)
+std::vector<Hash>
+DatabaseRequestHandler::updateUnchangedFilesWithRetry(std::pair<std::vector<Hash>, std::vector<std::string>> hashFile,
+													  ProjectIn project, long long prevVersion)
 {
-	int retries = 0;
-	std::vector<Hash> hashes;
-	hashes = database->updateUnchangedFiles(hashFile.first, hashFile.second, project, prevVersion);
-	if (errno != 0)
+	std::vector<Hash> hash = hashFile.first;
+	std::vector<std::string> file = hashFile.second;
+	std::function<std::vector<Hash>()> function = [hash, file, project, prevVersion, this]()
 	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			hashes = database->updateUnchangedFiles(hashFile.first, hashFile.second, project, prevVersion);
-			if (errno == 0)
-			{
-				return hashes;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-		return {};
-	}
-	return hashes;
+		return this->database->updateUnchangedFiles(hash, file, project, prevVersion);
+	};
+	return queryWithRetry<std::vector<Hash>>(function);
 }
-
 
 std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 {
-	int retries = 0;
-	std::vector<MethodOut> methods;
-	methods = database->hashToMethods(hash);
-	if (errno != 0)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			methods = database->hashToMethods(hash);
-			if (errno == 0)
-			{
-				return methods;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-		return {};
-	}
-	return methods;
+	std::function<std::vector<MethodOut>()> function = [hash, this]()
+	{ 
+		return this->database->hashToMethods(hash); 
+	};
+	return queryWithRetry<std::vector<MethodOut>>(function);
 }
+
 
 ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
 {
-	errno = 0;
-	int retries = 0;
-	ProjectOut project;
-	project = database->searchForProject(projectID, version);
-	if (errno != 0 && errno != ERANGE)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			project = database->searchForProject(projectID, version);
-			if (errno == 0 || errno == ERANGE)
-			{
-				return project;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-	}
-	return project;
+	std::function<ProjectOut()> function = [projectID, version, this]()
+	{ 
+		return this->database->searchForProject(projectID, version); 
+	};
+	return queryWithRetry<ProjectOut>(function);
 }
 
 ProjectOut DatabaseRequestHandler::getPrevProjectWithRetry(ProjectID projectID)
 {
-	int retries = 0;
-	ProjectOut project;
-	project = database->prevProject(projectID);
-	if (errno != 0)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			project = database->prevProject(projectID);
-			if (errno == 0)
-			{
-				return project;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-	}
-	return project;
+	std::function<ProjectOut()> function = [projectID, this]()
+	{ 
+		return this->database->prevProject(projectID); 
+	};
+	return queryWithRetry<ProjectOut>(function);
 }
 
 Author DatabaseRequestHandler::idToAuthorWithRetry(std::string id)
 {
-	int retries = 0;
-	Author author("","");
-	author = database->idToAuthor(id);
-	if (errno != 0)
+	std::function<Author()> function = [id, this]()
 	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			author = database->idToAuthor(id);
-			if (errno == 0)
-			{
-				return author;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
+		Author author("", "");
+		author = this->database->idToAuthor(id);
 		return author;
-	}
-	return author;
+	};
+	return queryWithRetry<Author>(function);
 }
 
 std::vector<MethodId> DatabaseRequestHandler::authorToMethodsWithRetry(std::string authorId)
 {
-	int retries = 0;
-	std::vector<MethodId> methods;
-	methods = database->authorToMethods(authorId);
-	if (errno != 0)
-	{
-		while (retries < MAX_RETRIES)
-		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			methods = database->authorToMethods(authorId);
-			if (errno == 0)
-			{
-				return methods;
-			}
-			retries++;
-		}
-		errno = ENETUNREACH;
-		return {};
-	}
-	return methods;
+	std::function<std::vector<MethodId>()> function = [authorId, this]()
+	{ 
+		return this->database->authorToMethods(authorId); 
+	};
+	return queryWithRetry<std::vector<MethodId>>(function);
 }

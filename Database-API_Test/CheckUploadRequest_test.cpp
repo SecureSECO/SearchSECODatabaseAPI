@@ -90,7 +90,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	std::vector<MethodOut> v;
 	v.push_back(method1out);
 
-	EXPECT_CALL(database, addProject(projectEqual(project))).Times(1);
+	EXPECT_CALL(database, addProject(projectEqual(project))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 	std::string result = handler.handleRequest("chup", request, nullptr);

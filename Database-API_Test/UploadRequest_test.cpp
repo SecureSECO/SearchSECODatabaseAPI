@@ -97,7 +97,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
+	EXPECT_CALL(database, addProject(projectEqual(projectT1))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, request, nullptr);
@@ -136,7 +136,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, nullptr);
 
-	EXPECT_CALL(database, addProject(projectEqual(projectT1))).Times(1);
+	EXPECT_CALL(database, addProject(projectEqual(projectT1))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, 1, true)).Times(1);
@@ -177,7 +177,7 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	MockJDDatabase jddatabase;
 	handler.initialize(&database, &jddatabase, nullptr);
 
-	EXPECT_CALL(database, addProject(projectEqual(projectT2))).Times(1);
+	EXPECT_CALL(database, addProject(projectEqual(projectT2))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, 1, true)).Times(1);

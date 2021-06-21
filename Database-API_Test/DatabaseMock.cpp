@@ -18,7 +18,7 @@ class MockDatabase : public DatabaseHandler
 {
 public:
 	MOCK_METHOD(void, connect, (std::string ip, int port), ());
-	MOCK_METHOD(void, addProject, (ProjectIn project), ());
+	MOCK_METHOD(bool, addProject, (ProjectIn project), ());
 	MOCK_METHOD(void, addHashToProject, (ProjectIn project, int index), ());
 	MOCK_METHOD(void, addMethod, (MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject), ());
 	MOCK_METHOD(ProjectOut, searchForProject, (ProjectID projectID, Version version), ());

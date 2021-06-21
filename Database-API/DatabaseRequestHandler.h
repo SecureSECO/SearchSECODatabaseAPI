@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include "Definitions.h"
 #include <mutex>
+#include <tuple>
 #include <queue>
 
 #define PROJECT_DATA_SIZE 9
@@ -37,9 +38,7 @@ public:
 	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
 	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
-	/// <returns>
-	/// Response towards user after processing the request successfully.
-	/// </returns>
+	/// <returns> Response towards user after processing the request successfully. </returns>
 	std::string handleUploadRequest(std::string request);
 
 	/// <summary>
@@ -50,20 +49,14 @@ public:
 	/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
 	/// "hash_1'\n'hash_2'\n'...'\n'hash_N".
 	/// </param>
-	/// <returns>
-	/// The methods which contain hashes equal to one within the request, in string format.
-	/// </returns>
+	/// <returns> The methods which contain hashes equal to one within the request, in string format. </returns>
 	std::string handleCheckRequest(std::string request);
 
 	/// <summary>
 	/// Handles requests wanting to obtain methods with certain hashes.
 	/// </summary>
-	/// <param name="hashes">
-	/// The list of hashes we want to check for.
-	/// </param>
-	/// <returns>
-	/// The methods which contain hashes equal to one within the request, in string format.
-	/// </returns>
+	/// <param name="hashes"> The list of hashes we want to check for. </param>
+	/// <returns> The methods which contain hashes equal to one within the request, in string format. </returns>
 	std::string handleCheckRequest(std::vector<Hash> hashes);
 
 	/// <summary>
@@ -116,7 +109,7 @@ public:
 	std::string handlePrevProjectsRequest(std::string request);
 
 	/// <summary>
-	/// Handles a requests for retrieving the authors by the given ids.
+	/// Handles a requests for retrieving the authors by the given IDs.
 	/// </summary>
 	/// <param nam'="request">
 	/// The request that contains the author ids with the following format
@@ -153,49 +146,37 @@ private:
 	/// The relevant data to create the Project. It has the following format:
 	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion".
 	/// </param>
-	/// <returns>
-	/// A Project containing all data as provided within request.
-	/// </returns>
+	/// <returns> The project containing all data as provided within request. </returns>
 	ProjectIn requestToProject(std::string request);
 
 	/// <summary>
 	/// Converts a data entry to a MethodIn (defined in Types.h).
 	/// </summary>
 	/// <param name="dataEntry">
-	/// The relevant data to create the Method. It has the following format
-	/// (where | is defined as FIELD_DELIMITER_CHAR):
+	/// The relevant data to create the Method. It has the following format:
 	/// "method_hash|method_name|method_fileLocation|number_of_authors|
 	///  method_author1_name|method_author1_mail|...|method_authorN_name|method_authorN_mail".
 	/// </param>
-	/// <returns>
-	/// A method containing all data as provided in input.
-	/// </returns>
+	/// <returns> A method containing all data as provided in input. </returns>
 	MethodIn dataEntryToMethod(std::string dataEntry);
 
 	/// <summary>
 	/// Retrieves the hashes within a request.
 	/// </summary>
 	/// <param name="request">
-	/// Represents the request made by the user. It has the following format
-	/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+	/// Represents the request made by the user. It has the following format:
 	/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
 	///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
 	///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
-	/// <returns>
-	/// The hashes of the methods given in the requests.
-	/// </returns>
+	/// <returns> The hashes of the methods given in the requests. </returns>
 	std::vector<Hash> requestToHashes(std::string request);
 
 	/// <summary>
 	/// Checks if a hash is valid.
 	/// </summary>
-	/// <param name="hash">
-	/// The hash to be checked.
-	/// </param>
-	/// <returns>
-	/// Boolean indicating the validity of the given hash.
-	/// </returns>
+	/// <param name="hash"> The hash to be checked. </param>
+	/// <returns> Boolean indicating the validity of the given hash. </returns>
 	bool isValidHash(Hash hash);
 
 	/// <summary>
@@ -337,6 +318,8 @@ private:
 	void singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project,
 							long long prevVersion, long long parserVersion, bool newProject);
 
+	template <class T> T queryWithRetry(std::function<T()> function);
+
 	/// <summary>
 	/// Handles the threads used to update methods in unchanged files.
 	/// </summary>
@@ -468,7 +451,7 @@ private:
 	/// Calls connect in the DatabaseHandler, if connect fails, it retries as many times as the MAX_RETRIES.
 	/// If it still fails on the last retry, the function throws an exception.
 	/// </summary>
-	void connectWithRetry(std::string ip, int port);
+	std::tuple<> connectWithRetry(std::string ip, int port);
 
 	/// <summary>
 	/// Tries to upload project to the database, if it fails it retries as many times as the MAX_RETRIES.
@@ -485,7 +468,7 @@ private:
 	/// A boolean to different new projects from changed projects.
 	/// The value is true if and only if the project is new.
 	/// </param>
-	void addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion,
+	std::tuple<> addMethodWithRetry(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion,
 							bool newProject);
 
 	/// <summary>
@@ -524,13 +507,6 @@ private:
 	/// If it fails, it returns an empty vector and puts the errno on ENETUNREACH.
 	/// </summary>
 	ProjectOut searchForProjectWithRetry(ProjectID projectID, Version version);
-
-	/// <summary>
-	/// Tries to get authorID from the database given an author, if it fails it retries like above.
-	/// If it succeeds, it returns the id.
-	/// If it fails, it returns an empty string and puts errno on ENETUNREACH.
-	/// </summary>
-	std::string authorToIdWithRetry(Author author);
 
 	/// <summary>
 	/// Tries to get author from the database given an authorID, if it fails it retries like above.
