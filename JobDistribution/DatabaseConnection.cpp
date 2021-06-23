@@ -43,7 +43,7 @@ void DatabaseConnection::connect(std::string ip, int port)
 
 		if (rc != CASS_OK)
 		{
-			// Display connection error message.
+			// An connection error occurred, which is handled below.
 			const char *message;
 			size_t messageLength;
 			cass_future_error_message(connectFuture, &message, &messageLength);
@@ -83,6 +83,7 @@ std::string DatabaseConnection::getTopJob()
 	CassFuture *resultFuture = cass_session_execute(connection, query);
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
+		// Retrieve the result.
 		const CassResult *result = cass_future_get_result(resultFuture);
 		const CassRow *row = cass_result_first_row(result);
 		const char *url;
@@ -94,6 +95,7 @@ std::string DatabaseConnection::getTopJob()
 		cass_value_get_int64(cass_row_get_column_by_name(row, "priority"), &priority);
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
+
 		// Delete the job that is returned.
 		deleteTopJob(id, priority);
 		if (errno != 0)
@@ -105,7 +107,7 @@ std::string DatabaseConnection::getTopJob()
 	}
 	else
 	{
-		// Handle error.
+		// An error occurred, which is handled below.
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
@@ -125,6 +127,7 @@ void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 	cass_statement_bind_uuid(query, 1, id);
 
 	CassFuture* queryFuture = cass_session_execute(connection, query);
+
 	// Statement objects can be freed immediately after being executed.
 	cass_statement_free(query);
 
@@ -133,6 +136,7 @@ void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 
 	if (rc != 0)
 	{
+		// An error occurred, which is handled below.
 		printf("Query result: %s\n", cass_error_desc(rc));
 		errno = ENETUNREACH;
 	}
@@ -146,6 +150,7 @@ int DatabaseConnection::getNumberOfJobs()
 	CassFuture* resultFuture = cass_session_execute(connection, query);
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
+		// Retrieve the result.
 		const CassResult* result = cass_future_get_result(resultFuture);
 		const CassRow* row = cass_result_first_row(result);
 		cass_int64_t count;
@@ -156,7 +161,7 @@ int DatabaseConnection::getNumberOfJobs()
 	}
 	else
 	{
-		// Handle error.
+		// An error occurred, which is handled below.
 		const char* message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
@@ -172,10 +177,9 @@ void DatabaseConnection::uploadJob(std::string url, long long priority)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
-	long long currentTime = Utility::getCurrentTimeMilliSeconds();
+	auto currentTime = Utility::getCurrentTimeMilliSeconds();
 	long long resultPriority = currentTime - priority;
 	cass_statement_bind_int64(query, 0, resultPriority);
-
 	cass_statement_bind_string(query, 1, url.c_str());
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);

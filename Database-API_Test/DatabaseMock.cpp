@@ -27,7 +27,7 @@ public:
 				(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion),
 				());
 	MOCK_METHOD(std::vector<MethodOut>, hashToMethods, (std::string hash), ());
-	MOCK_METHOD(std::string, authorToId, (Author author), ());
+	MOCK_METHOD(std::string, authorToID, (Author author), ());
 	MOCK_METHOD(Author, idToAuthor, (std::string id), ());
-	MOCK_METHOD(std::vector<MethodId>, authorToMethods, (std::string authorId));
+	MOCK_METHOD(std::vector<MethodID>, authorToMethods, (std::string authorID));
 };

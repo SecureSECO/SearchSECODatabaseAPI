@@ -16,6 +16,7 @@ namespace types {
 typedef std::string AuthorID;
 typedef long long ProjectID;
 typedef std::string Hash;
+typedef std::string File;
 typedef time_t Version;
 
 /// <summary>
@@ -23,20 +24,20 @@ typedef time_t Version;
 /// </summary>
 struct Author
 {
-public:
-	std::string name;
-	std::string mail;
-	std::string id;
-	Author() : name(""), mail(""), id("")
-	{
-	}
+	public:
+		std::string name;
+		std::string mail;
+		std::string id;
+		Author() : name(""), mail(""), id("")
+		{
+		}
 
-	Author(std::string name, std::string mail) :
-	name(name),
-	mail(mail)
-	{
-		id = md5(name + " " + mail);
-	}
+		Author(std::string name, std::string mail) :
+		name(name),
+		mail(mail)
+		{
+			id = md5(name + " " + mail);
+		}
 };
 
 
@@ -45,12 +46,12 @@ public:
 /// </summary>
 struct MethodIn
 {
-public:
-	Hash hash;
-	std::string methodName;
-	std::string fileLocation;
-	int lineNumber;
-	std::vector<Author> authors;
+	public:
+		Hash hash;
+		std::string methodName;
+		File fileLocation;
+		int lineNumber;
+		std::vector<Author> authors;
 };
 
 /// <summary>
@@ -59,27 +60,27 @@ public:
 /// </summary>
 struct MethodOut
 {
-public:
-	Hash hash;
-	ProjectID projectID;
-	std::string fileLocation;
-	Version startVersion;
-	std::string startVersionHash;
-	Version endVersion;
-	std::string endVersionHash;
-	std::string methodName;	
-	int lineNumber;
-	std::vector<AuthorID> authorIDs;
-	long long parserVersion;
+	public:
+		Hash hash;
+		ProjectID projectID;
+		File fileLocation;
+		Version startVersion;
+		std::string startVersionHash;
+		Version endVersion;
+		std::string endVersionHash;
+		std::string methodName;	
+		int lineNumber;
+		std::vector<AuthorID> authorIDs;
+		long long parserVersion;
 };
 
-struct MethodId
+struct MethodID
 {
-public:
-	Hash hash;
-	ProjectID projectId;
-	std::string fileLocation;
-	Version startVersion;
+	public:
+		Hash hash;
+		ProjectID projectID;
+		File fileLocation;
+		Version startVersion;
 };
 
 /// <summary>
@@ -87,16 +88,16 @@ public:
 /// </summary>
 struct ProjectIn
 {
-public:
-	ProjectID projectID;
-	Version version;
-	std::string versionHash;
-	std::string license;
-	std::string name;
-	std::string url;
-	Author owner = Author("","");
-	std::vector<Hash> hashes;
-	long long parserVersion;
+	public:
+		ProjectID projectID;
+		Version version;
+		std::string versionHash;
+		std::string license;
+		std::string name;
+		std::string url;
+		Author owner = Author("","");
+		std::vector<Hash> hashes;
+		long long parserVersion;
 };
 
 /// <summary>
@@ -104,15 +105,15 @@ public:
 /// </summary>
 struct ProjectOut
 {
-public:
-	ProjectID projectID;
-	Version version;
-	std::string versionHash;
-	std::string license;
-	std::string name;
-	std::string url;
-	AuthorID ownerID;
-	std::vector<Hash> hashes;
-	long long parserVersion;
+	public:
+		ProjectID projectID;
+		Version version;
+		std::string versionHash;
+		std::string license;
+		std::string name;
+		std::string url;
+		AuthorID ownerID;
+		std::vector<Hash> hashes;
+		long long parserVersion;
 };
 }

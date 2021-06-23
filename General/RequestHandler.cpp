@@ -9,17 +9,16 @@ Utrecht University within the Software Project course.
 
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
 {
-	// Make the requestHandlers.
+	// Initialise the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
 	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
 std::string RequestHandler::handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection)
 {
-	// We convert the requestType to a eRequestType (for the switch below).
-	eRequestType eRequest = getERequestType(requestType);
+	ERequestType eRequest = getERequestType(requestType);
 
-	// We handle the request based on its type.
+	// Handle the request based on its type.
 	std::string result;
 	switch (eRequest)
 	{
@@ -76,7 +75,7 @@ std::string RequestHandler::handleNotImplementedRequest()
 	return HTTPStatusCodes::clientError("Request not implemented yet.");
 }
 
-eRequestType RequestHandler::getERequestType(std::string requestType)
+ERequestType RequestHandler::getERequestType(std::string requestType)
 {
 	if (requestType == "upld")
 	{

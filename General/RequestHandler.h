@@ -19,7 +19,7 @@ class TcpConnection;
 /// <summary>
 /// The different types of requests which are supported.
 /// </summary>
-enum eRequestType
+enum ERequestType
 {
 	eUpload,
 	eCheck,
@@ -41,12 +41,10 @@ class RequestHandler
 public:
 
 	/// <summary>
-	/// Makes the RequestHandler ready for later usage.
+	/// Readies the request handler for later usage.
 	/// </summary>
-	/// <param name="databaseHandler">
-	/// Handler for interactions with the database.
-	/// </param>
-	virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip = IP, int port = DBPORT);
+  virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus *raft,
+						  std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -61,7 +59,8 @@ public:
 	/// <returns>
 	/// Response towards user after processing the request successfully.
 	/// </returns>
-	virtual std::string handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection);
+  virtual std::string handleRequest(std::string requestType, std::string request,
+									boost::shared_ptr<TcpConnection> connection);
 
 	JobRequestHandler* getJobRequestHandler() 
 	{
@@ -86,15 +85,15 @@ private:
 	std::string handleNotImplementedRequest();
 
 	/// <summary>
-	/// Converts a requestType into an eRequestType.
+	/// Converts a requestType to an eRequestType.
 	/// </summary>
 	/// <param name="requestType">
 	/// The type of the request, which is a string of exactly 4 characters.
 	/// </param>
 	/// <returns>
-	/// A corresponding eRequestType.
+	/// The corresponding ERequestType.
 	/// </returns>
-	eRequestType getERequestType(std::string requestType);
+	ERequestType getERequestType(std::string requestType);
 
 	DatabaseRequestHandler* dbrh;
 	JobRequestHandler* jrh;

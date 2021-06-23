@@ -82,13 +82,13 @@ void RAFTConsensus::start(RequestHandler* requestHandler,
 void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::string>> ips) 
 {
 	// Loop through all set IP's where we expect the leader to be.
-	for (auto const& x : ips)
+	for (auto const& ipPort : ips)
 	{
 		try 
 		{
 			// Try to connect to the set IP.
-			std::string ip = x.first;
-			std::string port = x.second;
+			std::string ip = ipPort.first;
+			std::string port = ipPort.second;
 			std::string response = "";
 			while (response.substr(0, std::string(RESPONSE_OK).size()) != RESPONSE_OK) 
 			{
@@ -100,9 +100,9 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 			leader = false;
 			break;
 		}
-		catch (std::exception const& ex) 
+		catch (std::exception const& e) 
 		{
-			std::cout << ex.what() << std::endl;
+			std::cout << e.what() << std::endl;
 			delete networkhandler;
 			continue;
 		}
@@ -138,7 +138,7 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);
 	if (receivedLeader[0] != RESPONSE_OK) 
 	{
-		// If we get something which is not an ok, we will assume that it has send back the true leader.
+		// If we get something which is not an OK, we will assume that it has send back the true leader.
 		if(receivedLeader.size() != 2) 
 		{
 			throw std::runtime_error("Incorrect response from connect request. Size was " +
@@ -229,7 +229,7 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 	int crawlid = Utility::safeStoi(hbSplitted[0]);
 	if (errno == 0) 
 	{
-		requestHandler->getJobRequestHandler()->crawlId = crawlid;
+		requestHandler->getJobRequestHandler()->crawlID = crawlid;
 	}
 	else 
 	{
@@ -317,7 +317,7 @@ void RAFTConsensus::heartbeatSender()
 			}
 			catch(std::exception const& ex)
 			{
-				// If an error occured, we will assume the connection has dropped.
+				// If an error occured, we assume the connection has dropped.
 				std::cout << "Connection dropped." << std::endl;
 				dropConnection(i);
 				
@@ -348,7 +348,7 @@ std::string RAFTConsensus::getHeartbeat()
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	JobRequestHandler* jrh = requestHandler->getJobRequestHandler();
 
-	std::string hb = std::to_string(jrh->crawlId) + 
+	std::string hb = std::to_string(jrh->crawlID) + 
 		fieldDelimiter + nodeConnectionChange + entryDelimiter;
 	nodeConnectionChange = "";
 	return hb;
@@ -363,9 +363,9 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 			connection->start(requestHandler, connection);
 		}
 	}
-	catch (std::exception const& ex) 
+	catch (std::exception const& e) 
 	{
-		std::cout << ex.what();
+		std::cout << e.what();
 	}
 }
 

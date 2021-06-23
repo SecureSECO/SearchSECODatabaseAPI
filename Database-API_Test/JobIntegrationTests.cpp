@@ -22,24 +22,27 @@ Utrecht University within the Software Project course.
 // Test if first crawl is returned and then the correct job.
 TEST(JobDatabaseIntegrationTest, GetJobRequest)
 {
-	// Set up:
-	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	// Set up the test.
+	errno = 0;
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RequestHandler handler;
 	RAFTConsensus raftConsensus;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	std::string input = "";
 	std::string expectedOutput = "Crawl" + fieldDelimiter + "0";
 
-	// Test:
+	// Check if the first output is as expected.
 	std::string output = handler.handleRequest("gtjb", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	std::string expectedOutput2 = "Spider" + fieldDelimiter + "https://github.com/caged/microsis";
 
+	// Check if the second output is as expected.
 	std::string output2 = handler.handleRequest("gtjb", input, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }
@@ -48,7 +51,7 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 // and the job is inserted correctly in the database.
 TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 {
-	// Set up:
+	// Set up the test.
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	DatabaseHandler database;
@@ -66,11 +69,13 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	std::string input2 = "";
 	std::string expectedOutput2 = "Crawl" + fieldDelimiter + "0";
 
+	// Check if the first output is as expected.
 	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 
 	std::string expectedOutput3 = "Spider" + fieldDelimiter + "https://github.com/mcostalba/Stockfish";
 
+	// Check if the second output is as expected.
 	std::string output3 = handler.handleRequest("gtjb", input2, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expectedOutput3));
 }
@@ -78,7 +83,7 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 // Test if multiple jobs get succesfully uploaded.
 TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 {
-	// Set up:
+	// Set up the test.
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
@@ -99,7 +104,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 // Test if crawl data is handled succesfully.
 TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 {
-	// Set up:
+	// Set up the test.
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
@@ -117,5 +122,6 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	std::string output2 = handler.handleRequest("gtjb", input2, nullptr);
 	std::string expectedOutput2 = "Crawl" + fieldDelimiter + "100";
 
+	// Check if the output is as expected.
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }

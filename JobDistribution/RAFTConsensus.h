@@ -29,7 +29,9 @@ public:
 	/// Starts RAFT. Will try to connect to a set list of IP's where we assume the leaders are.
 	/// If none of them respond, we will assume we are the first and assume the role of leader.
 	/// </summary>
-	/// <param name="assumeLeader">If set to true, will skip the connect phase and assume that this node is the leader.</param>
+	/// <param name="assumeLeader">
+	/// If set to true, will skip the connect phase and assume that this node is the leader.
+	/// </param>
 	void start(RequestHandler* requestHandler, 
 		std::vector<std::pair<std::string, std::string>> ips, 
 		bool assumeLeader = false);
@@ -42,7 +44,7 @@ public:
 	/// <summary>
 	/// Will pass the given request on to the leader of the network.
 	/// </summary>
-	/// <returns>The string that the leader gives back.</returns>
+	/// <returns> The string that the leader gives back. </returns>
 	virtual std::string passRequestToLeader(std::string requestType, std::string request);
 
 	/// <summary>
@@ -50,8 +52,10 @@ public:
 	/// If this node is the leader, we will add it to our list of connections.
 	/// If we are not the leader, we will return the ip and port of the leader of the network.
 	/// </summary>
-	/// <returns>If we are the leader, we will return ok and the initial data.
-	///	If we are not the leader, we will return the leader of the network.</returns>
+	/// <returns> 
+	/// If we are the leader, we will return ok and the initial data.
+	///	If we are not the leader, we will return the leader of the network.
+	/// </returns>
 	virtual std::string connectNewNode(boost::shared_ptr<TcpConnection> connection, std::string request);
 
 	/// <summary>
@@ -64,7 +68,7 @@ private:
 	/// Will try to set up a connection with the leader.
 	/// If no connection can be astablished, we will assume the role of leader.
 	/// </summary>
-	/// <param name="ips">List of node to try and connect with.</param>
+	/// <param name="ips"> List of node to try and connect with. </param>
 	void connectToLeader(std::vector<std::pair<std::string, std::string>> ips);
 
 
@@ -83,13 +87,13 @@ private:
 	/// Handles the initial data that is send back by the leader.
 	/// </summary>
 	/// <param name="initialData">The initial data. 
-	/// Pos 0 is OK, pos 1 and 2 are the IP and port of this node.
+	/// Position 0 is OK, positions 1 and 2 are the ip and port of this node respectively.
 	/// The rest are the other nodes in the network.</param>
 	void handleInitialData(std::vector<std::string> initialData);
 
 	/// <summary>
 	/// Will try to connect to the given Ip and port.
-	/// If we connect but we get a different Ip and port back,
+	/// If we connect but we get a different ip and port back,
 	/// then we will give those back through the ip and port variables.
 	/// The response will hold the full response we got.
 	/// </summary>
@@ -135,7 +139,6 @@ private:
 	NetworkHandler* networkhandler;
 	std::string leaderIp, leaderPort, myIp, myPort;
 	std::vector<std::pair<std::string, std::string>> nonLeaderNodes;
-
 
 	// Leader variables.
 	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;

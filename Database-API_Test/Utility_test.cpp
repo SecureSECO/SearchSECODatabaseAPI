@@ -138,26 +138,6 @@ TEST(CheckAppendByMultipleWords, SmallTest)
 	}
 }
 
-// Checks if makeTuple functions properly for non-empty vectors.
-TEST(CheckMakeTuple, SmallTest)
-{
-	std::vector<std::string> input = {"ab", "cd", "ef"};
-	std::string expected = "(ab,cd,ef)";
-
-	std::string output = Utility::makeTuple(input);
-	ASSERT_EQ(output, expected);
-}
-
-// Checks if makeTuple works on empty vector.
-TEST(CheckMakeTuple, EmptyVector)
-{
-	std::vector<std::string> input = {};
-	std::string expected = "()";
-
-	std::string output = Utility::makeTuple(input);
-	ASSERT_EQ(output, expected);
-}
-
 // Checks if splitStringOn works if no delimiter is present.
 TEST(CheckStringSplit, NoSplit)
 {
@@ -212,16 +192,17 @@ TEST(CheckStringSplit, EndSplit)
 	ASSERT_EQ(output[0], "line1");
 }
 
-//Checks if hashToUuidString correctly changes a hash to a uuid string when the input hash is correct.
-TEST(CheckStringConversion, correctHashToUuid)
+// Checks if hashToUUIDString correctly changes a hash to a uuid string when the input hash is correct.
+TEST(CheckStringConversion, correctHashToUUID)
 {
 	std::string input = "2c7f46d4f57cf9e66b03213358c7ddb5";
 
-	std::string output = Utility::hashToUuidString(input);
+	std::string output = Utility::hashToUUIDString(input);
 	ASSERT_EQ(output, "2c7f46d4-f57c-f9e6-6b03-213358c7ddb5");
 }
 
-TEST(CheckStringConversion, correctUuidToHash)
+// Checks if uuidStringToHash correctly converts a uuid string to a hash when the input uuid string is correct.
+TEST(CheckStringConversion, correctUUIDToHash)
 {
 	std::string input = "2c7f46d4-f57c-f9e6-6b03-213358c7ddb5";
 

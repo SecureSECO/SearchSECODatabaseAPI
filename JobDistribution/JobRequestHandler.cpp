@@ -20,7 +20,7 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* reques
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
 	timeLastRecount = Utility::getCurrentTimeSeconds();
-	crawlId = 0;
+	crawlID = 0;
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
@@ -30,6 +30,7 @@ std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnect
 
 std::string JobRequestHandler::handleGetJobRequest(std::string request, std::string data)
 {
+	// If you are the leader, check if there is a job left.
 	if (raft->isLeader())
 	{
 		auto currentTime = Utility::getCurrentTimeSeconds();
@@ -49,13 +50,14 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 			timeLastCrawl = currentTime;
 			std::string s = "Crawl";
 			s += FIELD_DELIMITER_CHAR;
-			return HTTPStatusCodes::success(s + std::to_string(crawlId));
+			return HTTPStatusCodes::success(s + std::to_string(crawlID));
 		}
 		else
 		{
 			return HTTPStatusCodes::success("NoJob");
 		}
 	}
+	// If you are not the leader, pass the request to the leader.
 	return raft->passRequestToLeader(request, data);
 }
 
@@ -117,27 +119,29 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 
 std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data)
 {
+	// If it is the leader, we handle the request, otherwise, we pass it on to the leader.
 	if (raft->isLeader())
 	{
 		int id = Utility::safeStoi(data.substr(0, data.find(ENTRY_DELIMITER_CHAR)));
 		if (errno == 0)
 		{
-			updateCrawlId(id);
+			updateCrawlID(id);
 		}
 		else
 		{
-			return HTTPStatusCodes::clientError("Error: invalid crawlId.");
+			return HTTPStatusCodes::clientError("Error: invalid crawlID.");
 		}
-		// Get data after crawlId and pass it on to handleUploadRequest.
+
+		// Get data after crawlID and pass it on to handleUploadRequest.
 		std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
 		return handleUploadJobRequest(request, jobdata);
 	}
 	return raft->passRequestToLeader(request, data);
 }
 
-void JobRequestHandler::updateCrawlId(int id)
+void JobRequestHandler::updateCrawlID(int id)
 {
-	crawlId = id;
+	crawlID = id;
 	timeLastCrawl = -1;
 }
 

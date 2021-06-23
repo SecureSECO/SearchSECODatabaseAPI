@@ -72,6 +72,9 @@ MethodOut testMethod5 = {.hash = "06f73d7ab46184c55bf4742b9428a4c0",
 // Checks if the program works when a check request is sent providing a single hash.
 TEST(CheckRequestTests, SingleHashRequest)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -88,6 +91,8 @@ TEST(CheckRequestTests, SingleHashRequest)
 	std::string output1(outputChars1.begin(), outputChars1.end());
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
+
+	// Check if the output is correct.
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success(output1));
 
@@ -96,6 +101,9 @@ TEST(CheckRequestTests, SingleHashRequest)
 // Checks if the program works when a check request is sent providing multiple hashes.
 TEST(CheckRequestTests, MultipleHashRequest)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -107,6 +115,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	std::vector<MethodOut> v3;
 	v3.push_back(testMethod3);
 
+	// We expect some calls towards the database.
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
@@ -142,6 +151,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output3(outputChars3.begin(), outputChars3.end());
 
+	// Check if the output is correct.
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
@@ -151,6 +161,9 @@ TEST(CheckRequestTests, MultipleHashRequest)
 // Checks if the program can successfully handle a check request with a hash which is not in the database.
 TEST(CheckRequestTests, SingleHashNoMatch)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -158,6 +171,8 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 	std::vector<MethodOut> v;
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
+
+	// Check if the output is correct.
 	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
@@ -165,6 +180,7 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 // Checks if the program can successfully handle a check request with multiple hashes, all with one match.
 TEST(CheckRequestTests, MultipleHashOneMatch)
 {
+	// Set up the test.
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -208,6 +224,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output3(outputChars3.begin(), outputChars3.end());
 
+	// Check if the output is correct.
 	EXPECT_FALSE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_FALSE(result.find(output3) != std::string::npos);
@@ -217,6 +234,9 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 // Checks if the program can successfully handle a check request with one hash, having multiple matches.
 TEST(CheckRequestTests, OneHashMultipleMatches)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -243,6 +263,7 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output4(outputChars4.begin(), outputChars4.end());
 
+	// Check if the output is correct.
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output4) != std::string::npos);
 	EXPECT_EQ(HTTPStatusCodes::getCode(result), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
@@ -251,6 +272,9 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 // Check if the program can successfully handle a check request with multiple hashes, having multiple matches.
 TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
@@ -264,6 +288,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	v2.push_back(testMethod5);
 	v3.push_back(testMethod3);
 
+	// We expect some calls towards the database.
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v1));
 	EXPECT_CALL(database, hashToMethods("06f73d7ab46184c55bf4742b9428a4c0")).WillOnce(testing::Return(v2));
 	EXPECT_CALL(database, hashToMethods("137fed017b6159acc0af30d2c6b403a5")).WillOnce(testing::Return(v3));
@@ -313,6 +338,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output5(outputChars5.begin(), outputChars5.end());
 
+	// Check if the output is correct. 
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
 	EXPECT_TRUE(result.find(output2) != std::string::npos);
 	EXPECT_TRUE(result.find(output3) != std::string::npos);
@@ -324,9 +350,13 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 // Checks if the program correctly identifies an invalid hash in the input.
 TEST(CheckRequestTests, InvalidHash)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 	std::string request = "hello_I'm_an_invalid_hash";
 
+	// Check if the output is correct.
 	std::string output = handler.handleRequest("chck", request, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::clientError("Invalid hash presented."));
 }

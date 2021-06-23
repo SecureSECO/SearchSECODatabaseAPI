@@ -13,20 +13,15 @@ ConnectionHandler::~ConnectionHandler()
 	server->stop();
 }
 
-// Connection Handler Methods.
-void ConnectionHandler::startListen(DatabaseHandler* databaseHandler, 
-	DatabaseConnection* databaseConnection, 
-	RAFTConsensus* raft, 
-	int port, 
-	RequestHandler *requestHandler)
+void ConnectionHandler::startListen(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
+									RAFTConsensus *raft, int port, RequestHandler *requestHandler)
 {
-
-	if (requestHandler == nullptr) 
+	if (requestHandler == nullptr)
 	{
 		handler = new RequestHandler();
 		raft->start(handler, raft->getIps());
 	}
-	else 
+	else
 	{
 		handler = requestHandler;
 	}
@@ -36,9 +31,8 @@ void ConnectionHandler::startListen(DatabaseHandler* databaseHandler,
 		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
 		this->server = &server;
 		ioContext.run();
-		
 	}
-	catch (std::exception& e)
+	catch (std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
 	}
@@ -64,7 +58,7 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 	len = boost::asio::read_until(socket_, boost::asio::dynamic_buffer(request), '\n', error);
 	if (error == boost::asio::error::eof)
 	{
-		// Socket was closed before receiving \n.
+		// The socket was closed before receiving '\n'.
 		return;
 	}
 	std::string r(request.begin(), request.begin() + len - 1);
@@ -98,7 +92,7 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 		size -= socket_.read_some(boost::asio::buffer(data), error);
 		if (error == boost::asio::error::eof)
 		{
-			// Socket was closed before receiving all data..
+			// The socket was closed before receiving all data.
 			return;
 		}
 		if (size < 0)
@@ -110,7 +104,7 @@ void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::st
 	}
 }
 
-// TCP server Methods.
+// TCP Server Methods.
 TcpServer::TcpServer(boost::asio::io_context& ioContext, 
 	DatabaseHandler* databaseHandler, 
 	DatabaseConnection* databaseConnection, 

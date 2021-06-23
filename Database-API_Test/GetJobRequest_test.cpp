@@ -9,18 +9,18 @@ Utrecht University within the Software Project course.
 #include "RaftConsensusMock.cpp"
 #include <gtest/gtest.h>
 
-
-
 // Test if a jobRequestHandler first returns crawl and then a job when the number of jobs it too low.
 TEST(GetJobRequest, NotEnoughJobsTest)
 {
-	RequestHandler handler;
+	// Set up the test.
+	errno = 0;
+	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(3));
-	errno = 0;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "gtjb";
@@ -33,6 +33,8 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.pop_back();
+
+	// Check if the first output is correct.
 	std::string input(inputChars.begin(), inputChars.end());
 	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 
@@ -43,6 +45,8 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	std::vector<char> input2Chars = {};
 	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	input2Chars.pop_back();
+
+	// Check if the second output is correct.
 	std::string input2(input2Chars.begin(), input2Chars.end());
 	ASSERT_EQ(result2, HTTPStatusCodes::success(input2));
 }
@@ -50,10 +54,13 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 // Test if job is returned when there are enough jobs in the database.
 TEST(GetJobRequest, EnoughJobsTest)
 {
-	RequestHandler handler;
+	// Set up the test.
+	errno = 0;
+
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(550));
 	handler.initialize(&database, &jddatabase, &raftConsensus);
@@ -68,6 +75,8 @@ TEST(GetJobRequest, EnoughJobsTest)
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.pop_back();
+
+	// Check if the output is correct.
 	std::string input(inputChars.begin(), inputChars.end());
 	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 }
@@ -75,10 +84,13 @@ TEST(GetJobRequest, EnoughJobsTest)
 // Test if the right string is returned when there are no jobs in the database.
 TEST(GetJobRequest, NoJobsTest)
 {
-	RequestHandler handler;
+	// Set up the test.
+	errno = 0;
+
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(0));
 	handler.initialize(&database, &jddatabase, &raftConsensus);
@@ -93,12 +105,14 @@ TEST(GetJobRequest, NoJobsTest)
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputChars.pop_back();
-	std::string input(inputChars.begin(), inputChars.end());
 
+	// Check if the first output is correct.
+	std::string input(inputChars.begin(), inputChars.end());
 	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);
 
+	// Check if the second output is correct.
 	ASSERT_EQ(result2, HTTPStatusCodes::success("NoJob"));
 }

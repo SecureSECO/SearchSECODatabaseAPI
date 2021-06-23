@@ -50,7 +50,7 @@ public:
 	/// <returns>
 	/// Response is "Spider?url", where url is the url of the first job in the database
 	/// if there are enough in the database or if a crawler is already working.
-	/// Response is "Crawl?crawlId", where crawlId is the current crawlId
+	/// Response is "Crawl?crawlID", where crawlID is the current crawlID
 	/// if the number of jobs is not enough and there is no crawler working.
 	/// Response is "NoJob" if there are no jobs and a crawler is already working.
 	/// </returns>
@@ -69,21 +69,21 @@ public:
 	std::string handleCrawlDataRequest(std::string request, std::string data);
 
 	/// <summary>
-	/// Variables describing the number of jobs in the jobqueue, the current crawlId
+	/// Variables describing the number of jobs in the jobqueue, the current crawlID
 	/// which is needed by the crawler to crawl a specific part of github
 	/// and if there is currently a crawler working.
 	/// </summary>
 	int numberOfJobs;
-	int crawlId;
+	int crawlID;
 	long long timeLastCrawl = -1;
 
 	/// <summary>
-	/// Updates the crawlId when crawl data is uploaded to the database.
+	/// Updates the crawlID when crawl data is uploaded to the database.
 	/// </summary>
 	/// <param name="id">
-	/// New crawlId.
+	/// New crawlID.
 	/// </param>
-	void updateCrawlId(int id);
+	void updateCrawlID(int id);
 private:
 	RAFTConsensus* raft;
 	RequestHandler* requestHandler;

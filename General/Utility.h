@@ -22,9 +22,9 @@ public:
 	/// The string to convert.
 	/// </param>
 	/// <returns>
-	/// int corresponding to string on success, or 0 when the string cannot be converted.
+	/// The integer corresponding to string on success, or 0 when the string cannot be converted.
 	/// If the string cannot be converted, errno is set to EDOM. If the converted string would fall
-	/// out of the range of an int, errno is set to ERANGE. Strings of the form "123AAA" are parsed
+	/// out of the range of an integer, errno is set to ERANGE. Strings of the form "123AAA" are parsed
 	/// to 123.
 	/// </returns>
 	static int safeStoi(std::string str);
@@ -44,51 +44,52 @@ public:
 	static long long safeStoll(std::string str);
 
 	/// <summary>
-	/// Appends 'result' by a string, and adds a special character ('delimiter') at the end.
+	/// Appends a char vector by a string and adds a special character at the end.
 	/// </summary>
+	/// <param name="result"> The base char vector. </param>
+	/// <param name="word"> The string to be appended to the char vector. </param>
+	/// <param name="delimiter"> The character to be added at the end of the vector. </param>
 	static void appendBy(std::vector<char>& result, std::string word, char delimiter);
 
 	/// <summary>
-	/// Appends 'result' by a multiple strings while separating the different strings
-	/// by a special character ('wordSeparator') and adds a special character at the end ('endChar').
+	/// Appends a character vector by multiple strings while separating the strings by special characters
+	/// and adds a character to the end.
 	/// </summary>
+	/// <param name="result"> The base char vector. </param>
+	/// <param name="words"> The strings to be appended to the vector. </param>
+	/// <param name="wordSeparator"> The separator for different words. </param>
+	/// <param name="endChar"> The character appended to the vector at the end. </param>
 	static void appendBy(std::vector<char> &result, std::vector<std::string> words, char wordSeparator, char endChar);
 
 	/// <summary>
-	/// Makes a tuple of the words provided as input by putting commas between different words and
-	/// encapsulating the separated words by parentheses.
+	/// Splits a string on a special character.
 	/// </summary>
-	/// <returns>
-	/// Tuple consisting of the words provided as input.
-	/// </returns>
-	static std::string makeTuple(std::vector<std::string> words);
-
-	/// <summary>
-	/// Splits a string ('str') on a special character ('delimiter').
-	/// </summary>
-	/// <returns>
-	/// The vector consisting of the substrings. A delimiter at the end of the string is ignored.
-	/// </returns>
+	/// <param name="str"> The string to be split. </param>
+	/// <param name="delimiter"> The character on which the string is split. </param>
+	/// <returns> A vector of the substrings obtained by splitting the string. </returns>
 	static std::vector<std::string> splitStringOn(std::string str, char delimiter);
 
 	/// <summary>
-	/// Changes a string with the format of a hash to a string with the format of a uuid.
-	/// This comes down to adding 4 dashes to the string in the correct places.
+	/// Changes a string with the format of a hash to a string with the format of a UUID.
 	/// </summary>
-	static std::string hashToUuidString(std::string hash);
+	/// <param name="hash"> The hash to be converted to a UUID string. </param>
+	/// <returns> The hash with format of a UUID string. </returns>
+	static std::string hashToUUIDString(std::string hash);
 
 	/// <summary>
 	/// Changes a string with the format of a uuid to a string with the format of a hash.
-	/// This comes down to removing all dashes from the input string.
 	/// </summary>
+	/// <param name="uuid"> The string to be converted to a hash. </param>
+	/// <returns> The UUID with format of a hash. </returns>
 	static std::string uuidStringToHash(std::string uuid);
 
 	/// <summary>
-	/// Gets the current time sinds epoch in seconds.
+	/// Gets the current time since epoch in seconds, represented as an integer.
 	/// </summary>
 	static long long getCurrentTimeSeconds();
+
 	/// <summary>
-	/// Gets the current time sinds epoch in Milliseconds.
+	/// Gets the current time since epoch in milliseconds, represented as an integer.
 	/// </summary>
 	static long long getCurrentTimeMilliSeconds();
 };

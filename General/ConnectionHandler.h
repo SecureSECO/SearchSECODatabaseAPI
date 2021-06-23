@@ -35,12 +35,14 @@ public:
 	/// <summary>
 	/// Starts listening for requests. Takes in a pointer to the database handler.
 	/// </summary>
-	/// <param name="databaseHandler">Handles the connection with the database for the main keyspace.</param>
-	/// <param name="databaseConnection">Handles the connection with the database for the job keyspace.</param>
-	/// <param name="raft">The raft system for the job queue.</param>
-	/// <param name="port">The port on which we will listen.</param>
-	/// <param name="handler">The request handler that will be used.
-	///	A new request handler will be made if the given request handler is a nullptr.</param>
+	/// <param name="databaseHandler"> Handles the connection with the database for the main keyspace. </param>
+	/// <param name="databaseConnection"> Handles the connection with the database for the job keyspace. </param>
+	/// <param name="raft"> The raft system for the job queue. </param>
+	/// <param name="port"> The port on which we will listen. </param>
+	/// <param name="handler">
+	/// The request handler that will be used. A new request handler will be made if the given request handler 
+	/// is a nullptr.
+	/// </param>
 	void startListen(DatabaseHandler* databaseHandler, 
 		DatabaseConnection* databaseConnection, 
 		RAFTConsensus* raft, 

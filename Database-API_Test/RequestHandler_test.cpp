@@ -13,6 +13,9 @@ Utrecht University within the Software Project course.
 // Tests if the RequestHandler requests to connect to the database when initialized.
 TEST(GeneralTest, InitializeTest)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 	MockDatabase database;
 	MockJDDatabase jddatabase;
@@ -24,6 +27,10 @@ TEST(GeneralTest, InitializeTest)
 // Tests if the RequestHandler correctly responds to an unknown request.
 TEST(GeneralTest, UnknownRequest)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
+
 	EXPECT_EQ(handler.handleRequest("kill", "", nullptr), HTTPStatusCodes::clientError("Unknown request type."));
 }

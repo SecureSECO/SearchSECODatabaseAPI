@@ -71,21 +71,6 @@ void Utility::appendBy(std::vector<char> &result, std::vector<std::string> words
 	result.push_back(endCharacter);
 }
 
-std::string Utility::makeTuple(std::vector<std::string> words)
-{
-	std::vector<char> chars = { '(' };
-	for (std::string word : words)
-	{
-		Utility::appendBy(chars, word, ',');
-	}
-	if (chars.size() > 1)
-	{
-		chars.pop_back();
-	}
-	chars.push_back(')');
-	return std::string(chars.begin(), chars.end());
-}
-
 std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 {
 	std::stringstream strStream(str);
@@ -98,7 +83,7 @@ std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 	return substrings;
 }
 
-std::string Utility::hashToUuidString(std::string hash)
+std::string Utility::hashToUUIDString(std::string hash)
 {
 	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-" + hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" + hash.substr(20, 12);
 }

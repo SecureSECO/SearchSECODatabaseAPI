@@ -16,11 +16,15 @@ Utrecht University within the Software Project course.
 // Checks if extract projects request works correctly when the request is empty.
 TEST(ExtractPrevProjectsRequestTests, Empty)
 {
+	// Set up the test.
+	errno - 0;
+
 	RequestHandler handler;
 
 	std::string input1 = "";
 	std::string expected1 = "No results found.";
 
+	// Check if the output is as expected.
 	std::string output1 = handler.handleRequest("gppr", input1, nullptr);
 	ASSERT_EQ(output1, HTTPStatusCodes::success(expected1));
 }
@@ -28,10 +32,13 @@ TEST(ExtractPrevProjectsRequestTests, Empty)
 // Checks if the extract projects request works correctly when searching for a single existing project.
 TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID2 = 1;
@@ -56,6 +63,8 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 	std::string expected2(expectedChars.begin(), expectedChars.end());
 
 	EXPECT_CALL(database, prevProject(projectID2)).WillOnce(testing::Return(project2));
+
+	// Check if the output is as expected.
 	std::string output2 = handler.handleRequest("gppr", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
@@ -63,10 +72,13 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 // Checks if the extract projects request works correctly when searching for a non-existing project.
 TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID3 = 2497301;
@@ -80,6 +92,8 @@ TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 	std::string expected3 = "No results found.";
 
 	EXPECT_CALL(database, prevProject(projectID3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, project));
+
+	// Check if the output is as expected.
 	std::string output3 = handler.handleRequest("gppr", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
@@ -87,10 +101,13 @@ TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 // Checks if the extract projects request works correctly when searching for multiple projects.
 TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID4_1 = 2;
@@ -181,6 +198,9 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 // Tests if an input for the extract projects request with too few arguments is correctly handled.
 TEST(ExtractPrevProjectsRequestTests, TooFewArguments)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::string input5 = "1";
@@ -194,6 +214,9 @@ TEST(ExtractPrevProjectsRequestTests, TooFewArguments)
 // Tests if an input for the extract projects request with wrong argument types is correctly handled.
 TEST(ExtractPrevProjectsRequestTests, WrongArgumentTypes)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::vector<char> inputChars = {};
@@ -202,6 +225,7 @@ TEST(ExtractPrevProjectsRequestTests, WrongArgumentTypes)
 	std::string expected6 =
 		"The request failed. For each project, both the projectID and the version should be a long long int.";
 
+	// Check if the output is as expected.
 	std::string output6 = handler.handleRequest("gppr", input6, nullptr);
 	ASSERT_EQ(output6, HTTPStatusCodes::clientError(expected6));
 }

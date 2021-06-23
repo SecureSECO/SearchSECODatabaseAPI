@@ -77,9 +77,12 @@ MATCHER_P(methodEqual, method, "")
 // and one author.
 TEST(UploadRequest, SingleMethodSingleAuthor)
 {
-	RequestHandler handler;
+	// Set up the test.
+	errno = 0;
+
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::string requestType = "upld";
@@ -100,6 +103,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
@@ -108,6 +112,14 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 // each having a single author.
 TEST(UploadRequest, MultipleMethodsSingleAuthor)
 {
+	// Set up the test.
+	errno = 0;
+
+	MockJDDatabase jddatabase;
+	MockDatabase database;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+
 	std::string requestType = "upld";
 
 	std::vector<char> requestChars = {};
@@ -131,16 +143,12 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
-	MockDatabase database;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, nullptr);
-
 	EXPECT_CALL(database, addProject(projectEqual(projectT1))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_2), projectEqual(projectT1), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, 1, true)).Times(1);
 
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
@@ -149,6 +157,14 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 // and multiple authors for each method.
 TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 {
+	// Set up the test.
+	errno = 0;
+
+	MockJDDatabase jddatabase;
+	MockDatabase database;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr);
+
 	std::string requestType = "upld";
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
@@ -172,16 +188,12 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
-	MockDatabase database;
-	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, nullptr);
-
 	EXPECT_CALL(database, addProject(projectEqual(projectT2))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_1), projectEqual(projectT2), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_2), projectEqual(projectT2), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, 1, true)).Times(1);
 
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
@@ -189,6 +201,11 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 // Tests if the program can handle an upload request with invalid project data, too many arguments.
 TEST(UploadRequest, InvalidProjectSize)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -198,7 +215,7 @@ TEST(UploadRequest, InvalidProjectSize)
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -206,6 +223,11 @@ TEST(UploadRequest, InvalidProjectSize)
 // Tests if the program can handle an upload request with invalid project data, non-integer id.
 TEST(UploadRequest, InvalidProjectID)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"xabs398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
@@ -215,7 +237,7 @@ TEST(UploadRequest, InvalidProjectID)
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -224,6 +246,11 @@ TEST(UploadRequest, InvalidProjectID)
 // Tests if the program can handle an upload request with invalid project data, non-integer version.
 TEST(UploadRequest, InvalidProjectVersion)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "xabs1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject",
@@ -233,7 +260,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
@@ -241,6 +268,11 @@ TEST(UploadRequest, InvalidProjectVersion)
 // Tests if the program can handle an upload request with invalid method data, too few arguments.
 TEST(UploadRequest, InvalidMethodSizeSmall)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -252,7 +284,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -260,6 +292,11 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 // Tests if the program can handle an upload request with invalid method data, too many arguments.
 TEST(UploadRequest, InvalidMethodSizeLarge)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -273,7 +310,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -281,6 +318,11 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 // Tests if the program can handle an upload request with invalid method data, invalid method hash.
 TEST(UploadRequest, InvalidMethodHash)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -298,7 +340,7 @@ TEST(UploadRequest, InvalidMethodHash)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 2."));
 }
@@ -306,6 +348,11 @@ TEST(UploadRequest, InvalidMethodHash)
 // Tests if the program can handle an upload request with invalid method data, non-integer line number.
 TEST(UploadRequest, InvalidMethodLine)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -319,7 +366,7 @@ TEST(UploadRequest, InvalidMethodLine)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
@@ -328,6 +375,11 @@ TEST(UploadRequest, InvalidMethodLine)
 // Tests if the program can handle an upload request with invalid method data, non-integer number of authors.
 TEST(UploadRequest, InvalidMethodAuthorLines)
 {
+	// Set up the test.
+	errno = 0;
+
+	RequestHandler handler;
+
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
 					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
@@ -341,7 +393,7 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
-	RequestHandler handler;
+	// Check if the output is as expected.
 	std::string result = handler.handleRequest("upld", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }

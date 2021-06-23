@@ -26,11 +26,15 @@ MATCHER_P(matcherNotNull, request, "")
 	return arg != nullptr;
 }
 
+// Check if we can become a leader.
 TEST(RaftTests, BecomeLeader)
 {
-	RequestHandler raftHandler; 
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
+	RequestHandler raftHandler;
 	raftHandler.initialize(&database, &jddatabase, nullptr);
 	{
 		RAFTConsensus raft;
@@ -40,13 +44,18 @@ TEST(RaftTests, BecomeLeader)
 	}
 }
 
+// Check if a connection with a new node be accepted.
 TEST(RaftTests, AcceptConnection)
 {
+	// Set up the test.
+	errno = 0;
+
 	boost::asio::io_context ioCon;
-	RequestHandler handler; 
 	MockDatabase database;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, nullptr);
+
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
 		RAFTConsensus raft;
@@ -64,11 +73,18 @@ TEST(RaftTests, AcceptConnection)
 	delete connMock;
 }
 
+// Test if we can read the ips from a file.
 TEST(RaftTests, ReadIpsFromFile) 
 {
+	// Set up the test.
+	errno = 0;
+
 	RAFTConsensus raft;
+	
 	auto ips = raft.getIps("dotenvTestfile.txt");
 	std::string port = std::to_string(PORT);
 	std::vector<std::pair<std::string, std::string>> expectedOutput = {{"127.0.0.1", port}, {"127.0.0.2", port}};
+
+	// Check if the output is as expected.
 	ASSERT_EQ(ips, expectedOutput);
 }

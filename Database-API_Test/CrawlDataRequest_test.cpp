@@ -9,14 +9,16 @@ Utrecht University within the Software Project course.
 #include "RaftConsensusMock.cpp"
 #include <gtest/gtest.h>
 
-// Check if data is correctly handled when the crawlId is valid.
+// Check if data is correctly handled when the crawlID is valid.
 TEST(CrawlDataRequest, SingleJob)
 {
-	RequestHandler handler;
+	// Set up the test.
+	errno = 0;
+
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
-	errno = 0;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	std::string requestType = "upcd";
@@ -42,13 +44,18 @@ TEST(CrawlDataRequest, SingleJob)
 	std::vector<char> inputFunctionChars = {};
 	Utility::appendBy(inputFunctionChars, {"Crawl", "100"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	inputFunctionChars.pop_back();
+
+	// Check if the output is correct.
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
 	ASSERT_EQ(result2, HTTPStatusCodes::success(inputFunction));
 }
 
-// Check if an invalid crawlId is handled correctly.
-TEST(CrawlDataRequest, InvalidId)
+// Check if an invalid crawlID is handled correctly.
+TEST(CrawlDataRequest, InvalidID)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
@@ -64,7 +71,7 @@ TEST(CrawlDataRequest, InvalidId)
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
+	// Check if the output is correct.
 	std::string result = handler.handleRequest(requestType, request, nullptr);
-
-	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error: invalid crawlId."));
+	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error: invalid crawlID."));
 }

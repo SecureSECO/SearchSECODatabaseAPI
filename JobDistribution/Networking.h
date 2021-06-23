@@ -22,6 +22,7 @@ public:
 	/// <param name="data">The data to be send.</param>
 	/// <param name="dataSize">The size of the data array in bytes.</param>
 	void sendData(const char* data, int dataSize);
+
 	/// <summary>
 	/// Send data to the database.
 	/// </summary>
@@ -36,8 +37,10 @@ public:
 	/// <summary>
 	/// Receives data from the other side of the connection.
 	/// </summary>
-	/// <param name="stopOnNewLine">If true, will stop listning when encountering a new line.
-	///	If false, will stop when the connection stops.</param>
+	/// <param name="stopOnNewLine">
+	/// If true, will stop listning when encountering a new line.
+	///	If false, will stop when the connection stops.
+	/// </param>
 	std::string receiveData(bool stopOnNewLine = true);
 private:
 	boost::asio::io_context ioContext;

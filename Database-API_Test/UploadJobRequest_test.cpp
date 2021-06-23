@@ -12,14 +12,16 @@ Utrecht University within the Software Project course.
 // Test for a single correct job.
 TEST(UploadJobRequest, SingleJob)
 {
-	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	// Set up the test.
+	errno = 0;
 
-	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
-	errno = 0;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
+
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
 	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1";
@@ -35,15 +37,17 @@ TEST(UploadJobRequest, SingleJob)
 // Test for multiple correct jobs.
 TEST(UploadJobRequest, MultipleJobs)
 {
-	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+	// Set up the test.
+	errno = 0;
 
-	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
-	errno = 0;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
+
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
 	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter +
@@ -61,13 +65,16 @@ TEST(UploadJobRequest, MultipleJobs)
 // Test for one job, but with an invalid priority.
 TEST(UploadJobRequest, OneJobInvalidPriority)
 {
-	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	// Set up the test.
+	errno = 0;
 
-	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
+
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
 	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "aaaaa";
@@ -82,15 +89,17 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 //Test for multiple jobs, where one job has an invalid priority.
 TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 {
-	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
+	// Set up the test.
+	errno = 0;
 
-	RequestHandler handler;
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
-	errno = 0;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
+
+	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
+	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
 	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter + "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "aaaa";

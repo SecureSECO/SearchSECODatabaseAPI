@@ -45,7 +45,7 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 		boost::array<char, 128> buf;
 		boost::system::error_code error;
 
-		// Read incomming data.
+		// Read the incoming data.
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
 		if (len == 0 && stopOnNewLine) 
@@ -53,7 +53,7 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 			throw std::runtime_error("No data received, meaning the other side dropped out.");
 		}
 
-		// Add it to out buffer.
+		// Add it to buffer.
 		for (int i = 0; i < len; i++)
 		{
 			ret.push_back(buf[i]);
@@ -65,7 +65,7 @@ std::string NetworkHandler::receiveData(bool stopOnNewLine)
 		}
 		else if (error)
 		{
-			// If any error occures, we just throw.
+			// If any error occurs, we just throw.
 			std::cout << "Networking error: " << error.message();
 			throw boost::system::system_error(error);
 		}

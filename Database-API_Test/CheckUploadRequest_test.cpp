@@ -33,10 +33,12 @@ MATCHER_P(methodEqual, method, "")
 // Tests if program works correctly with one request and one (hard-coded) match.
 TEST(CheckUploadRequest, OneRequestOneMatch)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	errno = 0;
 	handler.initialize(&database, &jddatabase, nullptr);
 
 	std::vector<char> requestChars = {};
@@ -93,6 +95,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, addProject(projectEqual(project))).WillOnce(testing::Return(true));
 	EXPECT_CALL(database, addMethod(methodEqual(method1in), projectEqual(project), -1, 1, true)).Times(1);
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
+
+	// Check if the output is correct.
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
@@ -100,6 +104,9 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 // Tests if program correctly handles a checkupload which cannot be converted to hashes.
 TEST(CheckUploadRequest, HashConversionError)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::vector<char> requestChars = {};
@@ -111,6 +118,7 @@ TEST(CheckUploadRequest, HashConversionError)
 	Utility::appendBy(requestChars, {"a6aa62503e2ca3310e3a837502b80df5xx", "Method1", "MyProject/Method1.cpp", "1", "1", "Owner", "owner@mail.com"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 
+	// Check if the output is correct.
 	std::string result = handler.handleRequest("chup", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing hashes."));
 }

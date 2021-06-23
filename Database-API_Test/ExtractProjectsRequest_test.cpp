@@ -17,11 +17,15 @@ Utrecht University within the Software Project course.
 // Checks if extract projects request works correctly when the request is empty.
 TEST(ExtractProjectsRequestTests, Empty)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::string input1 = "";
 	std::string expected1 = "No results found.";
 
+	// Check if the output is correct.
 	std::string output1 = handler.handleRequest("extp", input1, nullptr);
 	ASSERT_EQ(output1, HTTPStatusCodes::success(expected1));
 }
@@ -29,10 +33,13 @@ TEST(ExtractProjectsRequestTests, Empty)
 // Checks if the extract projects request works correctly when searching for a single existing project.
 TEST(ExtractProjectsRequestTests, SingleExistingProject)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID2 = 1;
@@ -60,6 +67,8 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 	std::string expected2(expectedChars.begin(), expectedChars.end());
 
 	EXPECT_CALL(database, searchForProject(projectID2, version2)).WillOnce(testing::Return(p2));
+
+	// Check if the output is correct.
 	std::string output2 = handler.handleRequest("extp", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
@@ -67,10 +76,13 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 // Checks if the extract projects request works correctly when searching for a non-existing project.
 TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID3 = 1;
@@ -84,6 +96,8 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 	std::string expected3 = "No results found.";
 
 	EXPECT_CALL(database, searchForProject(projectID3, version3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, p3));
+
+	// Check if the output is correct.
 	std::string output3 = handler.handleRequest("extp", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
@@ -91,10 +105,13 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 // Checks if the extract projects request works correctly when searching for multiple projects.
 TEST(ExtractProjectsRequestTests, MultipleProjects)
 {
+	// Set up the test.
+	errno = 0;
+
 	MockDatabase database;
-	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
+	RequestHandler handler;
 	handler.initialize(&database, &jddatabase, &raftConsensus);
 
 	ProjectID projectID4_1 = 2;
@@ -174,7 +191,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	std::string output4 = handler.handleRequest("extp", input4, nullptr);
 	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
-	// Expect the status code to be succesfull.
+	// We expect the status code to be 'success'.
 	EXPECT_EQ(HTTPStatusCodes::getCode(output4), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 
 	// Assert that the output contains 3 entries.
@@ -191,12 +208,16 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 // Tests if an input for the extract projects request with too few arguments is correctly handled.
 TEST(ExtractProjectsRequestTests, TooFewArguments)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::string input5 = "1";
 	std::string expected5 =
 		"The request failed. Each project should be provided a projectID and a version (in that order).";
 
+	// Check if the output is correct.
 	std::string output5 = handler.handleRequest("extp", input5, nullptr);
 	ASSERT_EQ(output5, HTTPStatusCodes::clientError(expected5));
 }
@@ -204,6 +225,9 @@ TEST(ExtractProjectsRequestTests, TooFewArguments)
 // Tests if an input for the extract projects request with wrong argument types is correctly handled.
 TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 {
+	// Set up the test.
+	errno = 0;
+
 	RequestHandler handler;
 
 	std::vector<char> inputChars = {};
@@ -212,6 +236,7 @@ TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 	std::string expected6 =
 		"The request failed. For each project, both the projectID and the version should be a long long int.";
 
+	// Check if the output is correct.
 	std::string output6 = handler.handleRequest("extp", input6, nullptr);
 	ASSERT_EQ(output6, HTTPStatusCodes::clientError(expected6));
 }
