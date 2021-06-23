@@ -5,10 +5,7 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
-
-// External includes
 #include <boost/asio.hpp>
-
 
 using boost::asio::ip::tcp;
 

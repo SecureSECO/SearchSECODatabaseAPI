@@ -5,18 +5,12 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
-
 #include "RequestHandler.h"
 #include "RAFTConsensus.h"
 
-#include <string>
-#include <vector>
-#include <boost/bind/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <iostream>
 
 #define PORT 8003
 #define CONNECTION_TIMEOUT 10000000	// Timeout in microseconds.

@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "JDDatabaseMock.cpp"
 #include "RAFTConsensus.h"
 #include "DatabaseConnection.h"
+
 #include <gtest/gtest.h>
 
 // Tests if the RequestHandler requests to connect to the database when initialized.

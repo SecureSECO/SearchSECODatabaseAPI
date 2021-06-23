@@ -2,10 +2,13 @@
 Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
+#include "Definitions.h"
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
-#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
+#include "HTTPStatus.h"
+#include "Utility.h"
+
 #include <gtest/gtest.h>
 
 MethodOut testMethod1 = {.hash = "2c7f46d4f57cf9e66b03213358c7ddb5",

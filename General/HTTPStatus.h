@@ -5,9 +5,6 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
-
-#include "Definitions.h"
-
 #include <string>
 
 namespace HTTPStatusCodes

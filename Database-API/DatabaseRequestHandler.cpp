@@ -4,9 +4,12 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "DatabaseRequestHandler.h"
+#include "Definitions.h"
+#include "HTTPStatus.h"
+#include "Utility.h"
+
 #include <iostream>
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <sstream>
 #include <ctime>
@@ -14,13 +17,6 @@ Utrecht University within the Software Project course.
 #include <thread>
 #include <future>
 #include <utility>
-#include <functional>
-#include <math.h>
-#include <unistd.h>
-
-#include "DatabaseRequestHandler.h"
-#include "HTTPStatus.h"
-#include "Utility.h"
 
 DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
 {
@@ -825,22 +821,6 @@ std::string DatabaseRequestHandler::authorsToString(std::vector<std::pair<Author
 	}
 	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
-}
-
-Author DatabaseRequestHandler::datanEntryToAuthor(std::string dataEntry)
-{
-	std::vector<std::string> authorData = Utility::splitStringOn(dataEntry, FIELD_DELIMITER_CHAR);
-
-	if (authorData.size() != 2)
-	{
-		errno = EILSEQ;
-		Author author;
-		return author;
-	}
-
-	Author author(authorData[0], authorData[1]);
-
-	return author;
 }
 
 std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)

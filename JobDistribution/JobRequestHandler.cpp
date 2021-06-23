@@ -4,13 +4,10 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "Definitions.h"
 #include "JobRequestHandler.h"
 #include "HTTPStatus.h"
-
-#include <unistd.h>
-#include <math.h>
-#include <iostream>
-#include <exception>
+#include "Utility.h"
 
 JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port)
 {

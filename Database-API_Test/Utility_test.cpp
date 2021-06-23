@@ -3,6 +3,7 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
 #include "Utility.h"
+
 #include <gtest/gtest.h>
 
 // Checks if parseable string is converted correctly by safeStoi.

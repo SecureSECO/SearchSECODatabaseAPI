@@ -6,7 +6,6 @@ Utrecht University within the Software Project course.
 
 #include <chrono>
 #include <sstream>
-#include <string>
 #include <boost/algorithm/string.hpp>
 #include "Utility.h"
 

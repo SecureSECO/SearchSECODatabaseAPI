@@ -5,7 +5,9 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseConnection.h"
+#include "HTTPStatus.h"
 #include "Utility.h"
+
 #include <iostream>
 #include <chrono>
 #include <unistd.h>

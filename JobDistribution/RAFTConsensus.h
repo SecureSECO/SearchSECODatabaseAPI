@@ -5,12 +5,11 @@ Utrecht University within the Software Project course.
 */
 #pragma once
 
+#include "Networking.h"
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <mutex>
-
-#include "Networking.h"
 
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000

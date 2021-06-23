@@ -4,13 +4,14 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include <iostream>
-#include <unistd.h>
-#include "Types.h"
 #include "Database-API.h"
+#include "DatabaseConnection.h"
 #include "DatabaseHandler.h"
 #include "ConnectionHandler.h"
 #include "RAFTConsensus.h"
+
+#include <iostream>
+#include <unistd.h>
 
 int main()
 {

@@ -4,8 +4,8 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "gmock/gmock.h"
 #include <string>
+#include <gmock/gmock.h>
 
 using namespace types;
 

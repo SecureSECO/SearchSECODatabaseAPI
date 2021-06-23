@@ -4,13 +4,15 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "Definitions.h"
+#include "TestDefinitions.h"
+#include "RequestHandler.h"
 #include "DatabaseConnection.h"
 #include "DatabaseHandler.h"
-#include "HTTPStatus.h"
 #include "RAFTConsensus.h"
-#include "RequestHandler.h"
+#include "HTTPStatus.h"
 #include "Utility.h"
-#include "TestDefinitions.h"
+
 #include <algorithm>
 #include <chrono>
 #include <gtest/gtest.h>

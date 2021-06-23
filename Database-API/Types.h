@@ -6,7 +6,6 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include <ctime>
-#include <string>
 #include <vector>
 
 #include "md5/md5.h"

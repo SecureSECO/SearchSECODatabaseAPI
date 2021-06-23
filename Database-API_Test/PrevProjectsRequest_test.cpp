@@ -4,12 +4,13 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "RequestHandler.h"
 #include "DatabaseMock.cpp"
-#include "HTTPStatus.h"
 #include "JDDatabaseMock.cpp"
 #include "RaftConsensusMock.cpp"
-#include "RequestHandler.h"
+#include "HTTPStatus.h"
 #include "Utility.h"
+
 #include <boost/shared_ptr.hpp>
 #include <gtest/gtest.h>
 

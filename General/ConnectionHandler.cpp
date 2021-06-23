@@ -6,7 +6,13 @@ Utrecht University within the Software Project course.
 
 #include "ConnectionHandler.h"
 #include "Utility.h"
+
+#include <boost/array.hpp>
+#include <boost/bind/bind.hpp>
 #include <chrono>
+#include <string>
+#include <vector>
+#include <iostream>
 
 ConnectionHandler::~ConnectionHandler() 
 {

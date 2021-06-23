@@ -2,10 +2,13 @@
 Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)*/
 
+#include "Definitions.h"
 #include "RequestHandler.h"
-#include "HTTPStatus.h"
 #include "DatabaseMock.cpp"
 #include "JDDatabaseMock.cpp"
+#include "HTTPStatus.h"
+#include "Utility.h"
+
 #include <gtest/gtest.h>
 
 // Checks if two projects are equal. I.e., they have the same contents.

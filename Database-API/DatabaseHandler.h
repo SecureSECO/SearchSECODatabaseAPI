@@ -6,7 +6,7 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "Types.h"
-#include <string>
+
 #include <tuple>
 #include <cassandra.h>
 

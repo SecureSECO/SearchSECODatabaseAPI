@@ -6,10 +6,11 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "DatabaseHandler.h"
-#include "Definitions.h"
+
 #include <mutex>
 #include <tuple>
 #include <queue>
+#include <functional>
 
 #define PROJECT_DATA_SIZE 9
 #define METHOD_DATA_MIN_SIZE 5
@@ -316,15 +317,6 @@ class DatabaseRequestHandler
 		/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
 		/// </returns>
 		std::string authorsToString(std::vector<std::pair<Author, AuthorID>> authors);
-
-		/// <summary>
-		/// Parses a dataEntry to an author.
-		/// </summary>
-		/// <param name="dataEntry">
-		/// A string with the name and mail of an author seperated by the FIELD_DELIMITER_CHAR.
-		/// </param>
-		/// <returns> An author with the name and mail passed to the method. </returns>
-		Author datanEntryToAuthor(std::string dataEntry);
 
 		/// <summary>
 		/// Retrieves the authors corresponding to the IDs given as input using the database.

@@ -4,12 +4,12 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "gmock/gmock.h"
 #include "RequestHandler.h"
 #include "ConnectionHandler.h"
+
 #include <string>
 #include <boost/shared_ptr.hpp>
-
+#include <gmock/gmock.h>
 
 /// <summary>
 /// Handles requests.

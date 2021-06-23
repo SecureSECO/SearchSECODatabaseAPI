@@ -7,8 +7,6 @@ Utrecht University within the Software Project course.
 #pragma once
 #include "DatabaseConnection.h"
 #include "RAFTConsensus.h"
-#include "Utility.h"
-#include "Definitions.h"
 
 #include <boost/shared_ptr.hpp>
 

@@ -4,6 +4,8 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
+#include "TestDefinitions.h"
+#include "Definitions.h"
 #include "RAFTConsensus.h"
 #include "Networking.h"
 #include "RequestHandler.h"
@@ -14,9 +16,6 @@ Utrecht University within the Software Project course.
 #include "DatabaseMock.cpp"
 
 #include <gtest/gtest.h>
-
-#define TESTLISTENPORT 9043
-#define TESTIP "127.0.0.1"
 
 std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
@@ -38,7 +37,7 @@ TEST(RaftTests, BecomeLeader)
 	raftHandler.initialize(&database, &jddatabase, nullptr);
 	{
 		RAFTConsensus raft;
-		raft.start(&raftHandler, {{TESTIP, "-1"}}, false);
+		raft.start(&raftHandler, {{TEST_IP, "-1"}}, false);
 
 		ASSERT_TRUE(raft.isLeader());
 	}
@@ -68,7 +67,7 @@ TEST(RaftTests, AcceptConnection)
 
 		std::string resp = raft.connectNewNode(connection, "-1" + entryDelimiter);
 
-		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TESTIP + fieldDelimiter + "-1" + entryDelimiter);
+		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TEST_IP + fieldDelimiter + "-1" + entryDelimiter);
 	}
 	delete connMock;
 }

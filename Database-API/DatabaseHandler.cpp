@@ -6,7 +6,9 @@ Utrecht University within the Software Project course.
 
 #include "DatabaseHandler.h"
 #include "Utility.h"
+
 #include <iostream>
+#include <string>
 #include <unistd.h>
 
 void DatabaseHandler::connect(std::string ip, int port)
@@ -670,7 +672,6 @@ std::vector<MethodID> DatabaseHandler::authorToMethods(std::string authorID)
 	if (cass_future_error_code(resultFuture) == CASS_OK)
 	{
 		const CassResult *result = cass_future_get_result(resultFuture);
-
 		CassIterator *iterator = cass_iterator_from_result(result);
 
 		// Add matches to result list.
@@ -681,7 +682,6 @@ std::vector<MethodID> DatabaseHandler::authorToMethods(std::string authorID)
 		}
 
 		cass_iterator_free(iterator);
-
 		cass_result_free(result);
 	}
 	else
@@ -747,7 +747,6 @@ CassUuid DatabaseHandler::createAuthorIfNotExists(Author author)
 	cass_uuid_from_string(Utility::hashToUUIDString(author.id).c_str(), &authorID);
 
 	CassStatement *insertQuery2 = cass_prepared_bind(insertAuthorByID);
-
 	cass_statement_bind_uuid_by_name(insertQuery2, "authorID", authorID);
 	cass_statement_bind_string_by_name(insertQuery2, "name", author.name.c_str());
 	cass_statement_bind_string_by_name(insertQuery2, "mail", author.mail.c_str());
@@ -830,7 +829,6 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 MethodID DatabaseHandler::getMethodID(const CassRow *row)
 {
 	MethodID method;
-
 	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
 	method.projectID = getInt64(row, "projectid");
 	method.startVersion = getInt64(row, "startversiontime");
