@@ -24,22 +24,22 @@ include_directories(../Resources/include)
 enable_testing()
 
 add_executable(
-  tests
-  Raft_tests.cpp
-  Utility_test.cpp
-  RequestHandler_test.cpp
-  CheckRequest_test.cpp
-  UploadRequest_test.cpp
-  CheckUploadRequest_test.cpp
-  ExtractProjectsRequest_test.cpp
-  AuthorRequest_test.cpp
-  IntegrationTests.cpp
-  JobIntegrationTests.cpp
-  UploadJobRequest_test.cpp
-  JobRequestHandler_test.cpp
-  GetJobRequest_test.cpp
-  CrawlDataRequest_test.cpp
-  HTTPStatus_test.cpp
+	tests
+	Raft_tests.cpp
+	Utility_test.cpp
+	RequestHandler_test.cpp
+	CheckRequest_test.cpp
+	UploadRequest_test.cpp
+	CheckUploadRequest_test.cpp
+	ExtractProjectsRequest_test.cpp
+	AuthorRequest_test.cpp
+	IntegrationTests.cpp
+	JobIntegrationTests.cpp
+	UploadJobRequest_test.cpp
+	JobRequestHandler_test.cpp
+	GetJobRequest_test.cpp
+	CrawlDataRequest_test.cpp
+	HTTPStatus_test.cpp
 )
 target_link_libraries(
   tests

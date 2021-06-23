@@ -32,6 +32,11 @@ struct Author
 		{
 		}
 
+		/// <summary>
+		/// Constructs an author with provided name and mail,
+		/// and generates id as the MD5-hash of the concatenated 
+		/// string of name and mail separated by ' '.
+		/// </summary>
 		Author(std::string name, std::string mail) :
 		name(name),
 		mail(mail)
