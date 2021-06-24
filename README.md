@@ -5,6 +5,11 @@ The database API is responsible for handling the communication between the contr
 To install the program you should clone the git repository.
 
 ## Dependencies
+The database api code has the following dependencies:
+* Cassandra
+* Datastax cpp-driver
+* Boost-asio
+
 For running the program using Docker you need the following dependencies installed:
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker compose](https://docs.docker.com/compose/install/)
