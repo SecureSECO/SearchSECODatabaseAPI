@@ -42,8 +42,8 @@ public:
 	/// <summary>
 	/// Readies the request handler for later usage.
 	/// </summary>
-  virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus *raft,
-						  std::string ip = IP, int port = DBPORT);
+  virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, 
+						  RAFTConsensus *raft, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.

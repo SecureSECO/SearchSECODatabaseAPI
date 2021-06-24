@@ -106,6 +106,7 @@ struct ProjectIn
 
 /// <summary>
 /// Represents the relevant data of a project when it is returned to user.
+/// Difference with ProjectIn: authorIDs instead of authors.
 /// </summary>
 struct ProjectOut
 {

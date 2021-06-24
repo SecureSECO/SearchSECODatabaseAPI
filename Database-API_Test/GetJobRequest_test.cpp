@@ -46,7 +46,8 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	std::string result2 = handler.handleRequest(requestType, request, nullptr);
 
 	std::vector<char> input2Chars = {};
-	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
 	input2Chars.pop_back();
 
 	// Check if the second output is correct.
@@ -76,7 +77,8 @@ TEST(GetJobRequest, EnoughJobsTest)
 	std::string result = handler.handleRequest(requestType, request, nullptr);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
 	inputChars.pop_back();
 
 	// Check if the output is correct.

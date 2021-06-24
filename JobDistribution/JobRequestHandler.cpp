@@ -9,7 +9,8 @@ Utrecht University within the Software Project course.
 #include "HTTPStatus.h"
 #include "Utility.h"
 
-JobRequestHandler::JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port)
+JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database,
+									 std::string ip, int port)
 {
 	this->raft = raft;
 	this->requestHandler = requestHandler;
@@ -80,9 +81,11 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 			}
 			else
 			{
-				return HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue.");
+				return HTTPStatusCodes::clientError(
+					"A job has an invalid priority, no jobs have been added to the queue.");
 			}
 		}
+
 		// Call to the database to upload jobs.
 		for (int i = 0; i < urls.size(); i++)
 		{

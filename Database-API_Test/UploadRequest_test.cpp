@@ -14,44 +14,61 @@ Utrecht University within the Software Project course.
 
 // Test input part 1:
 Author owner("Owner", "owner@mail.com");
-std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5",
-			"f3a258ba6cd26c1b7d553a493c614104",
-			"59bf62494932580165af0451f76be3e9" };
-ProjectIn projectT1 = { .projectID = 0, .version = 0, .versionHash = "42ea965b1f326f878bebcda51c7fb4b2", .license = "MyLicense",
-			.name = "MyProject", .url = "MyUrl", .owner = owner,
-			.hashes = { }, .parserVersion = 1};
-MethodIn methodT1_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
-			.methodName = "Method1",
-			.fileLocation = "MyProject/Method1.cpp",
-			.lineNumber = 1, .authors = { owner } };
-MethodIn methodT1_2 = { .hash = "f3a258ba6cd26c1b7d553a493c614104",
-			.methodName = "Method2",
-			.fileLocation = "MyProject/Method2.cpp",
-			.lineNumber = 11, .authors = { owner } };
-MethodIn methodT1_3 = { .hash = "59bf62494932580165af0451f76be3e9",
-			.methodName = "Method3",
-			.fileLocation = "MyProject/Method3.cpp",
-			.lineNumber = 31, .authors = { owner } };
+std::vector<Hash> hashes = {"a6aa62503e2ca3310e3a837502b80df5", "f3a258ba6cd26c1b7d553a493c614104",
+							"59bf62494932580165af0451f76be3e9"};
+ProjectIn projectT1 = {.projectID = 0,
+					   .version = 0,
+					   .versionHash = "42ea965b1f326f878bebcda51c7fb4b2",
+					   .license = "MyLicense",
+					   .name = "MyProject",
+					   .url = "MyUrl",
+					   .owner = owner,
+					   .hashes = {},
+					   .parserVersion = 1};
+MethodIn methodT1_1 = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
+					   .methodName = "Method1",
+					   .fileLocation = "MyProject/Method1.cpp",
+					   .lineNumber = 1,
+					   .authors = {owner}};
+MethodIn methodT1_2 = {.hash = "f3a258ba6cd26c1b7d553a493c614104",
+					   .methodName = "Method2",
+					   .fileLocation = "MyProject/Method2.cpp",
+					   .lineNumber = 11,
+					   .authors = {owner}};
+MethodIn methodT1_3 = {.hash = "59bf62494932580165af0451f76be3e9",
+					   .methodName = "Method3",
+					   .fileLocation = "MyProject/Method3.cpp",
+					   .lineNumber = 31,
+					   .authors = {owner}};
 
 // Test input part 2:
 Author author1("Author 1", "author1@mail.com");
 Author author2("Author 2", "author2@mail.com");
 Author author3("Author 3", "author3@mail.com");
-ProjectIn projectT2 = { .projectID = 398798723, .version = 1618222334, .versionHash = "05a647eeb4954187fa5ac00942054cdc",
-			  .license = "MyLicense", .name = "MyProject",
-			  .url = "MyUrl", .owner = owner, .hashes = { }, .parserVersion = 1 };
-MethodIn methodT2_1 = { .hash = "a6aa62503e2ca3310e3a837502b80df5",
-			.methodName = "Method1",
-			.fileLocation = "MyProject/Method1.cpp",
-			.lineNumber = 1, .authors = { author1, author2, author3 } };
-MethodIn methodT2_2 = { .hash = "f3a258ba6cd26c1b7d553a493c614104",
-			.methodName = "Method2",
-			.fileLocation = "MyProject/Method2.cpp",
-			.lineNumber = 999, .authors = { author2, owner } };
-MethodIn methodT2_3 = { .hash = "59bf62494932580165af0451f76be3e9",
-			.methodName = "Method3",
-			.fileLocation = "MyProject/Method3.cpp",
-			.lineNumber = 9999999, .authors = { owner, author2, author1, author3 } };
+ProjectIn projectT2 = {.projectID = 398798723,
+					   .version = 1618222334,
+					   .versionHash = "05a647eeb4954187fa5ac00942054cdc",
+					   .license = "MyLicense",
+					   .name = "MyProject",
+					   .url = "MyUrl",
+					   .owner = owner,
+					   .hashes = {},
+					   .parserVersion = 1};
+MethodIn methodT2_1 = {.hash = "a6aa62503e2ca3310e3a837502b80df5",
+					   .methodName = "Method1",
+					   .fileLocation = "MyProject/Method1.cpp",
+					   .lineNumber = 1,
+					   .authors = {author1, author2, author3}};
+MethodIn methodT2_2 = {.hash = "f3a258ba6cd26c1b7d553a493c614104",
+					   .methodName = "Method2",
+					   .fileLocation = "MyProject/Method2.cpp",
+					   .lineNumber = 999,
+					   .authors = {author2, owner}};
+MethodIn methodT2_3 = {.hash = "59bf62494932580165af0451f76be3e9",
+					   .methodName = "Method3",
+					   .fileLocation = "MyProject/Method3.cpp",
+					   .lineNumber = 9999999,
+					   .authors = {owner, author2, author1, author3}};
 
 // Checks if two projects are equal. I.e., they have the same contents.
 MATCHER_P(projectEqual, project, "")
@@ -90,10 +107,10 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	std::string requestType = "upld";
 
 	std::vector<char> requestChars = {};
-	Utility::appendBy(
-		requestChars,
-		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner",
+					   "owner@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
@@ -125,10 +142,10 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	std::string requestType = "upld";
 
 	std::vector<char> requestChars = {};
-	Utility::appendBy(
-		requestChars,
-		{"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner", "owner@mail.com", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(requestChars,
+					  {"0", "0", "42ea965b1f326f878bebcda51c7fb4b2", "MyLicense", "MyProject", "MyUrl", "Owner",
+					   "owner@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
@@ -170,8 +187,8 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	std::string requestType = "upld";
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -210,8 +227,8 @@ TEST(UploadRequest, InvalidProjectSize)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner", "stars@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner", "stars@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -277,8 +294,8 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -301,8 +318,8 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -327,8 +344,8 @@ TEST(UploadRequest, InvalidMethodHash)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -357,8 +374,8 @@ TEST(UploadRequest, InvalidMethodLine)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
@@ -384,8 +401,8 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
-					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", "MyUrl",
-					   "Owner", "owner@mail.com", "1"},
+					  {"398798723", "1618222334", "05a647eeb4954187fa5ac00942054cdc", "MyLicense", "MyProject", 
+					   "MyUrl", "Owner", "owner@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);
 	requestChars.push_back(ENTRY_DELIMITER_CHAR);

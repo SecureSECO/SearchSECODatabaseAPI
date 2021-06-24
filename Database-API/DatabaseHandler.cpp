@@ -86,7 +86,8 @@ void DatabaseHandler::setPreparedStatements()
 									 "AND file = ? AND startVersionTime = ?");
 
 	// Prepare query used to select a method from the database given a hash, projectID and a file location.
-	selectMethod = prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
+	selectMethod =
+		prepareStatement("SELECT * FROM projectdata.methods WHERE method_hash = ? AND projectID = ? AND file = ?");
 
 	// Prepare query used to select the unchanged methods based on hash, projectID and file location.
 	selectUnchangedMethods = prepareStatement(
@@ -101,7 +102,8 @@ void DatabaseHandler::setPreparedStatements()
 	selectMethodByAuthor = prepareStatement("SELECT * FROM projectdata.method_by_author WHERE authorid = ?");
 
 	// Prepare query used to relate an author to an ID of the author (inside the author_by_id table).
-	insertAuthorByID = prepareStatement("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?) IF NOT EXISTS");
+	insertAuthorByID =
+		prepareStatement("INSERT INTO projectdata.author_by_id (authorID, name, mail) VALUES (?, ?, ?) IF NOT EXISTS");
 
 	// Prepare query used to select an author given its ID (bby means of the author_by_id table).
 	selectAuthorByID = prepareStatement("SELECT * FROM projectdata.author_by_id WHERE authorid = ?");
@@ -355,7 +357,8 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 	}
 }
 
-void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion, bool newProject)
+void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long prevVersion, long long parserVersion,
+								bool newProject)
 {
 	errno = 0;
 
@@ -541,7 +544,8 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	cass_future_free(queryFuture);
 }
 
-std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files, ProjectIn project, long long prevVersion)
+std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes, std::vector<std::string> files,
+														ProjectIn project, long long prevVersion)
 {
 	errno = 0;
 

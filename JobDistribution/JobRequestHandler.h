@@ -23,7 +23,8 @@ public:
 	/// <summary>
 	/// Constructor method.
 	/// </summary>
-	JobRequestHandler(RAFTConsensus* raft, RequestHandler* requestHandler, DatabaseConnection* database, std::string ip, int port);
+  JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, std::string ip,
+					int port);
 
 	/// <summary>
 	/// Handles request from new node to connect to the network.
@@ -34,8 +35,9 @@ public:
 	/// Handles request to upload one or more jobs with their priorities.
 	/// </summary>
 	/// <param name="data">
-	/// Consists of url and priority pairs, the url and priority are separated by a FIELD_DELIMITER_CHAR ('?') and the pairs by ENTRY_DELIMITER_CHAR ('\n').
-	/// Data format is url1?priority1\nurl2?priority2\n...
+	/// Consists of url and priority pairs, the url and priority are separated by the FIELD_DELIMITER_CHAR ('?') and 
+	/// the pairs by the ENTRY_DELIMITER_CHAR ('\n').
+	/// Data format is "url1?priority1'\n'url2?priority2'\n'..."
 	/// </param>
 	/// <returns>
 	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
@@ -58,8 +60,8 @@ public:
 	/// Handles request to upload crawl data to the job queue.
 	/// </summary>
 	/// <param name="data">
-	/// Data is almost the same as in handleUploadJobRequest, but now with an id in front.
-	/// Data format is id\nurl1?priority1\nurl2?priority2\n...
+	/// Data is almost the same as in handleUploadJobRequest, but now with an ID in front.
+	/// Data format is: "id'\n'url1?priority1'\n'url2?priority2'\n'..."
 	/// </param>
 	/// <returns>
 	/// Returns the result of handleUploadRequest.
@@ -68,7 +70,7 @@ public:
 
 	/// <summary>
 	/// Variables describing the number of jobs in the jobqueue, the current crawlID
-	/// which is needed by the crawler to crawl a specific part of github
+	/// which is needed by the crawler to crawl a specific part of GitHub
 	/// and if there is currently a crawler working.
 	/// </summary>
 	int numberOfJobs;

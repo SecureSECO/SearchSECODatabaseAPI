@@ -93,7 +93,8 @@ private:
 	/// <summary>
 	/// Loops until expected amount of data is received.
 	/// </summary>
-	void readExpectedData(int& size, std::vector<char>& data, std::string& totalData, boost::system::error_code& error);
+	void readExpectedData(int &size, std::vector<char> &data, std::string &totalData, 
+						  boost::system::error_code &error);
 
 
 	tcp::socket socket_;
@@ -103,8 +104,12 @@ private:
 class TcpServer
 {
 public:
-	TcpServer(boost::asio::io_context& ioContext, DatabaseHandler* databaseHandler, DatabaseConnection* databaseConnection, RAFTConsensus* raft, RequestHandler* handler, int port);
+	TcpServer(boost::asio::io_context &ioContext, DatabaseHandler *databaseHandler,
+			  DatabaseConnection *databaseConnection, RAFTConsensus *raft, RequestHandler *handler, int port);
 
+	/// <summary>
+	/// Stops the server.
+	/// </summary>
 	void stop();
 private:
 

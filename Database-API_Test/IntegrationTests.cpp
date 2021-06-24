@@ -196,7 +196,8 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 
 	// Test if the output is as expected.
 	std::string output4 = handler.handleRequest("chck", input4, nullptr);
-	std::vector<std::string> entries4 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> entries4 =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
 	// The number of entries should be equal to 3.
 	ASSERT_EQ(entries4.size(), 3);
@@ -230,7 +231,8 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	inputChars.push_back(ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(
-		inputChars, {"a6aa62503e2ca3310e3a837502b80df5", "M11", "P6/M11.cpp", "1", "1", "Author 8", "author8@mail.com"},
+		inputChars, {"a6aa62503e2ca3310e3a837502b80df5", "M11", "P6/M11.cpp", "1", "1", "Author 8", 
+					 "author8@mail.com"},
 		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input5_1(inputChars.begin(), inputChars.end());
 
@@ -395,7 +397,8 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 
 	// Test if the output is as expected.
 	std::string output = handler.handleRequest("idau", request, nullptr);
-	ASSERT_TRUE(output == HTTPStatusCodes::success(expectedOutput1) || output == HTTPStatusCodes::success(expectedOutput2));
+	ASSERT_TRUE(output == HTTPStatusCodes::success(expectedOutput1) ||
+				output == HTTPStatusCodes::success(expectedOutput2));
 }
 
 // Tests author by id request functionality with an unknown author as input.
@@ -653,7 +656,8 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 
 	// Test if the output is as expected.
 	std::string output11 = handler.handleRequest("extp", input11, nullptr);
-	std::vector<std::string> entries11 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output11), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> entries11 =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(output11), ENTRY_DELIMITER_CHAR);
 
 	ASSERT_EQ(entries11.size(), 2);
 
@@ -712,7 +716,8 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 
 	// Test if the output is as expected.
 	std::string output12 = handler.handleRequest("extp", input12, nullptr);
-	std::vector<std::string> entries12 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> entries12 =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
 
 	// Check if the number of found projects is equal to 3.
 	ASSERT_EQ(entries12.size(), 3);
@@ -827,15 +832,17 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 	std::string input12(inputChars.begin(), inputChars.end());
 
 	std::vector<char> expectedChars = {};
-	Utility::appendBy(
-		expectedChars, {"2", "5000000001000", "9d075dfba5c2a903ff1f542ea729ae8b", "L2", "P2", "www.github.com/p2", "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
-		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(expectedChars,
+					  {"2", "5000000001000", "9d075dfba5c2a903ff1f542ea729ae8b", "L2", "P2", "www.github.com/p2",
+					   "68bd2db6-fe91-47d2-a134-cf82b104f547", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_1(expectedChars.begin(), expectedChars.end());
 
 	expectedChars = {};
 	Utility::appendBy(expectedChars,
-					  {"3", "5000000004000", "8a04d1e679548a35a6feec48321cac81", "L3", "P3", "www.github.com/p3", "b2217c08-06eb-4a57-b977-7c6d72299301", "1"},
+					  {"3", "5000000004000", "8a04d1e679548a35a6feec48321cac81", "L3", "P3", "www.github.com/p3",
+					   "b2217c08-06eb-4a57-b977-7c6d72299301", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	expectedChars.pop_back();
 	std::string expectedOutput12_2(expectedChars.begin(), expectedChars.end());
@@ -852,7 +859,8 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 
 	// Test if the output is as expected.
 	std::string output12 = handler.handleRequest("gppr", input12, nullptr);
-	std::vector<std::string> entries12 = Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> entries12 =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
 
 	// Check if the number of found projects is equal to 3.
 	ASSERT_EQ(entries12.size(), 3);
@@ -878,13 +886,15 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
-					  {"1", "5000000002000", "f3ae47acf1f7c2c23d208edb406f29928da29d30", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
+					  {"1", "5000000002000", "f3ae47acf1f7c2c23d208edb406f29928da29d30", "L1a", "P1a",
+					   "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, "5000000000000", ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, "", ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars,
-					  {"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Author 1", "author1@mail.com"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		inputChars,
+		{"2807dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Author 1", "author1@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input(inputChars.begin(), inputChars.end());
 
 	std::string input2 = "2807dac8e9f49ee4a24e14560c5d187a";
@@ -900,7 +910,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 	ASSERT_EQ(project.hashes.size(), 1);
 
 	std::string methodData = handler.handleRequest("chck", input2, nullptr);
-	std::vector<std::string> methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> methodDataEntries =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	ASSERT_EQ(methodDataEntries.size(), 1);
 
@@ -922,7 +933,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
-					  {"1", "5000000010000", "28d4ab0b9125c97da037d20982f9e90c1ac3a3f6", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
+					  {"1", "5000000010000", "28d4ab0b9125c97da037d20982f9e90c1ac3a3f6", "L1a", "P1a",
+					   "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, "5000000000000", ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, {"P1/M1.cpp"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -947,7 +959,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 
 	// First check if the added method contains the correct start- and endVersion.
 	std::string methodData = handler.handleRequest("chck", input2, nullptr);
-	std::vector<std::string> methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> methodDataEntries =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	ASSERT_EQ(methodDataEntries.size(), 1);
 
@@ -983,13 +996,16 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
-					  {"3", "5000000020000", "f51ef5f3bbg8580adc4c633e63c6cca9779c81a7", "L1a", "P1a", "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
+					  {"3", "5000000020000", "f51ef5f3bbg8580adc4c633e63c6cca9779c81a7", "L1a", "P1a",
+					   "www.github.com/p1a", "Author 1", "author1@mail.com", "1"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(inputChars, "5000000004000", ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars, {"P3/M3.cpp", "P3/M4.cpp", "P1/UnknownFile.cpp"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(inputChars,
-					  {"2808dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Author 1", "author1@mail.com"},
-					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"P3/M3.cpp", "P3/M4.cpp", "P1/UnknownFile.cpp"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(
+		inputChars,
+		{"2808dac8e9f49ee4a24e14560c5d187a", "M1a", "P1a/M1a.cpp", "1", "1", "Author 1", "author1@mail.com"},
+		FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string input(inputChars.begin(), inputChars.end());
 
 	std::string input2 = "2808dac8e9f49ee4a24e14560c5d187a";
@@ -1010,7 +1026,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 
 	// First check if the added method contains the correct start- and endVersion.
 	std::string methodData = handler.handleRequest("chck", input2, nullptr);
-	std::vector<std::string> methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
+	std::vector<std::string> methodDataEntries =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	ASSERT_EQ(methodDataEntries.size(), 1);
 

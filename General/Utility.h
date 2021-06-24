@@ -48,7 +48,7 @@ public:
 	/// <param name="result"> The base char vector. </param>
 	/// <param name="word"> The string to be appended to the char vector. </param>
 	/// <param name="delimiter"> The character to be added at the end of the vector. </param>
-	static void appendBy(std::vector<char>& result, std::string word, char delimiter);
+	static void appendBy(std::vector<char> &result, std::string word, char delimiter);
 
 	/// <summary>
 	/// Appends a character vector by multiple strings while separating the strings by special characters

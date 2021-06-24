@@ -17,11 +17,11 @@ int Utility::safeStoi(std::string str)
 	{
 		res = stoi(str);
 	}
-	catch(const std::out_of_range& e)
+	catch(const std::out_of_range &e)
 	{
 		errno = ERANGE;
 	}
-	catch(const std::exception& e)
+	catch(const std::exception &e)
 	{
 		errno = EDOM;
 	}
@@ -36,18 +36,18 @@ long long Utility::safeStoll(std::string str)
 	{
 		res = stoll(str);
 	}
-	catch(const std::out_of_range& e)
+	catch(const std::out_of_range &e)
 	{
 		errno = ERANGE;
 	}
-	catch(const std::exception& e)
+	catch(const std::exception &e)
 	{
 		errno = EDOM;
 	}
 	return res;
 }
 
-void Utility::appendBy(std::vector<char>& result, std::string word, char endCharacter)
+void Utility::appendBy(std::vector<char> &result, std::string word, char endCharacter)
 {
 	for (int i = 0; i < word.size(); i++)
 	{
@@ -56,7 +56,8 @@ void Utility::appendBy(std::vector<char>& result, std::string word, char endChar
 	result.push_back(endCharacter);
 }
 
-void Utility::appendBy(std::vector<char> &result, std::vector<std::string> words, char wordSeparator, char endCharacter)
+void Utility::appendBy(std::vector<char> &result, std::vector<std::string> words, char wordSeparator, 
+					   char endCharacter)
 {
 	for (int i = 0; i < words.size(); i++)
 	{
@@ -84,7 +85,8 @@ std::vector<std::string> Utility::splitStringOn(std::string str, char delimiter)
 
 std::string Utility::hashToUUIDString(std::string hash)
 {
-	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-" + hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" + hash.substr(20, 12);
+	return hash.substr(0, 8) + "-" + hash.substr(8, 4) + "-" + hash.substr(12, 4) + "-" + hash.substr(16, 4) + "-" +
+		   hash.substr(20, 12);
 }
 
 std::string Utility::uuidStringToHash(std::string uuid)

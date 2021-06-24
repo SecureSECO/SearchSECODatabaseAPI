@@ -90,7 +90,8 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 }
 
-void TcpConnection::readExpectedData(int& size, std::vector<char>& data, std::string& totalData, boost::system::error_code& error)
+void TcpConnection::readExpectedData(int &size, std::vector<char> &data, std::string &totalData,
+									 boost::system::error_code &error)
 {
 	while (size > 0)
 	{

@@ -110,11 +110,6 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		return HTTPStatusCodes::clientError("Error parsing project data.");
 	}
 
-	if (errno != 0)
-	{
-		// Parser version could not be parsed.
-		return HTTPStatusCodes::clientError("Error parsing parser version.");
-	}
 	std::vector<std::string> unchangedFiles;
 	ProjectOut prevProject;
 	bool newProject = true;
@@ -130,17 +125,19 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 		newProject = false;
 		unchangedFiles = Utility::splitStringOn(dataEntries[2], FIELD_DELIMITER_CHAR);
 		prevProject = database->searchForProject(project.projectID, prevVersion);
-		if (errno != 0)
+		if (errno == ERANGE)
 		{
-			if (errno == ERANGE)
-			{
-				return HTTPStatusCodes::serverError("The database does not contain the provided version of the project.");
-			}
-			return HTTPStatusCodes::serverError("An error occurred while trying to locate the previous version of the project.");
+			return HTTPStatusCodes::serverError("The database does not contain the provided version of the project.");
+		}
+		else if (errno != 0)
+		{
+			return HTTPStatusCodes::serverError(
+				"An error occurred while trying to locate the previous version of the project.");
 		}
 	}
 
 	std::queue<MethodIn> methodQueue;
+
 	for (int i = 3; i < dataEntries.size(); i++)
 	{
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
@@ -164,10 +161,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 	{
 		return HTTPStatusCodes::serverError("Unable to upload methods to the database.");
 	}
-	else
-	{
-		return HTTPStatusCodes::success("Your project has been successfully added to the database.");
-	}
+	return HTTPStatusCodes::success("Your project has been successfully added to the database.");
 }
 
 void DatabaseRequestHandler::handleUploadThreads(ProjectIn project, std::queue<MethodIn> methodQueue, bool newProject,
@@ -287,8 +281,9 @@ DatabaseRequestHandler::cartesianProductQueue(std::vector<std::vector<T1>> listT
 }
 
 
-void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, ProjectIn project, 
-												long long prevVersion, long long parserVersion, bool newProject)
+void DatabaseRequestHandler::singleUploadThread(std::queue<MethodIn> &methods, std::mutex &queueLock, 
+												ProjectIn project, long long prevVersion, 
+												long long parserVersion, bool newProject)
 {
 	while (true)
 	{
@@ -352,7 +347,7 @@ ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
 
 	// We return the project information in the form of a Project.
 	ProjectIn project;
-	project.projectID  = Utility::safeStoll(projectData[0]);	// Converts string to long long.
+	project.projectID  = Utility::safeStoll(projectData[0]);
 	if (errno != 0)
 	{
 		return ProjectIn();
@@ -573,7 +568,8 @@ std::vector<ProjectOut> DatabaseRequestHandler::getPrevProjects(std::queue<Proje
 	return projects;
 }
 
-std::vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(std::queue<Hash> &hashes, std::mutex &queueLock)
+std::vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(std::queue<Hash> &hashes,
+																		 std::mutex &queueLock)
 {
 	std::vector<MethodOut> methods;
 	while (true)
@@ -600,30 +596,31 @@ std::vector<MethodOut> DatabaseRequestHandler::singleHashToMethodsThread(std::qu
 	}
 }
 
-std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> methods, char dataDelimiter, char methodDelimiter)
+std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> methods, char dataDelimiter,
+													char methodDelimiter)
 {
 	std::vector<char> chars = {};
 	while (!methods.empty())
 	{
 		MethodOut lastMethod = methods.back();
-		Hash hash						= lastMethod.hash;
-		std::string projectID			= std::to_string(lastMethod.projectID);
-		std::string startVersion		= std::to_string(lastMethod.startVersion);
-		Hash startVersionHash			= lastMethod.startVersionHash;
-		std::string endVersion			= std::to_string(lastMethod.endVersion);
-		Hash endVersionHash				= lastMethod.endVersionHash;
-		std::string name				= lastMethod.methodName;
-		File fileLocation				= lastMethod.fileLocation;
-		std::string lineNumber			= std::to_string(lastMethod.lineNumber);
-		std::vector<AuthorID> authorIDs	= lastMethod.authorIDs;
-		std::string authorTotal			= std::to_string(authorIDs.size());
-		std::string parserVersion		= std::to_string(lastMethod.parserVersion);
+		Hash hash = lastMethod.hash;
+		std::string projectID = std::to_string(lastMethod.projectID);
+		std::string startVersion = std::to_string(lastMethod.startVersion);
+		Hash startVersionHash = lastMethod.startVersionHash;
+		std::string endVersion = std::to_string(lastMethod.endVersion);
+		Hash endVersionHash = lastMethod.endVersionHash;
+		std::string name = lastMethod.methodName;
+		File fileLocation = lastMethod.fileLocation;
+		std::string lineNumber = std::to_string(lastMethod.lineNumber);
+		std::vector<AuthorID> authorIDs = lastMethod.authorIDs;
+		std::string authorTotal = std::to_string(authorIDs.size());
+		std::string parserVersion = std::to_string(lastMethod.parserVersion);
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
 		std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
 												 endVersion, endVersionHash, name,		   fileLocation,
-												 lineNumber, parserVersion,  authorTotal};
+												 lineNumber, parserVersion,	 authorTotal};
 		dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
 
 		// Append 'chars' by the special dataElements separated by special characters.
@@ -632,6 +629,34 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 	}
 	std::string result(chars.begin(), chars.end()); // Converts the vector of chars to a string.
 	return result;
+}
+
+std::string DatabaseRequestHandler::methodToString(MethodOut method, char dataDelimiter, char methodDelimiter,
+												   std::vector<char> &chars)
+{
+	Hash hash = lastMethod.hash;
+	std::string projectID = std::to_string(method.projectID);
+	std::string startVersion = std::to_string(method.startVersion);
+	Hash startVersionHash = method.startVersionHash;
+	std::string endVersion = std::to_string(method.endVersion);
+	Hash endVersionHash = method.endVersionHash;
+	std::string name = method.methodName;
+	File fileLocation = method.fileLocation;
+	std::string lineNumber = std::to_string(method.lineNumber);
+	std::vector<AuthorID> authorIDs = method.authorIDs;
+	std::string authorTotal = std::to_string(authorIDs.size());
+	std::string parserVersion = std::to_string(method.parserVersion);
+
+	// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
+	// authorTotal and all the authorIDs.
+	std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
+											 endVersion, endVersionHash, name,		   fileLocation,
+											 lineNumber, parserVersion,	 authorTotal};
+	dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
+
+	// Append 'chars' by the special dataElements separated by special characters.
+	Utility::appendBy(chars, dataElements, dataDelimiter, methodDelimiter);
+	methods.pop_back();
 }
 
 std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string request)
@@ -647,13 +672,15 @@ std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string req
 		if (projectData.size() < 2)
 		{
 			errno = EILSEQ;
-			return HTTPStatusCodes::clientError("The request failed. Each project should be provided a projectID and a version (in that order).");
+			return HTTPStatusCodes::clientError(
+				"The request failed. Each project should be provided a projectID and a version (in that order).");
 		}
 		ProjectID projectID = Utility::safeStoll(projectData[0]);
 		Version version = Utility::safeStoll(projectData[1]);
 		if (errno != 0)
 		{
-			return HTTPStatusCodes::clientError("The request failed. For each project, both the projectID and the version should be a long long int.");
+			return HTTPStatusCodes::clientError(
+				"The request failed. For each project, both the projectID and the version should be a long long int.");
 		}
 
 		std::pair<ProjectID, Version> key = std::make_pair(projectID, version);
@@ -684,7 +711,8 @@ std::string DatabaseRequestHandler::handlePrevProjectsRequest(std::string reques
 		ProjectID projectID = Utility::safeStoll(projectsData[i]);
 		if (errno != 0)
 		{
-			return HTTPStatusCodes::clientError("The request failed. For each project, the projectID should be a long long int.");
+			return HTTPStatusCodes::clientError(
+				"The request failed. For each project, the projectID should be a long long int.");
 		}
 
 		projectQueue.push(projectID);
@@ -704,7 +732,8 @@ std::string DatabaseRequestHandler::handlePrevProjectsRequest(std::string reques
 }
 
 
-std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::queue<ProjectID> &projectIDs, std::mutex &queueLock)
+std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::queue<ProjectID> &projectIDs,
+																		std::mutex &queueLock)
 {
 	std::vector<ProjectOut> projects;
 	while (true)
@@ -728,7 +757,9 @@ std::vector<ProjectOut> DatabaseRequestHandler::singlePrevProjectThread(std::que
 	}
 }
 
-std::vector<ProjectOut> DatabaseRequestHandler::singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &keys, std::mutex &queueLock)
+std::vector<ProjectOut>
+DatabaseRequestHandler::singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &keys,
+												  std::mutex &queueLock)
 {
 	std::vector<ProjectOut> projects;
 	while (true)
@@ -774,7 +805,8 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 		std::string hashesTotal = std::to_string(hashes.size());
 		std::string parserVersion = std::to_string(projects[i].parserVersion);
 
-		std::vector<std::string> dataElements = {projectID, version, versionHash, license, name, url, ownerID, parserVersion};
+		std::vector<std::string> dataElements = {projectID, version, versionHash, license,
+												 name,		url,	 ownerID,	  parserVersion};
 		Utility::appendBy(chars, dataElements, dataDelimiter, projectDelimiter);
 	}
 	std::string result(chars.begin(), chars.end());
@@ -826,7 +858,6 @@ std::string DatabaseRequestHandler::authorsToString(std::vector<std::pair<Author
 std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 {
 	std::vector<AuthorID> authorIDs = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
-
 	std::regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIDs.size(); i++)
@@ -843,12 +874,10 @@ std::string DatabaseRequestHandler::handleGetAuthorRequest(std::string request)
 	{
 		return HTTPStatusCodes::serverError("Unable to get authors from database.");
 	}
-
 	if (authors.size() <= 0)
 	{
 		return HTTPStatusCodes::success("No results found.");
 	}
-
 	return HTTPStatusCodes::success(authorsToString(authors));
 }
 
@@ -891,7 +920,8 @@ std::vector<std::pair<Author, AuthorID>> DatabaseRequestHandler::getAuthors(std:
 	return authors;
 }
 
-std::vector<std::pair<Author, AuthorID>> DatabaseRequestHandler::singleIDToAuthorThread(std::queue<AuthorID> &authorIDs, std::mutex &queueLock)
+std::vector<std::pair<Author, AuthorID>> DatabaseRequestHandler::singleIDToAuthorThread(std::queue<AuthorID> &authorIDs,
+																						std::mutex &queueLock)
 {
 	std::vector<std::pair<Author, AuthorID>> authors;
 	while (true)
@@ -921,7 +951,6 @@ std::vector<std::pair<Author, AuthorID>> DatabaseRequestHandler::singleIDToAutho
 std::string DatabaseRequestHandler::handleGetMethodsByAuthorRequest(std::string request)
 {
 	std::vector<AuthorID> authorIDs = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
-
 	std::regex re(UUID_REGEX);
 
 	for (int i = 0; i < authorIDs.size(); i++)
@@ -990,7 +1019,8 @@ std::vector<std::pair<MethodID, AuthorID>> DatabaseRequestHandler::getMethodsByA
 	return methods;
 }
 
-std::vector<std::pair<MethodID, AuthorID>> DatabaseRequestHandler::singleAuthorToMethodsThread(std::queue<AuthorID> &authorIDs, std::mutex &queueLock)
+std::vector<std::pair<MethodID, AuthorID>>
+DatabaseRequestHandler::singleAuthorToMethodsThread(std::queue<AuthorID> &authorIDs, std::mutex &queueLock)
 {
 	std::vector<std::pair<MethodID, AuthorID>> methods;
 	while (true)
@@ -1028,8 +1058,7 @@ std::string DatabaseRequestHandler::methodIDsToString(std::vector<std::pair<Meth
 		std::string startVersion = std::to_string(lastMethod.first.startVersion);
 		AuthorID authorID = lastMethod.second;
 
-		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
-		// authorTotal and all the authorIDs.
+		// We initialize dataElements, which consists of the authorID, hash, projectID and startVersion.
 		std::vector<std::string> dataElements = {authorID, hash, projectID, startVersion};
 
 		for (std::string data : dataElements)

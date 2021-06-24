@@ -7,14 +7,16 @@ Utrecht University within the Software Project course.
 #include "HTTPStatus.h"
 #include "RequestHandler.h"
 
-void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, RAFTConsensus* raft, std::string ip, int port)
+void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
+								RAFTConsensus *raft, std::string ip, int port)
 {
 	// Initialise the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
-	jrh  = new JobRequestHandler(raft, this, databaseConnection, ip, port);
+	jrh = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
-std::string RequestHandler::handleRequest(std::string requestType, std::string request, boost::shared_ptr<TcpConnection> connection)
+std::string RequestHandler::handleRequest(std::string requestType, std::string request,
+										  boost::shared_ptr<TcpConnection> connection)
 {
 	ERequestType eRequest = getERequestType(requestType);
 
@@ -22,45 +24,45 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 	std::string result;
 	switch (eRequest)
 	{
-		case eUpload:
-			result = dbrh->handleUploadRequest(request);
-			break;
-		case eCheck:
-			result = dbrh->handleCheckRequest(request);
-			break;
-		case eCheckUpload:
-			result = dbrh->handleCheckUploadRequest(request);
-			break;
-		case eConnect:
-			result = jrh->handleConnectRequest(connection, request);
-			break;
-		case eUploadJob:
-			result = jrh->handleUploadJobRequest(requestType, request);
-			break;
-		case eUploadCrawlData:
-			result = jrh->handleCrawlDataRequest(requestType, request);
-			break;
-		case eGetTopJob:
-			result = jrh->handleGetJobRequest(requestType, request);
-			break;
-		case eExtractProjects:
-			result = dbrh->handleExtractProjectsRequest(request);
-			break;
-		case eGetAuthor:
-			result = dbrh->handleGetAuthorRequest(request);
-			break;
-		case eGetMethodByAuthor:
-			result = dbrh->handleGetMethodsByAuthorRequest(request);
-			break;
-		case eGetPrevProjectsRequest:
-			result = dbrh->handlePrevProjectsRequest(request);
-			break;
-		case eUnknown:
-			result = handleUnknownRequest();
-			break;
-		default:
-			result = handleNotImplementedRequest();
-			break;
+	case eUpload:
+		result = dbrh->handleUploadRequest(request);
+		break;
+	case eCheck:
+		result = dbrh->handleCheckRequest(request);
+		break;
+	case eCheckUpload:
+		result = dbrh->handleCheckUploadRequest(request);
+		break;
+	case eConnect:
+		result = jrh->handleConnectRequest(connection, request);
+		break;
+	case eUploadJob:
+		result = jrh->handleUploadJobRequest(requestType, request);
+		break;
+	case eUploadCrawlData:
+		result = jrh->handleCrawlDataRequest(requestType, request);
+		break;
+	case eGetTopJob:
+		result = jrh->handleGetJobRequest(requestType, request);
+		break;
+	case eExtractProjects:
+		result = dbrh->handleExtractProjectsRequest(request);
+		break;
+	case eGetAuthor:
+		result = dbrh->handleGetAuthorRequest(request);
+		break;
+	case eGetMethodByAuthor:
+		result = dbrh->handleGetMethodsByAuthorRequest(request);
+		break;
+	case eGetPrevProjectsRequest:
+		result = dbrh->handlePrevProjectsRequest(request);
+		break;
+	case eUnknown:
+		result = handleUnknownRequest();
+		break;
+	default:
+		result = handleNotImplementedRequest();
+		break;
 	}
 	return result;
 }

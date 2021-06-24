@@ -32,32 +32,43 @@ class DatabaseRequestHandler
 		/// Handles requests which want to add one project with their corresponding methods to the database.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user. It has the following format (where | is defined as FIELD_DELIMITER_CHAR):
-		/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
+		/// The request made by the user. It has the following format:
+		/// "projectID?version?versionHash?license?project_name?url?owner_name?owner_mail?parserVersion'\n'
 		///  prevVersion'\n'
-		///  unchangedfile1|unchangedfile2|...|unchangedfileM`\n`
-		///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
-		///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+		///  unchangedfile1?unchangedfile2?...?unchangedfileM'\n'
+		///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
+		///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+		/// If you want to upload a new project, the second and third row 
+		/// containing prevVersion and the unchanged files, can be left empty.
 		/// </param>
-		/// <returns> Response towards user after processing the request successfully. </returns>
+		/// <returns> Response towards user after processing the request. </returns>
 		std::string handleUploadRequest(std::string request);
 
 		/// <summary>
 		/// Handles requests wanting to obtain methods with certain hashes.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user, having the following format
-		/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
+		/// The request made by the user, having the following format:
 		/// "hash_1'\n'hash_2'\n'...'\n'hash_N".
 		/// </param>
-		/// <returns> The methods which contain hashes equal to one within the request, in string format. </returns>
+		/// <returns> 
+		/// The methods which contain hashes equal to one within the request. A method is presented as follows:
+		/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
+		///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+		/// Separated methods are separated by '\n'.
+		/// </returns>
 		std::string handleCheckRequest(std::string request);
 
 		/// <summary>
 		/// Handles requests wanting to obtain methods with certain hashes.
 		/// </summary>
 		/// <param name="hashes"> The list of hashes we want to check for. </param>
-		/// <returns> The methods which contain hashes equal to one within the request, in string format. </returns>
+		/// <returns> 
+		/// The methods which contain hashes equal to one within the request. A method is presented as follows: 
+		/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
+		///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+		/// Separated methods are separated by '\n'. 
+		/// </returns>
 		std::string handleCheckRequest(std::vector<Hash> hashes);
 
 		/// <summary>
@@ -65,16 +76,17 @@ class DatabaseRequestHandler
 		/// after which it adds the project itself to the database.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user, having the following format
-		/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-		/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
-		///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
-		///  method1_author1_name|method1_author1_mail|...|method1_authorM_name|method1_authorM_mail'\n'
+		/// The request made by the user, having the following format:
+		/// "projectID?version?versionHash?license?project_name?url?owner_name?owner_mail?parserVersion'\n'
+		///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
+		///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail'\n'
 		///  <method2_data>'\n'...'\n'<methodN_data>".
 		/// </param>
 		/// <returns>
-		/// The methods which contain hashes equal to the one of the hashes
-		/// of the methods within the request, in string format.
+		/// The methods which contain hashes equal to one within the request. A method is presented as follows: 
+		/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
+		///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+		/// Separated methods are separated by '\n'. 
 		/// </returns>
 		std::string handleCheckUploadRequest(std::string request);
 
@@ -82,14 +94,13 @@ class DatabaseRequestHandler
 		/// Handles requests wanting to obtain project data from the database given their projectID and version.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user which has the following format
-		/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
-		/// "projectID_1|version_1'\n'...'\n'projectID_M|version_M".
+		/// The request made by the user which has the following format:
+		/// "projectID_1?version_1'\n'...'\n'projectID_M?version_M".
 		/// </param>
 		/// <returns>
-		/// The relevant projects found in the database in string format as follows:
-		/// "projectID_1|version_1|license_1|project_name_1|url_1|owner_id1'\n'"
-		/// "<project2_data>'\n'...'\n'<projectN_data>".
+		/// The projects found in the database in string format. A project is presented as follows:
+		/// "projectID?version?versionHash?license?project_name?url?owner_id?parserVersion".
+		/// Separated projects are separated by '\n'.
 		/// </returns>
 		std::string handleExtractProjectsRequest(std::string request);
 
@@ -98,14 +109,13 @@ class DatabaseRequestHandler
 		/// projectID.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user which has the following format
-		/// (where | and '\n' are defined as FIELD_DELIMITER_CHAR and ENTRY_DELIMITER_CHAR respectively):
+		/// The request made by the user which has the following format:
 		/// "projectID_1'\n'...'\n'projectID_M".
 		/// </param>
 		/// <returns>
-		/// The relevant projects found in the database in string format as follows:
-		/// "projectID_1|version_1|license_1|project_name_1|url_1|owner_id1'\n'"
-		/// "<project2_data>'\n'...'\n'<projectN_data>".
+		/// The projects found in the database in string format. A project is presented as follows:
+		/// "projectID?version?versionHash?license?project_name?url?owner_id?parserVersion".
+		/// Separated projects are separated by '\n'.
 		/// </returns>
 		std::string handlePrevProjectsRequest(std::string request);
 
@@ -113,14 +123,13 @@ class DatabaseRequestHandler
 		/// Handles a requests for retrieving the authors by the given IDs.
 		/// </summary>
 		/// <param nam'="request">
-		/// The request that contains the author ids with the following format
-		/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
-		/// id_1'\n'id_2'\n'...
+		/// The request that contains the author ids with the following format:
+		/// id_1'\n'...'\n'id_N
 		/// </param>
 		/// <returns>
-		/// A string with the authors retrieved from the database with the following format
-		/// (where | is defined as FIELD_DELIMITER_CHAR):
-		/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
+		/// A string with the authors retrieved from the database. An author is presented as follows:
+		/// "name?mail?id".
+		/// The authors are separated by '\n'.
 		/// </returns>
 		std::string handleGetAuthorRequest(std::string request);
 
@@ -128,14 +137,13 @@ class DatabaseRequestHandler
 		/// Handles requests wanting to obtain methods with certain authors.
 		/// </summary>
 		/// <param name="request">
-		/// The request made by the user, having the following format
-		/// (where '\n' is defined as ENTRY_DELIMITER_CHAR):
+		/// The request made by the user, having the following format:
 		/// "authorID_1'\n'authorID_2'\n'...".
 		/// </param>
 		/// <returns>
-		/// The methods that the given author has worked on with the following format:
-		/// (where | is defined as FIELD_DELIMITER_CHAR):
-		/// authorID_1|hash_1|projectID_1|version_1'\n'authorID_2|hash_2|projectID_2|version_2'\n'...
+		/// The method keys that the given authors have worked on. An entry is presented as follows:
+		/// "authorID?hash?projectID?version".
+		/// Separated entries are separated by '\n'.
 		/// </returns>
 		std::string handleGetMethodsByAuthorRequest(std::string request);
 
@@ -144,8 +152,8 @@ class DatabaseRequestHandler
 		/// Converts a request to a ProjectIn (defined in Types.h).
 		/// </summary>
 		/// <param name="request">
-		/// The relevant data to create the Project. It has the following format:
-		/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion".
+		/// The relevant data to create the project (except hashes). It has the following format:
+		/// "projectID?version?versionHash?license?project_name?url?author_name?author_mail?parserVersion".
 		/// </param>
 		/// <returns> The project containing all data as provided within request. </returns>
 		ProjectIn requestToProject(std::string request);
@@ -154,9 +162,9 @@ class DatabaseRequestHandler
 		/// Converts a data entry to a MethodIn (defined in Types.h).
 		/// </summary>
 		/// <param name="dataEntry">
-		/// The relevant data to create the Method. It has the following format:
-		/// "method_hash|method_name|method_fileLocation|number_of_authors|
-		///  method_author1_name|method_author1_mail|...|method_authorN_name|method_authorN_mail".
+		/// The relevant data to create the method. It has the following format:
+		/// "method_hash?method_name?file?lineNumber?authorTotal?
+		///  author1_name?author1_mail?...?authorN_name?authorN_mail".
 		/// </param>
 		/// <returns> A method containing all data as provided in input. </returns>
 		MethodIn dataEntryToMethod(std::string dataEntry);
@@ -166,11 +174,11 @@ class DatabaseRequestHandler
 		/// </summary>
 		/// <param name="request">
 		/// Represents the request made by the user. It has the following format:
-		/// "projectID|version|license|project_name|url|author_name|author_mail|parserVersion'\n'
-		///  method1_hash|method1_name|method1_fileLocation|method1_lineNumber|method1_numberOfAuthors|
-		///  method1_author1_name|method1_author1_mail|<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+		/// "projectID?version?license?project_name?url?author_name?author_mail?parserVersion'\n'
+		///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
+		///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
 		/// </param>
-		/// <returns> The hashes of the methods given in the requests. </returns>
+		/// <returns> The hashes of the methods given in the requests in a vector. </returns>
 		std::vector<Hash> requestToHashes(std::string request);
 
 		/// <summary>
@@ -213,7 +221,9 @@ class DatabaseRequestHandler
 		/// Retrieves the projects corresponding to the projectKeys given as input (in a queue) using the database.
 		/// </summary>
 		/// <param name="keys"> A queue of pairs of projectIDs and versions. </param>
-		/// <returns> All projects in the database corresponding to one of the keys in the queue 'keys'. </returns>
+		/// <returns>
+		/// A vector of the projects in the database corresponding to one of the keys in the queue 'keys'. 
+		/// </returns>
 		std::vector<ProjectOut> getProjects(std::queue<std::pair<ProjectID, Version>> keys);
 
 	
@@ -233,14 +243,17 @@ class DatabaseRequestHandler
 		std::vector<MethodOut> singleHashToMethodsThread(std::queue<Hash> &hashes, std::mutex &queueLock);
 
 		/// <summary> Handles a single thread of checking hashes with the database. </summary>
-		/// <param name="projectKeyQueue"> The queue with pairs of projectIDs and versions that have to be checked. </param>
+		/// <param name="projectKeyQueue"> 
+		/// The queue with pairs of projectIDs and versions that have to be checked.
+		/// </param>
 		/// <param name="queueLock"> The lock for the queue. </param>
 		/// <returns> The projects found by a single thread inside a vector. </returns>
 		std::vector<ProjectOut> singleSearchProjectThread(std::queue<std::pair<ProjectID, Version>> &projectKeyQueue,
 														  std::mutex &queueLock);
 
 		/// <summary>
-		/// Handles a single thread of checking hashes (of the previous projects for the given versions) with the database.
+		/// Handles a single thread of checking hashes (of the previous projects for the given versions) 
+		/// with the database.
 		/// </summary>
 		/// <param name="hashes"> The queue with hashes that have to be checked. </param>
 		/// <param name="queueLock"> The lock for the queue. </param>
@@ -312,9 +325,9 @@ class DatabaseRequestHandler
 		/// </summary>
 		/// <param name="authors"> A vector of pairs of authors and their corresponding ID. </param>
 		/// <returns>
-		/// A string of the format (where | and '\n' are defined as FIELD_DELIMITER_CHAR and 
+		/// A string of the format (where ? and '\n' are defined as FIELD_DELIMITER_CHAR and 
 		/// ENTRY_DELIMITER_CHAR respectively):
-		/// name_1|mail_1|id_1'\n'name_2|mail_2|id_2'\n'...
+		/// name_1?mail_1?id_1'\n'name_2?mail_2?id_2'\n'...
 		/// </returns>
 		std::string authorsToString(std::vector<std::pair<Author, AuthorID>> authors);
 
@@ -355,15 +368,16 @@ class DatabaseRequestHandler
 		/// </summary>
 		/// <param name="methods"> A vector of pairs containing a method and the corresponding authorID. </param>
 		/// <returns>
-		/// A string of the format (where | and '\n' are defined as FIELD_DELIMITER_CHAR and 
+		/// A string of the format (where ? and '\n' are defined as FIELD_DELIMITER_CHAR and 
 		/// ENTRY_DELIMITER_CHAR respectively):
-		/// authorID_1|hash_1|projectID_1|version_1'\n'authorID_2|hash_2|projectID_2|version_2'\n'...
+		/// authorID_1?hash_1?projectID_1?version_1'\n'authorID_2?hash_2?projectID_2?version_2'\n'...
 		/// <returns>
 		std::string methodIDsToString(std::vector<std::pair<MethodID, AuthorID>> methods);
 
 		/// <summary>
 		/// Calls connect in the DatabaseHandler, if connect fails, it retries as many times as the MAX_RETRIES.
-		/// If it still fails on the last retry, sets the errno to ENETUNREACH, so an exception can be thrown afterwards.
+		/// If it still fails on the last retry, sets the errno to ENETUNREACH, 
+		/// so an exception can be thrown afterwards.
 		/// </summary>
 		/// <param name="ip"> The corresponding ip. </param>
 		/// <param name="port"> The corresponding portnumber. </param>
@@ -394,8 +408,8 @@ class DatabaseRequestHandler
 		/// <summary>
 		/// Tries to obtain the previous/latest version of the relevant project.
 		/// If it succeeds, either returns the project found, or returns an empty project with projectID = -1,
-		/// if there is no such project inside the database. If it still fails on the last retry, it returns an empty project
-		/// (with projectID = -1) and set the errno on ENETUNREACH.
+		/// if there is no such project inside the database. If it still fails on the last retry, 
+		/// it returns an empty project with projectID = -1 and set the errno on ENETUNREACH.
 		/// </summary>
 		/// <param name="projectID"> The projectID of the project to be searched for. </param>
 		/// <returns> The latest version of the project with the provided projectID. </returns>
@@ -471,9 +485,8 @@ class DatabaseRequestHandler
 		/// <param name="listT2">
 		/// A list of elements of type T2. It has the role of container L.
 		/// </param>
-		template <class T1, class T2>
-		std::queue<std::pair<std::vector<T1>, std::vector<T2>>> cartesianProductQueue(std::vector<std::vector<T1>> listT1,
-																					  std::vector<std::vector<T2>> listT2);
+		template <class T1, class T2> std::queue<std::pair<std::vector<T1>, std::vector<T2>>>
+		cartesianProductQueue(std::vector<std::vector<T1>> listT1, std::vector<std::vector<T2>> listT2);
 
 		DatabaseHandler *database;
 };

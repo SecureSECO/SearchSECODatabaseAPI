@@ -49,8 +49,8 @@ TEST(ConnectionHandlerIntegrationTests, basic_request)
 	EXPECT_CALL(handler, handleRequest("chck", input, notnullptrMatcher(nullptr)))
 		.WillOnce(testing::Return(expectedOutput));
 
-	thread =
-		new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, &handler);
+	thread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, 
+							 &handler);
 	usleep(500000); // Just to make sure the listener has started.
 
 	NetworkHandler *networkHandler = NetworkHandler::createHandler();
@@ -93,8 +93,8 @@ TEST(ConnectionHandlerIntegrationTests, basic_in_chunks)
 		.Times(1)
 		.WillOnce(testing::Return(expectedOutput));
 
-	thread =
-		new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, &handler);
+	thread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, 
+							 &handler);
 	usleep(500000); // Just to make sure the listner has started.
 
 	NetworkHandler *networkHandler = NetworkHandler::createHandler();
@@ -129,8 +129,8 @@ TEST(ConnectionHandlerIntegrationTests, too_big_request)
 
 	const std::string expectedOutput = "Request body larger than expected.";
 
-	thread =
-		new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, &handler);
+	thread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, 
+							 &handler);
 	usleep(500000); // Just to make sure the listener has started.
 
 	NetworkHandler *networkHandler = NetworkHandler::createHandler();
@@ -163,8 +163,8 @@ TEST(ConnectionHandlerIntegrationTests, invalid)
 
 	const std::string expectedOutput = "Error parsing command.";
 
-	thread =
-		new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, &handler);
+	thread = new std::thread(&ConnectionHandler::startListen, &listen, nullptr, nullptr, nullptr, TESTCONNECTPORT, 
+							 &handler);
 	usleep(500000); // Just to make sure the listner has started.
 
 	NetworkHandler *networkHandler = NetworkHandler::createHandler();

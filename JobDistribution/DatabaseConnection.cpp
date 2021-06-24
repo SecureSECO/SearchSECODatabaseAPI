@@ -59,15 +59,18 @@ void DatabaseConnection::connect(std::string ip, int port)
 
 void DatabaseConnection::setPreparedStatements()
 {
-	CassFuture *prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue WHERE constant = 1 LIMIT 1");
+	CassFuture *prepareFuture =
+		cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue WHERE constant = 1 LIMIT 1");
 	CassError rc = cass_future_error_code(prepareFuture);
 	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
+	prepareFuture = cass_session_prepare(
+		connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
 	rc = cass_future_error_code(prepareFuture);
 	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
 
-	prepareFuture = cass_session_prepare(connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
+	prepareFuture = cass_session_prepare(
+		connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
 	rc = cass_future_error_code(prepareFuture);
 	preparedUploadJob = cass_future_get_prepared(prepareFuture);
 
@@ -169,6 +172,7 @@ int DatabaseConnection::getNumberOfJobs()
 		cass_future_error_message(resultFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to get number of jobs: '%.*s'\n", (int)messageLength, message);
 		cass_statement_free(query);
+		cass_future_free(resultFuture);
 		errno = ENETUNREACH;
 		return -1;
 	}
