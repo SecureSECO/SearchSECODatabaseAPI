@@ -14,7 +14,7 @@ For running the program using Docker you need the following dependencies install
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker compose](https://docs.docker.com/compose/install/)
 
-If you want to build the program locally in Linux you will need to preform the following commands to get the required dependencies:
+If you want to build the program locally in Linux you will need to perform the following commands to get the required dependencies:
 * `sudo apt-get install libboost-all-dev`
 * `wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb`
 * `sudo dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb`
