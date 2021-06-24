@@ -1,6 +1,3 @@
-
-#project(tests)
-
 cmake_minimum_required (VERSION 3.13)
 
 include(FetchContent)
@@ -19,7 +16,7 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 
-include_directories(../Resources/include)
+include_directories(../external/include)
 
 enable_testing()
 
