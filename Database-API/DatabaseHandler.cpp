@@ -160,7 +160,7 @@ ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version versio
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to search for the project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -205,7 +205,7 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to add the hash to the method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -300,7 +300,7 @@ ProjectOut DatabaseHandler::prevProject(ProjectID projectID)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to get previous project: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to retrieve previous version of project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -478,7 +478,11 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	CassError rc = cass_future_error_code(queryFuture);
 	if (rc != 0)
 	{
-		printf("Unable to insert new method: %s\n", cass_error_desc(rc));
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to insert new method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -515,7 +519,6 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 	}
 
 	cass_statement_bind_collection_by_name(query, "authors", authors);
-
 	cass_collection_free(authors);
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
@@ -525,10 +528,13 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 
 	// This will block until the query has finished.
 	CassError rc = cass_future_error_code(queryFuture);
-
 	if (rc != 0)
 	{
-		printf("Unable to update method: %s\n", cass_error_desc(rc));
+		// Handle error.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to update method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -553,7 +559,7 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(queryFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to get unchanged methods: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to retrieve unchanged methods: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -656,7 +662,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(queryFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to relate the author with the method: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to relate the author to the method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -738,7 +744,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to retrieve the author: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
