@@ -5,7 +5,7 @@ image-build:
     - changes:
         - PipelineDockerfile
   script:
-    - docker build -f PipelineDockerfile -t database-api-ci-image:$CI_COMMIT_REF_NAME .
+    - docker build -f PipelineDockerfile --no-cache -t database-api-ci-image:$CI_COMMIT_REF_NAME .
 
 google-tests:
   image: database-api-ci-image:$CI_COMMIT_REF_NAME

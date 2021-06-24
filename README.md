@@ -1,33 +1,20 @@
-# Usage
+# Database API
+The database API is responsible for handling the communication between the controller and the database.
 
-The database can handle three different requests. Every request has a different four-letter identifier which should be specified in the input. After the identifier the length of the input data should be specified, this is the number of ASCII characters (so `\n` has a length of 1). Following this should be the input data in a specific format, explained below.
-* With the check request you can check if a method or multiple methods are present in the database. If they are present, they will be printed on the command-line. The identifier for this request is `chck`. The data should have the following format: `hash_1\nhash_2\n...\nhash_N\n`, where `hash_i` is the hash of a method you want to match to.
-* With the upload request you can upload or update a project with its specified methods. The identifier for this request is `upld`. The data should have the following format: `projectID?version?license?project_name?url?author_name?author_mail?parserVersion\nprevVersion\nunchangedFile1?unchangedFile2?...?unchangedFileM\nmethod1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?method1_author1_name?method1_author1_mail?<other authors>\n<method2_data>\n...\n<methodN_data>`, where `url` is the URL of the project on GitHub. If you want to upload a new project, you can leave the lines with the `prevVersion` and `unchangedFile1` until `unchangedFileM` completely empty.
-* With the checkupload request you can match the input data to existing entries in the database, matches will show up on the command-line. After this, the project and methods will be added to the database. The identifier for this request is `chup`. The format for the data is the same as for the upload request.
-* With the extractprojects request it is possible to retrieve the information of projects given their `projectID`. The identifier for this request is `extp`. The format for the data is the same as for the check request, although instead of hashes, projectIDs should be provided.
+# Installation
+To install the program you should clone the git repository.
 
-# Running in container
+## Dependencies
+The database api code has the following dependencies:
+* Cassandra
+* Datastax cpp-driver
+* Boost-asio
 
-### Joining
+For running the program using Docker you need the following dependencies installed:
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker compose](https://docs.docker.com/compose/install/)
 
-You can run this program with the database using Docker. For this you will first need to install [Docker](https://docs.docker.com/get-docker/) and [Docker compose](https://docs.docker.com/compose/install/) (Included with Docker desktop on Windows). After this you should clone the repository. You should set the variables in the `.env` file. The _LOC_ is for the location of the data to store, _SEEDS_ is for the ips of the nodes to connect to and the _IP_ is for the public IP-addres of the current computer. In order to be able to have contact with the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have you computer join the distributed database. After this the API should be listening on port `8003` for requests.
-
-### Leaving
-
-To stop the program you should first tell it to leave the database by using `docker exec cassandra nodetool decommision`. After this you can use `docker stop api` and `docker stop cassandra` to stop the containers.
-
-### Running tests
-
-To locally run the tests(including integration tests) you can first use `docker build -f TestingDockerfile -t testing .` in the main folder to build the container. After this you can use `docker run --name testContainer testing` to actually run the tests. This will also generate the code coverage. To copy the code coverage files to a local folder you can use `docker cp testContainer:/build/coverage ./coverage`. After this you can open _index.html_ in the coverage folder to see the code coverage.
-
-# Running seperately
-
-If you don't want to run the program in a docker container you can build and run the API seperately using the instructions below.
-
-### Setting up
-
-To run this project you will need some sort of Ubuntu machine(like a VM).
-You will then have to perform the following commands in a folder that can contain some files:
+If you want to build the program locally in Linux you will need to perform the following commands to get the required dependencies:
 * `sudo apt-get install libboost-all-dev`
 * `wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb`
 * `sudo dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb`
@@ -37,23 +24,46 @@ You will then have to perform the following commands in a folder that can contai
 * `wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb`
 * `dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb`
 
-This will install all the dependencies.
-After this you will need to clone the desired branch.
-You can then use `cmake` and `cmake --build` to run the program.
+## Building
+There are two different ways of building the program. You can simply run it using Docker, this is the easiest if you just want to run the program. The other way is to locally build the program using `cmake` on Linux.
 
-### Building
+### Docker
+In order to start the program using Docker you should first set the variables in the `.env` file. The _LOC_ is for the location of the data to store, _SEEDS_ is for the IP-addresses of the nodes to connect to and the _IP_ is for the public IP-address of the current computer. In order to contact the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have your computer join the distributed database. After this the API should be listening on port `8003` for requests.
 
-This can be done using the following commands in the projects main folder:
+### Linux
+In order to build the program using `cmake` you should preform the following commands:
 * `mkdir build`
 * `cd build`
 * `cmake ..`
 * `cmake --build .`
 
-### Running
+The Database API can then be started using `./Database-API/Database-API`.
 
-After this the program can be run using `./Database-API/Database-API`.
-This will only work when you also have a [Cassandra](https://cassandra.apache.org/doc/latest/getting_started/installing.html) database running on your computer.
+# Usage
 
-For testing you can run the tests after building by using `./Database-API_Test/tests`.
+The database API can handle multiple different requests. Every request has a different four-letter identifier which should be specified in the input. After the identifier the length of the input data should be specified, this is the number of ASCII characters (so `\n` has a length of 1). Following this should be the input data in the specific format required by the request. The database API supports the following requests for uploading to and extracting from the database:
+* The `check` request can be used to check if a method or multiple methods are present in the database.
+* The `upload` request can be used to upload or update a project with its specified methods.
+* The `check upload` request can be used to match the input data to existing entries in the database, matches will show up on the command-line. After this, the project and methods will be added to the database.
+* The `extract projects` request can be used to retrieve the information of projects given their `projectID`.
+* The `get author` request can be used to get the name and email corresponding to an author ID.
+* The `get method by author` request can be used to get the methods that an author has worked on.
+* The `get previous project` request can be used to get the most recent project of a repository in the database.
 
-To generate the code coverage you van use `make coverage` after building using `cmake -DCMAKE_BUILD_TYPE=Debug ..` instead of `cmake ..`. After this there will be an `.html` file inside the coverage folder with detailed information about the code coverage.
+The API also supports the following requests for the job distribution system:
+* The `connect` request can be used to connect a new node to the network.
+* The `upload job` request can be used to upload multiple jobs to the jobsqueue.
+* The `upload crawl data` request can be used to both upload new jobs and update the crawl id.
+* The `get tob job` request can be used to get a job.
+
+### Stopping
+
+To stop the program you should first tell it to leave the distributed database by using `docker exec cassandra nodetool decommision`. After this you can use `docker stop api` and `docker stop cassandra` to stop the containers.
+
+### Running tests
+
+To locally run the tests(including integration tests) you can first use `docker build -f TestingDockerfile -t testing .` in the main folder to build the container. After this you can use `docker run --name testContainer testing` to actually run the tests. This will also generate the code coverage. To copy the code coverage files to a local folder you can use `docker cp testContainer:/build/coverage ./coverage`. After this you can open _index.html_ in the coverage folder to see the code coverage.
+
+# License
+This program has been developed by students from the bachelor Computer Science at Utrecht University within the Software Project course.
+© Copyright Utrecht University (Department of Information and Computing Sciences)
