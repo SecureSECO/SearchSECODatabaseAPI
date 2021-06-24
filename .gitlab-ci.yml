@@ -36,7 +36,7 @@ linting:
   before_script:
     - apt-get -y install clang clang-tidy clang-format
   script:
-    - clang-tidy SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -- 
-      -Iexternal/include/ -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ 
-    - clang SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -Iexternal/include/ 
-      -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ -fsyntax-only
+    - clang-tidy libSearchSECODatabaseAPI/Database-API/*.cpp libSearchSECODatabaseAPI/General/*.cpp libSearchSECODatabaseAPI/JobDistribution/*.cpp -- 
+      -Iexternal/include/ -IlibSearchSECODatabaseAPI/Database-API/ -IlibSearchSECODatabaseAPI/General/ -IlibSearchSECODatabaseAPI/JobDistribution/ 
+    - clang libSearchSECODatabaseAPI/Database-API/*.cpp libSearchSECODatabaseAPI/General/*.cpp libSearchSECODatabaseAPI/JobDistribution/*.cpp -Iexternal/include/ 
+      -IlibSearchSECODatabaseAPI/Database-API/ -IlibSearchSECODatabaseAPI/General/ -IlibSearchSECODatabaseAPI/JobDistribution/ -fsyntax-only
