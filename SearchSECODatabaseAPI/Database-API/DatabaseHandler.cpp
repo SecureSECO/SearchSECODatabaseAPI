@@ -162,7 +162,7 @@ ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version versio
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to search for the project: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to search for project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -207,7 +207,7 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to add the hash to the method: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to add hash to the method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 

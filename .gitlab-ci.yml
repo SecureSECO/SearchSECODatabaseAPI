@@ -25,7 +25,7 @@ google-tests:
     - cd database_build
     - cmake ..
     - cmake --build .
-    - ./Database-API_Test/tests --gtest_output="xml:report.xml"
+    - ./tests/tests --gtest_output="xml:report.xml"
 
 
 linting:
@@ -36,5 +36,5 @@ linting:
   before_script:
     - apt-get -y install clang clang-tidy clang-format
   script:
-    - clang-tidy Database-API/*.cpp General/*.cpp JobDistribution/*.cpp -- -IResources/include/ -IDatabase-API/ -IGeneral/ -IJobDistribution/ 
-    - clang Database-API/*.cpp General/*.cpp JobDistribution/*.cpp -IResources/include/ -IDatabase-API/ -IGeneral/ -IJobDistribution/ -fsyntax-only
+    - clang-tidy SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -- -Iexternal/include/ -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ 
+    - clang SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -Iexternal/include/ -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ -fsyntax-only
