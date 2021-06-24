@@ -37,7 +37,7 @@ In order to build the program using `cmake` you should preform the following com
 * `cmake ..`
 * `cmake --build .`
 
-It can then be started using `./Database-API/Database-API`.
+The Database API can then be started using `./Database-API/Database-API`.
 
 # Usage
 
