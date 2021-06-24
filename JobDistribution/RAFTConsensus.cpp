@@ -374,4 +374,5 @@ std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c
 {
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	return c->getIp() + fieldDelimiter + port;
+}
 

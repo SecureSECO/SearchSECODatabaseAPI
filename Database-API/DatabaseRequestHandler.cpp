@@ -631,34 +631,6 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 	return result;
 }
 
-std::string DatabaseRequestHandler::methodToString(MethodOut method, char dataDelimiter, char methodDelimiter,
-												   std::vector<char> &chars)
-{
-	Hash hash = lastMethod.hash;
-	std::string projectID = std::to_string(method.projectID);
-	std::string startVersion = std::to_string(method.startVersion);
-	Hash startVersionHash = method.startVersionHash;
-	std::string endVersion = std::to_string(method.endVersion);
-	Hash endVersionHash = method.endVersionHash;
-	std::string name = method.methodName;
-	File fileLocation = method.fileLocation;
-	std::string lineNumber = std::to_string(method.lineNumber);
-	std::vector<AuthorID> authorIDs = method.authorIDs;
-	std::string authorTotal = std::to_string(authorIDs.size());
-	std::string parserVersion = std::to_string(method.parserVersion);
-
-	// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
-	// authorTotal and all the authorIDs.
-	std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
-											 endVersion, endVersionHash, name,		   fileLocation,
-											 lineNumber, parserVersion,	 authorTotal};
-	dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
-
-	// Append 'chars' by the special dataElements separated by special characters.
-	Utility::appendBy(chars, dataElements, dataDelimiter, methodDelimiter);
-	methods.pop_back();
-}
-
 std::string DatabaseRequestHandler::handleExtractProjectsRequest(std::string request)
 {
 	errno = 0;
