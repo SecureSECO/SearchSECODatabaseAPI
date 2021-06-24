@@ -1060,3 +1060,58 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 		}
 	}
 }
+
+TEST(DatabaseIntegrationTest, UploadRequestWithMethodInChangedFile)
+{
+	// Set up the test.
+	errno = 0;
+
+	DatabaseHandler database;
+	DatabaseConnection jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+
+	std::vector<char> inputChars = {};
+	Utility::appendBy(inputChars,
+					  {"5", "5000000010000", "55ef8ce63715cd78dcb79b8b79c2d0dde5787fa3", "L5", "P5",
+					   "www.github.com/p5a", "New Author 1", "newauthor1@mail.com", "1"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, "5000000009000", ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"P5/M8.cpp", "P5/M9.cpp"}, FIELD_DELIMITER_CHAR,
+					  ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars,
+					  {"8811e6bedb87e90cef39de1179f3bd2e", "M10a", "P5/M10.cpp", "1", "1", "Special Author 1",
+					   "specialauthor1@mail.com"},
+					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	std::string input(inputChars.begin(), inputChars.end());
+
+	std::string expectedOutput = "Your project has been successfully added to the database.";
+
+	// Test if the output is as expected.
+	std::string output = handler.handleRequest("upld", input, nullptr);
+	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
+
+	// There should be a new project with projectID 5 and version
+	// 5000000010000, with both the unchanged method and the added
+	// method with the correct start- and endVersion.
+	ProjectOut project = database.searchForProject(5, 5000000010000);
+	ASSERT_EQ(project.hashes.size(), 3);
+
+	// Check if the unchanged method in changed file is updated correctly.
+	std::string methodData = handler.handleRequest("chck", "8811e6bedb87e90cef39de1179f3bd2e", nullptr);
+	std::vector<std::string> methodDataEntries =
+		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
+
+	for (int i = 0; i < methodDataEntries.size(); i++)
+	{
+
+		std::vector<std::string> methodDataFields = Utility::splitStringOn(methodDataEntries[0], FIELD_DELIMITER_CHAR);
+		if (methodDataFields[0] == "5")
+		{
+			ASSERT_EQ(methodDataFields[2], "5000000009000"); // Start version.
+			ASSERT_EQ(methodDataFields[4], "5000000010000"); // Updated end version.
+			ASSERT_EQ(methodDataFields[6], "M10a");			 // Updated method name.
+			ASSERT_EQ(methodDataFields[10], "2");			 // Updated number of authors.
+		}
+	}
+}

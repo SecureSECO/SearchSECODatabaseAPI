@@ -69,7 +69,7 @@ void DatabaseHandler::setPreparedStatements()
 
 	// Prepare query used to insert a project into the database.
 	insertProject = prepareStatement("INSERT INTO projectdata.projects (projectID, versiontime, versionhash, license, "
-									 "name, url, ownerid, hashes, parserversion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+									 "name, url, ownerID, hashes, parserversion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 	// Prepare query used to add hashes to a project in the database.
 	addHashesToProject =
@@ -131,6 +131,8 @@ ProjectOut DatabaseHandler::searchForProject(ProjectID projectID, Version versio
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectProject);
+
+	// Bind the variables in the statement.
 	cass_statement_bind_int64_by_name(query, "projectID", projectID);
 	cass_statement_bind_int64_by_name(query, "versiontime", version);
 
@@ -218,6 +220,7 @@ bool DatabaseHandler::addProject(ProjectIn project)
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertProject);
 
+	// Bind the variables in the statement.
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 	cass_statement_bind_int64_by_name(query, "versiontime", project.version);
 	cass_statement_bind_string_by_name(query, "versionhash", project.versionHash.c_str());
@@ -251,8 +254,10 @@ bool DatabaseHandler::addProject(ProjectIn project)
 
 	if (rc != 0)
 	{
-		printf("Query result: %s\n", cass_error_desc(rc));
-		std::cout << cass_error_desc(rc) << std::endl;
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to add project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 		return false;
 	}
@@ -309,6 +314,8 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(addHashesToProject);
+
+	// Bind the variables in the statement.
 	cass_statement_bind_int64_by_name(query, "projectID", project.projectID);
 	cass_statement_bind_int64_by_name(query, "versiontime", project.version);
 
@@ -332,7 +339,10 @@ void DatabaseHandler::addHashToProject(ProjectIn project, int index)
 
 	if (rc != 0)
 	{
-		printf("Query result: %s\n", cass_error_desc(rc));
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to add hash to project: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -356,6 +366,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 
 		std::string hashUUID = Utility::hashToUUIDString(method.hash);
 
+		// Bind the variables in the statement.
 		CassUuid uuid;
 		cass_uuid_from_string(hashUUID.c_str(), &uuid);
 		cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
@@ -430,6 +441,7 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethod);
 
+	// Bind the variables in the statement.
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUUIDString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
@@ -445,6 +457,8 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 
 	int size = method.authors.size();
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
+
+	// For each author of the method, add an entry to the table method_by_author.
 	for (int i = 0; i < size; i++)
 	{
 		CassUuid authorID = createAuthorIfNotExists(method.authors[i]);
@@ -477,13 +491,13 @@ void DatabaseHandler::updateMethod(MethodIn method, ProjectIn project, long long
 
 	CassStatement *query = cass_prepared_bind(updateMethods);
 
+	// Bind the variables in the statement.
 	CassUuid uuid;
 	cass_uuid_from_string(Utility::hashToUUIDString(method.hash).c_str(), &uuid);
 	cass_statement_bind_uuid_by_name(query, "method_hash", uuid);
 	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
 	cass_statement_bind_string_by_name(query, "file", method.fileLocation.c_str());
 	cass_statement_bind_int64_by_name(query, "startversiontime", startVersion);
-
 	cass_statement_bind_int64_by_name(query, "endversiontime", project.version);
 	cass_statement_bind_string_by_name(query, "endversionhash", project.versionHash.c_str());
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
@@ -535,20 +549,11 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 	}
 	else
 	{
-		// Handle error.
+		// An error occurred, which is handled below.
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(queryFuture, &message, &messageLength);
 		fprintf(stderr, "Unable to get unchanged methods: '%.*s'\n", (int)messageLength, message);
-		errno = ENETUNREACH;
-	}
-
-	// This will block until the query has finished.
-	CassError rc = cass_future_error_code(queryFuture);
-
-	if (rc != 0)
-	{
-		printf("Unable to retrieve unchanged methods: %s\n", cass_error_desc(rc));
 		errno = ENETUNREACH;
 	}
 
@@ -595,7 +600,6 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
 
 	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, hashes.size());
-
 	for (int i = 0; i < hashes.size(); i++)
 	{
 		CassUuid hash;
@@ -604,11 +608,9 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 	}
 
 	cass_statement_bind_collection(query, 0, hashesCollection);
-
 	cass_collection_free(hashesCollection);
 
 	CassCollection *filesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, files.size());
-
 	for (int i = 0; i < files.size(); i++)
 	{
 		cass_collection_append_string(filesCollection, files[i].c_str());
@@ -630,6 +632,7 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(insertMethodByAuthor);
 
+	// Bind the variables in the statement.
 	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
 
 	CassUuid uuid;
@@ -649,7 +652,11 @@ void DatabaseHandler::addMethodByAuthor(CassUuid authorID, MethodIn method, Proj
 
 	if (rc != 0)
 	{
-		printf("Query result: %s\n", cass_error_desc(rc));
+		// An error occurred which is handled below.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to relate the author with the method: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -690,7 +697,7 @@ std::vector<MethodID> DatabaseHandler::authorToMethods(std::string authorID)
 		const char *message;
 		size_t messageLength;
 		cass_future_error_message(resultFuture, &message, &messageLength);
-		fprintf(stderr, "Unable to run query: '%.*s'\n", (int)messageLength, message);
+		fprintf(stderr, "Unable to obtain the methods by the author: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 
@@ -746,13 +753,16 @@ CassUuid DatabaseHandler::createAuthorIfNotExists(Author author)
 	CassUuid authorID;
 	cass_uuid_from_string(Utility::hashToUUIDString(author.id).c_str(), &authorID);
 
-	CassStatement *insertQuery2 = cass_prepared_bind(insertAuthorByID);
-	cass_statement_bind_uuid_by_name(insertQuery2, "authorID", authorID);
-	cass_statement_bind_string_by_name(insertQuery2, "name", author.name.c_str());
-	cass_statement_bind_string_by_name(insertQuery2, "mail", author.mail.c_str());
-	cass_session_execute(connection, insertQuery2);
+	CassStatement *query = cass_prepared_bind(insertAuthorByID);
 
-	cass_statement_free(insertQuery2);
+	// Bind the variables in the statement.
+	cass_statement_bind_uuid_by_name(query, "authorID", authorID);
+	cass_statement_bind_string_by_name(query, "name", author.name.c_str());
+	cass_statement_bind_string_by_name(query, "mail", author.mail.c_str());
+
+	cass_session_execute(connection, query);
+
+	cass_statement_free(query);
 
 	return authorID;
 }
@@ -760,6 +770,8 @@ CassUuid DatabaseHandler::createAuthorIfNotExists(Author author)
 ProjectOut DatabaseHandler::getProject(const CassRow *row)
 {
 	ProjectOut project;
+
+	// Retrieve the values of the variables in the row.
 	project.projectID = getInt64(row, "projectID");
 	project.version = getInt64(row, "versiontime");
 	project.versionHash = getString(row, "versionHash");
@@ -774,6 +786,7 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 
 	if (iterator)
 	{
+		// Retrieve the hashes one by one.
 		while (cass_iterator_next(iterator))
 		{
 			char hash[CASS_UUID_STRING_LENGTH];
@@ -794,10 +807,10 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 {
 	MethodOut method;
 
+	// Retrieve the values of the variables in the row.
 	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
 	method.methodName = getString(row, "name");
 	method.fileLocation = getString(row, "file");
-
 	method.lineNumber = getInt32(row, "lineNumber");
 	method.projectID = getInt64(row, "projectID");
 	method.startVersion = getInt64(row, "startversiontime");
@@ -810,6 +823,7 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 	CassIterator *iterator = cass_iterator_from_collection(set);
 	if (iterator)
 	{
+		// Retrieve the authors one by one.
 		while (cass_iterator_next(iterator))
 		{
 			char authorID[CASS_UUID_STRING_LENGTH];
@@ -829,6 +843,8 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 MethodID DatabaseHandler::getMethodID(const CassRow *row)
 {
 	MethodID method;
+
+	// Retrieve the values of the variables in the row.
 	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
 	method.projectID = getInt64(row, "projectid");
 	method.startVersion = getInt64(row, "startversiontime");
