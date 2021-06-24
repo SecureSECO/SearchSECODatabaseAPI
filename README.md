@@ -31,7 +31,7 @@ There are two different ways of building the program. You can simply run it usin
 In order to start the program using Docker you should first set the variables in the `.env` file. The _LOC_ is for the location of the data to store, _SEEDS_ is for the IP-addresses of the nodes to connect to and the _IP_ is for the public IP-address of the current computer. In order to contact the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have your computer join the distributed database. After this the API should be listening on port `8003` for requests.
 
 ### Linux
-In order to build the program using cmake you should preform the following commands:
+In order to build the program using `cmake` you should preform the following commands:
 * `mkdir build`
 * `cd build`
 * `cmake ..`
