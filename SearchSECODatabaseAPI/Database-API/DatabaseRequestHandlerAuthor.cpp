@@ -4,7 +4,14 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "DatabaseRequestHandler.cpp"
+#include "Definitions.h"
+#include "DatabaseRequestHandler.h"
+#include "HTTPStatus.h"
+#include "Utility.h"
+
+#include <future>
+#include <thread>
+#include <regex>
 
 std::string DatabaseRequestHandler::authorsToString(std::vector<std::pair<Author, AuthorID>> authors)
 {

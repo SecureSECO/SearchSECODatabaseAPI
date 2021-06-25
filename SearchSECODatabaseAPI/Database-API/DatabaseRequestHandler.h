@@ -286,16 +286,6 @@ class DatabaseRequestHandler
 								long long prevVersion, long long parserVersion, bool newProject);
 
 		/// <summary>
-		/// A general template for a query to be performed with retries.
-		/// </summary>
-		/// <typeparam name="T"> 
-		/// The output of the query. If no output is given, an empty tuple (std::tuple<>) is used.
-		/// </typeparam>
-		/// <param name="function"> The corresponding query to be performed a single time. </param>
-		/// <returns> Output of the query, which may be an empty tuple. </returns>
-		template <class T> T queryWithRetry(std::function<T()> function);
-
-		/// <summary>
 		/// Handles the threads used to update methods in unchanged files.
 		/// </summary>
 		/// <param name="project"> The project to be added/updated to the database. </param>
@@ -461,6 +451,31 @@ class DatabaseRequestHandler
 		std::vector<MethodID> authorToMethodsWithRetry(AuthorID authorID);
 
 		/// <summary>
+		/// A general template for a query to be performed with retries.
+		/// </summary>
+		/// <typeparam name="T">
+		/// The output of the query. If no output is given, an empty tuple (std::tuple<>) should be used.
+		/// </typeparam>
+		/// <param name="function"> The corresponding query to be performed a single time. </param>
+		/// <returns> Output of the query, which may be an empty tuple. </returns>
+		template <class T> T queryWithRetry(std::function<T()> function)
+		{
+			errno = 0;
+			int retries = 0;
+			T items;
+			do
+			{
+				items = function();
+				retries++;
+			} while (errno != 0 && errno != ERANGE && retries <= MAX_RETRIES);
+			if (retries > MAX_RETRIES)
+			{
+				errno = ENETUNREACH;
+			}
+			return items;
+		};
+
+		/// <summary>
 		/// Splits a list of arbitrary type into multiple chunks of size at most equal to the chunkSize.
 		/// </summary>
 		/// <param name="list">
@@ -469,7 +484,26 @@ class DatabaseRequestHandler
 		/// <param name="chunkSize">
 		/// The maximum size of a single chunk.
 		/// </param>
-		template <class T> std::vector<std::vector<T>> toChunks(std::vector<T> list, int chunkSize);
+		template <class T> std::vector<std::vector<T>> toChunks(std::vector<T> list, int chunkSize)
+		{
+			std::vector<T> currentChunk = {};
+			std::vector<std::vector<T>> chunks = {};
+			for (T element : list)
+			{
+				currentChunk.push_back(element);
+				if (currentChunk.size() >= chunkSize)
+				{
+					chunks.push_back(currentChunk);
+					currentChunk.clear();
+				}
+			}
+			if (currentChunk.size() > 0)
+			{
+				chunks.push_back(currentChunk);
+			}
+
+			return chunks;
+		};
 
 		/// <summary>
 		/// Forms a queue of the elements in the cartesian product of two vectors of type T1 and T2 respectively.
@@ -482,7 +516,19 @@ class DatabaseRequestHandler
 		/// A list of elements of type T2. It has the role of container L.
 		/// </param>
 		template <class T1, class T2> std::queue<std::pair<std::vector<T1>, std::vector<T2>>>
-		cartesianProductQueue(std::vector<std::vector<T1>> listT1, std::vector<std::vector<T2>> listT2);
+		cartesianProductQueue(std::vector<std::vector<T1>> listT1, std::vector<std::vector<T2>> listT2)
+		{
+			std::queue<std::pair<std::vector<T1>, std::vector<T2>>> pairQueue;
+			for (std::vector<T1> elemT1 : listT1)
+			{
+				for (std::vector<T2> elemT2 : listT2)
+				{
+					pairQueue.push(std::make_pair(elemT1, elemT2));
+				}
+			}
+
+			return pairQueue;
+		}
 
 		DatabaseHandler *database;
 };

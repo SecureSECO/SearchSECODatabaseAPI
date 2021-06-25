@@ -4,17 +4,14 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "DatabaseRequestHandler.cpp"
+#include "Definitions.h"
+#include "DatabaseRequestHandler.h"
+#include "HTTPStatus.h"
+#include "Utility.h"
 
-DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
-{
-	this->database = database;
-	connectWithRetry(ip, port);
-	if (errno != 0)
-	{
-		throw "Unable to connect to the database.";
-	}
-}
+#include <future>
+#include <thread>
+#include <regex>
 
 std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request)
 {
@@ -510,15 +507,6 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 	{
 		return result;
 	}
-}
-
-std::tuple<> DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
-{
-	std::function<std::tuple<>()> function = [ip, port, this]() {
-		this->database->connect(ip, port);
-		return std::make_tuple();
-	};
-	return queryWithRetry<std::tuple<>>(function);
 }
 
 bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
