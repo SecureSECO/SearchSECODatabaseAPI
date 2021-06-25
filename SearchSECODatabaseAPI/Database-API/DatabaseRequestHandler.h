@@ -325,8 +325,7 @@ class DatabaseRequestHandler
 		/// </summary>
 		/// <param name="authors"> A vector of pairs of authors and their corresponding ID. </param>
 		/// <returns>
-		/// A string of the format (where ? and '\n' are defined as FIELD_DELIMITER_CHAR and 
-		/// ENTRY_DELIMITER_CHAR respectively):
+		/// A string of the format:
 		/// name_1?mail_1?id_1'\n'name_2?mail_2?id_2'\n'...
 		/// </returns>
 		std::string authorsToString(std::vector<std::pair<Author, AuthorID>> authors);
@@ -368,8 +367,7 @@ class DatabaseRequestHandler
 		/// </summary>
 		/// <param name="methods"> A vector of pairs containing a method and the corresponding authorID. </param>
 		/// <returns>
-		/// A string of the format (where ? and '\n' are defined as FIELD_DELIMITER_CHAR and 
-		/// ENTRY_DELIMITER_CHAR respectively):
+		/// A string of the format:
 		/// authorID_1?hash_1?projectID_1?version_1'\n'authorID_2?hash_2?projectID_2?version_2'\n'...
 		/// <returns>
 		std::string methodIDsToString(std::vector<std::pair<MethodID, AuthorID>> methods);
@@ -461,8 +459,6 @@ class DatabaseRequestHandler
 		/// If it fails, it returns an empty vector and puts errno on ENETUNREACH.
 		/// </summary>
 		std::vector<MethodID> authorToMethodsWithRetry(AuthorID authorID);
-
-		/// NEXT METHODS TO UTILITY IF TIME LEFT.
 
 		/// <summary>
 		/// Splits a list of arbitrary type into multiple chunks of size at most equal to the chunkSize.

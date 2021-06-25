@@ -3,38 +3,40 @@
 project ("Database-API")
 
 add_executable (Database-APIexe
-	"libSearchSECODatabaseAPI/General/Database-API.cpp" "libSearchSECODatabaseAPI/General/Database-API.h"
-	"libSearchSECODatabaseAPI/General/ConnectionHandler.cpp" "libSearchSECODatabaseAPI/General/ConnectionHandler.h"
-	"libSearchSECODatabaseAPI/General/RequestHandler.cpp" "libSearchSECODatabaseAPI/General/RequestHandler.h"
-	"libSearchSECODatabaseAPI/General/Utility.cpp" "libSearchSECODatabaseAPI/General/Utility.h"
-	"libSearchSECODatabaseAPI/General/HTTPStatus.cpp" "libSearchSECODatabaseAPI/General/HTTPStatus.h"
-	"libSearchSECODatabaseAPI/General/Definitions.h"
-	"libSearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
-	"libSearchSECODatabaseAPI/Database-API/Types.h"
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
-	"libSearchSECODatabaseAPI/General/md5/md5.cpp" "libSearchSECODatabaseAPI/General/md5/md5.h"
-	"libSearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "libSearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
-	"libSearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "libSearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
-	"libSearchSECODatabaseAPI/JobDistribution/Networking.cpp" "libSearchSECODatabaseAPI/JobDistribution/Networking.h"
-	"libSearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "libSearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
+	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
+	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
+	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
+	"SearchSECODatabaseAPI/General/HTTPStatus.cpp" "SearchSECODatabaseAPI/General/HTTPStatus.h"
+	"SearchSECODatabaseAPI/General/Definitions.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandlerGet.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandlerSet.cpp"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
+	"SearchSECODatabaseAPI/Database-API/Types.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
+	"SearchSECODatabaseAPI/General/md5/md5.cpp" "SearchSECODatabaseAPI/General/md5/md5.h"
+	"SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
+	"SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
+	"SearchSECODatabaseAPI/JobDistribution/Networking.cpp" "SearchSECODatabaseAPI/JobDistribution/Networking.h"
+	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 add_library(Database-API-library
-	"libSearchSECODatabaseAPI/General/Database-API.cpp" "libSearchSECODatabaseAPI/General/Database-API.h"
-	"libSearchSECODatabaseAPI/General/ConnectionHandler.cpp" "libSearchSECODatabaseAPI/General/ConnectionHandler.h"
-	"libSearchSECODatabaseAPI/General/RequestHandler.cpp" "libSearchSECODatabaseAPI/General/RequestHandler.h"
-	"libSearchSECODatabaseAPI/General/Utility.cpp" "libSearchSECODatabaseAPI/General/Utility.h"
-	"libSearchSECODatabaseAPI/General/HTTPStatus.cpp" "libSearchSECODatabaseAPI/General/HTTPStatus.h"
-	"libSearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
-	"libSearchSECODatabaseAPI/Database-API/Types.h"
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
-	"libSearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
-	"libSearchSECODatabaseAPI/General/md5/md5.cpp" "libSearchSECODatabaseAPI/General/md5/md5.h"
-	"libSearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "libSearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
-	"libSearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "libSearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
-	"libSearchSECODatabaseAPI/JobDistribution/Networking.cpp" "libSearchSECODatabaseAPI/JobDistribution/Networking.h"
-	"libSearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "libSearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
+	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
+	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
+	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
+	"SearchSECODatabaseAPI/General/HTTPStatus.cpp" "SearchSECODatabaseAPI/General/HTTPStatus.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandlerGet.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandlerSet.cpp"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
+	"SearchSECODatabaseAPI/Database-API/Types.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
+	"SearchSECODatabaseAPI/General/md5/md5.cpp" "SearchSECODatabaseAPI/General/md5/md5.h"
+	"SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
+	"SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
+	"SearchSECODatabaseAPI/JobDistribution/Networking.cpp" "SearchSECODatabaseAPI/JobDistribution/Networking.h"
+	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
@@ -42,9 +44,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 include_directories(external/include)
 target_link_libraries(Database-APIexe /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
 
-include_directories("libSearchSECODatabaseAPI/Database-API")
-include_directories("libSearchSECODatabaseAPI/General")
-include_directories("libSearchSECODatabaseAPI/JobDistribution")
+include_directories("SearchSECODatabaseAPI/Database-API")
+include_directories("SearchSECODatabaseAPI/General")
+include_directories("SearchSECODatabaseAPI/JobDistribution")
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 include(external/CodeCoverage.cmake)
