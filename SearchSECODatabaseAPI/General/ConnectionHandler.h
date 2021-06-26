@@ -79,6 +79,7 @@ public:
 	/// Starts the handeling of a request. Takes in the request handler to call.
 	/// </summary>
 	virtual void start(RequestHandler *handler, pointer thisPointer);
+
 protected:
 	/// <summary>
 	/// Constructor. Not public because you need to use the create method.
@@ -111,8 +112,8 @@ public:
 	/// Stops the server.
 	/// </summary>
 	void stop();
-private:
 
+private:
 	/// <summary>
 	/// Starts accepting incoming requests.
 	/// </summary>

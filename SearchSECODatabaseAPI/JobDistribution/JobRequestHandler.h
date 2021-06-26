@@ -23,8 +23,8 @@ public:
 	/// <summary>
 	/// Constructor method.
 	/// </summary>
-  JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, std::string ip,
-					int port);
+	JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, std::string ip,
+					  int port);
 
 	/// <summary>
 	/// Handles request from new node to connect to the network.
@@ -35,7 +35,7 @@ public:
 	/// Handles request to upload one or more jobs with their priorities.
 	/// </summary>
 	/// <param name="data">
-	/// Consists of url and priority pairs, the url and priority are separated by the FIELD_DELIMITER_CHAR ('?') and 
+	/// Consists of url and priority pairs, the url and priority are separated by the FIELD_DELIMITER_CHAR ('?') and
 	/// the pairs by the ENTRY_DELIMITER_CHAR ('\n').
 	/// Data format is "url1?priority1'\n'url2?priority2'\n'..."
 	/// </param>
@@ -84,10 +84,11 @@ public:
 	/// New crawlID.
 	/// </param>
 	void updateCrawlID(int id);
+
 private:
-	RAFTConsensus* raft;
-	RequestHandler* requestHandler;
-	DatabaseConnection* database;
+	RAFTConsensus *raft;
+	RequestHandler *requestHandler;
+	DatabaseConnection *database;
 
 	/// <summary>
 	/// Tries to connect with database, if it fails it retries as many times as MAX_RETRIES.

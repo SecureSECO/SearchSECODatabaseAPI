@@ -38,12 +38,11 @@ enum ERequestType
 class RequestHandler
 {
 public:
-
 	/// <summary>
 	/// Readies the request handler for later usage.
 	/// </summary>
-  virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection, 
-						  RAFTConsensus *raft, std::string ip = IP, int port = DBPORT);
+	virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
+							RAFTConsensus *raft, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -58,15 +57,15 @@ public:
 	/// <returns>
 	/// Response towards user after processing the request successfully.
 	/// </returns>
-  virtual std::string handleRequest(std::string requestType, std::string request,
-									boost::shared_ptr<TcpConnection> connection);
+	virtual std::string handleRequest(std::string requestType, std::string request,
+									  boost::shared_ptr<TcpConnection> connection);
 
-	JobRequestHandler* getJobRequestHandler() 
+	JobRequestHandler *getJobRequestHandler()
 	{
 		return jrh;
-	} 
-private:
+	}
 
+private:
 	/// <summary>
 	/// Handles unknown requests.
 	/// </summary>
@@ -94,6 +93,6 @@ private:
 	/// </returns>
 	ERequestType getERequestType(std::string requestType);
 
-	DatabaseRequestHandler* dbrh;
-	JobRequestHandler* jrh;
+	DatabaseRequestHandler *dbrh;
+	JobRequestHandler *jrh;
 };

@@ -23,25 +23,25 @@ typedef time_t Version;
 /// </summary>
 struct Author
 {
-	public:
-		std::string name;
-		std::string mail;
-		std::string id;
-		Author() : name(""), mail(""), id("")
-		{
-		}
+public:
+	std::string name;
+	std::string mail;
+	std::string id;
+	Author() : name(""), mail(""), id("")
+	{
+	}
 
-		/// <summary>
-		/// Constructs an author with provided name and mail,
-		/// and generates id as the MD5-hash of the concatenated 
-		/// string of name and mail separated by ' '.
-		/// </summary>
-		Author(std::string name, std::string mail) :
-		name(name),
-		mail(mail)
-		{
-			id = md5(name + " " + mail);
-		}
+	/// <summary>
+	/// Constructs an author with provided name and mail,
+	/// and generates id as the MD5-hash of the concatenated 
+	/// string of name and mail separated by ' '.
+	/// </summary>
+	Author(std::string name, std::string mail) :
+	name(name),
+	mail(mail)
+	{
+		id = md5(name + " " + mail);
+	}
 };
 
 
@@ -50,12 +50,12 @@ struct Author
 /// </summary>
 struct MethodIn
 {
-	public:
-		Hash hash;
-		std::string methodName;
-		File fileLocation;
-		int lineNumber;
-		std::vector<Author> authors;
+public:
+	Hash hash;
+	std::string methodName;
+	File fileLocation;
+	int lineNumber;
+	std::vector<Author> authors;
 };
 
 /// <summary>
@@ -64,27 +64,27 @@ struct MethodIn
 /// </summary>
 struct MethodOut
 {
-	public:
-		Hash hash;
-		ProjectID projectID;
-		File fileLocation;
-		Version startVersion;
-		std::string startVersionHash;
-		Version endVersion;
-		std::string endVersionHash;
-		std::string methodName;	
-		int lineNumber;
-		std::vector<AuthorID> authorIDs;
-		long long parserVersion;
+public:
+	Hash hash;
+	ProjectID projectID;
+	File fileLocation;
+	Version startVersion;
+	std::string startVersionHash;
+	Version endVersion;
+	std::string endVersionHash;
+	std::string methodName;	
+	int lineNumber;
+	std::vector<AuthorID> authorIDs;
+	long long parserVersion;
 };
 
 struct MethodID
 {
-	public:
-		Hash hash;
-		ProjectID projectID;
-		File fileLocation;
-		Version startVersion;
+public:
+	Hash hash;
+	ProjectID projectID;
+	File fileLocation;
+	Version startVersion;
 };
 
 /// <summary>
@@ -92,16 +92,16 @@ struct MethodID
 /// </summary>
 struct ProjectIn
 {
-	public:
-		ProjectID projectID;
-		Version version;
-		std::string versionHash;
-		std::string license;
-		std::string name;
-		std::string url;
-		Author owner = Author("","");
-		std::vector<Hash> hashes;
-		long long parserVersion;
+public:
+	ProjectID projectID;
+	Version version;
+	std::string versionHash;
+	std::string license;
+	std::string name;
+	std::string url;
+	Author owner = Author("", "");
+	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 
 /// <summary>
@@ -110,15 +110,15 @@ struct ProjectIn
 /// </summary>
 struct ProjectOut
 {
-	public:
-		ProjectID projectID;
-		Version version;
-		std::string versionHash;
-		std::string license;
-		std::string name;
-		std::string url;
-		AuthorID ownerID;
-		std::vector<Hash> hashes;
-		long long parserVersion;
+public:
+	ProjectID projectID;
+	Version version;
+	std::string versionHash;
+	std::string license;
+	std::string name;
+	std::string url;
+	AuthorID ownerID;
+	std::vector<Hash> hashes;
+	long long parserVersion;
 };
 }

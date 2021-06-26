@@ -37,8 +37,8 @@ public:
 	/// Returns the amount of jobs in the jobs table.
 	/// </summary>
 	virtual int getNumberOfJobs();
-private:
 
+private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
 	/// </summary>

@@ -62,6 +62,7 @@ public:
 	/// </summary>
 	/// <returns>List of ips with port.</returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
+
 private:
 	/// <summary>
 	/// Will try to set up a connection with the leader.
@@ -122,7 +123,6 @@ private:
 	/// </summary>
 	/// <param name="i">The index of the node to be dropped.</param>
 	void dropConnection(int i);
-
 
 	/// <summary>
 	/// Converts a connection to a string that can be used to connect to the other side of the connection.

@@ -39,6 +39,7 @@ public:
 	///	If false, will stop when the connection stops.
 	/// </param>
 	std::string receiveData(bool stopOnNewLine = true);
+
 private:
 	boost::asio::io_context ioContext;
 	/// <summary>
