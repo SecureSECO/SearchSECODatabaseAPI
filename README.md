@@ -54,7 +54,7 @@ The API also supports the following requests for the job distribution system:
 * The `connect` request can be used to connect a new node to the network.
 * The `upload job` request can be used to upload multiple jobs to the jobsqueue.
 * The `upload crawl data` request can be used to both upload new jobs and update the crawl id.
-* The `get tob job` request can be used to get a job.
+* The `get top job` request can be used to get a job.
 
 ### Stopping
 
