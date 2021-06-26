@@ -393,7 +393,7 @@ std::string DatabaseRequestHandler::handlePrevProjectsRequest(std::string reques
 	std::vector<std::string> projectsData = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 	std::queue<ProjectID> projectQueue;
 
-	// We fill the queue with projectKeys, which identify a project uniquely.
+	// We fill the queue with projectIDs to retrieve the latest version of the projects.
 	for (int i = 0; i < projectsData.size(); i++)
 	{
 		ProjectID projectID = Utility::safeStoll(projectsData[i]);

@@ -5,12 +5,16 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "Definitions.h"
 #include "DatabaseHandler.h"
 
 #include <mutex>
 #include <tuple>
 #include <queue>
 #include <functional>
+#include <math.h>
+#include <unistd.h>
+
 
 #define PROJECT_DATA_SIZE 9
 #define METHOD_DATA_MIN_SIZE 5
@@ -456,17 +460,21 @@ class DatabaseRequestHandler
 		/// <typeparam name="T">
 		/// The output of the query. If no output is given, an empty tuple (std::tuple<>) should be used.
 		/// </typeparam>
-		/// <param name="function"> The corresponding query to be performed a single time. </param>
-		/// <returns> Output of the query, which may be an empty tuple. </returns>
-		template <class T> T queryWithRetry(std::function<T()> function)
+		/// <param name="query"> The corresponding query to be performed a single time. </param>
+		/// <returns> Output of the query, which may be an empty tuple (to replace void). </returns>
+		template <class T> T queryWithRetry(std::function<T()> query)
 		{
 			errno = 0;
 			int retries = 0;
 			T items;
 			do
 			{
-				items = function();
-				retries++;
+				items = query();
+				if (errno != 0 && errno != ERANGE)
+				{
+					usleep(pow(2, retries) * RETRY_SLEEP);
+					retries++;
+				}
 			} while (errno != 0 && errno != ERANGE && retries <= MAX_RETRIES);
 			if (retries > MAX_RETRIES)
 			{
@@ -528,7 +536,7 @@ class DatabaseRequestHandler
 			}
 
 			return pairQueue;
-		}
+		};
 
 		DatabaseHandler *database;
 };
