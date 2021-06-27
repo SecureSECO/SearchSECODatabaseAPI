@@ -4,16 +4,13 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-// Controller includes
 #include "Networking.h"
 #include "Definitions.h"
 
-// External includes
 #include <boost/array.hpp>
 #include <iostream>
 
-
-// https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/tutorial.html was used as a base.
+// We used https://www.boost.org/doc/libs/1_75_0/doc/html/boost_asio/tutorial.html as a base.
 
 void NetworkHandler::openConnection(std::string server, std::string port)
 {
