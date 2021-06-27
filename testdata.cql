@@ -1,6 +1,6 @@
 CREATE KEYSPACE IF NOT EXISTS projectData
-    WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
-    
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+	
 CREATE TABLE IF NOT EXISTS projectData.methods
 (
   method_hash UUID,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS projectData.methods
   PRIMARY KEY ((method_hash), projectID, file, startVersionTime)
 )
 WITH CLUSTERING ORDER BY (projectID ASC, file ASC, startVersionTime DESC);
-    
+	
 CREATE TABLE IF NOT EXISTS projectData.projects
 (
   projectID bigint,
@@ -35,33 +35,33 @@ WITH CLUSTERING ORDER BY (versionTime DESC);
 
 CREATE TABLE IF NOT EXISTS projectData.method_by_author
 (
-  authorID UUID,
-  hash UUID,
-  projectID bigint,
-  file text,
-  startVersionTime timestamp,  
-  PRIMARY KEY ((authorID), hash, projectID, file, startVersionTime)
+	authorID UUID,
+	hash UUID,
+	projectID bigint,
+	file text,
+	startVersionTime timestamp,  
+	PRIMARY KEY ((authorID), hash, projectID, file, startVersionTime)
 )
 WITH CLUSTERING ORDER BY (hash ASC, projectID ASC, file ASC, startVersionTime DESC);
 
 CREATE TABLE IF NOT EXISTS projectData.author_by_id
 (
-  authorID UUID,
-  name text,
-  mail text,
-  PRIMARY KEY (authorID)
+	authorID UUID,
+	name text,
+	mail text,
+	PRIMARY KEY (authorID)
 );
 
 CREATE KEYSPACE IF NOT EXISTS jobs
-    WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1' : 1};
-    
+WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1' : 1};
+	
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (
-    jobid UUID,
-    priority bigint,
-    url text,
-    constant int,
-    PRIMARY KEY ((constant), priority, jobid) 
+	jobid UUID,
+	priority bigint,
+	url text,
+	constant int,
+	PRIMARY KEY ((constant), priority, jobid) 
 ) 
 WITH CLUSTERING ORDER BY (priority ASC);
 

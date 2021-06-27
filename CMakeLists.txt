@@ -1,62 +1,65 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
 project ("Database-API")
-# Add source to this project's executable.
+
 add_executable (Database-APIexe
-    "General/Database-API.cpp" "General/Database-API.h"
-    "General/ConnectionHandler.cpp" "General/ConnectionHandler.h"
-    "General/RequestHandler.cpp" "General/RequestHandler.h"
-    "General/Utility.cpp" "General/Utility.h"
-    "General/HTTPStatus.cpp" "General/HTTPStatus.h"
-    "General/Definitions.h"
-    "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
-    "Database-API/Types.h"
-    "Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
-    "General/md5/md5.cpp" "General/md5/md5.h"
-    "JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
-    "JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
-    "JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
-    "JobDistribution/RAFTConsensus.cpp" "JobDistribution/RAFTConsensus.h")
+	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
+	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
+	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
+	"SearchSECODatabaseAPI/General/HTTPStatus.cpp" "SearchSECODatabaseAPI/General/HTTPStatus.h"
+	"SearchSECODatabaseAPI/General/Definitions.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandlerGet.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandlerSet.cpp"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
+	"SearchSECODatabaseAPI/Database-API/Types.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
+	"SearchSECODatabaseAPI/General/md5/md5.cpp" "SearchSECODatabaseAPI/General/md5/md5.h"
+	"SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
+	"SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
+	"SearchSECODatabaseAPI/JobDistribution/Networking.cpp" "SearchSECODatabaseAPI/JobDistribution/Networking.h"
+	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 add_library(Database-API-library
-    "General/Database-API.cpp" "General/Database-API.h"
-    "General/ConnectionHandler.cpp" "General/ConnectionHandler.h"
-    "General/RequestHandler.cpp" "General/RequestHandler.h"
-    "General/Utility.cpp" "General/Utility.h"
-    "General/HTTPStatus.cpp" "General/HTTPStatus.h"
-    "Database-API/DatabaseHandler.cpp" "Database-API/DatabaseHandler.h"
-    "Database-API/Types.h"
-    "Database-API/DatabaseRequestHandler.cpp" "Database-API/DatabaseRequestHandler.h"
-    "General/md5/md5.cpp" "General/md5/md5.h"
-    "JobDistribution/JobRequestHandler.cpp" "JobDistribution/JobRequestHandler.h"
-    "JobDistribution/DatabaseConnection.cpp" "JobDistribution/DatabaseConnection.h"
-    "JobDistribution/Networking.cpp" "JobDistribution/Networking.h"
-    "JobDistribution/RAFTConsensus.cpp" "JobDistribution/RAFTConsensus.h")
+	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
+	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
+	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
+	"SearchSECODatabaseAPI/General/HTTPStatus.cpp" "SearchSECODatabaseAPI/General/HTTPStatus.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandlerGet.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandlerSet.cpp"
+	"SearchSECODatabaseAPI/Database-API/DatabaseHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseHandler.h"
+	"SearchSECODatabaseAPI/Database-API/Types.h"
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerAuthor.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerMethod.cpp" "SearchSECODatabaseAPI/Database-API/DatabaseRequestHandlerProject.cpp" 
+	"SearchSECODatabaseAPI/Database-API/DatabaseRequestHandler.h"
+	"SearchSECODatabaseAPI/General/md5/md5.cpp" "SearchSECODatabaseAPI/General/md5/md5.h"
+	"SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.cpp" "SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h"
+	"SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.cpp" "SearchSECODatabaseAPI/JobDistribution/DatabaseConnection.h"
+	"SearchSECODatabaseAPI/JobDistribution/Networking.cpp" "SearchSECODatabaseAPI/JobDistribution/Networking.h"
+	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 
-include_directories(Resources/include)
+include_directories(external/include)
 target_link_libraries(Database-APIexe /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
 
-include_directories("Database-API")
-include_directories("General")
-include_directories("JobDistribution")
+include_directories("SearchSECODatabaseAPI/Database-API")
+include_directories("SearchSECODatabaseAPI/General")
+include_directories("SearchSECODatabaseAPI/JobDistribution")
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
-include(Resources/CodeCoverage.cmake)
+include(external/CodeCoverage.cmake)
 append_coverage_compiler_flags()
 
 setup_target_for_coverage_lcov(
-        NAME coverage
-        EXECUTABLE tests
-        EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../Database-API_Test/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*")
+		NAME coverage
+		EXECUTABLE tests
+		EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../tests/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # Copy .env file
 configure_file(".env" ".env" COPYONLY)
 
 # Include sub-projects.
-add_subdirectory ("Database-API_Test")
+add_subdirectory ("tests")
