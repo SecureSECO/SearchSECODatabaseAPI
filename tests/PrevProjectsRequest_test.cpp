@@ -18,7 +18,7 @@ Utrecht University within the Software Project course.
 TEST(ExtractPrevProjectsRequestTests, Empty)
 {
 	// Set up the test.
-	errno - 0;
+	errno = 0;
 
 	RequestHandler handler;
 
@@ -182,7 +182,7 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 	std::vector<std::string> entries4 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
-	// Expect the status code to be succesfull.
+	// Expect the status code to be succesful.
 	EXPECT_EQ(HTTPStatusCodes::getCode(output4), HTTPStatusCodes::getCode(HTTPStatusCodes::success("")));
 
 	// Assert that the output contains 3 entries.
