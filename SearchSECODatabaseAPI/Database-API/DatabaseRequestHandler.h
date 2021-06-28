@@ -296,7 +296,8 @@ private:
 	/// <param name="unchangedFiles">
 	/// The files that did not change in comparison with the previous version of the project.
 	/// </param>
-	void handleUpdateUnchangedFilesThreads(ProjectIn project, ProjectOut prevProject, std::vector<File> unchangedFiles);
+	void handleUpdateUnchangedFilesThreads(ProjectIn project, ProjectOut prevProject, 
+										   std::vector<File> unchangedFiles);
 
 	/// <summary>
 	/// Handles a single thread of updating methods in unchanged files.
