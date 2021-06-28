@@ -36,6 +36,7 @@ void DatabaseConnection::connect(std::string ip, int port)
 	if (rc != CASS_OK)
 	{
 		std::cout << "Could not connect to the database." << std::endl;
+		std::cout << "Retrying in 45 seconds.." << std::endl;
 		usleep(45000000);
 		std::cout << "Retrying now." << std::endl;
 
@@ -45,7 +46,7 @@ void DatabaseConnection::connect(std::string ip, int port)
 
 		if (rc != CASS_OK)
 		{
-			// An connection error occurred, which is handled below.
+			// A connection error occurred, which is handled below.
 			const char *message;
 			size_t messageLength;
 			cass_future_error_message(connectFuture, &message, &messageLength);

@@ -42,7 +42,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		{
 			return getTopJobWithRetry();
 		}
-		// If number of jobs is not high enough, the job is to crawl for more jobs.
+		// If the number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
 		{
 			timeLastCrawl = currentTime;
@@ -119,7 +119,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 
 std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data)
 {
-	// If it is the leader, we handle the request, otherwise, we pass it on to the leader.
+	// If this node is the leader, we handle the request, otherwise, the node passes the request on to the leader.
 	if (raft->isLeader())
 	{
 		int id = Utility::safeStoi(data.substr(0, data.find(ENTRY_DELIMITER_CHAR)));

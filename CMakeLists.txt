@@ -55,7 +55,7 @@ append_coverage_compiler_flags()
 setup_target_for_coverage_lcov(
 		NAME coverage
 		EXECUTABLE tests
-		EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../tests/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*" "/${PROJECT_SOURCE_DIR}/General/md5/*")
+		EXCLUDE "/usr/include/*" "${PROJECT_SOURCE_DIR}../tests/*" "${PROJECT_SOURCE_DIR}../build/_deps/*" "${PROJECT_SOURCE_DIR}../_deps/*" "${PROJECT_SOURCE_DIR}../SearchSECODatabaseAPI/General/md5/*")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # Copy .env file

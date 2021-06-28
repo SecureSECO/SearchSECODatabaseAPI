@@ -441,7 +441,7 @@ private:
 
 	/// <summary>
 	/// Tries to get author from the database given an authorID, if it fails it retries as many times as
-	/// MAX_RETRIES. If it succeeds, it returns the author. If it fails, it returns an emprt author and
+	/// MAX_RETRIES. If it succeeds, it returns the author. If it fails, it returns an empty author and
 	/// puts errno on ENETUNREACH.
 	/// </summary>
 	Author idToAuthorWithRetry(AuthorID id);
