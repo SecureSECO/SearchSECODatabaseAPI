@@ -60,7 +60,7 @@ public:
 	/// <summary>
 	/// Reads the given file and gets the ips out of it.
 	/// </summary>
-	/// <returns>List of ips with port.</returns>
+	/// <returns> List of ips with port. </returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
 
 private:
@@ -86,9 +86,10 @@ private:
 	/// <summary>
 	/// Handles the initial data that is send back by the leader.
 	/// </summary>
-	/// <param name="initialData">The initial data. 
-	/// Position 0 is OK, positions 1 and 2 are the ip and port of this node respectively.
-	/// The rest are the other nodes in the network.</param>
+	/// <param name="initialData">
+	/// The initial data. Position 0 is OK, positions 1 and 2 are the ip and port of this node
+	/// respectively. The rest are the other nodes in the network.
+	/// </param>
 	void handleInitialData(std::vector<std::string> initialData);
 
 	/// <summary>
@@ -111,7 +112,7 @@ private:
 	std::string getHeartbeat();
 
 	/// <summary>
-	/// Listens for incomming data on the given connection. Any request received will be handled localy.
+	/// Listens for incoming data on the given connection. Any request received will be handled locally.
 	/// The result of the request will be send back through the connection. This will be done as long
 	/// as the connection stays open.
 	/// </summary>
@@ -121,7 +122,7 @@ private:
 	/// Removes a connection from the list of nodes connected to the leader.
 	/// This method will keep track that the connection has been dropped, so that it can be send in the heartbeat.
 	/// </summary>
-	/// <param name="i">The index of the node to be dropped.</param>
+	/// <param name="i"> The index of the node to be dropped. </param>
 	void dropConnection(int i);
 
 	/// <summary>
