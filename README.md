@@ -72,4 +72,4 @@ This program has been developed by students from the bachelor Computer Science a
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 
 ## Licenses for code from other projects
-* [Cassandra](https://cassandra.apache.org/). The license for Cassandra, Cassandra exporter agent and Datastax cpp driver can be found in [external/LICENSE](external/LICENSE.txt). 
+* [Cassandra](https://cassandra.apache.org/). The license for Cassandra, Cassandra exporter agent and [Datastax cpp driver](https://github.com/datastax/cpp-driver) can be found in [external/LICENSE](external/LICENSE.txt). 
