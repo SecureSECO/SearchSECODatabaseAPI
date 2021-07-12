@@ -19,5 +19,7 @@ public:
 	MOCK_METHOD(void, uploadJob, (std::string url, long long priority), ());
 	MOCK_METHOD(std::string, getTopJob, (), ());
 	MOCK_METHOD(int, getNumberOfJobs, (), ());
+	MOCK_METHOD(int, getCrawlID, (), ());
+	MOCK_METHOD(void, setCrawlID, (int id), ());
 };
 

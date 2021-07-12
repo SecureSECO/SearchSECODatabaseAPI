@@ -230,7 +230,7 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 	int crawlid = Utility::safeStoi(hbSplitted[0]);
 	if (errno == 0) 
 	{
-		requestHandler->getJobRequestHandler()->crawlID = crawlid;
+		requestHandler->getJobRequestHandler()->updateCrawlID(crawlid);
 	}
 	else 
 	{

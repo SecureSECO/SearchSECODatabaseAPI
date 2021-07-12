@@ -38,6 +38,16 @@ public:
 	/// </summary>
 	virtual int getNumberOfJobs();
 
+	/// <summary>
+	/// Returns the current crawl ID in the database.
+	/// </summary>
+	virtual int getCrawlID();
+
+	/// <summary>
+	/// Updates crawl ID in the database.
+	/// </summary>
+	virtual void setCrawlID(int id);
+
 private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
@@ -58,5 +68,7 @@ private:
 	const CassPrepared *preparedDeleteTopJob;
 	const CassPrepared *preparedAmountOfJobs;
 	const CassPrepared *preparedUploadJob;
+	const CassPrepared *preparedCrawlID;
+	const CassPrepared *preparedUpdateCrawlID;
 };
 

@@ -25,7 +25,6 @@ void ConnectionHandler::startListen(DatabaseHandler *databaseHandler, DatabaseCo
 	if (requestHandler == nullptr)
 	{
 		handler = new RequestHandler();
-		raft->start(handler, raft->getIps());
 	}
 	else
 	{
@@ -36,6 +35,7 @@ void ConnectionHandler::startListen(DatabaseHandler *databaseHandler, DatabaseCo
 		boost::asio::io_context ioContext;
 		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
 		this->server = &server;
+		raft->start(handler, raft->getIps());
 		ioContext.run();
 	}
 	catch (std::exception &e)
