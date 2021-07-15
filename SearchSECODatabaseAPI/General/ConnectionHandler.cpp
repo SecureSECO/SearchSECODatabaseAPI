@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "ConnectionHandler.h"
 #include "Utility.h"
+#include "HTTPStatus.h"
 
 #include <boost/array.hpp>
 #include <boost/bind/bind.hpp>
@@ -69,7 +70,7 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 	}
 	if (len < 6)
 	{
-		boost::asio::write(socket_, boost::asio::buffer(std::string("Header too short.")), error);
+		boost::asio::write(socket_, boost::asio::buffer(HTTPStatusCodes::clientError("Header too short.")), error);
 		return;
 	}
 	std::string r(request.begin(), request.begin() + len - 1);
@@ -81,12 +82,13 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 	int size = Utility::safeStoi(length) - (request.size() - len);
 	if (errno != 0)
 	{
-		boost::asio::write(socket_, boost::asio::buffer(std::string("Error parsing command.")), error);
+		boost::asio::write(socket_, boost::asio::buffer(HTTPStatusCodes::clientError("Error parsing command.")), error);
 		return;
 	}
 	if (size < 0)
 	{
-		boost::asio::write(socket_, boost::asio::buffer(std::string("Request body larger than expected.")), error);
+		boost::asio::write(
+			socket_, boost::asio::buffer(HTTPStatusCodes::clientError("Request body larger than expected.")), error);
 		return;
 	}
 	std::vector<char> data(size);
