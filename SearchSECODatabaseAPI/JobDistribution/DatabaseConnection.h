@@ -44,7 +44,7 @@ public:
 	virtual int getCrawlID();
 
 	/// <summary>
-	/// Sets the craw ID in the database to the given value.
+	/// Sets the crawl ID in the database to the given value.
 	/// </summary>
 	virtual void setCrawlID(int id);
 
