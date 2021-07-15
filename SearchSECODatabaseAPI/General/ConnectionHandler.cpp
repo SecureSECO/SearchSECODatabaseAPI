@@ -67,6 +67,11 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 		// The socket was closed before receiving '\n'.
 		return;
 	}
+	if (len < 6)
+	{
+		boost::asio::write(socket_, boost::asio::buffer(std::string("Header too short.")), error);
+		return;
+	}
 	std::string r(request.begin(), request.begin() + len - 1);
 
 	std::cout << r << std::endl;
