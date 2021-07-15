@@ -17,8 +17,8 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *reques
 	this->database = database;
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
-	timeLastRecount = Utility::getCurrentTimeSeconds();
-	crawlID = 0;
+	crawlID = database->getCrawlID();
+	timeLastRecount = Utility::getCurrentTimeSeconds();	
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
@@ -143,6 +143,7 @@ void JobRequestHandler::updateCrawlID(int id)
 {
 	crawlID = id;
 	timeLastCrawl = -1;
+	database->setCrawlID(id);
 }
 
 void JobRequestHandler::connectWithRetry(std::string ip, int port)

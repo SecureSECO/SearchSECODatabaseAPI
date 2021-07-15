@@ -79,6 +79,14 @@ void DatabaseConnection::setPreparedStatements()
 	rc = cass_future_error_code(prepareFuture);
 	preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
 
+	prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.variables WHERE name = 'crawlID'");
+	rc = cass_future_error_code(prepareFuture);
+	preparedCrawlID = cass_future_get_prepared(prepareFuture);
+
+	prepareFuture = cass_session_prepare(connection, "UPDATE jobs.variables SET value = ? WHERE name = 'crawlID'");
+	rc = cass_future_error_code(prepareFuture);
+	preparedUpdateCrawlID = cass_future_get_prepared(prepareFuture);
+
 	cass_future_free(prepareFuture);
 }
 
@@ -176,6 +184,57 @@ int DatabaseConnection::getNumberOfJobs()
 		cass_future_free(resultFuture);
 		errno = ENETUNREACH;
 		return -1;
+	}
+}
+
+int DatabaseConnection::getCrawlID()
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(preparedCrawlID);
+	CassFuture *resultFuture = cass_session_execute(connection, query);
+	if (cass_future_error_code(resultFuture) == CASS_OK)
+	{
+		// Retrieve the result.
+		const CassResult *result = cass_future_get_result(resultFuture);
+		const CassRow *row = cass_result_first_row(result);
+		cass_int32_t id;
+		cass_value_get_int32(cass_row_get_column(row, 1), &id);
+		cass_statement_free(query);
+		cass_future_free(resultFuture);
+		return id;
+	}
+	else
+	{
+		// An error occurred, which is handled below.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to get crawl ID: '%.*s'\n", (int)messageLength, message);
+		cass_statement_free(query);
+		cass_future_free(resultFuture);
+		errno = ENETUNREACH;
+		return 0;
+	}
+}
+
+void DatabaseConnection::setCrawlID(int id)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(preparedUpdateCrawlID);
+	cass_statement_bind_int32_by_name(query, "value", id);
+
+	CassFuture *resultFuture = cass_session_execute(connection, query);
+
+	if (cass_future_error_code(resultFuture) != CASS_OK)
+	{
+		// An error occurred, which is handled below.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to get crawl ID: '%.*s'\n", (int)messageLength, message);
+		cass_statement_free(query);
+		cass_future_free(resultFuture);
+		errno = ENETUNREACH;
 	}
 }
 
