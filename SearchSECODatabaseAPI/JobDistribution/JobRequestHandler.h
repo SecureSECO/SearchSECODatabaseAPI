@@ -32,6 +32,11 @@ public:
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
 
 	/// <summary>
+	/// Handles request for the ip adresses in the network.
+	/// </summary>
+	std::string handleGetIPsRequest(std::string request, std::string data);
+
+	/// <summary>
 	/// Handles request to upload one or more jobs with their priorities.
 	/// </summary>
 	/// <param name="data">

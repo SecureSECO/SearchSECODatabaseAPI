@@ -26,6 +26,23 @@ std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnect
 	return raft->connectNewNode(connection, request);
 }
 
+std::string JobRequestHandler::handleGetIPsRequest(std::string request, std::string data)
+{
+	// If you are the leader, get the ips from the RAFT consensus.
+	if (raft->isLeader())
+	{
+		std::vector<std::string> ips = raft->getCurrentIPs();
+		std::string result;
+		for (std::string ip : ips)
+		{
+			result += ip + ENTRY_DELIMITER_CHAR;
+		}
+		return HTTPStatusCodes::success(result);
+	}
+	// If you are not the leader, pass the request to the leader.
+	return raft->passRequestToLeader(request, data);
+}
+
 std::string JobRequestHandler::handleGetJobRequest(std::string request, std::string data)
 {
 	// If you are the leader, check if there is a job left.

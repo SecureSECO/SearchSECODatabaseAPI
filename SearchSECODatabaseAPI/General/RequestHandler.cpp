@@ -36,6 +36,9 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 	case eConnect:
 		result = jrh->handleConnectRequest(connection, request);
 		break;
+	case eGetIPs:
+		result = jrh->handleGetIPsRequest(requestType, request);
+		break;
 	case eUploadJob:
 		result = jrh->handleUploadJobRequest(requestType, request);
 		break;
@@ -94,6 +97,10 @@ ERequestType RequestHandler::getERequestType(std::string requestType)
 	else if (requestType == "conn")
 	{
 		return eConnect;
+	}
+	else if (requestType == "gtip")
+	{
+		return eGetIPs;
 	}
 	else if (requestType == "upjb")
 	{

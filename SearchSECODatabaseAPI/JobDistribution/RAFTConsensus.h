@@ -63,6 +63,12 @@ public:
 	/// <returns> List of ips with port. </returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
 
+	/// <summary>
+	/// Returns the ips currently know to this api.
+	/// </summary>
+	/// <returns> List of ips with port. </returns>
+	virtual std::vector<std::string> getCurrentIPs();
+
 private:
 	/// <summary>
 	/// Will try to set up a connection with the leader.

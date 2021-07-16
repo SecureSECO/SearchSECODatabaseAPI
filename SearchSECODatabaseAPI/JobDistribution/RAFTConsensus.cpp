@@ -39,22 +39,44 @@ std::vector<std::pair<std::string, std::string>> RAFTConsensus::getIps(std::stri
 		return {};
 	}
 	std::string line;
+	int total = 0;
+	std::vector<std::pair<std::string, std::string>> output = {};
 	while (std::getline(fileHandler, line)) 
 	{
 		auto lineSplitted = Utility::splitStringOn(line, '=');
 		if (lineSplitted.size() >= 2 && lineSplitted[0] == "SEEDS") 
 		{
-			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');
-			std::vector<std::pair<std::string, std::string>> output = {};
+			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');			
 			for (std::string ip : ipsSplitted) 
 			{
 				output.push_back(std::pair<std::string, std::string>(ip, std::to_string(PORT)));
 			}
-			return output;
+			total++;
+		}
+		else if (lineSplitted.size() >= 2 && lineSplitted[0] == "IP")
+		{
+			myIp = lineSplitted[1];
+			myPort = std::to_string(PORT);
+			output.push_back(std::pair<std::string, std::string>(lineSplitted[1], std::to_string(PORT)));
+			total++;
 		}
 	}
-	std::cout << "No SEEDS entry found in .env file or SEEDS entry was empty." << std::endl;
-	return {};
+	if (total < 2)
+	{
+		std::cout << "No SEEDS or IP entry found in .env file or SEEDS or IP entry was empty." << std::endl;
+	}
+	return output;
+}
+
+std::vector<std::string> RAFTConsensus::getCurrentIPs()
+{
+	std::vector<std::string> result = std::vector<std::string>();
+	for (auto ip : *others)
+	{
+		result.push_back(connectionToString(ip.first, ip.second));
+	}
+	result.push_back(myIp + FIELD_DELIMITER_CHAR + myPort);
+	return result;
 }
 
 void RAFTConsensus::start(RequestHandler* requestHandler, 

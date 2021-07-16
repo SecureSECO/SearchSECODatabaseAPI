@@ -24,6 +24,7 @@ enum ERequestType
 	eCheck,
 	eCheckUpload,
 	eConnect,
+	eGetIPs,
 	eUploadJob,
 	eUploadCrawlData,
 	eGetTopJob,
