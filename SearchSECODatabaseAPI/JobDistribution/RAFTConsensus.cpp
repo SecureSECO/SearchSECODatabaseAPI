@@ -57,7 +57,6 @@ std::vector<std::pair<std::string, std::string>> RAFTConsensus::getIps(std::stri
 		{
 			myIp = lineSplitted[1];
 			myPort = std::to_string(PORT);
-			output.push_back(std::pair<std::string, std::string>(lineSplitted[1], std::to_string(PORT)));
 			total++;
 		}
 	}
@@ -154,8 +153,8 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	networkhandler->openConnection(ip, port);
 
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	networkhandler->sendData("conn" + std::to_string(1 + std::to_string(PORT).length()) + entryDelimiter +
-							 std::to_string(PORT) + entryDelimiter);
+	networkhandler->sendData("conn" + std::to_string(2 + std::to_string(PORT).length() + myIp.length()) + entryDelimiter +
+							 myIp + FIELD_DELIMITER_CHAR + std::to_string(PORT) + entryDelimiter);
 
 	response = networkhandler->receiveData();
 	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);

@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
+
 using namespace types;
 
 /// <summary>
@@ -20,5 +21,6 @@ public:
 	MOCK_METHOD(bool, isLeader, (), ());
 	MOCK_METHOD(std::string, passRequestToLeader, (std::string requestType, std::string request), ());
 	MOCK_METHOD(std::string, connectNewNode, (boost::shared_ptr<TcpConnection> connection, std::string request), ());
+	MOCK_METHOD(std::vector<std::string>, getCurrentIPs, (), ());
 };
 
