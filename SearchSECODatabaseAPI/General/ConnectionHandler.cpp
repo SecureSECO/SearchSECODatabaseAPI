@@ -161,9 +161,3 @@ void TcpServer::stop()
 	stopped = true;
 	acceptor_.cancel();
 }
-
-
-std::string TcpConnection::getIp() 
-{
-	return socket_.remote_endpoint().address().to_string();
-}

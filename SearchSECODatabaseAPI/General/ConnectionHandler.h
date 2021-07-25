@@ -66,11 +66,6 @@ public:
 	}
 
 	/// <summary>
-	/// Gets the ip of the other side of this connection.
-	/// </summary>
-	virtual std::string getIp();
-
-	/// <summary>
 	/// Sends the given data to the other side of the connection.
 	/// </summary>
 	virtual void sendData(const std::string &data, boost::system::error_code &error);

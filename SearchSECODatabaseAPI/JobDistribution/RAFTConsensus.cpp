@@ -39,22 +39,43 @@ std::vector<std::pair<std::string, std::string>> RAFTConsensus::getIps(std::stri
 		return {};
 	}
 	std::string line;
+	int total = 0;
+	std::vector<std::pair<std::string, std::string>> output = {};
 	while (std::getline(fileHandler, line)) 
 	{
 		auto lineSplitted = Utility::splitStringOn(line, '=');
 		if (lineSplitted.size() >= 2 && lineSplitted[0] == "SEEDS") 
 		{
-			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');
-			std::vector<std::pair<std::string, std::string>> output = {};
+			auto ipsSplitted = Utility::splitStringOn(lineSplitted[1], ',');			
 			for (std::string ip : ipsSplitted) 
 			{
 				output.push_back(std::pair<std::string, std::string>(ip, std::to_string(PORT)));
 			}
-			return output;
+			total++;
+		}
+		else if (lineSplitted.size() >= 2 && lineSplitted[0] == "IP")
+		{
+			myIp = lineSplitted[1];
+			myPort = std::to_string(PORT);
+			total++;
 		}
 	}
-	std::cout << "No SEEDS entry found in .env file or SEEDS entry was empty." << std::endl;
-	return {};
+	if (total < 2)
+	{
+		std::cout << "No SEEDS or IP entry found in .env file or SEEDS or IP entry was empty." << std::endl;
+	}
+	return output;
+}
+
+std::vector<std::string> RAFTConsensus::getCurrentIPs()
+{
+	std::vector<std::string> result = std::vector<std::string>();
+	for (auto ip : *others)
+	{
+		result.push_back(connectionToString(ip));
+	}
+	result.push_back(myIp + FIELD_DELIMITER_CHAR + myPort);
+	return result;
 }
 
 void RAFTConsensus::start(RequestHandler* requestHandler, 
@@ -62,7 +83,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler,
 	bool assumeLeader) 
 {
 	started = true;
-	others = new std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>();
+	others = new std::vector<Connection>();
 	leader = true;
 	this->requestHandler = requestHandler;
 	if (!assumeLeader) 
@@ -132,8 +153,8 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	networkhandler->openConnection(ip, port);
 
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	networkhandler->sendData("conn" + std::to_string(1 + std::to_string(PORT).length()) + entryDelimiter +
-							 std::to_string(PORT) + entryDelimiter);
+	networkhandler->sendData("conn" + std::to_string(2 + std::to_string(PORT).length() + myIp.length()) + entryDelimiter +
+							 myIp + FIELD_DELIMITER_CHAR + std::to_string(PORT) + entryDelimiter);
 
 	response = networkhandler->receiveData();
 	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);
@@ -195,24 +216,26 @@ std::string RAFTConsensus::connectNewNode(boost::shared_ptr<TcpConnection> conne
 	{
 		request = request.substr(0, request.length() - 1);
 
+		std::vector<std::string> splitted = Utility::splitStringOn(request, FIELD_DELIMITER_CHAR);
+
 		mtx.lock();
 		std::string initialData = "";
 		for (auto con : *others) 
 		{
-			initialData += fieldDelimiter + connectionToString(con.first, con.second);
+			initialData += fieldDelimiter + connectionToString(con);
 		}
-
-		others->push_back(std::pair<boost::shared_ptr<TcpConnection>, std::string>(connection, request));
+		Connection conn = Connection(connection, splitted[0], splitted[1]);
+		others->push_back(conn);
 		if(nodeConnectionChange != "") 
 		{
 			nodeConnectionChange += fieldDelimiter;
 		}
-		nodeConnectionChange += "A" + fieldDelimiter + connectionToString(connection, request);
+		nodeConnectionChange += "A" + fieldDelimiter + connectionToString(conn);
 
 		mtx.unlock();
 		new std::thread(&RAFTConsensus::listenForRequests, this, connection);
 
-		std::string connectingIp = fieldDelimiter + connectionToString(connection, request);
+		std::string connectingIp = fieldDelimiter + connectionToString(conn);
 
 		return std::string(RESPONSE_OK) + connectingIp + initialData + entryDelimiter;
 	}
@@ -307,7 +330,7 @@ void RAFTConsensus::heartbeatSender()
 		{
 			try 
 			{
-				boost::shared_ptr<TcpConnection> connection = others->at(i).first;
+				boost::shared_ptr<TcpConnection> connection = others->at(i).connection;
 				
 				connection->sendData(data, error);
 				if (error)
@@ -332,12 +355,12 @@ void RAFTConsensus::dropConnection(int i)
 {
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
-	std::pair<boost::shared_ptr<TcpConnection>, std::string> c = others->at(i);
+	Connection c = others->at(i);
 	if(nodeConnectionChange != "") 
 	{
 		nodeConnectionChange += fieldDelimiter;
 	}
-	nodeConnectionChange += "R" + fieldDelimiter + connectionToString(c.first, c.second);
+	nodeConnectionChange += "R" + fieldDelimiter + connectionToString(c);
 
 	(*others)[i] = (*others)[others->size()-1];
 	others->pop_back();
@@ -370,9 +393,9 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 	}
 }
 
-std::string RAFTConsensus::connectionToString(boost::shared_ptr<TcpConnection> c, std::string port)
+std::string RAFTConsensus::connectionToString(Connection connection)
 {
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
-	return c->getIp() + fieldDelimiter + port;
+	return connection.ip + fieldDelimiter + connection.port;
 }
 

@@ -19,6 +19,22 @@ Utrecht University within the Software Project course.
 class TcpConnection;
 class RequestHandler;
 
+/// <summary>
+/// Represents the data of a connection with another node.
+/// </summary>
+struct Connection
+{
+  public:
+	boost::shared_ptr<TcpConnection> connection;
+	std::string ip;
+	std::string port;
+
+	Connection(boost::shared_ptr<TcpConnection> conn, std::string ip, std::string port)
+		: connection(conn), ip(ip), port(port)
+	{
+	}
+};
+
 class RAFTConsensus
 {
 public:
@@ -62,6 +78,12 @@ public:
 	/// </summary>
 	/// <returns> List of ips with port. </returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
+
+	/// <summary>
+	/// Returns the ips currently know to this api.
+	/// </summary>
+	/// <returns> List of ips with port. </returns>
+	virtual std::vector<std::string> getCurrentIPs();
 
 private:
 	/// <summary>
@@ -128,7 +150,7 @@ private:
 	/// <summary>
 	/// Converts a connection to a string that can be used to connect to the other side of the connection.
 	/// </summary>
-	std::string connectionToString(boost::shared_ptr<TcpConnection> connection, std::string port);
+	std::string connectionToString(Connection connection);
 
 	bool leader;
 	bool stop = false;
@@ -141,7 +163,7 @@ private:
 	std::vector<std::pair<std::string, std::string>> nonLeaderNodes;
 
 	// Leader variables.
-	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;
+	std::vector<Connection>* others;
 	RequestHandler* requestHandler;
 	std::string nodeConnectionChange = "";
 };
