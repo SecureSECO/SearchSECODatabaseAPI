@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #pragma once
 #include "Definitions.h"
 #include "DatabaseHandler.h"
+#include "Statistics.h"
 
 #include <mutex>
 #include <tuple>
@@ -30,7 +31,7 @@ Utrecht University within the Software Project course.
 class DatabaseRequestHandler
 {
 public:
-	DatabaseRequestHandler(DatabaseHandler *database, std::string ip = IP, int port = DBPORT);
+	DatabaseRequestHandler(DatabaseHandler *database, Statistics *stats, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles requests which want to add one project with their corresponding methods to the database.
@@ -46,7 +47,7 @@ public:
 	/// containing prevVersion and the unchanged files, can be left empty.
 	/// </param>
 	/// <returns> Response towards user after processing the request. </returns>
-	std::string handleUploadRequest(std::string request);
+	std::string handleUploadRequest(std::string request, std::string client);
 
 	/// <summary>
 	/// Handles requests wanting to obtain methods with certain hashes.
@@ -92,7 +93,7 @@ public:
 	///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
 	/// Separated methods are separated by '\n'.
 	/// </returns>
-	std::string handleCheckUploadRequest(std::string request);
+	std::string handleCheckUploadRequest(std::string request, std::string client);
 
 	/// <summary>
 	/// Handles requests wanting to obtain project data from the database given their projectID and version.
@@ -150,6 +151,13 @@ public:
 	/// Separated entries are separated by '\n'.
 	/// </returns>
 	std::string handleGetMethodsByAuthorRequest(std::string request);
+
+	/// <summary>
+	/// Retrieves the extension from the passed file name.
+	/// </summary>
+	/// <param name="file"> The file name to get the extension of.</param>
+	/// <returns> The extension of the file.</returns>
+	std::string getExtension(std::string file);
 
 private:
 	/// <summary>
@@ -539,4 +547,5 @@ private:
 	};
 
 	DatabaseHandler *database;
+	Statistics *stats;
 };

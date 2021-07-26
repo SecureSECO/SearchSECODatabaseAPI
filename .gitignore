@@ -356,3 +356,4 @@ ASALocalRun/
 healthchecksdb
 /out/build/x64-Debug
 /coverage
+/stats

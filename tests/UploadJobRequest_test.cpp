@@ -23,7 +23,7 @@ TEST(UploadJobRequest, SingleJob)
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
@@ -33,7 +33,7 @@ TEST(UploadJobRequest, SingleJob)
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue."));
 }
@@ -48,7 +48,7 @@ TEST(UploadJobRequest, MultipleJobs)
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
@@ -61,7 +61,7 @@ TEST(UploadJobRequest, MultipleJobs)
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/nlohmann/json/issues/1573", 2)).Times(1);
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue."));
 
 }
@@ -76,7 +76,7 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
@@ -86,7 +86,7 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 0)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result,
 			  HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue."));
 }
@@ -101,7 +101,7 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
@@ -114,7 +114,7 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, uploadJob("https://github.com/nlohmann/json/issues/1573", 0)).Times(0);
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result,
 			  HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue."));
 }

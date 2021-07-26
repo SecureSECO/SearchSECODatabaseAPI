@@ -8,14 +8,14 @@ Utrecht University within the Software Project course.
 #include "RequestHandler.h"
 
 void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
-								RAFTConsensus *raft, std::string ip, int port)
+								RAFTConsensus *raft, Statistics *stats, std::string ip, int port)
 {
 	// Initialise the requestHandlers.
-	dbrh = new DatabaseRequestHandler(databaseHandler, ip, port);
+	dbrh = new DatabaseRequestHandler(databaseHandler, stats, ip, port);
 	jrh = new JobRequestHandler(raft, this, databaseConnection, ip, port);
 }
 
-std::string RequestHandler::handleRequest(std::string requestType, std::string request,
+std::string RequestHandler::handleRequest(std::string requestType, std::string client, std::string request,
 										  boost::shared_ptr<TcpConnection> connection)
 {
 	ERequestType eRequest = getERequestType(requestType);
@@ -25,13 +25,13 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string r
 	switch (eRequest)
 	{
 	case eUpload:
-		result = dbrh->handleUploadRequest(request);
+		result = dbrh->handleUploadRequest(request, client);
 		break;
 	case eCheck:
 		result = dbrh->handleCheckRequest(request);
 		break;
 	case eCheckUpload:
-		result = dbrh->handleCheckUploadRequest(request);
+		result = dbrh->handleCheckUploadRequest(request, client);
 		break;
 	case eConnect:
 		result = jrh->handleConnectRequest(connection, request);

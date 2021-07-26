@@ -28,7 +28,7 @@ TEST(ExtractProjectsRequestTests, Empty)
 	std::string expected1 = "No results found.";
 
 	// Check if the output is correct.
-	std::string output1 = handler.handleRequest("extp", input1, nullptr);
+	std::string output1 = handler.handleRequest("extp", "", input1, nullptr);
 	ASSERT_EQ(output1, HTTPStatusCodes::success(expected1));
 }
 
@@ -42,7 +42,7 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID2 = 1;
 	Version version2 = 5000000000000;
@@ -71,7 +71,7 @@ TEST(ExtractProjectsRequestTests, SingleExistingProject)
 	EXPECT_CALL(database, searchForProject(projectID2, version2)).WillOnce(testing::Return(p2));
 
 	// Check if the output is correct.
-	std::string output2 = handler.handleRequest("extp", input2, nullptr);
+	std::string output2 = handler.handleRequest("extp", "", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
 
@@ -85,7 +85,7 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID3 = 1;
 	Version version3 = 5000000001000;
@@ -100,7 +100,7 @@ TEST(ExtractProjectsRequestTests, SingleNonExistingProject)
 	EXPECT_CALL(database, searchForProject(projectID3, version3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, p3));
 
 	// Check if the output is correct.
-	std::string output3 = handler.handleRequest("extp", input3, nullptr);
+	std::string output3 = handler.handleRequest("extp", "", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
 
@@ -114,7 +114,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID4_1 = 2;
 	Version version4_1 = 5000000001000;
@@ -190,7 +190,7 @@ TEST(ExtractProjectsRequestTests, MultipleProjects)
 		.WillOnce(testing::SetErrnoAndReturn(ERANGE, project4_2));
 	EXPECT_CALL(database, searchForProject(projectID4_3, version4_3)).WillOnce(testing::Return(project4_3));
 	EXPECT_CALL(database, searchForProject(projectID4_4, version4_4)).WillOnce(testing::Return(project4_4));
-	std::string output4 = handler.handleRequest("extp", input4, nullptr);
+	std::string output4 = handler.handleRequest("extp", "", input4, nullptr);
 	std::vector<std::string> entries4 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
@@ -221,7 +221,7 @@ TEST(ExtractProjectsRequestTests, TooFewArguments)
 		"The request failed. Each project should be provided a projectID and a version (in that order).";
 
 	// Check if the output is correct.
-	std::string output5 = handler.handleRequest("extp", input5, nullptr);
+	std::string output5 = handler.handleRequest("extp", "", input5, nullptr);
 	ASSERT_EQ(output5, HTTPStatusCodes::clientError(expected5));
 }
 
@@ -240,7 +240,7 @@ TEST(ExtractProjectsRequestTests, WrongArgumentTypes)
 		"The request failed. For each project, both the projectID and the version should be a long long int.";
 
 	// Check if the output is correct.
-	std::string output6 = handler.handleRequest("extp", input6, nullptr);
+	std::string output6 = handler.handleRequest("extp", "", input6, nullptr);
 	ASSERT_EQ(output6, HTTPStatusCodes::clientError(expected6));
 }
 

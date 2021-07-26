@@ -12,6 +12,7 @@ Utrecht University within the Software Project course.
 #include "RAFTConsensus.h"
 #include "HTTPStatus.h"
 #include "Utility.h"
+#include "StatisticsMock.cpp"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -28,9 +29,9 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::string input1 = "2c7f46d4f57cf9e66b03213358c7ddb5";
 
@@ -43,7 +44,7 @@ TEST(DatabaseIntegrationTest, CheckRequestSingleHash)
 	std::string expectedOutput1(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output1 = handler.handleRequest("chck", input1, nullptr);
+	std::string output1 = handler.handleRequest("chck", "", input1, nullptr);
 	ASSERT_EQ(output1, HTTPStatusCodes::success(expectedOutput1));
 }
 
@@ -56,13 +57,13 @@ TEST(DatabaseIntegrationTest, CheckRequestUnknownHash)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr, TEST_IP, TEST_PORT);
 
 	std::string input2 = "cb2b9a64f153e3947c5dafff0ce48949";
 	std::string expectedOutput2 = "No results found.";
 
 	// Test if the output is as expected.
-	std::string output2 = handler.handleRequest("chck", input2, nullptr);
+	std::string output2 = handler.handleRequest("chck", "", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
 }
 
@@ -74,9 +75,9 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> input3Chars = {};
 	Utility::appendBy(input3Chars, {"8811e6bedb87e90cef39de1179f3bd2e", "137fed017b6159acc0af30d2c6b403a5"},
@@ -112,7 +113,7 @@ TEST(DatabaseIntegrationTest, CheckRequestMultipleHashes)
 	std::vector<std::string> expectedOutputs3 = {expectedOutput3_1, expectedOutput3_2, expectedOutput3_3};
 
 	// Test if the output is as expected.
-	std::string output3 = handler.handleRequest("chck", input3, nullptr);
+	std::string output3 = handler.handleRequest("chck", "", input3, nullptr);
 	std::vector<std::string> entries3 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output3), ENTRY_DELIMITER_CHAR);
 
@@ -137,7 +138,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(
@@ -195,7 +196,7 @@ TEST(DatabaseIntegrationTest, CheckRequestComplete)
 												 expectedOutput4_1_2, expectedOutput4_3};
 
 	// Test if the output is as expected.
-	std::string output4 = handler.handleRequest("chck", input4, nullptr);
+	std::string output4 = handler.handleRequest("chck", "", input4, nullptr);
 	std::vector<std::string> entries4 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
@@ -219,9 +220,10 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -241,11 +243,11 @@ TEST(DatabaseIntegrationTest, UploadRequestOneMethod)
 	std::string unexpectedOutput5_2 = "No results found.";
 
 	// Test if the output is as expected.
-	std::string output5_1 = handler.handleRequest("upld", input5_1, nullptr);
+	std::string output5_1 = handler.handleRequest("upld", "", input5_1, nullptr);
 	ASSERT_EQ(output5_1, HTTPStatusCodes::success(expectedOutput5_1));
 
 	// Test if the method from the project is actually in the database.
-	std::string output5_2 = handler.handleRequest("chck", input5_2, nullptr);
+	std::string output5_2 = handler.handleRequest("chck", "", input5_2, nullptr);
 	ASSERT_NE(output5_2, HTTPStatusCodes::success(unexpectedOutput5_2));
 }
 
@@ -257,9 +259,10 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -291,11 +294,11 @@ TEST(DatabaseIntegrationTest, UploadRequestMultipleMethods)
 	std::string expectedOutput6 = "Your project has been successfully added to the database.";
 
 	// Test if the output is as expected.
-	std::string output6_1 = handler.handleRequest("upld", input6_1, nullptr);
+	std::string output6_1 = handler.handleRequest("upld", "", input6_1, nullptr);
 	ASSERT_EQ(output6_1, HTTPStatusCodes::success(expectedOutput6));
 
 	// Test properties the data in the database should satisfy by doing a check request.
-	std::string output6_2 = handler.handleRequest("chck", input6_2, nullptr);
+	std::string output6_2 = handler.handleRequest("chck", "", input6_2, nullptr);
 
 	// Test if the output has the right number of entries (which should be 3).
 	std::string output6_2_message = HTTPStatusCodes::getMessage(output6_2);
@@ -330,9 +333,10 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -360,7 +364,7 @@ TEST(DatabaseIntegrationTest, CheckUploadRequestKnownHash)
 	std::string expectedOutput7(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output7 = handler.handleRequest("chup", input7, nullptr);
+	std::string output7 = handler.handleRequest("chup", "", input7, nullptr);
 	ASSERT_EQ(output7, HTTPStatusCodes::success(expectedOutput7));
 }
 
@@ -372,9 +376,9 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -396,7 +400,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestMultipleAuthor)
 	std::string expectedOutput2(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("idau", request, nullptr);
+	std::string output = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_TRUE(output == HTTPStatusCodes::success(expectedOutput1) ||
 				output == HTTPStatusCodes::success(expectedOutput2));
 }
@@ -409,15 +413,15 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestUnknownAuthor)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::string request = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280";
 	std::string expectedOutput = "No results found.";
 
 	// Test if the request is implemented correctly.
-	std::string output = handler.handleRequest("idau", request, nullptr);
+	std::string output = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
@@ -429,9 +433,9 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280"},
@@ -444,7 +448,7 @@ TEST(DatabaseIntegrationTest, GetAuthorRequestSingleUnknownAuthor)
 	std::string expectedOutput(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("idau", request, nullptr);
+	std::string output = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
@@ -456,9 +460,9 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleID)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::string input = "41ab7373-8f24-4a03-83dc-621036d99f34";
 
@@ -469,7 +473,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestSingleID)
 	std::string expectedOutput(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("aume", input, nullptr);
+	std::string output = handler.handleRequest("aume", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
@@ -481,15 +485,15 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestUnknownID)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::string input = "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280";
 	std::string expectedOutput = "No results found.";
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("aume", input, nullptr);
+	std::string output = handler.handleRequest("aume", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
 
@@ -501,9 +505,9 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIDs)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -529,7 +533,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIDs)
 	std::string output3(outputChars.begin(), outputChars.end());
 
 	// Test if the output is as expected.
-	std::string result = handler.handleRequest("aume", input, nullptr);
+	std::string result = handler.handleRequest("aume", "", input, nullptr);
 
 	EXPECT_EQ(result.size(), HTTPStatusCodes::success(output1).size() + output2.size() + output3.size());
 	EXPECT_TRUE(result.find(output1) != std::string::npos);
@@ -545,9 +549,9 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIDsOneMatch)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"41ab7373-8f24-4a03-83dc-621036d99f34", "9e7eb5f5-2ff7-47ab-bfa0-4038e4afa280"},
@@ -561,7 +565,7 @@ TEST(DatabaseIntegrationTest, MethodByAuthorRequestMultipleIDsOneMatch)
 	std::string expectedOutput(outputChars.begin(), outputChars.end());
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("aume", input, nullptr);
+	std::string output = handler.handleRequest("aume", "", input, nullptr);
 
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 }
@@ -575,9 +579,9 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1", "5000000000000"},
@@ -592,7 +596,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleExistingProject)
 	std::string expected9(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output9 = handler.handleRequest("extp", input9, nullptr);
+	std::string output9 = handler.handleRequest("extp", "", input9, nullptr);
 	ASSERT_EQ(output9, HTTPStatusCodes::success(expected9));
 }
 
@@ -604,9 +608,9 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -615,7 +619,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestSingleNonExistingProject)
 	std::string expected10 = "No results found.";
 
 	// Test if the output is as expected.
-	std::string output10 = handler.handleRequest("extp", input10, nullptr);
+	std::string output10 = handler.handleRequest("extp", "", input10, nullptr);
 	ASSERT_EQ(output10, HTTPStatusCodes::success(expected10));
 }
 
@@ -626,10 +630,10 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"101", "5000000008000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -655,7 +659,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestOneProjectMultipleVersions)
 	std::vector<std::string> expectedOutputs11 = {expectedOutput11_1, expectedOutput11_2};
 
 	// Test if the output is as expected.
-	std::string output11 = handler.handleRequest("extp", input11, nullptr);
+	std::string output11 = handler.handleRequest("extp", "", input11, nullptr);
 	std::vector<std::string> entries11 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output11), ENTRY_DELIMITER_CHAR);
 
@@ -676,10 +680,10 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"2", "5000000001000"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -715,7 +719,7 @@ TEST(DatabaseIntegrationTest, ExtractProjectsRequestDifferentProjects)
 	std::vector<std::string> expectedOutputs12 = {expectedOutput12_1, expectedOutput12_2, expectedOutput12_3};
 
 	// Test if the output is as expected.
-	std::string output12 = handler.handleRequest("extp", input12, nullptr);
+	std::string output12 = handler.handleRequest("extp", "", input12, nullptr);
 	std::vector<std::string> entries12 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
 
@@ -739,10 +743,10 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestSingleExistingProject)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"1"},
@@ -757,7 +761,7 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestSingleExistingProject)
 	std::string expected9(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output9 = handler.handleRequest("gppr", input9, nullptr);
+	std::string output9 = handler.handleRequest("gppr", "", input9, nullptr);
 	ASSERT_EQ(output9, HTTPStatusCodes::success(expected9));
 }
 
@@ -768,10 +772,10 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestSingleNonExistingProject)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"7864535641"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -780,7 +784,7 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestSingleNonExistingProject)
 	std::string expected10 = "No results found.";
 
 	// Test if the output is as expected.
-	std::string output10 = handler.handleRequest("gppr", input10, nullptr);
+	std::string output10 = handler.handleRequest("gppr", "", input10, nullptr);
 	ASSERT_EQ(output10, HTTPStatusCodes::success(expected10));
 }
 
@@ -791,10 +795,10 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestOneProjectMultipleVersions)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, "101", ENTRY_DELIMITER_CHAR);
@@ -808,7 +812,7 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestOneProjectMultipleVersions)
 	std::string expected(expectedChars.begin(), expectedChars.end());
 
 	// Test if the output is as expected.
-	std::string output11 = handler.handleRequest("gppr", input11, nullptr);
+	std::string output11 = handler.handleRequest("gppr", "", input11, nullptr);
 	ASSERT_EQ(output11, HTTPStatusCodes::success(expected));
 }
 
@@ -819,10 +823,10 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 	errno = 0;
 
 	DatabaseHandler database;
-	RAFTConsensus raftConsensus;
+	RAFTConsensus raftConsensus(nullptr);
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus, TEST_IP, TEST_PORT);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"17938729387"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -858,7 +862,7 @@ TEST(DatabaseIntegrationTest, PrevProjectsRequestDifferentProjects)
 	std::vector<std::string> expectedOutputs12 = {expectedOutput12_1, expectedOutput12_2, expectedOutput12_3};
 
 	// Test if the output is as expected.
-	std::string output12 = handler.handleRequest("gppr", input12, nullptr);
+	std::string output12 = handler.handleRequest("gppr", "", input12, nullptr);
 	std::vector<std::string> entries12 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output12), ENTRY_DELIMITER_CHAR);
 
@@ -882,7 +886,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -901,7 +906,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 	std::string expectedOutput = "Your project has been successfully added to the database.";
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("upld", input, nullptr);
+	std::string output = handler.handleRequest("upld", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	// There should be a new project with projectID 1 and version
@@ -909,7 +914,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithoutUnchangedFiles)
 	ProjectOut project = database.searchForProject(1, 5000000002000);
 	ASSERT_EQ(project.hashes.size(), 1);
 
-	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::string methodData = handler.handleRequest("chck", "", input2, nullptr);
 	std::vector<std::string> methodDataEntries =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
@@ -929,7 +934,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -948,7 +954,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 	std::string expectedOutput = "Your project has been successfully added to the database.";
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("upld", input, nullptr);
+	std::string output = handler.handleRequest("upld", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	// There should be a new project with projectID 1 and version
@@ -958,7 +964,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 	ASSERT_EQ(project.hashes.size(), 2);
 
 	// First check if the added method contains the correct start- and endVersion.
-	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::string methodData = handler.handleRequest("chck", "", input2, nullptr);
 	std::vector<std::string> methodDataEntries =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
@@ -970,7 +976,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithUnchangedFile)
 	ASSERT_EQ(methodDataFields[4], "5000000010000");
 
 	// Now also check if the unchanged method contained the correct start- and endVersion.
-	methodData = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
+	methodData = handler.handleRequest("chck", "", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	for (int i = 0; i < methodDataEntries.size(); i++)
@@ -992,7 +998,8 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -1015,7 +1022,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 	std::string expectedOutput = "Your project has been successfully added to the database.";
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("upld", input, nullptr);
+	std::string output = handler.handleRequest("upld", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	// There should be a new project with projectID 1 and version
@@ -1025,7 +1032,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 	ASSERT_EQ(project.hashes.size(), 3);
 
 	// First check if the added method contains the correct start- and endVersion.
-	std::string methodData = handler.handleRequest("chck", input2, nullptr);
+	std::string methodData = handler.handleRequest("chck", "", input2, nullptr);
 	std::vector<std::string> methodDataEntries =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
@@ -1037,7 +1044,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 	ASSERT_EQ(methodDataFields[4], "5000000020000");
 
 	// Now also check if the unchanged methods contain the correct start- and endVersion.
-	methodData = handler.handleRequest("chck", input3, nullptr);
+	methodData = handler.handleRequest("chck", "", input3, nullptr);
 	methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	for (int i = 0; i < methodDataEntries.size(); i++)
@@ -1050,7 +1057,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 		}
 	}
 
-	methodData = handler.handleRequest("chck", input4, nullptr);
+	methodData = handler.handleRequest("chck", "", input4, nullptr);
 	methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	for (int i = 0; i < methodDataEntries.size(); i++)
@@ -1064,7 +1071,7 @@ TEST(DatabaseIntegrationTest, UploadRequestUpdateProjectWithBothChangedAndUnchan
 	}
 
 	// Finally, check that a method inside a changed file contains the correct start- and endVersion.
-	methodData = handler.handleRequest("chck", input5, nullptr);
+	methodData = handler.handleRequest("chck", "", input5, nullptr);
 	methodDataEntries = Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 
 	for (int i = 0; i < methodDataEntries.size(); i++)
@@ -1086,7 +1093,8 @@ TEST(DatabaseIntegrationTest, UploadRequestWithMethodInChangedFile)
 	DatabaseHandler database;
 	DatabaseConnection jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr, TEST_IP, TEST_PORT);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats, TEST_IP, TEST_PORT);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars,
@@ -1105,7 +1113,7 @@ TEST(DatabaseIntegrationTest, UploadRequestWithMethodInChangedFile)
 	std::string expectedOutput = "Your project has been successfully added to the database.";
 
 	// Test if the output is as expected.
-	std::string output = handler.handleRequest("upld", input, nullptr);
+	std::string output = handler.handleRequest("upld", "", input, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::success(expectedOutput));
 
 	// There should be a new project with projectID 5 and version
@@ -1115,7 +1123,7 @@ TEST(DatabaseIntegrationTest, UploadRequestWithMethodInChangedFile)
 	ASSERT_EQ(project.hashes.size(), 3);
 
 	// Check if the unchanged method in changed file is updated correctly.
-	std::string methodData = handler.handleRequest("chck", "8811e6bedb87e90cef39de1179f3bd2e", nullptr);
+	std::string methodData = handler.handleRequest("chck", "", "8811e6bedb87e90cef39de1179f3bd2e", nullptr);
 	std::vector<std::string> methodDataEntries =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(methodData), ENTRY_DELIMITER_CHAR);
 

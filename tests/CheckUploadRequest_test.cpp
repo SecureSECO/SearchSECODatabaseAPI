@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "Definitions.h"
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "StatisticsMock.cpp"
 #include "JDDatabaseMock.cpp"
 #include "HTTPStatus.h"
 #include "Utility.h"
@@ -44,7 +45,8 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	MockStatistics stats;
+	handler.initialize(&database, &jddatabase, nullptr, &stats);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars,
@@ -102,7 +104,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, hashToMethods("a6aa62503e2ca3310e3a837502b80df5")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("chup", request, nullptr);
+	std::string result = handler.handleRequest("chup", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
@@ -128,6 +130,6 @@ TEST(CheckUploadRequest, HashConversionError)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("chup", request, nullptr);
+	std::string result = handler.handleRequest("chup", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing hashes."));
 }

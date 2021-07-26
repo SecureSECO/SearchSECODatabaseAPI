@@ -118,6 +118,12 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 	return method;
 }
 
+std::string DatabaseRequestHandler::getExtension(std::string file)
+{
+	size_t loc = file.find_last_of('.');
+	return file.substr(loc, file.size());
+}
+
 std::string DatabaseRequestHandler::handleCheckRequest(std::string request)
 {
 	std::vector<Hash> hashes = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);

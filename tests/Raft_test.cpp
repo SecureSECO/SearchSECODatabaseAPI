@@ -34,9 +34,9 @@ TEST(RaftTests, BecomeLeader)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler raftHandler;
-	raftHandler.initialize(&database, &jddatabase, nullptr);
+	raftHandler.initialize(&database, &jddatabase, nullptr, nullptr);
 	{
-		RAFTConsensus raft;
+		RAFTConsensus raft(nullptr);
 		raft.start(&raftHandler, {{TEST_IP, "-1"}}, false);
 
 		ASSERT_TRUE(raft.isLeader());
@@ -53,11 +53,11 @@ TEST(RaftTests, AcceptConnection)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
-		RAFTConsensus raft;
+		RAFTConsensus raft(nullptr);
 		raft.start(&handler, {}, true);
 
 		ASSERT_TRUE(raft.isLeader());
@@ -82,11 +82,11 @@ TEST(RaftTests, GetCurrentIPs)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 
 	TcpConnectionMock *connMock = new TcpConnectionMock(ioCon);
 	{
-		RAFTConsensus raft;
+		RAFTConsensus raft(nullptr);
 		raft.start(&handler, {}, true);
 
 		ASSERT_TRUE(raft.isLeader());
@@ -111,7 +111,7 @@ TEST(RaftTests, ReadIpsFromFile)
 	// Set up the test.
 	errno = 0;
 
-	RAFTConsensus raft;
+	RAFTConsensus raft(nullptr);
 	
 	auto ips = raft.getIps("dotenvTestfile.txt");
 	std::string port = std::to_string(PORT);

@@ -26,14 +26,14 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(3));
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";
 	std::string request = "";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -45,7 +45,7 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 
 	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	std::string result2 = handler.handleRequest(requestType, request, nullptr);
+	std::string result2 = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> input2Chars = {};
 	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
@@ -69,14 +69,14 @@ TEST(GetJobRequest, EnoughJobsTest)
 	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(550));
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";
 	std::string request = "";
 
 	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
@@ -100,14 +100,14 @@ TEST(GetJobRequest, NoJobsTest)
 	RequestHandler handler;
 
 	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(0));
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";
 	std::string request = "";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -118,7 +118,7 @@ TEST(GetJobRequest, NoJobsTest)
 	ASSERT_EQ(result, HTTPStatusCodes::success(input));
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	std::string result2 = handler.handleRequest(requestType, request, nullptr);
+	std::string result2 = handler.handleRequest(requestType, "", request, nullptr);
 
 	// Check if the second output is correct.
 	ASSERT_EQ(result2, HTTPStatusCodes::success("NoJob"));

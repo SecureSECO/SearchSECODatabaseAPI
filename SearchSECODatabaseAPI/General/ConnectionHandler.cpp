@@ -21,7 +21,8 @@ ConnectionHandler::~ConnectionHandler()
 }
 
 void ConnectionHandler::startListen(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
-									RAFTConsensus *raft, int port, RequestHandler *requestHandler)
+									RAFTConsensus *raft, Statistics *stats, int port,
+									RequestHandler *requestHandler)
 {
 	if (requestHandler == nullptr)
 	{
@@ -34,9 +35,10 @@ void ConnectionHandler::startListen(DatabaseHandler *databaseHandler, DatabaseCo
 	try
 	{
 		boost::asio::io_context ioContext;
-		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port);
+		std::vector<std::pair<std::string, std::string>> ips = raft->getIps();
+		TcpServer server(ioContext, databaseHandler, databaseConnection, raft, handler, port, stats);
 		this->server = &server;
-		raft->start(handler, raft->getIps());
+		raft->start(handler, ips);
 		ioContext.run();
 	}
 	catch (std::exception &e)
@@ -56,7 +58,7 @@ void TcpConnection::sendData(const std::string &data, boost::system::error_code 
 	boost::asio::write(socket_, boost::asio::buffer(data), error);
 }
 
-void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
+void TcpConnection::start(RequestHandler *handler, pointer thisPointer, Statistics *stats)
 {
 	
 	std::vector<char> request = std::vector<char>();
@@ -68,15 +70,19 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 		// The socket was closed before receiving '\n'.
 		return;
 	}
-	if (len < 6)
+	std::string r(request.begin(), request.begin() + len - 1);
+
+	std::cout << r << std::endl;
+	std::vector<std::string> header = Utility::splitStringOn(r, FIELD_DELIMITER_CHAR);
+	if (header.size() < 3)
 	{
 		boost::asio::write(socket_, boost::asio::buffer(HTTPStatusCodes::clientError("Header too short.")), error);
 		return;
 	}
-	std::string r(request.begin(), request.begin() + len - 1);
 
-	std::cout << r << std::endl;
-	std::string length = r.substr(4);
+	stats->requestCounter->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).Increment();
+	stats->latestRequest->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).SetToCurrentTime();
+	std::string length = header[2];
 	std::string totalData(request.begin() + len, request.end());
 
 	int size = Utility::safeStoi(length) - (request.size() - len);
@@ -93,7 +99,8 @@ void TcpConnection::start(RequestHandler* handler, pointer thisPointer)
 	}
 	std::vector<char> data(size);
 	readExpectedData(size, data, totalData, error);
-	std::string result = handler->handleRequest(r.substr(0, 4), totalData, thisPointer);
+	std::string result = handler->handleRequest(header[0], header[1], totalData, thisPointer);
+	stats->newRequest = true;
 	boost::asio::write(socket_, boost::asio::buffer(result), error);
 }
 
@@ -123,12 +130,13 @@ TcpServer::TcpServer(boost::asio::io_context& ioContext,
 	DatabaseHandler* databaseHandler, 
 	DatabaseConnection* databaseConnection, 
 	RAFTConsensus* raft, RequestHandler* handler, 
-	int port)
+	int port, Statistics *stats)
 	: ioContext_(ioContext),
-	acceptor_(ioContext, tcp::endpoint(tcp::v4(), port))
+	acceptor_(ioContext, tcp::endpoint(tcp::v4(), port)), stats(stats)
 {
 	this->handler = handler;
-	handler->initialize(databaseHandler, databaseConnection, raft);
+	stats->myIP = raft->getMyIP();
+	handler->initialize(databaseHandler, databaseConnection, raft, stats);
 	startAccept();
 }
 
@@ -141,8 +149,7 @@ void TcpServer::startAccept()
 			boost::asio::placeholders::error));
 }
 
-void TcpServer::handleAccept(TcpConnection::pointer newConnection,
-	const boost::system::error_code& error)
+void TcpServer::handleAccept(TcpConnection::pointer newConnection, const boost::system::error_code &error)
 {
 	if (stopped) 
 	{
@@ -151,7 +158,7 @@ void TcpServer::handleAccept(TcpConnection::pointer newConnection,
 	startAccept();
 	if (!error)
 	{
-		new std::thread(&TcpConnection::start, newConnection, handler, newConnection);
+		new std::thread(&TcpConnection::start, newConnection, handler, newConnection, stats);
 	}
 
 }

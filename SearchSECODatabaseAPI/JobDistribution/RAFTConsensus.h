@@ -6,10 +6,12 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "Networking.h"
+#include "Statistics.h"
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <mutex>
+#include <prometheus/counter.h>
 
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
@@ -39,6 +41,10 @@ class RAFTConsensus
 {
 public:
 	~RAFTConsensus();
+
+	RAFTConsensus(Statistics *stats) : stats(stats)
+	{
+	}
 
 	/// <summary>
 	/// Starts RAFT. Will try to connect to a set list of IP's where we assume the leaders are.
@@ -84,6 +90,15 @@ public:
 	/// </summary>
 	/// <returns> List of ips with port. </returns>
 	virtual std::vector<std::string> getCurrentIPs();
+
+	/// <summary>
+	/// Gets the ip of this node.
+	/// </summary>
+	/// <returns>The own ip address. </returns>
+	virtual std::string getMyIP()
+	{
+		return myIp;
+	}
 
 private:
 	/// <summary>
@@ -156,6 +171,7 @@ private:
 	bool stop = false;
 	bool started = false;
 	std::mutex mtx;
+	Statistics *stats;
 
 	// Non-leader variables.
 	NetworkHandler* networkhandler;

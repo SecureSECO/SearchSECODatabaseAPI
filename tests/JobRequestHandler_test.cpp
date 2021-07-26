@@ -20,6 +20,6 @@ TEST(GeneralTest, InitializeJobTest)
 	MockJDDatabase jddatabase;
 
 	EXPECT_CALL(jddatabase, connect(IP, DBPORT)).Times(1);
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 }
 

@@ -47,6 +47,8 @@ target_link_libraries(
   "Database-API-library"
 )
 target_link_libraries(tests /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
+target_link_libraries(tests ${CURL_LIBRARIES})
+target_link_libraries(tests prometheus-cpp::pull)
 
 # Copying it twice, because the pipeline expects it to be somewhere else then running it localy.
 configure_file("../dotenvTestfile.txt" "dotenvTestfile.txt" COPYONLY)
