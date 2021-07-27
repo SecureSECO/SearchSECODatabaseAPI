@@ -30,12 +30,12 @@ void Statistics::Initialize()
 
 	methodCounter = &prometheus::BuildCounter()
 						  .Name("api_methods_total")
-						  .Help("Number of recieved methods.")
+						  .Help("Number of received methods.")
 						  .Register(*registry);
 
 	latestRequest = &prometheus::BuildGauge()
 						   .Name("api_request_time_seconds")
-						   .Help("The latest time a request has been recieved.")
+						   .Help("The latest time a request has been received.")
 						   .Register(*registry);
 
 	// Ask the exposer to scrape the registry on incoming HTTP requests.
@@ -93,17 +93,17 @@ void Statistics::readFromFile(std::string file)
 			case reqCount:
 				requestCounter
 					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Request", lineSplitted[2]}})
-					.Increment(Utility::safeStoi(lineSplitted[3]));
+					.Increment(Utility::safeStod(lineSplitted[3]));
 				break;
 			case methCount:
 				methodCounter
 					->Add({{"Node", lineSplitted[2]}, {"Client", lineSplitted[0]}, {"Extension", lineSplitted[1]}})
-					.Increment(Utility::safeStoi(lineSplitted[3]));
+					.Increment(Utility::safeStod(lineSplitted[3]));
 				break;
 			case reqTime:
 				latestRequest
 					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Request", lineSplitted[2]}})
-					.Set(stod(lineSplitted[3]));
+					.Set(Utility::safeStod(lineSplitted[3]));
 				break;
 			default:
 				break;

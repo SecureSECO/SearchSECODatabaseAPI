@@ -43,6 +43,20 @@ public:
 	static long long safeStoll(std::string str);
 
 	/// <summary>
+	/// Safely attempts to convert a string to a corresponding double.
+	/// </summary>
+	/// <param name="str">
+	/// The string to convert.
+	/// </param>
+	/// <returns>
+	/// double corresponding to string on success, or 0 when the string cannot be converted.
+	/// If the string cannot be converted, errno is set to EDOM. If the converted string would fall
+	/// out of the range of a long long, errno is set to ERANGE. Strings of the form "123AAA" are
+	/// parsed to 123.
+	/// </returns>
+	static long long safeStod(std::string str);
+
+	/// <summary>
 	/// Appends a char vector by a string and adds a special character at the end.
 	/// </summary>
 	/// <param name="result"> The base char vector. </param>

@@ -23,7 +23,7 @@ enum StatFamily
 };
 
 /// <summary>
-/// Stores the Promethesu statistics variables.
+/// Stores the Prometheus statistics variables.
 /// </summary>
 class Statistics
 {
@@ -34,7 +34,7 @@ class Statistics
 	virtual void Initialize();
 
 	/// <summary>
-	/// Regularly siynchronizes the statistics to the passed file.
+	/// Regularly synchronizes the statistics to the passed file.
 	/// </summary>
 	/// <param name="file"> The file to write the statistic to.</param>
 	void synchronize(std::string file);
@@ -42,7 +42,7 @@ class Statistics
 	/// <summary>
 	/// Write the value of the statistics to the given file.
 	/// </summary>
-	/// <param name="file"> The file to wrtie the statistics to.</param>
+	/// <param name="file"> The file to write the statistics to.</param>
 	void writeToFile(std::string file);
 
 	/// <summary>
@@ -51,7 +51,7 @@ class Statistics
 	/// <param name="file"> The file to read the statistics from.</param>
 	void readFromFile(std::string file);
 
-	// The families to stor the statistics in.
+	// The families to store the statistics in.
 	prometheus::Family<prometheus::Counter> *requestCounter;
 	prometheus::Family<prometheus::Counter> *methodCounter;
 	prometheus::Family<prometheus::Gauge> *latestRequest;

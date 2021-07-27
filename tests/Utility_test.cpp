@@ -88,6 +88,36 @@ TEST(CheckSafeStoll, NonParseable)
 	ASSERT_EQ(errno, EDOM);
 }
 
+// Checks if parseable string is converted correctly by safeStod.
+TEST(CheckSafeStod, CorrectInput)
+{
+	std::string input = "9876543210";
+
+	long long output = Utility::safeStod(input);
+	ASSERT_EQ(output, 9876543210);
+	ASSERT_EQ(errno, 0);
+}
+
+// Checks if the partial parsing functions as desired for safeStod.
+TEST(CheckSafeStod, PartiallyParseable)
+{
+	std::string input = "9876543210Bonjour";
+
+	long long output = Utility::safeStod(input);
+	ASSERT_EQ(output, 9876543210);
+	ASSERT_EQ(errno, 0);
+}
+
+// Checks if non-parseable input gives the correct response for safeStod.
+TEST(CheckSafeStod, NonParseable)
+{
+	std::string input = "Bonjour9876543210";
+
+	long long output = Utility::safeStod(input);
+	ASSERT_EQ(output, 0);
+	ASSERT_EQ(errno, EDOM);
+}
+
 // Checks if appendBy functions as desired.
 TEST(CheckAppendBySingleWord, SmallTest)
 {

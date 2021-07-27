@@ -30,12 +30,12 @@ class MockStatistics : public Statistics
 
 		methodCounter = &prometheus::BuildCounter()
 							 .Name("api_methods_total")
-							 .Help("Number of recieved methods.")
+							 .Help("Number of received methods.")
 							 .Register(*registry);
 
 		latestRequest = &prometheus::BuildGauge()
 							 .Name("api_request_time_seconds")
-							 .Help("The latest time a request has been recieved.")
+							 .Help("The latest time a request has been received.")
 							 .Register(*registry);
 	}
 };
