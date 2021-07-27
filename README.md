@@ -70,7 +70,7 @@ To run the dashboard on a server you should first create a file called `promethe
 docker run -p 9090:9090 -p 80:3000 -v /path/to/file:/etc/prometheus -d --name=prometheus prom/prometheus
 docker run -d --network=container:prometheus --name=grafana grafana/grafana
 ```
-You can then use the ip address of the server you host te dashboard on to access the dashboard.
+You can then use the ip address of the server you host the dashboard on to access the dashboard.
 
 # License
 
