@@ -37,16 +37,16 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string c
 		result = jrh->handleConnectRequest(connection, request);
 		break;
 	case eGetIPs:
-		result = jrh->handleGetIPsRequest(requestType, request);
+		result = jrh->handleGetIPsRequest(requestType, client, request);
 		break;
 	case eUploadJob:
-		result = jrh->handleUploadJobRequest(requestType, request);
+		result = jrh->handleUploadJobRequest(requestType, client, request);
 		break;
 	case eUploadCrawlData:
-		result = jrh->handleCrawlDataRequest(requestType, request);
+		result = jrh->handleCrawlDataRequest(requestType, client, request);
 		break;
 	case eGetTopJob:
-		result = jrh->handleGetJobRequest(requestType, request);
+		result = jrh->handleGetJobRequest(requestType, client, request);
 		break;
 	case eExtractProjects:
 		result = dbrh->handleExtractProjectsRequest(request);

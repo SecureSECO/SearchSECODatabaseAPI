@@ -153,15 +153,16 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	networkhandler->openConnection(ip, port);
 
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-	networkhandler->sendData("conn" + std::to_string(2 + std::to_string(PORT).length() + myIp.length()) + entryDelimiter +
-							 myIp + FIELD_DELIMITER_CHAR + std::to_string(PORT) + entryDelimiter);
+	networkhandler->sendData("conn" + std::string(1, FIELD_DELIMITER_CHAR) + "node" + myIp + FIELD_DELIMITER_CHAR +
+							 std::to_string(2 + std::to_string(PORT).length() + myIp.length()) + entryDelimiter + myIp +
+							 FIELD_DELIMITER_CHAR + std::to_string(PORT) + entryDelimiter);
 
 	response = networkhandler->receiveData();
 	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);
-	if (receivedLeader[0] != RESPONSE_OK) 
+	if (receivedLeader[0] != RESPONSE_OK)
 	{
 		// If we get something which is not an OK, we will assume that it has send back the true leader.
-		if(receivedLeader.size() != 2) 
+		if (receivedLeader.size() != 2)
 		{
 			throw std::runtime_error("Incorrect response from connect request. Size was " +
 									 std::to_string(receivedLeader.size()));
@@ -170,7 +171,7 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 		port = receivedLeader[1];
 		delete networkhandler;
 	}
-	else 
+	else
 	{
 		handleInitialData(receivedLeader);
 	}
@@ -292,22 +293,23 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 	}
 }
 
-std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::string request) 
+std::string RAFTConsensus::passRequestToLeader(std::string requestType, std::string client, std::string request)
 {
 	std::string received = "";
 
-	try 
+	try
 	{
 		std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
-		NetworkHandler* networking = NetworkHandler::createHandler();
+		NetworkHandler *networking = NetworkHandler::createHandler();
 
 		networking->openConnection(leaderIp, leaderPort);
-		networking->sendData(requestType + std::to_string(request.length()) + entryDelimiter + request);
+		networking->sendData(requestType + FIELD_DELIMITER_CHAR + client + FIELD_DELIMITER_CHAR +
+							 std::to_string(request.length()) + entryDelimiter + request);
 
 		received = networking->receiveData(false);
 		delete networking;
 	}
-	catch(std::exception const& ex) 
+	catch (std::exception const &ex)
 	{
 		std::cout << "Receive data gave an error" << std::endl;
 	}

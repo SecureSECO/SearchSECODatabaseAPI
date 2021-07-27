@@ -26,7 +26,7 @@ std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnect
 	return raft->connectNewNode(connection, request);
 }
 
-std::string JobRequestHandler::handleGetIPsRequest(std::string request, std::string data)
+std::string JobRequestHandler::handleGetIPsRequest(std::string request, std::string client, std::string data)
 {
 	// If you are the leader, get the ips from the RAFT consensus.
 	if (raft->isLeader())
@@ -40,10 +40,10 @@ std::string JobRequestHandler::handleGetIPsRequest(std::string request, std::str
 		return HTTPStatusCodes::success(result);
 	}
 	// If you are not the leader, pass the request to the leader.
-	return raft->passRequestToLeader(request, data);
+	return raft->passRequestToLeader(request, client, data);
 }
 
-std::string JobRequestHandler::handleGetJobRequest(std::string request, std::string data)
+std::string JobRequestHandler::handleGetJobRequest(std::string request, std::string client, std::string data)
 {
 	// If you are the leader, check if there is a job left.
 	if (raft->isLeader())
@@ -73,10 +73,10 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		}
 	}
 	// If you are not the leader, pass the request to the leader.
-	return raft->passRequestToLeader(request, data);
+	return raft->passRequestToLeader(request, client, data);
 }
 
-std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string data)
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string client, std::string data)
 {
 	if (raft->isLeader())
 	{
@@ -131,10 +131,10 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 			return HTTPStatusCodes::clientError("An error has occurred while adding your job(s) to the queue.");
 		}
 	}
-	return raft->passRequestToLeader(request, data);
+	return raft->passRequestToLeader(request, client, data);
 }
 
-std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string data)
+std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string client, std::string data)
 {
 	// If this node is the leader, we handle the request, otherwise, the node passes the request on to the leader.
 	if (raft->isLeader())
@@ -151,9 +151,9 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 
 		// Get data after crawlID and pass it on to handleUploadRequest.
 		std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
-		return handleUploadJobRequest(request, jobdata);
+		return handleUploadJobRequest(request, client, jobdata);
 	}
-	return raft->passRequestToLeader(request, data);
+	return raft->passRequestToLeader(request, client, data);
 }
 
 void JobRequestHandler::updateCrawlID(int id)
