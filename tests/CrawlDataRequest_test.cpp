@@ -24,7 +24,7 @@ TEST(CrawlDataRequest, SingleJob)
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "upcd";
 	std::vector<char> requestChars = {};
@@ -35,7 +35,7 @@ TEST(CrawlDataRequest, SingleJob)
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
 
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue."));
 
@@ -44,7 +44,7 @@ TEST(CrawlDataRequest, SingleJob)
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillRepeatedly(testing::Return(true));
 
-	std::string result2 = handler.handleRequest(requestType2, request2, nullptr);
+	std::string result2 = handler.handleRequest(requestType2, "", request2, nullptr);
 
 	std::vector<char> inputFunctionChars = {};
 	Utility::appendBy(inputFunctionChars, {"Crawl", "100"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
@@ -65,7 +65,7 @@ TEST(CrawlDataRequest, InvalidID)
 	MockJDDatabase jddatabase;
 	MockDatabase database;
 	MockRaftConsensus raftConsensus;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "upcd";
 	std::vector<char> requestChars = {};
@@ -77,6 +77,6 @@ TEST(CrawlDataRequest, InvalidID)
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error: invalid crawlID."));
 }

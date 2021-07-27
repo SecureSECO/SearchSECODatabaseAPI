@@ -10,6 +10,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseRequestHandler.h"
 #include "RAFTConsensus.h"
 #include "DatabaseConnection.h"
+#include "Statistics.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -43,7 +44,7 @@ public:
 	/// Readies the request handler for later usage.
 	/// </summary>
 	virtual void initialize(DatabaseHandler *databaseHandler, DatabaseConnection *databaseConnection,
-							RAFTConsensus *raft, std::string ip = IP, int port = DBPORT);
+							RAFTConsensus *raft, Statistics *stats, std::string ip = IP, int port = DBPORT);
 
 	/// <summary>
 	/// Handles all requests send to the database.
@@ -58,7 +59,7 @@ public:
 	/// <returns>
 	/// Response towards user after processing the request successfully.
 	/// </returns>
-	virtual std::string handleRequest(std::string requestType, std::string request,
+	virtual std::string handleRequest(std::string requestType, std::string client, std::string request,
 									  boost::shared_ptr<TcpConnection> connection);
 
 	JobRequestHandler *getJobRequestHandler()

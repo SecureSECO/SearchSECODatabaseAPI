@@ -25,7 +25,7 @@ TEST(GetIPsRequest, SingleIP)
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtip";
 	std::string request = "";
@@ -37,7 +37,7 @@ TEST(GetIPsRequest, SingleIP)
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(raftConsensus, getCurrentIPs()).WillOnce(testing::Return(ip));
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
 	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,

@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #pragma once
 #include "RequestHandler.h"
 #include "RAFTConsensus.h"
+#include "Statistics.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -38,8 +39,9 @@ public:
 	/// is a nullptr.
 	/// </param>
 	void startListen(DatabaseHandler* databaseHandler, 
-		DatabaseConnection* databaseConnection, 
-		RAFTConsensus* raft, 
+		DatabaseConnection* databaseConnection,
+		RAFTConsensus *raft,
+		Statistics *stats,
 		int port = PORT, 
 		RequestHandler *handler = nullptr);
 
@@ -73,7 +75,7 @@ public:
 	/// <summary>
 	/// Starts the handeling of a request. Takes in the request handler to call.
 	/// </summary>
-	virtual void start(RequestHandler *handler, pointer thisPointer);
+	virtual void start(RequestHandler *handler, pointer thisPointer, Statistics *stats);
 
 protected:
 	/// <summary>
@@ -101,7 +103,8 @@ class TcpServer
 {
 public:
 	TcpServer(boost::asio::io_context &ioContext, DatabaseHandler *databaseHandler,
-			  DatabaseConnection *databaseConnection, RAFTConsensus *raft, RequestHandler *handler, int port);
+			DatabaseConnection *databaseConnection, RAFTConsensus *raft, RequestHandler *handler, int port,
+			Statistics *stats);
 
 	/// <summary>
 	/// Stops the server.
@@ -123,6 +126,7 @@ private:
 	boost::asio::io_context& ioContext_;
 	tcp::acceptor acceptor_;
 	RequestHandler* handler;
+	Statistics *stats;
 
 	bool stopped = false;
 };

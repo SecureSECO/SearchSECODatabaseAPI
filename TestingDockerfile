@@ -2,7 +2,7 @@ FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
 	apt-get -y dist-upgrade && \
-	apt-get -y install gcc g++ cmake autoconf dpkg wget git lcov && \
+	apt-get -y install gcc g++ cmake autoconf dpkg wget git lcov curl libcurl4-openssl-dev && \
 	apt-get -y install libboost-all-dev && \
 	wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
 	dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb && \
@@ -15,6 +15,7 @@ RUN apt-get -y update && \
 	wget https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz && \
 	tar xzvf apache-cassandra-3.11.10-bin.tar.gz
 COPY . .
+RUN dpkg -i ./external/prometheus-cpp_0.12.3_amd64.deb
 RUN mkdir build && \
 	cd build && \
 	cmake -DCMAKE_BUILD_TYPE=Debug .. && \

@@ -7,6 +7,7 @@ Utrecht University within the Software Project course.
 #include "Definitions.h"
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "StatisticsMock.cpp"
 #include "JDDatabaseMock.cpp"
 #include "HTTPStatus.h"
 #include "Utility.h"
@@ -102,9 +103,10 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	errno = 0;
 
 	MockJDDatabase jddatabase;
+	MockStatistics stats;
 	MockDatabase database;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, &stats);
 
 	std::string requestType = "upld";
 
@@ -125,7 +127,7 @@ TEST(UploadRequest, SingleMethodSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_1), projectEqual(projectT1), -1, 1, true)).Times(1);
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
@@ -137,9 +139,10 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	errno = 0;
 
 	MockJDDatabase jddatabase;
+	MockStatistics stats;
 	MockDatabase database;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, &stats);
 
 	std::string requestType = "upld";
 
@@ -170,7 +173,7 @@ TEST(UploadRequest, MultipleMethodsSingleAuthor)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT1_3), projectEqual(projectT1), -1, 1, true)).Times(1);
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
@@ -182,9 +185,10 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	errno = 0;
 
 	MockJDDatabase jddatabase;
+	MockStatistics stats;
 	MockDatabase database;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, &stats);
 
 	std::string requestType = "upld";
 	std::vector<char> requestChars = {};
@@ -215,7 +219,7 @@ TEST(UploadRequest, MultipleMethodsMultipleAuthors)
 	EXPECT_CALL(database, addMethod(methodEqual(methodT2_3), projectEqual(projectT2), -1, 1, true)).Times(1);
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest(requestType, request, nullptr);
+	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your project has been successfully added to the database."));
 }
 
@@ -237,7 +241,7 @@ TEST(UploadRequest, InvalidProjectSize)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
@@ -259,7 +263,7 @@ TEST(UploadRequest, InvalidProjectID)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
@@ -282,7 +286,7 @@ TEST(UploadRequest, InvalidProjectVersion)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing project data."));
 }
 
@@ -306,7 +310,7 @@ TEST(UploadRequest, InvalidMethodSizeSmall)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
@@ -332,7 +336,7 @@ TEST(UploadRequest, InvalidMethodSizeLarge)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
@@ -362,7 +366,7 @@ TEST(UploadRequest, InvalidMethodHash)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 2."));
 }
 
@@ -388,7 +392,7 @@ TEST(UploadRequest, InvalidMethodLine)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }
 
@@ -415,6 +419,6 @@ TEST(UploadRequest, InvalidMethodAuthorLines)
 	std::string request(requestChars.begin(), requestChars.end());
 
 	// Check if the output is as expected.
-	std::string result = handler.handleRequest("upld", request, nullptr);
+	std::string result = handler.handleRequest("upld", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError("Error parsing method 1."));
 }

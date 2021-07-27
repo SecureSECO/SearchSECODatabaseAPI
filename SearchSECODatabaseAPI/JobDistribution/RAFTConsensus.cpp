@@ -384,7 +384,7 @@ void RAFTConsensus::listenForRequests(boost::shared_ptr<TcpConnection> connectio
 	{
 		while(!stop) 
 		{
-			connection->start(requestHandler, connection);
+			connection->start(requestHandler, connection, stats);
 		}
 	}
 	catch (std::exception const& e) 

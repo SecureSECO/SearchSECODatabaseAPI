@@ -47,6 +47,25 @@ long long Utility::safeStoll(std::string str)
 	return res;
 }
 
+long long Utility::safeStod(std::string str)
+{
+	errno = 0;
+	long long res = 0;
+	try
+	{
+		res = stod(str);
+	}
+	catch (const std::out_of_range &e)
+	{
+		errno = ERANGE;
+	}
+	catch (const std::exception &e)
+	{
+		errno = EDOM;
+	}
+	return res;
+}
+
 void Utility::appendBy(std::vector<char> &result, std::string word, char endCharacter)
 {
 	for (int i = 0; i < word.size(); i++)

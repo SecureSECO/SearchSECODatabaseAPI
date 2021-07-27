@@ -18,9 +18,10 @@ Utrecht University within the Software Project course.
 #include <future>
 #include <utility>
 
-DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, std::string ip, int port)
+DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, Statistics *stats, std::string ip, int port)
 {
 	this->database = database;
+	this->stats = stats;
 	connectWithRetry(ip, port);
 	if (errno != 0)
 	{

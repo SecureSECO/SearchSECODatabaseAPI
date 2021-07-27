@@ -24,7 +24,7 @@ TEST(GeneralTest, InitializeTest)
 	MockJDDatabase jddatabase;
 	EXPECT_CALL(database, connect(IP, DBPORT)).Times(1);
 	errno = 0;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 }
 
 // Tests if the RequestHandler correctly responds to an unknown request.
@@ -35,5 +35,5 @@ TEST(GeneralTest, UnknownRequest)
 
 	RequestHandler handler;
 
-	EXPECT_EQ(handler.handleRequest("kill", "", nullptr), HTTPStatusCodes::clientError("Unknown request type."));
+	EXPECT_EQ(handler.handleRequest("kill", "", "", nullptr), HTTPStatusCodes::clientError("Unknown request type."));
 }

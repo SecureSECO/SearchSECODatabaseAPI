@@ -64,6 +64,14 @@ To stop the program you should first tell it to leave the distributed database b
 
 To locally run the tests(including integration tests) you can first use `docker build -f TestingDockerfile -t testing .` in the main folder to build the container. After this you can use `docker run --name testContainer testing` to actually run the tests. This will also generate the code coverage. To copy the code coverage files to a local folder you can use `docker cp testContainer:/build/coverage ./coverage`. After this you can open _index.html_ in the coverage folder to see the code coverage.
 
+## Dashboard
+To run the dashboard on a server you should first create a file called `prometheus.yml` based on the [example](https://prometheus.io/docs/prometheus/latest/configuration/configuration/). This should contain the ip addresses of the servers with port `8000`. After this you can use the following commands to start the dashboard:
+```
+docker run -p 9090:9090 -p 80:3000 -v /path/to/file:/etc/prometheus -d --name=prometheus prom/prometheus
+docker run -d --network=container:prometheus --name=grafana grafana/grafana
+```
+You can then use the ip address of the server you host the dashboard on to access the dashboard.
+
 # License
 
 This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for more info.
