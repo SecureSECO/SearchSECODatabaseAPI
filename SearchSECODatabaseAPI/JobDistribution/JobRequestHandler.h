@@ -34,7 +34,7 @@ public:
 	/// <summary>
 	/// Handles request for the ip adresses in the network.
 	/// </summary>
-	std::string handleGetIPsRequest(std::string request, std::string data);
+	std::string handleGetIPsRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Handles request to upload one or more jobs with their priorities.
@@ -47,7 +47,7 @@ public:
 	/// <returns>
 	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
 	/// </returns>
-	std::string handleUploadJobRequest(std::string request, std::string data);
+	std::string handleUploadJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Handles request to give the top job from the queue.
@@ -59,7 +59,7 @@ public:
 	/// if the number of jobs is not enough and there is no crawler working.
 	/// Response is "NoJob" if there are no jobs and a crawler is already working.
 	/// </returns>
-	std::string handleGetJobRequest(std::string request, std::string data);
+	std::string handleGetJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Handles request to upload crawl data to the job queue.
@@ -71,7 +71,7 @@ public:
 	/// <returns>
 	/// Returns the result of handleUploadRequest.
 	/// </returns>
-	std::string handleCrawlDataRequest(std::string request, std::string data);
+	std::string handleCrawlDataRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Variables describing the number of jobs in the jobqueue, the current crawlID

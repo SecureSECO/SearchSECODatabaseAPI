@@ -66,7 +66,7 @@ public:
 	/// Will pass the given request on to the leader of the network.
 	/// </summary>
 	/// <returns> The string that the leader gives back. </returns>
-	virtual std::string passRequestToLeader(std::string requestType, std::string request);
+	virtual std::string passRequestToLeader(std::string requestType, std::string client, std::string request);
 
 	/// <summary>
 	/// Will handle a connect request by a new node that wants to join the network.
