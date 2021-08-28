@@ -48,6 +48,8 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	// If you are the leader, check if there is a job left.
 	if (raft->isLeader())
 	{
+		// Lock job mutex, to prevent two threads simultaneously handing out the same job.
+		jobmtx.lock();
 		auto currentTime = Utility::getCurrentTimeSeconds();
 		bool alreadyCrawling = true;
 		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS) 
@@ -71,6 +73,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		{
 			return HTTPStatusCodes::success("NoJob");
 		}
+		jobmtx.unlock();
 	}
 	// If you are not the leader, pass the request to the leader.
 	return raft->passRequestToLeader(request, client, data);

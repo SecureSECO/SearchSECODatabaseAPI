@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseConnection.h"
 #include "RAFTConsensus.h"
 
+#include <mutex>
 #include <boost/shared_ptr.hpp>
 
 #define MIN_AMOUNT_JOBS 500
@@ -94,6 +95,7 @@ private:
 	RAFTConsensus *raft;
 	RequestHandler *requestHandler;
 	DatabaseConnection *database;
+	std::mutex jobmtx;
 
 	/// <summary>
 	/// Tries to connect with database, if it fails it retries as many times as MAX_RETRIES.
