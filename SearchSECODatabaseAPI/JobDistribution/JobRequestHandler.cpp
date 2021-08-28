@@ -18,7 +18,7 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *reques
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
 	crawlID = database->getCrawlID();
-	timeLastRecount = Utility::getCurrentTimeSeconds();	
+	timeLastRecount = Utility::getCurrentTimeSeconds();
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
@@ -52,7 +52,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		jobmtx.lock();
 		auto currentTime = Utility::getCurrentTimeSeconds();
 		bool alreadyCrawling = true;
-		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS) 
+		if (timeLastCrawl == -1 || currentTime - timeLastCrawl > CRAWL_TIMEOUT_SECONDS)
 		{
 			alreadyCrawling = false;
 		}
@@ -67,7 +67,12 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 			timeLastCrawl = currentTime;
 			std::string s = "Crawl";
 			s += FIELD_DELIMITER_CHAR;
-			return HTTPStatusCodes::success(s + std::to_string(crawlID));
+			s += std::to_string(crawlID);
+
+			// Identifier for this crawl job.
+			s += FIELD_DELIMITER_CHAR;
+			s += std::to_string(timeLastCrawl);
+			return HTTPStatusCodes::success(s);
 		}
 		else
 		{
@@ -120,7 +125,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 		}
 
 		long long timeNow = Utility::getCurrentTimeSeconds();
-		if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME) 
+		if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME)
 		{
 			numberOfJobs = database->getNumberOfJobs();
 		}
@@ -142,19 +147,30 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 	// If this node is the leader, we handle the request, otherwise, the node passes the request on to the leader.
 	if (raft->isLeader())
 	{
-		int id = Utility::safeStoi(data.substr(0, data.find(ENTRY_DELIMITER_CHAR)));
-		if (errno == 0)
+		// Get crawlID and identifier of crawl job.
+		std::string identifiers = data.substr(0, data.find(ENTRY_DELIMITER_CHAR));
+		long long jobID = Utility::safeStoll(identifiers.substr(identifiers.find(FIELD_DELIMITER_CHAR) + 1, identifiers.length()));
+		if (errno != 0)
 		{
+			return HTTPStatusCodes::clientError("Error: invalid jobID.");
+		}
+		if (jobID == timeLastCrawl)
+		{
+			int id = Utility::safeStoi(identifiers.substr(0, identifiers.find(FIELD_DELIMITER_CHAR)));
+			if (errno != 0)
+			{
+				return HTTPStatusCodes::clientError("Error: invalid crawlID.");
+			}
 			updateCrawlID(id);
+
+			// Get data after crawlID and pass it on to handleUploadRequest.
+			std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
+			return handleUploadJobRequest(request, client, jobdata);
 		}
 		else
 		{
-			return HTTPStatusCodes::clientError("Error: invalid crawlID.");
+			return HTTPStatusCodes::clientError("Crawl job was deprecated, a new job has already been issued.")
 		}
-
-		// Get data after crawlID and pass it on to handleUploadRequest.
-		std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
-		return handleUploadJobRequest(request, client, jobdata);
 	}
 	return raft->passRequestToLeader(request, client, data);
 }
