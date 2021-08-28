@@ -59,7 +59,9 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 		// Check if number of jobs is enough to provide the top job.
 		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
 		{
-			return getTopJobWithRetry();
+			std::string job = getTopJobWithRetry();
+			jobmtx.unlock();
+			return job;
 		}
 		// If the number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
@@ -72,13 +74,14 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 			// Identifier for this crawl job.
 			s += FIELD_DELIMITER_CHAR;
 			s += std::to_string(timeLastCrawl);
+			jobmtx.unlock();
 			return HTTPStatusCodes::success(s);
 		}
 		else
 		{
+			jobmtx.unlock();
 			return HTTPStatusCodes::success("NoJob");
 		}
-		jobmtx.unlock();
 	}
 	// If you are not the leader, pass the request to the leader.
 	return raft->passRequestToLeader(request, client, data);
@@ -169,7 +172,7 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 		}
 		else
 		{
-			return HTTPStatusCodes::clientError("Crawl job was deprecated, a new job has already been issued.")
+			return HTTPStatusCodes::clientError("Crawl job was deprecated, a new job has already been issued.");
 		}
 	}
 	return raft->passRequestToLeader(request, client, data);
