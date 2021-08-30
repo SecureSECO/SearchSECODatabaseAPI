@@ -12,7 +12,7 @@ void RequestHandler::initialize(DatabaseHandler *databaseHandler, DatabaseConnec
 {
 	// Initialise the requestHandlers.
 	dbrh = new DatabaseRequestHandler(databaseHandler, stats, ip, port);
-	jrh = new JobRequestHandler(raft, this, databaseConnection, ip, port);
+	jrh = new JobRequestHandler(raft, this, databaseConnection, stats, ip, port);
 }
 
 std::string RequestHandler::handleRequest(std::string requestType, std::string client, std::string request,

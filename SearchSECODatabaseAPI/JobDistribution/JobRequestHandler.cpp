@@ -9,12 +9,13 @@ Utrecht University within the Software Project course.
 #include "HTTPStatus.h"
 #include "Utility.h"
 
-JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database,
+JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, Statistics *stats,
 									 std::string ip, int port)
 {
 	this->raft = raft;
 	this->requestHandler = requestHandler;
 	this->database = database;
+	this->stats = stats;
 	connectWithRetry(ip, port);
 	numberOfJobs = database->getNumberOfJobs();
 	crawlID = database->getCrawlID();
@@ -91,58 +92,61 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 {
 	if (raft->isLeader())
 	{
-		// Split data on ENTRY_DELIMITER_CHAR, to get individual jobs.
-		std::vector<std::string> datasplits = Utility::splitStringOn(data, ENTRY_DELIMITER_CHAR);
-		std::vector<std::string> urls;
-		std::vector<int> priorities;
-		for (int i = 0; i < datasplits.size(); i++)
-		{
-			std::vector<std::string> dataSecondSplit = Utility::splitStringOn(datasplits[i], FIELD_DELIMITER_CHAR);
-			std::string url = dataSecondSplit[0];
-			urls.push_back(url);
-			int priority = Utility::safeStoi(dataSecondSplit[1]);
+		return handleUploadJobRequest(request, client, Utility::splitStringOn(data, ENTRY_DELIMITER_CHAR));
+	}
+	return raft->passRequestToLeader(request, client, data);
+}
 
-			// Check if priority could be parsed correctly.
-			if (errno == 0)
-			{
-				priorities.push_back(priority);
-			}
-			else
-			{
-				return HTTPStatusCodes::clientError(
-					"A job has an invalid priority, no jobs have been added to the queue.");
-			}
-		}
+std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string client,
+													  std::vector<std::string> data)
+{
+	std::vector<std::string> urls;
+	std::vector<int> priorities;
+	for (int i = 0; i < data.size(); i++)
+	{
+		std::vector<std::string> dataSecondSplit = Utility::splitStringOn(data[i], FIELD_DELIMITER_CHAR);
+		std::string url = dataSecondSplit[0];
+		urls.push_back(url);
+		int priority = Utility::safeStoi(dataSecondSplit[1]);
 
-		// Call to the database to upload jobs.
-		for (int i = 0; i < urls.size(); i++)
-		{
-			if (tryUploadJobWithRetry(urls[i], priorities[i]))
-			{
-				numberOfJobs += 1;
-			}
-			else
-			{
-				return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
-			}
-		}
-
-		long long timeNow = Utility::getCurrentTimeSeconds();
-		if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME)
-		{
-			numberOfJobs = database->getNumberOfJobs();
-		}
-
+		// Check if priority could be parsed correctly.
 		if (errno == 0)
 		{
-			return HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue.");
+			priorities.push_back(priority);
 		}
 		else
 		{
-			return HTTPStatusCodes::clientError("An error has occurred while adding your job(s) to the queue.");
+			return HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue.");
 		}
 	}
-	return raft->passRequestToLeader(request, client, data);
+
+	// Call to the database to upload jobs.
+	for (int i = 0; i < urls.size(); i++)
+	{
+		if (tryUploadJobWithRetry(urls[i], priorities[i]))
+		{
+			numberOfJobs += 1;
+		}
+		else
+		{
+			return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
+		}
+	}
+
+	long long timeNow = Utility::getCurrentTimeSeconds();
+	if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME)
+	{
+		numberOfJobs = database->getNumberOfJobs();
+	}
+
+	if (errno == 0)
+	{
+		return HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue.");
+	}
+	else
+	{
+		return HTTPStatusCodes::clientError("An error has occurred while adding your job(s) to the queue.");
+	}
 }
 
 std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::string client, std::string data)
@@ -150,25 +154,43 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 	// If this node is the leader, we handle the request, otherwise, the node passes the request on to the leader.
 	if (raft->isLeader())
 	{
+		std::vector<std::string> lines = Utility::splitStringOn(data, ENTRY_DELIMITER_CHAR);
+		if (lines.size() < 3)
+		{
+			return HTTPStatusCodes::clientError("Error: not enough lines.");
+		}
 		// Get crawlID and identifier of crawl job.
-		std::string identifiers = data.substr(0, data.find(ENTRY_DELIMITER_CHAR));
-		long long jobID = Utility::safeStoll(identifiers.substr(identifiers.find(FIELD_DELIMITER_CHAR) + 1, identifiers.length()));
+		std::vector<std::string> identifiers = Utility::splitStringOn(lines[0], FIELD_DELIMITER_CHAR);
+		if (identifiers.size() < 2)
+		{
+			return HTTPStatusCodes::clientError("Error: oncorrect amount of identifiers.");
+		}
+		long long jobID = Utility::safeStoll(identifiers[1]);
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::clientError("Error: invalid jobID.");
 		}
 		if (jobID == timeLastCrawl)
 		{
-			int id = Utility::safeStoi(identifiers.substr(0, identifiers.find(FIELD_DELIMITER_CHAR)));
+			int id = Utility::safeStoi(identifiers[0]);
 			if (errno != 0)
 			{
 				return HTTPStatusCodes::clientError("Error: invalid crawlID.");
 			}
 			updateCrawlID(id);
 
+			if (lines[1] != "")
+			{
+				std::vector<std::string> languages = Utility::splitStringOn(lines[1], FIELD_DELIMITER_CHAR);
+				for (int i = 0; i < languages.size(); i += 2)
+				{
+					stats->languageCounter->Add({{"Node", stats->myIP}, {"Client", client}, {"Language", languages[i]}})
+						.Increment(Utility::safeStoll(languages[i + 1]));
+				}
+			}
+
 			// Get data after crawlID and pass it on to handleUploadRequest.
-			std::string jobdata = data.substr(data.find(ENTRY_DELIMITER_CHAR) + 1, data.length());
-			return handleUploadJobRequest(request, client, jobdata);
+			return handleUploadJobRequest(request, client, std::vector<std::string>(lines.begin() + 2, lines.end()));
 		}
 		else
 		{

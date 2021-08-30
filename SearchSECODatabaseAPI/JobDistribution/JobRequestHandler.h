@@ -24,8 +24,8 @@ public:
 	/// <summary>
 	/// Constructor method.
 	/// </summary>
-	JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, std::string ip,
-					  int port);
+	JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, Statistics *stats,
+					std::string ip, int port);
 
 	/// <summary>
 	/// Handles request from new node to connect to the network.
@@ -49,6 +49,19 @@ public:
 	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
 	/// </returns>
 	std::string handleUploadJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
+	/// Handles request to upload one or more jobs with their priorities.
+	/// </summary>
+	/// <param name="data">
+	/// Consists of url and priority pairs, the url and priority are separated by the FIELD_DELIMITER_CHAR ('?') and
+	/// the pairs by the ENTRY_DELIMITER_CHAR ('\n').
+	/// Data format is "url1?priority1'\n'url2?priority2'\n'..."
+	/// </param>
+	/// <returns>
+	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
+	/// </returns>
+	std::string handleUploadJobRequest(std::string request, std::string client, std::vector<std::string> data);
 
 	/// <summary>
 	/// Handles request to give the top job from the queue.
@@ -95,6 +108,7 @@ private:
 	RAFTConsensus *raft;
 	RequestHandler *requestHandler;
 	DatabaseConnection *database;
+	Statistics *stats;
 	std::mutex jobmtx;
 
 	/// <summary>

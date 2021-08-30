@@ -135,7 +135,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 		CassFuture *queryFuture = cass_session_execute(connection, query);
 		if (cass_future_error_code(queryFuture) == CASS_OK)
 		{
-			handleSelectMethodQueryResult(queryFuture, method, project, prevVersion, parserVersion, &newMethod);
+			handleSelectMethodQueryResult(queryFuture, method, project, prevVersion, parserVersion, newMethod);
 		}
 		else
 		{
@@ -170,7 +170,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 }
 
 void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, MethodIn method, ProjectIn project,
-													long long prevVersion, long long parserVersion, bool newMethod)
+													long long prevVersion, long long parserVersion, bool &newMethod)
 {
 	const CassResult *result = cass_future_get_result(queryFuture);
 
@@ -304,7 +304,6 @@ std::vector<Hash> DatabaseHandler::updateUnchangedFiles(std::vector<Hash> hashes
 														ProjectIn project, long long prevVersion)
 {
 	errno = 0;
-
 	CassFuture *queryFuture = executeSelectUnchangedMethodsQuery(hashes, files, project);
 
 	std::vector<Hash> resultHashes;
@@ -367,6 +366,7 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 {
 	std::vector<Hash> hashes;
 	const CassResult *result = cass_future_get_result(queryFuture);
+
 	CassIterator *iterator = cass_iterator_from_result(result);
 
 	// Add matches to result list.
@@ -382,6 +382,8 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 			MethodIn method;
 			method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
 			method.fileLocation = getString(row, "file");
+			method.lineNumber = getInt32(row, "lineNumber");
+			method.methodName = getString(row, "name");
 			updateMethod(method, project, startVersion);
 			hashes.push_back(method.hash);
 		}

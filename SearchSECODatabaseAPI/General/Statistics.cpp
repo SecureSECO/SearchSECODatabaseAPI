@@ -23,20 +23,21 @@ void Statistics::Initialize()
 	registry = std::make_shared<prometheus::Registry>();
 
 	// Create the counter and gauge families.
-	requestCounter = &prometheus::BuildCounter()
-						.Name("api_requests_total")
-						.Help("Number of observed requests.")
-						.Register(*registry);
+	requestCounter =
+		&prometheus::BuildCounter().Name("api_requests_total").Help("Number of observed requests.").Register(*registry);
 
-	methodCounter = &prometheus::BuildCounter()
-						  .Name("api_methods_total")
-						  .Help("Number of received methods.")
-						  .Register(*registry);
+	methodCounter =
+		&prometheus::BuildCounter().Name("api_methods_total").Help("Number of received methods.").Register(*registry);
+
+	languageCounter = &prometheus::BuildCounter()
+						   .Name("api_languages_byte_total")
+						   .Help("Bytes of languages encountered.")
+						   .Register(*registry);
 
 	latestRequest = &prometheus::BuildGauge()
-						   .Name("api_request_time_seconds")
-						   .Help("The latest time a request has been received.")
-						   .Register(*registry);
+						 .Name("api_request_time_seconds")
+						 .Help("The latest time a request has been received.")
+						 .Register(*registry);
 
 	// Ask the exposer to scrape the registry on incoming HTTP requests.
 	exposer->RegisterCollectable(registry);
@@ -79,6 +80,10 @@ void Statistics::readFromFile(std::string file)
 			{
 				current = methCount;
 			}
+			else if (line == "#languageCount")
+			{
+				current = langCount;
+			}
 			else if (line == "#requestTime")
 			{
 				current = reqTime;
@@ -98,6 +103,11 @@ void Statistics::readFromFile(std::string file)
 			case methCount:
 				methodCounter
 					->Add({{"Node", lineSplitted[2]}, {"Client", lineSplitted[0]}, {"Extension", lineSplitted[1]}})
+					.Increment(Utility::safeStod(lineSplitted[3]));
+				break;
+			case langCount:
+				languageCounter
+					->Add({{"Node", lineSplitted[2]}, {"Client", lineSplitted[0]}, {"Language", lineSplitted[1]}})
 					.Increment(Utility::safeStod(lineSplitted[3]));
 				break;
 			case reqTime:
@@ -140,6 +150,19 @@ void Statistics::writeToFile(std::string file)
 	fileHandler << "#methodCount\n";
 
 	family = methodCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileHandler << "#languageCount\n";
+
+	family = languageCounter->Collect();
 
 	if (family.size() >= 1)
 	{

@@ -33,6 +33,11 @@ class MockStatistics : public Statistics
 							 .Help("Number of received methods.")
 							 .Register(*registry);
 
+		languageCounter = &prometheus::BuildCounter()
+							   .Name("api_languages_byte_total")
+							   .Help("Bytes of languages encountered.")
+							   .Register(*registry);
+
 		latestRequest = &prometheus::BuildGauge()
 							 .Name("api_request_time_seconds")
 							 .Help("The latest time a request has been received.")
