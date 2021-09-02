@@ -41,7 +41,7 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 
 	// Check if the first output is correct.
 	std::string input(inputChars.begin(), inputChars.end());
-	ASSERT_EQ(result, HTTPStatusCodes::success(input));
+	EXPECT_THAT(result, testing::StartsWith(HTTPStatusCodes::success(input)));
 
 	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
@@ -110,12 +110,12 @@ TEST(GetJobRequest, NoJobsTest)
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
+	Utility::appendBy(inputChars, {"Crawl", "0"}, FIELD_DELIMITER_CHAR, FIELD_DELIMITER_CHAR);
 	inputChars.pop_back();
 
 	// Check if the first output is correct.
 	std::string input(inputChars.begin(), inputChars.end());
-	ASSERT_EQ(result, HTTPStatusCodes::success(input));
+	EXPECT_THAT(result, testing::StartsWith(HTTPStatusCodes::success(input)));
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, "", request, nullptr);
