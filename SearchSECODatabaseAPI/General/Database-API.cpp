@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseHandler.h"
 #include "ConnectionHandler.h"
 #include "RAFTConsensus.h"
+#include "Statistics.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -17,12 +18,19 @@ int main()
 {
 	std::cout << "Starting the API." << std::endl;
 
-	RAFTConsensus raft;
+	Statistics stats;
+	stats.Initialize();
+
+	stats.readFromFile("stats/stats");
+
+	new std::thread(&Statistics::synchronize, std::ref(stats), "stats/stats");
+
+	RAFTConsensus raft(&stats);
 	ConnectionHandler listen;
 	DatabaseHandler databaseHandler;
 	DatabaseConnection databaseConnection;
 
-	listen.startListen(&databaseHandler, &databaseConnection, &raft);
+	listen.startListen(&databaseHandler, &databaseConnection, &raft, &stats);
 
 	return 0;
 }

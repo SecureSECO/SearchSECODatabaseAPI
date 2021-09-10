@@ -33,7 +33,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
 	std::vector<char> outputChars = {};
@@ -46,7 +46,7 @@ TEST(GetAuthorRequest, OneRequestOneMatch)
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("idau", request, nullptr);
+	std::string result = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
@@ -60,7 +60,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string request = "47919e8f-7103-48a3-9514-3f2d9d49ac61";
 	std::string output = "No results found.";
@@ -69,7 +69,7 @@ TEST(GetAuthorRequest, OneRequestNoMatch)
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("idau", request, nullptr);
+	std::string result = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
@@ -83,7 +83,7 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -110,7 +110,7 @@ TEST(GetAuthorRequest, MultipleRequestMultipleMatch)
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("idau", request, nullptr);
+	std::string result = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
@@ -124,7 +124,7 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
@@ -141,7 +141,7 @@ TEST(GetAuthorRequest, MultipleRequestSingleMatch)
 	// Test if the request is implemented correctly.
 	EXPECT_CALL(database, idToAuthor("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(author1));
 	EXPECT_CALL(database, idToAuthor("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(author2));
-	std::string result = handler.handleRequest("idau", request, nullptr);
+	std::string result = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success(output));
 }
 
@@ -155,12 +155,12 @@ TEST(GetAuthorRequest, IncorrectInput)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string request = "47919e8f710348a395143f2d9d49ac61";
 	std::string output = "Error parsing author id: 47919e8f710348a395143f2d9d49ac61";
 
-	std::string result = handler.handleRequest("idau", request, nullptr);
+	std::string result = handler.handleRequest("idau", "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::clientError(output));
 }
 
@@ -174,7 +174,7 @@ TEST(GetMethodByAuthorTests, SingleIDRequest)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	MethodID method;
 	method.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
@@ -193,7 +193,7 @@ TEST(GetMethodByAuthorTests, SingleIDRequest)
 	EXPECT_CALL(database, authorToMethods("41ab7373-8f24-4a03-83dc-621036d99f34")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("aume", "41ab7373-8f24-4a03-83dc-621036d99f34", nullptr);
+	std::string result = handler.handleRequest("aume", "", "41ab7373-8f24-4a03-83dc-621036d99f34", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success(output));
 }
 
@@ -207,7 +207,7 @@ TEST(GetMethodByAuthorTests, MultipleIDRequest)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	MethodID method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
@@ -250,7 +250,7 @@ TEST(GetMethodByAuthorTests, MultipleIDRequest)
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
+	std::string result = handler.handleRequest("aume", "", inputFunction, nullptr);
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
 
@@ -264,14 +264,14 @@ TEST(GetMethodByAuthorTests, SingleIDNoMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::vector<MethodID> v;
 
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
+	std::string result = handler.handleRequest("aume", "", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
@@ -285,7 +285,7 @@ TEST(GetMethodByAuthorTests, MultipleIDOneMatch)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	MethodID method;
 	method.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
@@ -304,7 +304,7 @@ TEST(GetMethodByAuthorTests, MultipleIDOneMatch)
 	Utility::appendBy(inputFunctionChars, {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
+	std::string result = handler.handleRequest("aume", "", inputFunction, nullptr);
 
 	std::vector<char> outputChars = {};
 	Utility::appendBy(outputChars,
@@ -324,7 +324,7 @@ TEST(GetMethodByAuthorTests, OneIDMultipleMatches)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	MethodID method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
@@ -361,7 +361,7 @@ TEST(GetMethodByAuthorTests, OneIDMultipleMatches)
 	EXPECT_CALL(database, authorToMethods("47919e8f-7103-48a3-9514-3f2d9d49ac61")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("aume", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
+	std::string result = handler.handleRequest("aume", "", "47919e8f-7103-48a3-9514-3f2d9d49ac61", nullptr);
 
 	EXPECT_TRUE(result == HTTPStatusCodes::success(output1) || result == HTTPStatusCodes::success(output2));
 }
@@ -374,7 +374,7 @@ TEST(GetMethodByAuthorTests, MultipleIDsMultipleMatches)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	MethodID method1;
 	method1.hash = "2c7f46d4f57cf9e66b03213358c7ddb5";
@@ -406,7 +406,7 @@ TEST(GetMethodByAuthorTests, MultipleIDsMultipleMatches)
 					  {"47919e8f-7103-48a3-9514-3f2d9d49ac61", "41ab7373-8f24-4a03-83dc-621036d99f34"},
 					  ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("aume", inputFunction, nullptr);
+	std::string result = handler.handleRequest("aume", "", inputFunction, nullptr);
 
 	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1,
@@ -442,11 +442,11 @@ TEST(GetMethodByAuthorTests, IncorrectInput)
 	RequestHandler handler;
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string output = "Error parsing author id: 41ab73738f244a0383dc621036d99f34";
 
 	// Test if the output is correct.
-	std::string result = handler.handleRequest("aume", "41ab73738f244a0383dc621036d99f34", nullptr);
+	std::string result = handler.handleRequest("aume", "", "41ab73738f244a0383dc621036d99f34", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::clientError(output));
 }

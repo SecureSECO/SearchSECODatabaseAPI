@@ -12,7 +12,7 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
-#define MAX_THREADS 32
+#define MAX_THREADS 16
 #define HASHES_INSERT_MAX 1000
 
 using namespace types;
@@ -157,7 +157,7 @@ private:
 	/// <param name="parserVersion"> The version of the parser. </param>
 	/// <param name="newProject"> Indication if the project is new or not. </param>
 	void handleSelectMethodQueryResult(CassFuture *queryFuture, MethodIn method, ProjectIn project,
-									   long long prevVersion, long long parserVersion, bool newProject);
+									   long long prevVersion, long long parserVersion, bool &newProject);
 
 	/// <summary>
 	/// Handles the result obtained by performing the select unchanged methods query.

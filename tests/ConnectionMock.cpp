@@ -19,15 +19,13 @@ public:
 
 	MOCK_METHOD(void, sendData, (const std::string &data, boost::system::error_code &error));
 	MOCK_METHOD(void, start, (RequestHandler *handler, pointer thisPointer), ());
-	MOCK_METHOD(std::string, getIp, (), ());
 	
 	TcpConnectionMock(boost::asio::io_context &iocon) : TcpConnection(iocon)
 	{
 		ON_CALL(*this, start).WillByDefault([this](RequestHandler *handler, pointer thisPointer) 
 		{
 			usleep(500000);
-		});	
-		ON_CALL(*this, getIp).WillByDefault([this]() {return "127.0.0.1";});
+		});
 	};
 };
 

@@ -34,9 +34,9 @@ TEST(RaftTests, BecomeLeader)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler raftHandler;
-	raftHandler.initialize(&database, &jddatabase, nullptr);
+	raftHandler.initialize(&database, &jddatabase, nullptr, nullptr);
 	{
-		RAFTConsensus raft;
+		RAFTConsensus raft(nullptr);
 		raft.start(&raftHandler, {{TEST_IP, "-1"}}, false);
 
 		ASSERT_TRUE(raft.isLeader());
@@ -53,11 +53,11 @@ TEST(RaftTests, AcceptConnection)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 
 	TcpConnectionMock* connMock = new TcpConnectionMock(ioCon);
 	{
-		RAFTConsensus raft;
+		RAFTConsensus raft(nullptr);
 		raft.start(&handler, {}, true);
 
 		ASSERT_TRUE(raft.isLeader());
@@ -65,9 +65,42 @@ TEST(RaftTests, AcceptConnection)
 		TcpConnection::pointer connection = TcpConnection::pointer(connMock);
 		boost::system::error_code err;
 
-		std::string resp = raft.connectNewNode(connection, "-1" + entryDelimiter);
+		std::string resp = raft.connectNewNode(connection, "127.0.0.1" + fieldDelimiter + "-1" + entryDelimiter);
 
 		EXPECT_EQ(resp, RESPONSE_OK + fieldDelimiter + TEST_IP + fieldDelimiter + "-1" + entryDelimiter);
+	}
+	delete connMock;
+}
+
+// Test whether the current ips are returned correctly.
+TEST(RaftTests, GetCurrentIPs)
+{
+	// Set up the test.
+	errno = 0;
+
+	boost::asio::io_context ioCon;
+	MockDatabase database;
+	MockJDDatabase jddatabase;
+	RequestHandler handler;
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
+
+	TcpConnectionMock *connMock = new TcpConnectionMock(ioCon);
+	{
+		RAFTConsensus raft(nullptr);
+		raft.start(&handler, {}, true);
+
+		ASSERT_TRUE(raft.isLeader());
+
+		TcpConnection::pointer connection = TcpConnection::pointer(connMock);
+		boost::system::error_code err;
+
+		std::string resp = raft.connectNewNode(connection, "127.0.0.2" + fieldDelimiter + "-1" + entryDelimiter);
+
+		std::vector<std::string> ips = raft.getCurrentIPs();
+
+		std::vector<std::string> expectedOutput = {"127.0.0.2" + fieldDelimiter + "-1", "?"};
+
+		ASSERT_EQ(ips, expectedOutput);
 	}
 	delete connMock;
 }
@@ -78,7 +111,7 @@ TEST(RaftTests, ReadIpsFromFile)
 	// Set up the test.
 	errno = 0;
 
-	RAFTConsensus raft;
+	RAFTConsensus raft(nullptr);
 	
 	auto ips = raft.getIps("dotenvTestfile.txt");
 	std::string port = std::to_string(PORT);

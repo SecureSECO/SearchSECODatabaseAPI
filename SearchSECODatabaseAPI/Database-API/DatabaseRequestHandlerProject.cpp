@@ -13,7 +13,7 @@ Utrecht University within the Software Project course.
 #include <thread>
 #include <regex>
 
-std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request)
+std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request, std::string client)
 {
 	std::vector<Hash> hashes = requestToHashes(request);
 	if (errno != 0)
@@ -35,7 +35,7 @@ std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request
 		return checkResult;
 	}
 
-	std::string uploadResult = handleUploadRequest(request);
+	std::string uploadResult = handleUploadRequest(request, client);
 	std::string uploadStatusCode = HTTPStatusCodes::getCode(uploadResult);
 
 	// Uploaded succeeded.
@@ -55,7 +55,7 @@ std::string DatabaseRequestHandler::handleCheckUploadRequest(std::string request
 	}
 }
 
-std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
+std::string DatabaseRequestHandler::handleUploadRequest(std::string request, std::string client)
 {
 	std::vector<std::string> dataEntries = Utility::splitStringOn(request, ENTRY_DELIMITER_CHAR);
 	// Check if project is valid.
@@ -94,6 +94,8 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 
 	std::queue<MethodIn> methodQueue;
 
+	std::map<std::string, int> extensionOccurences;
+
 	for (int i = 3; i < dataEntries.size(); i++)
 	{
 		MethodIn method = dataEntryToMethod(dataEntries[i]);
@@ -102,8 +104,14 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request)
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i-2) + ".");
 		}
 		
+		++extensionOccurences[getExtension(method.fileLocation)];
 		methodQueue.push(method);
 		project.hashes.push_back(method.hash);
+	}
+
+	for (std::pair<std::string, int> extension : extensionOccurences)
+	{
+		stats->methodCounter->Add({{"Node", stats->myIP}, {"Client", client}, {"Extension", extension.first}}).Increment(extension.second);
 	}
 
 	// Only upload if project and all methods are valid to prevent partial uploads.

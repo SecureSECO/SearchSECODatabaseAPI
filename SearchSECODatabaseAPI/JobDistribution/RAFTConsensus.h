@@ -6,10 +6,12 @@ Utrecht University within the Software Project course.
 
 #pragma once
 #include "Networking.h"
+#include "Statistics.h"
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <mutex>
+#include <prometheus/counter.h>
 
 #define RESPONSE_OK "ok"
 #define HEARTBEAT_TIME 1000000
@@ -19,10 +21,30 @@ Utrecht University within the Software Project course.
 class TcpConnection;
 class RequestHandler;
 
+/// <summary>
+/// Represents the data of a connection with another node.
+/// </summary>
+struct Connection
+{
+  public:
+	boost::shared_ptr<TcpConnection> connection;
+	std::string ip;
+	std::string port;
+
+	Connection(boost::shared_ptr<TcpConnection> conn, std::string ip, std::string port)
+		: connection(conn), ip(ip), port(port)
+	{
+	}
+};
+
 class RAFTConsensus
 {
 public:
 	~RAFTConsensus();
+
+	RAFTConsensus(Statistics *stats) : stats(stats)
+	{
+	}
 
 	/// <summary>
 	/// Starts RAFT. Will try to connect to a set list of IP's where we assume the leaders are.
@@ -44,7 +66,7 @@ public:
 	/// Will pass the given request on to the leader of the network.
 	/// </summary>
 	/// <returns> The string that the leader gives back. </returns>
-	virtual std::string passRequestToLeader(std::string requestType, std::string request);
+	virtual std::string passRequestToLeader(std::string requestType, std::string client, std::string request);
 
 	/// <summary>
 	/// Will handle a connect request by a new node that wants to join the network.
@@ -62,6 +84,21 @@ public:
 	/// </summary>
 	/// <returns> List of ips with port. </returns>
 	virtual std::vector<std::pair<std::string, std::string>> getIps(std::string file = ".env");
+
+	/// <summary>
+	/// Returns the ips currently know to this api.
+	/// </summary>
+	/// <returns> List of ips with port. </returns>
+	virtual std::vector<std::string> getCurrentIPs();
+
+	/// <summary>
+	/// Gets the ip of this node.
+	/// </summary>
+	/// <returns>The own ip address. </returns>
+	virtual std::string getMyIP()
+	{
+		return myIp;
+	}
 
 private:
 	/// <summary>
@@ -128,12 +165,13 @@ private:
 	/// <summary>
 	/// Converts a connection to a string that can be used to connect to the other side of the connection.
 	/// </summary>
-	std::string connectionToString(boost::shared_ptr<TcpConnection> connection, std::string port);
+	std::string connectionToString(Connection connection);
 
 	bool leader;
 	bool stop = false;
 	bool started = false;
 	std::mutex mtx;
+	Statistics *stats;
 
 	// Non-leader variables.
 	NetworkHandler* networkhandler;
@@ -141,7 +179,7 @@ private:
 	std::vector<std::pair<std::string, std::string>> nonLeaderNodes;
 
 	// Leader variables.
-	std::vector<std::pair<boost::shared_ptr<TcpConnection>, std::string>>* others;
+	std::vector<Connection>* others;
 	RequestHandler* requestHandler;
 	std::string nodeConnectionChange = "";
 };

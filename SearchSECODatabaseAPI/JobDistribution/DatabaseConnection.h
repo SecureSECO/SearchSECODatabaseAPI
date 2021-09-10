@@ -10,7 +10,7 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
-#define MAX_THREADS 32
+#define MAX_THREADS 16
 
 /// <summary>
 /// Handles interaction with database when dealing with job requests.
@@ -38,6 +38,16 @@ public:
 	/// </summary>
 	virtual int getNumberOfJobs();
 
+	/// <summary>
+	/// Returns the current crawl ID in the database.
+	/// </summary>
+	virtual int getCrawlID();
+
+	/// <summary>
+	/// Sets the crawl ID in the database to the given value.
+	/// </summary>
+	virtual void setCrawlID(int id);
+
 private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
@@ -58,5 +68,7 @@ private:
 	const CassPrepared *preparedDeleteTopJob;
 	const CassPrepared *preparedAmountOfJobs;
 	const CassPrepared *preparedUploadJob;
+	const CassPrepared *preparedCrawlID;
+	const CassPrepared *preparedUpdateCrawlID;
 };
 

@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "DatabaseConnection.h"
 #include "RAFTConsensus.h"
 
+#include <mutex>
 #include <boost/shared_ptr.hpp>
 
 #define MIN_AMOUNT_JOBS 500
@@ -23,13 +24,18 @@ public:
 	/// <summary>
 	/// Constructor method.
 	/// </summary>
-	JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, std::string ip,
-					  int port);
+	JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, Statistics *stats,
+					std::string ip, int port);
 
 	/// <summary>
 	/// Handles request from new node to connect to the network.
 	/// </summary>
 	std::string handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request);
+
+	/// <summary>
+	/// Handles request for the ip adresses in the network.
+	/// </summary>
+	std::string handleGetIPsRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Handles request to upload one or more jobs with their priorities.
@@ -42,7 +48,20 @@ public:
 	/// <returns>
 	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
 	/// </returns>
-	std::string handleUploadJobRequest(std::string request, std::string data);
+	std::string handleUploadJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
+	/// Handles request to upload one or more jobs with their priorities.
+	/// </summary>
+	/// <param name="data">
+	/// Consists of url and priority pairs, the url and priority are separated by the FIELD_DELIMITER_CHAR ('?') and
+	/// the pairs by the ENTRY_DELIMITER_CHAR ('\n').
+	/// Data format is "url1?priority1'\n'url2?priority2'\n'..."
+	/// </param>
+	/// <returns>
+	/// Response to user whether the job(s) has/have been uploaded succesfully or not.
+	/// </returns>
+	std::string handleUploadJobRequest(std::string request, std::string client, std::vector<std::string> data);
 
 	/// <summary>
 	/// Handles request to give the top job from the queue.
@@ -54,7 +73,7 @@ public:
 	/// if the number of jobs is not enough and there is no crawler working.
 	/// Response is "NoJob" if there are no jobs and a crawler is already working.
 	/// </returns>
-	std::string handleGetJobRequest(std::string request, std::string data);
+	std::string handleGetJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Handles request to upload crawl data to the job queue.
@@ -66,7 +85,7 @@ public:
 	/// <returns>
 	/// Returns the result of handleUploadRequest.
 	/// </returns>
-	std::string handleCrawlDataRequest(std::string request, std::string data);
+	std::string handleCrawlDataRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
 	/// Variables describing the number of jobs in the jobqueue, the current crawlID
@@ -89,6 +108,8 @@ private:
 	RAFTConsensus *raft;
 	RequestHandler *requestHandler;
 	DatabaseConnection *database;
+	Statistics *stats;
+	std::mutex jobmtx;
 
 	/// <summary>
 	/// Tries to connect with database, if it fails it retries as many times as MAX_RETRIES.

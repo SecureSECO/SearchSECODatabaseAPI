@@ -83,7 +83,7 @@ TEST(CheckRequestTests, SingleHashRequest)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 
@@ -98,7 +98,7 @@ TEST(CheckRequestTests, SingleHashRequest)
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
+	std::string result = handler.handleRequest("chck", "", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success(output1));
 
 }
@@ -112,7 +112,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v1;
 	v1.push_back(testMethod1);
 	std::vector<MethodOut> v2;
@@ -131,7 +131,7 @@ TEST(CheckRequestTests, MultipleHashRequest)
 		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
 		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
+	std::string result = handler.handleRequest("chck", "", inputFunction, nullptr);
 
 	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1,
@@ -172,13 +172,13 @@ TEST(CheckRequestTests, SingleHashNoMatch)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v;
 
 	EXPECT_CALL(database,hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
 
 	// Check if the output is correct.
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
+	std::string result = handler.handleRequest("chck", "", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 	EXPECT_EQ(result, HTTPStatusCodes::success("No results found."));
 }
 
@@ -189,7 +189,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v;
 	std::vector<MethodOut> v2;
 	v.push_back(testMethod2);
@@ -204,7 +204,7 @@ TEST(CheckRequestTests, MultipleHashOneMatch)
 		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
 		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
+	std::string result = handler.handleRequest("chck", "", inputFunction, nullptr);
 
 	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1,
@@ -245,13 +245,13 @@ TEST(CheckRequestTests, OneHashMultipleMatches)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v;
 	v.push_back(testMethod1);
 	v.push_back(testMethod4);
 
 	EXPECT_CALL(database, hashToMethods("2c7f46d4f57cf9e66b03213358c7ddb5")).WillOnce(testing::Return(v));
-	std::string result = handler.handleRequest("chck", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
+	std::string result = handler.handleRequest("chck", "", "2c7f46d4f57cf9e66b03213358c7ddb5", nullptr);
 
 	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1,
@@ -283,7 +283,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 	MockDatabase database;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, nullptr);
+	handler.initialize(&database, &jddatabase, nullptr, nullptr);
 	std::vector<MethodOut> v1;
 	std::vector<MethodOut> v2;
 	std::vector<MethodOut> v3;
@@ -304,7 +304,7 @@ TEST(CheckRequestTests, MultipleHashesMultipleMatches)
 		{"2c7f46d4f57cf9e66b03213358c7ddb5", "06f73d7ab46184c55bf4742b9428a4c0", "137fed017b6159acc0af30d2c6b403a5"},
 		ENTRY_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string inputFunction(inputFunctionChars.begin(), inputFunctionChars.end());
-	std::string result = handler.handleRequest("chck", inputFunction, nullptr);
+	std::string result = handler.handleRequest("chck", "", inputFunction, nullptr);
 
 	std::vector<char> outputChars1 = {};
 	Utility::appendBy(outputChars1,
@@ -362,6 +362,6 @@ TEST(CheckRequestTests, InvalidHash)
 	std::string request = "hello_I'm_an_invalid_hash";
 
 	// Check if the output is correct.
-	std::string output = handler.handleRequest("chck", request, nullptr);
+	std::string output = handler.handleRequest("chck", "", request, nullptr);
 	ASSERT_EQ(output, HTTPStatusCodes::clientError("Invalid hash presented."));
 }

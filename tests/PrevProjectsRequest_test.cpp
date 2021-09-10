@@ -26,7 +26,7 @@ TEST(ExtractPrevProjectsRequestTests, Empty)
 	std::string expected1 = "No results found.";
 
 	// Check if the output is as expected.
-	std::string output1 = handler.handleRequest("gppr", input1, nullptr);
+	std::string output1 = handler.handleRequest("gppr", "", input1, nullptr);
 	ASSERT_EQ(output1, HTTPStatusCodes::success(expected1));
 }
 
@@ -40,7 +40,7 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID2 = 1;
 
@@ -67,7 +67,7 @@ TEST(ExtractPrevProjectsRequestTests, SingleExistingProject)
 	EXPECT_CALL(database, prevProject(projectID2)).WillOnce(testing::Return(project2));
 
 	// Check if the output is as expected.
-	std::string output2 = handler.handleRequest("gppr", input2, nullptr);
+	std::string output2 = handler.handleRequest("gppr", "", input2, nullptr);
 	ASSERT_EQ(output2, HTTPStatusCodes::success(expected2));
 }
 
@@ -81,7 +81,7 @@ TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID3 = 2497301;
 
@@ -96,7 +96,7 @@ TEST(ExtractPrevProjectsRequestTests, SingleNonExistingProject)
 	EXPECT_CALL(database, prevProject(projectID3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, project));
 
 	// Check if the output is as expected.
-	std::string output3 = handler.handleRequest("gppr", input3, nullptr);
+	std::string output3 = handler.handleRequest("gppr", "", input3, nullptr);
 	ASSERT_EQ(output3, HTTPStatusCodes::success(expected3));
 }
 
@@ -110,7 +110,7 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 	MockRaftConsensus raftConsensus;
 	MockJDDatabase jddatabase;
 	RequestHandler handler;
-	handler.initialize(&database, &jddatabase, &raftConsensus);
+	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	ProjectID projectID4_1 = 2;
 	ProjectID projectID4_2 = 3;
@@ -178,7 +178,7 @@ TEST(ExtractPrevProjectsRequestTests, MultipleProjects)
 	EXPECT_CALL(database, prevProject(projectID4_2)).WillOnce(testing::Return(project4_2));
 	EXPECT_CALL(database, prevProject(projectID4_3)).WillOnce(testing::SetErrnoAndReturn(ERANGE, project4_3));
 	EXPECT_CALL(database, prevProject(projectID4_4)).WillOnce(testing::Return(project4_4));
-	std::string output4 = handler.handleRequest("gppr", input4, nullptr);
+	std::string output4 = handler.handleRequest("gppr", "", input4, nullptr);
 	std::vector<std::string> entries4 =
 		Utility::splitStringOn(HTTPStatusCodes::getMessage(output4), ENTRY_DELIMITER_CHAR);
 
@@ -208,6 +208,6 @@ TEST(ExtractPrevProjectsRequestTests, WrongArgumentTypes)
 	std::string expected6 = "The request failed. For each project, the projectID should be a long long int.";
 
 	// Check if the output is as expected.
-	std::string output6 = handler.handleRequest("gppr", input, nullptr);
+	std::string output6 = handler.handleRequest("gppr", "", input, nullptr);
 	ASSERT_EQ(output6, HTTPStatusCodes::clientError(expected6));
 }

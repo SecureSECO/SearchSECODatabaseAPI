@@ -4,6 +4,7 @@ project ("Database-API")
 
 add_executable (Database-APIexe
 	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/Statistics.cpp" "SearchSECODatabaseAPI/General/Statistics.h"
 	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
 	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
 	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
@@ -22,6 +23,7 @@ add_executable (Database-APIexe
 	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 add_library(Database-API-library
 	"SearchSECODatabaseAPI/General/Database-API.cpp" "SearchSECODatabaseAPI/General/Database-API.h"
+	"SearchSECODatabaseAPI/General/Statistics.cpp" "SearchSECODatabaseAPI/General/Statistics.h"
 	"SearchSECODatabaseAPI/General/ConnectionHandler.cpp" "SearchSECODatabaseAPI/General/ConnectionHandler.h"
 	"SearchSECODatabaseAPI/General/RequestHandler.cpp" "SearchSECODatabaseAPI/General/RequestHandler.h"
 	"SearchSECODatabaseAPI/General/Utility.cpp" "SearchSECODatabaseAPI/General/Utility.h"
@@ -47,6 +49,15 @@ target_link_libraries(Database-APIexe /usr/lib/x86_64-linux-gnu/libcassandra.so.
 include_directories("SearchSECODatabaseAPI/Database-API")
 include_directories("SearchSECODatabaseAPI/General")
 include_directories("SearchSECODatabaseAPI/JobDistribution")
+
+set(CURL_LIBRARY "-lcurl")
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIR})
+target_link_libraries(Database-APIexe ${CURL_LIBRARIES})
+
+find_package(prometheus-cpp CONFIG REQUIRED)
+
+target_link_libraries(Database-APIexe prometheus-cpp::pull)
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 include(external/CodeCoverage.cmake)

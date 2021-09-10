@@ -65,6 +65,15 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
 ) 
 WITH CLUSTERING ORDER BY (priority ASC);
 
+CREATE TABLE IF NOT EXISTS jobs.variables 
+(
+	name text,
+	value int,
+	PRIMARY KEY (name)
+);
+
+INSERT INTO jobs.variables (name, value) VALUES ('crawlID', 0);
+
 INSERT INTO projectData.methods (method_hash, projectID, startVersionTime, startVersionHash, endVersionTime, endVersionHash, name, file, lineNumber, authors, parserversion) VALUES 
 (2c7f46d4-f57c-f9e6-6b03-213358c7ddb5, 1, 5000000000000, '9e350b124404f40a114509910619f641', 5000000000000, '9e350b124404f40a114509910619f641', 'M1', 'P1/M1.cpp', 1, 
 { 68bd2db6-fe91-47d2-a134-cf82b104f547 }, 1);
