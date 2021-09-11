@@ -11,6 +11,7 @@ Utrecht University within the Software Project course.
 #include <iostream>
 #include <chrono>
 #include <unistd.h>
+#include <tuple>
 
 void DatabaseConnection::connect(std::string ip, int port)
 {
@@ -60,37 +61,48 @@ void DatabaseConnection::connect(std::string ip, int port)
 
 void DatabaseConnection::setPreparedStatements()
 {
-	CassFuture *prepareFuture =
-		cass_session_prepare(connection, "SELECT * FROM jobs.jobsqueue WHERE constant = 1 LIMIT 1");
-	CassError rc = cass_future_error_code(prepareFuture);
-	preparedGetTopJob = cass_future_get_prepared(prepareFuture);
+	preparedGetTopJob = prepareStatement("SELECT * FROM jobs.jobsqueue WHERE constant = 1 LIMIT 1");
 
-	prepareFuture = cass_session_prepare(
-		connection, "DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
-	rc = cass_future_error_code(prepareFuture);
-	preparedDeleteTopJob = cass_future_get_prepared(prepareFuture);
+	preparedDeleteTopJob =
+		prepareStatement("DELETE FROM jobs.jobsqueue WHERE constant = 1 AND priority = ? AND jobid = ?");
 
-	prepareFuture = cass_session_prepare(
-		connection, "INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES (uuid(), ?, ?, 1)");
-	rc = cass_future_error_code(prepareFuture);
-	preparedUploadJob = cass_future_get_prepared(prepareFuture);
+	preparedAddCurrentJob = prepareStatement(
+		"INSERT INTO jobs.currentjobs (jobid, time, timeout, priority, url, retries) VALUES (?, ?, ?, ?, ?, ?)");
 
-	prepareFuture = cass_session_prepare(connection, "SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
-	rc = cass_future_error_code(prepareFuture);
-	preparedAmountOfJobs = cass_future_get_prepared(prepareFuture);
+	preparedAddFailedJob = prepareStatement(
+		"INSERT INTO jobs.failedjobs (jobid, time, priority, url, retries, reasonID, reasonData) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
-	prepareFuture = cass_session_prepare(connection, "SELECT * FROM jobs.variables WHERE name = 'crawlID'");
-	rc = cass_future_error_code(prepareFuture);
-	preparedCrawlID = cass_future_get_prepared(prepareFuture);
+	preparedUploadJob =
+		prepareStatement("INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES (uuid(), ?, ?, 1, ?, ?)");
 
-	prepareFuture = cass_session_prepare(connection, "UPDATE jobs.variables SET value = ? WHERE name = 'crawlID'");
-	rc = cass_future_error_code(prepareFuture);
-	preparedUpdateCrawlID = cass_future_get_prepared(prepareFuture);
+	preparedAmountOfJobs = prepareStatement("SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
 
-	cass_future_free(prepareFuture);
+	preparedCrawlID = prepareStatement("SELECT * FROM jobs.variables WHERE name = 'crawlID'");
+
+	preparedUpdateCrawlID = prepareStatement("UPDATE jobs.variables SET value = ? WHERE name = 'crawlID'");
 }
 
-std::string DatabaseConnection::getTopJob()
+const CassPrepared *DatabaseConnection::prepareStatement(std::string query)
+{
+	CassFuture *prepareFuture = cass_session_prepare(connection, query.c_str());
+	CassError rc = cass_future_error_code(prepareFuture);
+	if (rc != 0)
+	{
+		// An error occurred which is handled below.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(prepareFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to prepare job query: '%.*s'\n", (int)messageLength, message);
+	}
+
+	const CassPrepared *result = cass_future_get_prepared(prepareFuture);
+
+	cass_future_free(prepareFuture);
+
+	return result;
+}
+
+std::tuple<std::string, std::string, long long, long long> DatabaseConnection::getTopJob()
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedGetTopJob);
@@ -104,20 +116,41 @@ std::string DatabaseConnection::getTopJob()
 		size_t len;
 		CassUuid id;
 		cass_int64_t priority;
+		cass_int32_t retries;
+		cass_int64_t timeout;
+
 		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
 		cass_value_get_int64(cass_row_get_column_by_name(row, "priority"), &priority);
+		cass_value_get_int32(cass_row_get_column_by_name(row, "retries"), &retries);
+		cass_value_get_int64(cass_row_get_column_by_name(row, "timeout"), &timeout);
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
+		
+		long long currTime = Utility::getCurrentTimeMilliSeconds();
+		
+		std::string resultUrl(url, len);
+
+		// Add job to list of current jobs.
+		addCurrentJob(id, currTime, timeout, priority, resultUrl, retries);
+		if (errno != 0)
+		{
+			return std::make_tuple("", "", 0, 0);
+		}
 
 		// Delete the job that is returned.
 		deleteTopJob(id, priority);
 		if (errno != 0)
 		{
-			return "";
+			// Do not delete current job, to prevent a newer version of the job from being accidentally deleted.
+			return std::make_tuple("", "", 0, 0);
 		}
-		std::string resultJob(url, len);
-		return resultJob;
+
+		char jobid[CASS_UUID_STRING_LENGTH];
+		cass_uuid_string(id, jobid);
+
+		// Return URL and timeout to send to the worker.
+		return std::make_tuple(jobid, resultUrl, currTime, timeout);
 	}
 	else
 	{
@@ -128,7 +161,7 @@ std::string DatabaseConnection::getTopJob()
 		fprintf(stderr, "Unable to get job: '%.*s'\n", (int)messageLength, message);
 		cass_statement_free(query);
 		errno = ENETUNREACH;
-		return "";
+		return std::make_tuple("", "", 0, 0);
 	}
 }
 
@@ -152,6 +185,67 @@ void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 	{
 		// An error occurred, which is handled below.
 		printf("Query result: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+	cass_future_free(queryFuture);
+}
+
+void DatabaseConnection::addCurrentJob(CassUuid id, long long currTime, long long timeout, long long priority, std::string url, int retries)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(preparedAddCurrentJob);
+
+	cass_statement_bind_uuid_by_name(query, "jobid", id);
+	cass_statement_bind_int64_by_name(query, "time", currTime);
+	cass_statement_bind_int64_by_name(query, "timeout", timeout);
+	cass_statement_bind_int64_by_name(query, "priority", priority);
+	cass_statement_bind_string_by_name(query, "url", url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", retries);	
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Unable to add current job: %s\n", cass_error_desc(rc));
+		errno = ENETUNREACH;
+	}
+	cass_future_free(queryFuture);
+}
+
+void DatabaseConnection::addFailedJob(std::string id, long long currTime, long long priority,
+									   std::string url, int retries, int reasonID, std::string reasonData)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(preparedAddFailedJob);
+
+	CassUuid jobid;
+	cass_uuid_from_string(id.c_str(), &jobid);
+
+	cass_statement_bind_uuid_by_name(query, "jobid", id);
+	cass_statement_bind_int64_by_name(query, "time", currTime);
+	cass_statement_bind_int64_by_name(query, "priority", priority);
+	cass_statement_bind_string_by_name(query, "url", url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", retries);
+	cass_statement_bind_int32_by_name(query, "reasonID", reasonID);
+	cass_statement_bind_string_by_name(query, "reasonData", reasonData.c_str());
+
+	CassFuture *queryFuture = cass_session_execute(connection, query);
+
+	// Statement objects can be freed immediately after being executed.
+	cass_statement_free(query);
+
+	// This will block until the query has finished.
+	CassError rc = cass_future_error_code(queryFuture);
+
+	if (rc != 0)
+	{
+		printf("Unable to add failed job: %s\n", cass_error_desc(rc));
 		errno = ENETUNREACH;
 	}
 	cass_future_free(queryFuture);
@@ -238,15 +332,17 @@ void DatabaseConnection::setCrawlID(int id)
 	}
 }
 
-void DatabaseConnection::uploadJob(std::string url, long long priority)
+void DatabaseConnection::uploadJob(std::string url, long long priority, int retries, long long timeout)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedUploadJob);
 
 	auto currentTime = Utility::getCurrentTimeMilliSeconds();
 	long long resultPriority = currentTime - priority;
-	cass_statement_bind_int64(query, 0, resultPriority);
-	cass_statement_bind_string(query, 1, url.c_str());
+	cass_statement_bind_int64_by_name(query, "priority", resultPriority);
+	cass_statement_bind_string_by_name(query, "url", url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", retries);
+	cass_statement_bind_int64_by_name(query, "timeout", timeout);
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 

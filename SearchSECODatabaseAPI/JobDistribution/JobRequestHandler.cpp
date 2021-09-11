@@ -1,16 +1,16 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-Â© Copyright Utrecht University (Department of Information and Computing Sciences)
+© Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "Definitions.h"
 #include "JobRequestHandler.h"
+#include "Definitions.h"
 #include "HTTPStatus.h"
 #include "Utility.h"
 
-JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database, Statistics *stats,
-									 std::string ip, int port)
+JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database,
+									 Statistics *stats, std::string ip, int port)
 {
 	this->raft = raft;
 	this->requestHandler = requestHandler;
@@ -88,6 +88,50 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	return raft->passRequestToLeader(request, client, data);
 }
 
+std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::string client, std::string data)
+{
+	// If you are the leader, check if there is a job left.
+	if (raft->isLeader())
+	{
+		std::vector<std::string> splitted = Utility::splitStringOn(data, FIELD_DELIMITER_CHAR);
+		std::string jobid = splitted[0];
+		long long jobTime = Utility::safeStoll(splitted[1]);
+		int reasonID = Utility::safeStoi(splitted[2]);
+		std::string reasonData = splitted[3];
+
+		auto job = getCurrentJobWithRetry(jobid, jobTime);//TODO
+
+		// If job was not present in currentjobs,
+		if (job == nullptr)
+		{
+			// a newer job was already given out. Signal this to the worker.
+			std::cout << "Received unknown job with ID: " << jobid << std::endl;
+
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+
+		// Check if the worker failed to complete the job.
+		if (reasonID != 0)
+		{
+			addFailedJobWithRetry(jobid, jobTime, job.priority, job.url, job.retries, reasonID, reasonData);
+
+			if (errno != 0)
+			{
+				std::cout << "Could not store failed job: " << data << std::endl;
+				return HTTPStatusCodes::databaseError("Job could not be added to failed jobs list.");
+			}
+
+			return HTTPStatusCodes::success("Job failed succesfully.");
+		}
+		else
+		{
+			return HTTPStatusCodes::success("Job finished succesfully.");
+		}
+	}
+	// If you are not the leader, pass the request to the leader.
+	return raft->passRequestToLeader(request, client, data);
+}
+
 std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::string client, std::string data)
 {
 	if (raft->isLeader())
@@ -102,6 +146,7 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 {
 	std::vector<std::string> urls;
 	std::vector<int> priorities;
+	std::vector<long long> timeouts;
 	for (int i = 0; i < data.size(); i++)
 	{
 		std::vector<std::string> dataSecondSplit = Utility::splitStringOn(data[i], FIELD_DELIMITER_CHAR);
@@ -118,12 +163,24 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 		{
 			return HTTPStatusCodes::clientError("A job has an invalid priority, no jobs have been added to the queue.");
 		}
+
+		long long timeout = Utility::safeStoll(dataSecondSplit[2]);
+
+		// Check if timeout could be parsed correctly.
+		if (errno == 0)
+		{
+			timeouts.push_back(timeout);
+		}
+		else
+		{
+			return HTTPStatusCodes::clientError("A job has an invalid timeout, no jobs have been added to the queue.");
+		}
 	}
 
 	// Call to the database to upload jobs.
 	for (int i = 0; i < urls.size(); i++)
 	{
-		if (tryUploadJobWithRetry(urls[i], priorities[i]))
+		if (tryUploadJobWithRetry(urls[i], priorities[i], 0, timeouts[i]))
 		{
 			numberOfJobs += 1;
 		}
@@ -202,27 +259,30 @@ std::string JobRequestHandler::handleCrawlDataRequest(std::string request, std::
 
 void JobRequestHandler::updateCrawlID(int id)
 {
-	crawlID = id;
 	timeLastCrawl = -1;
-	database->setCrawlID(id);
+	if (crawlID != id)
+	{
+		crawlID = id;
+		database->setCrawlID(id);
+	}
 }
 
 void JobRequestHandler::connectWithRetry(std::string ip, int port)
 {
 	errno = 0;
 	database->connect(ip, port);
-	int retries = 0;
+	int tries = 0;
 	if (errno != 0)
 	{
-		while (retries < MAX_RETRIES)
+		while (tries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
+			usleep(pow(2, tries) * RETRY_SLEEP);
 			database->connect(ip, port);
 			if (errno == 0)
 			{
 				return;
 			}
-			retries++;
+			tries++;
 		}
 		throw "Unable to connect to database.";
 	}
@@ -231,43 +291,77 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 
 std::string JobRequestHandler::getTopJobWithRetry()
 {
-	std::string url = database->getTopJob();
-	int retries = 0;
+	std::tuple<std::string, std::string, long long, long long> topJob = database->getTopJob();
+	std::string jobid = std::get<0>(topJob);
+	std::string url = std::get<1>(topJob);
+	long long currTime = std::get<2>(topJob);
+	long long timeout = std::get<3>(topJob);
+	int tries = 0;
 	if (errno != 0)
 	{
-		while (retries < MAX_RETRIES)
+		while (tries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			url = database->getTopJob();
+			usleep(pow(2, tries) * RETRY_SLEEP);
+			topJob = database->getTopJob();
+			jobid = std::get<0>(topJob);
+			url = std::get<1>(topJob);
+			currTime = std::get<2>(topJob);
+			timeout = std::get<3>(topJob);
 			if (errno == 0)
 			{
-				return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
+				return HTTPStatusCodes::success(
+					std::string("Spider") + FIELD_DELIMITER_CHAR + jobid + FIELD_DELIMITER_CHAR + url +
+					FIELD_DELIMITER_CHAR + std::to_string(currTime) + FIELD_DELIMITER_CHAR + std::to_string(timeout));
 			}
-			retries++;
+			tries++;
 		}
 		return HTTPStatusCodes::serverError("Unable to get job from database.");
 	}
 	numberOfJobs -= 1;
-	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + url);
+	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + jobid + FIELD_DELIMITER_CHAR + url +
+									FIELD_DELIMITER_CHAR + std::to_string(currTime) + FIELD_DELIMITER_CHAR +
+									std::to_string(timeout));
 }
 
-bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority)
+bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
 {
-	int retries = 0;
-	database->uploadJob(url, priority);
+	int tries = 0;
+	database->uploadJob(url, priority, retries, timeout);
 	if (errno != 0)
 	{
-		while (retries < MAX_RETRIES)
+		while (tries < MAX_RETRIES)
 		{
-			usleep(pow(2,retries) * RETRY_SLEEP);
-			database->uploadJob(url, priority);
+			usleep(pow(2, tries) * RETRY_SLEEP);
+			database->uploadJob(url, priority, retries, timeout);
 			if (errno == 0)
 			{
 				return true;
 			}
-			retries++;
+			tries++;
 		}
 		return false;
 	}
 	return true;
+}
+
+void JobRequestHandler::addFailedJobWithRetry(std::string id, long long currTime, long long priority, std::string url,
+											  int retries, int reasonID, std::string reasonData)
+{
+	int tries = 0;
+	database->addFailedJob(id, currTime, prioritym url, retries, reasonID, reasonData);
+	if (errno != 0)
+	{
+		while (tries < MAX_RETRIES)
+		{
+			usleep(pow(2, tries) * RETRY_SLEEP);
+			database->addFailedJob(id, currTime, prioritym url, retries, reasonID, reasonData);
+			if (errno == 0)
+			{
+				return;
+			}
+			tries++;
+		}
+		return;
+	}
+	return;
 }

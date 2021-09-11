@@ -29,6 +29,7 @@ enum ERequestType
 	eUploadJob,
 	eUploadCrawlData,
 	eGetTopJob,
+	eFinishJob,
 	eExtractProjects,
 	eGetAuthor,
 	eGetMethodByAuthor,

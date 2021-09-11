@@ -130,7 +130,7 @@ private:
 	/// If it succeeds, it returns true.
 	/// If it fails, it returns false.
 	/// </summary>
-	bool tryUploadJobWithRetry(std::string url, int priority);
+	bool tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
 
 	long long timeLastRecount = -1;
 };

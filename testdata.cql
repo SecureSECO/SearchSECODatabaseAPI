@@ -61,9 +61,35 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
 	priority bigint,
 	url text,
 	constant int,
-	PRIMARY KEY ((constant), priority, jobid) 
-) 
+	retries int,
+	timeout bigint,
+	PRIMARY KEY ((constant), priority, jobid)
+)
 WITH CLUSTERING ORDER BY (priority ASC);
+
+CREATE TABLE IF NOT EXISTS jobs.currentjobs 
+(
+	jobid UUID,
+	time timestamp,
+	timeout bigint,
+	priority bigint,
+	url text,
+	retries int,	
+	PRIMARY KEY ((jobid)) 
+);
+
+CREATE TABLE IF NOT EXISTS jobs.failedjobs 
+(
+	jobid UUID,
+	time timestamp,
+	priority bigint,
+	url text,
+	retries int,
+	reasonID int,
+	readonData text,
+	PRIMARY KEY ((jobid), time) 
+)
+WITH CLUSTERING ORDER BY (time DESC);
 
 CREATE TABLE IF NOT EXISTS jobs.variables 
 (
