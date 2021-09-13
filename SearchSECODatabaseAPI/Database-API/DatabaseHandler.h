@@ -12,7 +12,6 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
-#define MAX_THREADS 16
 #define HASHES_INSERT_MAX 1000
 
 using namespace types;

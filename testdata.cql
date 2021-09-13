@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS jobs.failedjobs
 (
 	jobid UUID,
 	time timestamp,
+	timeout bigint,
 	priority bigint,
 	url text,
 	retries int,

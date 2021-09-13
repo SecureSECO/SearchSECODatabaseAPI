@@ -5,52 +5,14 @@ Utrecht University within the Software Project course.
 */
 
 #include "DatabaseHandler.h"
+#include "DatabaseUtility.h"
 
 #include <iostream>
 #include <unistd.h>
 
 void DatabaseHandler::connect(std::string ip, int port)
 {
-	errno = 0;
-	CassFuture *connectFuture = NULL;
-	CassCluster *cluster = cass_cluster_new();
-	connection = cass_session_new();
-
-	// Add contact points.
-	cass_cluster_set_contact_points(cluster, ip.c_str());
-	cass_cluster_set_port(cluster, port);
-	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
-	cass_cluster_set_consistency(cluster, CASS_CONSISTENCY_QUORUM);
-	cass_cluster_set_num_threads_io(cluster, MAX_THREADS);
-
-	std::cout << "Connecting to the database." << std::endl;
-
-	// Provide the cluster object as configuration to connect the session.
-	connectFuture = cass_session_connect_keyspace(connection, cluster, "projectdata");
-
-	CassError rc = cass_future_error_code(connectFuture);
-
-	if (rc != CASS_OK)
-	{
-		std::cout << "Could not connect to the database." << std::endl;
-		std::cout << "Retrying after 45 seconds have elapsed.." << std::endl;
-		usleep(45000000);
-		std::cout << "Retrying now." << std::endl;
-
-		connectFuture = cass_session_connect_keyspace(connection, cluster, "projectdata");
-
-		CassError rc = cass_future_error_code(connectFuture);
-
-		if (rc != CASS_OK)
-		{
-			// An error occurred, display connection error message.
-			const char *message;
-			size_t messageLength;
-			cass_future_error_message(connectFuture, &message, &messageLength);
-			fprintf(stderr, "Connect error: '%.*s'\n", (int)messageLength, message);
-			errno = ENETUNREACH;
-		}
-	}
+	connection = DatabaseUtility::connect(ip, port, "projectdata");
 	setPreparedStatements();
 }
 

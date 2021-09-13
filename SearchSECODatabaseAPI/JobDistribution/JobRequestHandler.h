@@ -76,6 +76,24 @@ public:
 	std::string handleGetJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
+	/// 
+	/// </summary>
+	std::string handleUpdateJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
+	/// Handles request to indicate the worker is finished with a job, successfully or not.
+	/// </summary>
+	/// <returns>
+	/// Response is "Job not currently expected." if a newer version of the job was
+	/// given out, or if the job is not known to have been given out. Reponse is
+	/// "Job finished successfully" on success and "Job failed successfully" on 
+	/// a client-side failure, which was correctly handled and uploaded.
+	/// For a client-side failure, when the database fails to upload the current job
+	/// to the failedjobs table, "Job could not be added to failed jobs list." is returned.
+	/// </returns>
+	std::string handleFinishJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
 	/// Handles request to upload crawl data to the job queue.
 	/// </summary>
 	/// <param name="data">
@@ -131,6 +149,27 @@ private:
 	/// If it fails, it returns false.
 	/// </summary>
 	bool tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
+
+	/// <summary>
+	/// Attempts to retrieve a match from the currentjobs table with a matching jobid.
+	/// </summary>
+	/// <param name="jobid">The jobid to match on.</param>
+	/// <returns>
+	/// A Job object containing information on the current job. 
+	/// Returns a nullptr if no such job was found.
+	/// </returns>
+	Job getCurrentJobWithRetry(std::string jobid);
+
+	/// <summary>
+	/// Adds the given job to the currentjobs table.
+	/// </summary>
+	long long addCurrentJobWithRetry(Job job);
+
+	/// <summary>
+	/// Adds a job with the given parameters to the failedjobs table with retry.
+	/// </summary>
+	void addFailedJobWithRetry(std::string id, long long currTime, long long timeout, long long priority, std::string url, int retries,
+							   int reasonID, std::string reasonData);
 
 	long long timeLastRecount = -1;
 };

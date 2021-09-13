@@ -8,6 +8,10 @@ Utrecht University within the Software Project course.
 #include "Definitions.h"
 #include "HTTPStatus.h"
 #include "Utility.h"
+#include "JobTypes.h"
+#include <iostream>
+
+using namespace jobTypes;
 
 JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *requestHandler, DatabaseConnection *database,
 									 Statistics *stats, std::string ip, int port)
@@ -88,37 +92,93 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 	return raft->passRequestToLeader(request, client, data);
 }
 
-std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::string client, std::string data)
+std::string JobRequestHandler::handleUpdateJobRequest(std::string request, std::string client, std::string data)
 {
-	// If you are the leader, check if there is a job left.
+	// Request should only be processed by leader.
 	if (raft->isLeader())
 	{
 		std::vector<std::string> splitted = Utility::splitStringOn(data, FIELD_DELIMITER_CHAR);
 		std::string jobid = splitted[0];
+		std::cout << "Updating job: " << jobid << std::endl;
 		long long jobTime = Utility::safeStoll(splitted[1]);
-		int reasonID = Utility::safeStoi(splitted[2]);
-		std::string reasonData = splitted[3];
 
-		auto job = getCurrentJobWithRetry(jobid, jobTime);//TODO
+		Job job = getCurrentJobWithRetry(jobid);
 
-		// If job was not present in currentjobs,
-		if (job == nullptr)
+		// If job was not present in currentjobs (or an error was thrown),
+		if (job.jobid == "")
 		{
-			// a newer job was already given out. Signal this to the worker.
+			// a newer job was already given out and finished. Signal this to the worker.
 			std::cout << "Received unknown job with ID: " << jobid << std::endl;
 
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+
+		// Check if a newer version of the job is currently busy.
+		if (jobTime < job.time)
+		{
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+		else if (jobTime > job.time)
+		{
+			std::cout << "Received job was newer than newest job. (" << std::to_string(jobTime) << " > "
+					  << std::to_string(job.time) << ")" << std::endl
+					  << "JobID: " << job.jobid << std::endl;
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+
+		// Update timeout timer in currentjobs table.
+		long long newTime = addCurrentJobWithRetry(job);
+		return HTTPStatusCodes::success(std::to_string(newTime));
+	}
+	// If you are not the leader, pass the request to the leader.
+	return raft->passRequestToLeader(request, client, data);
+}
+
+std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::string client, std::string data)
+{
+	// Request should only be processed by leader.
+	if (raft->isLeader())
+	{
+		std::vector<std::string> splitted = Utility::splitStringOn(data, FIELD_DELIMITER_CHAR);
+		std::string jobid = splitted[0];
+		std::cout << "Finishing job: " << jobid << std::endl;
+		long long jobTime = Utility::safeStoll(splitted[1]);
+		int reasonID = Utility::safeStoi(splitted[2]);
+		std::string reasonData = splitted[3];		
+
+		Job job = getCurrentJobWithRetry(jobid);
+
+		// If job was not present in currentjobs (or an error was thrown),
+		if (job.jobid == "")
+		{
+			// a newer job was already given out and finished. Signal this to the worker.
+			std::cout << "Received unknown job with ID: " << jobid << std::endl;
+
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+
+		// Check if a newer version of the job is currently busy.
+		if (jobTime < job.time)
+		{
+			return HTTPStatusCodes::clientError("Job not currently expected.");
+		}
+		else if (jobTime > job.time)
+		{
+			std::cout << "Received job was newer than newest job. (" << std::to_string(jobTime) << " > "
+					  << std::to_string(job.time) << ")" << std::endl
+					  << "JobID: " << job.jobid << std::endl;
 			return HTTPStatusCodes::clientError("Job not currently expected.");
 		}
 
 		// Check if the worker failed to complete the job.
 		if (reasonID != 0)
 		{
-			addFailedJobWithRetry(jobid, jobTime, job.priority, job.url, job.retries, reasonID, reasonData);
+			addFailedJobWithRetry(jobid, jobTime, job.timeout, job.priority, job.url, job.retries, reasonID, reasonData);
 
 			if (errno != 0)
 			{
 				std::cout << "Could not store failed job: " << data << std::endl;
-				return HTTPStatusCodes::databaseError("Job could not be added to failed jobs list.");
+				return HTTPStatusCodes::serverError("Job could not be added to failed jobs list.");
 			}
 
 			return HTTPStatusCodes::success("Job failed succesfully.");
@@ -291,11 +351,7 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 
 std::string JobRequestHandler::getTopJobWithRetry()
 {
-	std::tuple<std::string, std::string, long long, long long> topJob = database->getTopJob();
-	std::string jobid = std::get<0>(topJob);
-	std::string url = std::get<1>(topJob);
-	long long currTime = std::get<2>(topJob);
-	long long timeout = std::get<3>(topJob);
+	Job topJob = database->getTopJob();
 	int tries = 0;
 	if (errno != 0)
 	{
@@ -303,24 +359,20 @@ std::string JobRequestHandler::getTopJobWithRetry()
 		{
 			usleep(pow(2, tries) * RETRY_SLEEP);
 			topJob = database->getTopJob();
-			jobid = std::get<0>(topJob);
-			url = std::get<1>(topJob);
-			currTime = std::get<2>(topJob);
-			timeout = std::get<3>(topJob);
 			if (errno == 0)
 			{
 				return HTTPStatusCodes::success(
-					std::string("Spider") + FIELD_DELIMITER_CHAR + jobid + FIELD_DELIMITER_CHAR + url +
-					FIELD_DELIMITER_CHAR + std::to_string(currTime) + FIELD_DELIMITER_CHAR + std::to_string(timeout));
+					std::string("Spider") + FIELD_DELIMITER_CHAR + topJob.jobid + FIELD_DELIMITER_CHAR + topJob.url +
+					FIELD_DELIMITER_CHAR + std::to_string(topJob.time) + FIELD_DELIMITER_CHAR + std::to_string(topJob.timeout));
 			}
 			tries++;
 		}
 		return HTTPStatusCodes::serverError("Unable to get job from database.");
 	}
 	numberOfJobs -= 1;
-	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + jobid + FIELD_DELIMITER_CHAR + url +
-									FIELD_DELIMITER_CHAR + std::to_string(currTime) + FIELD_DELIMITER_CHAR +
-									std::to_string(timeout));
+	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + topJob.jobid + FIELD_DELIMITER_CHAR + topJob.url +
+									FIELD_DELIMITER_CHAR + std::to_string(topJob.time) + FIELD_DELIMITER_CHAR +
+									std::to_string(topJob.timeout));
 }
 
 bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
@@ -344,17 +396,57 @@ bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int
 	return true;
 }
 
-void JobRequestHandler::addFailedJobWithRetry(std::string id, long long currTime, long long priority, std::string url,
-											  int retries, int reasonID, std::string reasonData)
+Job JobRequestHandler::getCurrentJobWithRetry(std::string jobid)
 {
 	int tries = 0;
-	database->addFailedJob(id, currTime, prioritym url, retries, reasonID, reasonData);
+	Job currentJob = database->getCurrentJob(jobid);
 	if (errno != 0)
 	{
 		while (tries < MAX_RETRIES)
 		{
 			usleep(pow(2, tries) * RETRY_SLEEP);
-			database->addFailedJob(id, currTime, prioritym url, retries, reasonID, reasonData);
+			currentJob = database->getCurrentJob(jobid);
+			if (errno == 0)
+			{
+				return currentJob;
+			}
+			tries++;
+		}
+	}
+	return currentJob;
+}
+
+long long JobRequestHandler::addCurrentJobWithRetry(Job job)
+{
+	int tries = 0;
+	long long currentTime = database->addCurrentJob(job);
+	if (errno != 0)
+	{
+		while (tries < MAX_RETRIES)
+		{
+			usleep(pow(2, tries) * RETRY_SLEEP);
+			currentTime = database->addCurrentJob(job);
+			if (errno == 0)
+			{
+				return currentTime;
+			}
+			tries++;
+		}
+	}
+	return currentTime;
+}
+
+void JobRequestHandler::addFailedJobWithRetry(std::string id, long long currTime, long long timeout, long long priority, std::string url,
+											  int retries, int reasonID, std::string reasonData)
+{
+	int tries = 0;
+	database->addFailedJob(id, currTime, timeout, priority, url, retries, reasonID, reasonData);
+	if (errno != 0)
+	{
+		while (tries < MAX_RETRIES)
+		{
+			usleep(pow(2, tries) * RETRY_SLEEP);
+			database->addFailedJob(id, currTime, timeout, priority, url, retries, reasonID, reasonData);
 			if (errno == 0)
 			{
 				return;

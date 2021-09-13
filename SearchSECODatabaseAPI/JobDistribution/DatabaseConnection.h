@@ -5,12 +5,16 @@ Utrecht University within the Software Project course.
 */
 
 #pragma once
+#include "JobTypes.h"
+
 #include <string>
 #include <cassandra.h>
 
 #define IP "cassandra"
 #define DBPORT 8002
 #define MAX_THREADS 16
+
+using namespace jobTypes;
 
 /// <summary>
 /// Handles interaction with database when dealing with job requests.
@@ -32,8 +36,28 @@ public:
 	/// <summary>
 	/// Retrieves the url of the first job in the jobs table and returns it.
 	/// </summary>
-	/// <returns> Tuple of URL, time job was given out and allotted timeout. </returns>
-	virtual std::tuple<std::string, std::string, long long, long long> getTopJob();
+	/// <returns> Job object containing data on the top job. </returns>
+	virtual Job getTopJob();
+
+	/// <summary>
+	/// Retrieves a job with matching jobid in the currentjobs table.
+	/// </summary>
+	/// <returns>
+	/// Job object containing information on job, or nullptr if
+	/// no match was present.
+	/// </returns>
+	virtual Job getCurrentJob(std::string jobid);
+
+	/// <summary>
+	/// Adds a job to the currentjobs table.
+	/// </summary>
+	virtual long long addCurrentJob(Job job);
+
+	/// <summary>
+	/// Adds a job to the failedjobs table.
+	/// </summary>
+	void addFailedJob(std::string id, long long currTime, long long timeout, long long priority, std::string url, int retries,
+					  int reasonID, std::string reasonData);
 
 	/// <summary>
 	/// Returns the amount of jobs in the jobs table.
@@ -57,28 +81,25 @@ private:
 	void deleteTopJob(CassUuid id, cass_int64_t priority);
 
 	/// <summary>
+	/// Deletes the job in the currentjobs table given its jobid.
+	/// </summary>
+	void deleteCurrentJob(CassUuid id);
+
+	/// <summary>
 	/// Adds a job to the currentjobs table.
 	/// </summary>
-	void addCurrentJob(CassUuid id, long long currTime, long long timeout, long long priority, std::string url,
+	long long addCurrentJob(CassUuid id, long long timeout, long long priority, std::string url,
 					   int retries);
 
 	/// <summary>
-	/// Adds a job to the failedjobs table.
+	/// Retrieves the job from the given row.
 	/// </summary>
-	void addFailedJob(CassUuid id, long long currTime, long long priority, std::string url, int retries, int reasonID,
-					  std::string reasonData);
+	Job retrieveCurrentJob(const CassRow *row);
 
 	/// <summary>
 	/// Creates prepared queries for later use.
 	/// </summary>
 	void setPreparedStatements();
-
-	/// <summary>
-	/// Prepares a specified statement (query) to be executed later.
-	/// </summary>
-	/// <param name="query"> A string containing the CQL-query to be executed later. </param>
-	/// <returns> The constant prepared statement that allows us to execute the query given as input. </returns>
-	const CassPrepared *prepareStatement(std::string query);
 
 	/// <summary>
 	/// The connection with the database.
@@ -88,6 +109,9 @@ private:
 	const CassPrepared *preparedGetTopJob;
 	const CassPrepared *preparedDeleteTopJob;
 	const CassPrepared *preparedAddCurrentJob;
+	const CassPrepared *preparedGetCurrentJob;
+	const CassPrepared *preparedDeleteCurrentJob;
+	const CassPrepared *preparedAddFailedJob;
 	const CassPrepared *preparedAmountOfJobs;
 	const CassPrepared *preparedUploadJob;
 	const CassPrepared *preparedCrawlID;
