@@ -173,7 +173,7 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 		// Check if the worker failed to complete the job.
 		if (reasonID != 0)
 		{
-			addFailedJobWithRetry(jobid, jobTime, job.timeout, job.priority, job.url, job.retries, reasonID, reasonData);
+			addFailedJobWithRetry(FailedJob(job, reasonID, reasonData));
 
 			if (errno != 0)
 			{
@@ -436,17 +436,16 @@ long long JobRequestHandler::addCurrentJobWithRetry(Job job)
 	return currentTime;
 }
 
-void JobRequestHandler::addFailedJobWithRetry(std::string id, long long currTime, long long timeout, long long priority, std::string url,
-											  int retries, int reasonID, std::string reasonData)
+void JobRequestHandler::addFailedJobWithRetry(FailedJob job)
 {
 	int tries = 0;
-	database->addFailedJob(id, currTime, timeout, priority, url, retries, reasonID, reasonData);
+	database->addFailedJob(job);
 	if (errno != 0)
 	{
 		while (tries < MAX_RETRIES)
 		{
 			usleep(pow(2, tries) * RETRY_SLEEP);
-			database->addFailedJob(id, currTime, timeout, priority, url, retries, reasonID, reasonData);
+			database->addFailedJob(job);
 			if (errno == 0)
 			{
 				return;

@@ -66,32 +66,25 @@ Job DatabaseConnection::getTopJob()
 		// Retrieve the result.
 		const CassResult *result = cass_future_get_result(resultFuture);
 		const CassRow *row = cass_result_first_row(result);
-		const char *url;
-		size_t len;
 		CassUuid id;
-		cass_int64_t priority;
-		cass_int32_t retries;
-		cass_int64_t timeout;
 
-		cass_value_get_string(cass_row_get_column_by_name(row, "url"), &url, &len);
 		cass_value_get_uuid(cass_row_get_column_by_name(row, "jobid"), &id);
-		cass_value_get_int64(cass_row_get_column_by_name(row, "priority"), &priority);
-		cass_value_get_int32(cass_row_get_column_by_name(row, "retries"), &retries);
-		cass_value_get_int64(cass_row_get_column_by_name(row, "timeout"), &timeout);
+		job.url = DatabaseUtility::getString(row, "url");
+		job.priority = DatabaseUtility::getInt64(row, "priority");
+		job.retries = DatabaseUtility::getInt32(row, "retries");
+		job.timeout = DatabaseUtility::getInt64(row, "timeout");
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
-		
-		std::string resultUrl(url, len);
 
 		// Add job to list of current jobs.
-		long long currTime = addCurrentJob(id, timeout, priority, resultUrl, retries);
+		long long currTime = addCurrentJob(id, job);
 		if (errno != 0)
 		{
 			return job;
 		}
 
 		// Delete the job that is returned.
-		deleteTopJob(id, priority);
+		deleteTopJob(id, job.priority);
 		if (errno != 0)
 		{
 			// Do not delete current job, to prevent a newer version of the job from being accidentally deleted.
@@ -103,12 +96,8 @@ Job DatabaseConnection::getTopJob()
 
 		// Return result.
 		
-		job.priority = priority;
 		job.jobid = jobid;
-		job.url = url;
-		job.retries = retries;
 		job.time = currTime;
-		job.timeout = timeout;
 		return job;
 	}
 	else
@@ -153,10 +142,10 @@ long long DatabaseConnection::addCurrentJob(Job job)
 {
 	CassUuid jobid;
 	cass_uuid_from_string(job.jobid.c_str(), &jobid);
-	return addCurrentJob(jobid, job.timeout, job.priority, job.url, job.retries);
+	return addCurrentJob(jobid, job);
 }
 
-long long DatabaseConnection::addCurrentJob(CassUuid id, long long timeout, long long priority, std::string url, int retries)
+long long DatabaseConnection::addCurrentJob(CassUuid id, Job job)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedAddCurrentJob);
@@ -164,10 +153,10 @@ long long DatabaseConnection::addCurrentJob(CassUuid id, long long timeout, long
 	cass_statement_bind_uuid_by_name(query, "jobid", id);
 	long long currTime = Utility::getCurrentTimeMilliSeconds();
 	cass_statement_bind_int64_by_name(query, "time", currTime);
-	cass_statement_bind_int64_by_name(query, "timeout", timeout);
-	cass_statement_bind_int64_by_name(query, "priority", priority);
-	cass_statement_bind_string_by_name(query, "url", url.c_str());
-	cass_statement_bind_int32_by_name(query, "retries", retries);	
+	cass_statement_bind_int64_by_name(query, "timeout", job.timeout);
+	cass_statement_bind_int64_by_name(query, "priority", job.priority);
+	cass_statement_bind_string_by_name(query, "url", job.url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", job.retries);	
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -179,7 +168,10 @@ long long DatabaseConnection::addCurrentJob(CassUuid id, long long timeout, long
 
 	if (rc != 0)
 	{
-		printf("Unable to add current job: %s\n", cass_error_desc(rc));
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(queryFuture, &message, &messageLength);
+		printf("Unable to add current job: '%.*s'\n", (int)messageLength, message);
 		errno = ENETUNREACH;
 	}
 	cass_future_free(queryFuture);
@@ -251,23 +243,22 @@ void DatabaseConnection::deleteCurrentJob(CassUuid id)
 	cass_future_free(queryFuture);
 }
 
-void DatabaseConnection::addFailedJob(std::string id, long long currTime, long long timeout, long long priority,
-									   std::string url, int retries, int reasonID, std::string reasonData)
+void DatabaseConnection::addFailedJob(FailedJob job)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(preparedAddFailedJob);
 
 	CassUuid jobid;
-	cass_uuid_from_string(id.c_str(), &jobid);
+	cass_uuid_from_string(job.jobid.c_str(), &jobid);
 
 	cass_statement_bind_uuid_by_name(query, "jobid", jobid);
-	cass_statement_bind_int64_by_name(query, "time", currTime);
-	cass_statement_bind_int64_by_name(query, "timeout", timeout);
-	cass_statement_bind_int64_by_name(query, "priority", priority);
-	cass_statement_bind_string_by_name(query, "url", url.c_str());
-	cass_statement_bind_int32_by_name(query, "retries", retries);
-	cass_statement_bind_int32_by_name(query, "reasonID", reasonID);
-	cass_statement_bind_string_by_name(query, "reasonData", reasonData.c_str());
+	cass_statement_bind_int64_by_name(query, "time", job.time);
+	cass_statement_bind_int64_by_name(query, "timeout", job.timeout);
+	cass_statement_bind_int64_by_name(query, "priority", job.priority);
+	cass_statement_bind_string_by_name(query, "url", job.url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", job.retries);
+	cass_statement_bind_int32_by_name(query, "reasonID", job.reasonID);
+	cass_statement_bind_string_by_name(query, "reasonData", job.reasonData.c_str());
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -295,8 +286,7 @@ int DatabaseConnection::getNumberOfJobs()
 		// Retrieve the result.
 		const CassResult* result = cass_future_get_result(resultFuture);
 		const CassRow* row = cass_result_first_row(result);
-		cass_int64_t count;
-		cass_value_get_int64(cass_row_get_column(row, 0), &count);
+		long long count = DatabaseUtility::getInt64(row, "count");
 		cass_statement_free(query);
 		cass_future_free(resultFuture);
 		return count;

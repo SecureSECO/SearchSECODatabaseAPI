@@ -39,5 +39,17 @@ namespace jobTypes
 		int retries;
 		int reasonID;
 		std::string reasonData;
+
+		/// <summary>
+		/// Constructs a failed job given a normal job and the reason.
+		/// </summary>
+		/// <param name="job"> The job this failed job is based on. </param>
+		/// <param name="reasonID"> The id of the failure reason. </param>
+		/// <param name="reasonData"> The data of the reason. </param>
+		FailedJob(Job job, int reasonID, std::string reasonData)
+			: jobid(job.jobid), time(job.time), timeout(job.timeout), priority(job.priority), url(job.url),
+			  retries(job.retries), reasonID(reasonID), reasonData(reasonData)
+		{
+		}
 	};
-}
+} // namespace jobTypes

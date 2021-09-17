@@ -181,10 +181,10 @@ void RAFTConsensus::listenForHeartbeat()
 {
 	while (!stop) 
 	{
+		std::string data;
 		try 
 		{
-			std::string data = networkhandler->receiveData();
-			handleHeartbeat(data);
+			data = networkhandler->receiveData();			
 		}
 		catch(std::exception const& ex) 
 		{
@@ -206,6 +206,7 @@ void RAFTConsensus::listenForHeartbeat()
 				throw std::runtime_error("Could not connect with the new leader.");
 			}
 		}
+		handleHeartbeat(data);
 	}
 }
 

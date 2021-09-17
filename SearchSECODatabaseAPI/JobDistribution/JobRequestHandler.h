@@ -168,8 +168,7 @@ private:
 	/// <summary>
 	/// Adds a job with the given parameters to the failedjobs table with retry.
 	/// </summary>
-	void addFailedJobWithRetry(std::string id, long long currTime, long long timeout, long long priority, std::string url, int retries,
-							   int reasonID, std::string reasonData);
+	void addFailedJobWithRetry(FailedJob job);
 
 	long long timeLastRecount = -1;
 };

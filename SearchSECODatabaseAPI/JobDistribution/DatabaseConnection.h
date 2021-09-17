@@ -56,8 +56,7 @@ public:
 	/// <summary>
 	/// Adds a job to the failedjobs table.
 	/// </summary>
-	void addFailedJob(std::string id, long long currTime, long long timeout, long long priority, std::string url, int retries,
-					  int reasonID, std::string reasonData);
+	void addFailedJob(FailedJob job);
 
 	/// <summary>
 	/// Returns the amount of jobs in the jobs table.
@@ -88,8 +87,7 @@ private:
 	/// <summary>
 	/// Adds a job to the currentjobs table.
 	/// </summary>
-	long long addCurrentJob(CassUuid id, long long timeout, long long priority, std::string url,
-					   int retries);
+	long long addCurrentJob(CassUuid id, Job job);
 
 	/// <summary>
 	/// Retrieves the job from the given row.
