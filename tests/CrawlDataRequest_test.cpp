@@ -32,7 +32,7 @@ TEST(CrawlDataRequest, SingleJob)
 	std::vector<char> requestChars = {};
 	Utility::appendBy(requestChars, {"100", "-1"}, FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	Utility::appendBy(requestChars, "", ENTRY_DELIMITER_CHAR);
-	Utility::appendBy(requestChars, {"https://github.com/zavg/linux-0.01", "1"}, FIELD_DELIMITER_CHAR,
+	Utility::appendBy(requestChars, {"https://github.com/zavg/linux-0.01", "1", "69"}, FIELD_DELIMITER_CHAR,
 					  ENTRY_DELIMITER_CHAR);
 	std::string request(requestChars.begin(), requestChars.end());
 

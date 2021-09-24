@@ -12,7 +12,9 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
-#define MAX_THREADS 16
+#define UPDATE_JOBS_TIMEOUT 300000000 // 5 minutes.
+#define MAX_JOB_RETRIES 3
+#define RECOUNT_WAIT_TIME 600
 
 using namespace jobTypes;
 
@@ -31,7 +33,7 @@ public:
 	/// Adds a job to the database given the url to a repository and a priority, 
 	/// together with number of previous tries and a timeout.
 	/// </summary>
-	virtual void uploadJob(std::string url, long long priority, int retries, long long timeout);
+	virtual void uploadJob(std::string url, long long priority, int retries, long long timeout, bool newJob);
 
 	/// <summary>
 	/// Retrieves the url of the first job in the jobs table and returns it.
@@ -73,6 +75,11 @@ public:
 	/// </summary>
 	virtual void setCrawlID(int id);
 
+	/// <summary>
+	/// Regularly updates the current jobs to check for a timeout.
+	/// </summary>
+	virtual void updateCurrentJobs();
+
 private:
 	/// <summary>
 	/// Deletes the first job in the jobs table given its jobid and priority.
@@ -100,14 +107,23 @@ private:
 	void setPreparedStatements();
 
 	/// <summary>
+	/// Moves a job with passed timeout to the failed jobs.
+	/// </summary>
+	virtual void updateCurrentJob(CassUuid jobid, Job job, long long currentTime);
+
+	/// <summary>
 	/// The connection with the database.
 	/// <summary>
 	CassSession *connection;
+
+	int numberOfJobs;
+	long long timeLastRecount = -1;
 
 	const CassPrepared *preparedGetTopJob;
 	const CassPrepared *preparedDeleteTopJob;
 	const CassPrepared *preparedAddCurrentJob;
 	const CassPrepared *preparedGetCurrentJob;
+	const CassPrepared *preparedGetCurrentJobs;
 	const CassPrepared *preparedDeleteCurrentJob;
 	const CassPrepared *preparedAddFailedJob;
 	const CassPrepared *preparedAmountOfJobs;

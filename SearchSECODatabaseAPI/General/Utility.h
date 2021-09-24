@@ -7,6 +7,12 @@ Utrecht University within the Software Project course.
 #pragma once
 #include <string>
 #include <vector>
+#include <functional>
+#include <math.h>
+#include <unistd.h>
+
+#define MAX_RETRIES 3
+#define RETRY_SLEEP 1000000
 
 /// <summary>
 /// Implements generic functionality.
@@ -105,4 +111,33 @@ public:
 	/// Gets the current time since epoch in milliseconds, represented as an integer.
 	/// </summary>
 	static long long getCurrentTimeMilliSeconds();
+
+	/// <summary>
+	/// A general template for a query to be performed with retries.
+	/// </summary>
+	/// <typeparam name="T">
+	/// The output of the query. If no output is given, an empty tuple (std::tuple<>) should be used.
+	/// </typeparam>
+	/// <param name="query"> The corresponding query to be performed a single time. </param>
+	/// <returns> Output of the query, which may be an empty tuple (to replace void). </returns>
+	template <class T> static T queryWithRetry(std::function<T()> query)
+	{
+		errno = 0;
+		int retries = 0;
+		T items;
+		do
+		{
+			items = query();
+			if (errno != 0 && errno != ERANGE)
+			{
+				usleep(pow(2, retries) * RETRY_SLEEP);
+				retries++;
+			}
+		} while (errno != 0 && errno != ERANGE && retries <= MAX_RETRIES);
+		if (retries > MAX_RETRIES)
+		{
+			errno = ENETUNREACH;
+		}
+		return items;
+	};
 };

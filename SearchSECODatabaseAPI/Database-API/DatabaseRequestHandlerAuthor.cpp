@@ -147,5 +147,5 @@ Author DatabaseRequestHandler::idToAuthorWithRetry(AuthorID id)
 		author = this->database->idToAuthor(id);
 		return author;
 	};
-	return queryWithRetry<Author>(function);
+	return Utility::queryWithRetry<Author>(function);
 }

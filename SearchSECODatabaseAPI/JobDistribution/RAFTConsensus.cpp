@@ -94,6 +94,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler,
 	if (leader) 
 	{
 		new std::thread(&RAFTConsensus::heartbeatSender, this);
+		new std::thread(&DatabaseConnection::updateCurrentJobs, requestHandler->getJobRequestHandler()->getDatabaseConnection());
 	}
 	else 
 	{

@@ -21,9 +21,8 @@ JobRequestHandler::JobRequestHandler(RAFTConsensus *raft, RequestHandler *reques
 	this->database = database;
 	this->stats = stats;
 	connectWithRetry(ip, port);
-	numberOfJobs = database->getNumberOfJobs();
+	database->getNumberOfJobs();
 	crawlID = database->getCrawlID();
-	timeLastRecount = Utility::getCurrentTimeSeconds();
 }
 
 std::string JobRequestHandler::handleConnectRequest(boost::shared_ptr<TcpConnection> connection, std::string request)
@@ -62,7 +61,7 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 			alreadyCrawling = false;
 		}
 		// Check if number of jobs is enough to provide the top job.
-		if (numberOfJobs >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && numberOfJobs >= 1))
+		if (database->getNumberOfJobs() >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && database->getNumberOfJobs() >= 1))
 		{
 			std::string job = getTopJobWithRetry();
 			jobmtx.unlock();
@@ -98,9 +97,17 @@ std::string JobRequestHandler::handleUpdateJobRequest(std::string request, std::
 	if (raft->isLeader())
 	{
 		std::vector<std::string> splitted = Utility::splitStringOn(data, FIELD_DELIMITER_CHAR);
+		if (splitted.size() < 2)
+		{
+			return HTTPStatusCodes::clientError("Incorrect amount if arguments. Expected job id and time.");
+		}
 		std::string jobid = splitted[0];
 		std::cout << "Updating job: " << jobid << std::endl;
 		long long jobTime = Utility::safeStoll(splitted[1]);
+		if (errno != 0)
+		{
+			return HTTPStatusCodes::clientError("Incorrect job time.");
+		}
 
 		Job job = getCurrentJobWithRetry(jobid);
 
@@ -140,11 +147,25 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 	if (raft->isLeader())
 	{
 		std::vector<std::string> splitted = Utility::splitStringOn(data, FIELD_DELIMITER_CHAR);
+		if (splitted.size() < 4)
+		{
+			return HTTPStatusCodes::clientError("Incorrect amount of arguments.");
+		}
 		std::string jobid = splitted[0];
 		std::cout << "Finishing job: " << jobid << std::endl;
 		long long jobTime = Utility::safeStoll(splitted[1]);
+		if (errno != 0)
+		{
+			return HTTPStatusCodes::clientError("Incorrect job time.");
+		}
 		int reasonID = Utility::safeStoi(splitted[2]);
-		std::string reasonData = splitted[3];		
+		if (errno != 0)
+		{
+			return HTTPStatusCodes::clientError("Incorrect reason id.");
+		}
+		std::string reasonData = splitted[3];
+
+		stats->jobCounter->Add({{"Node", stats->myIP}, {"Client", client}, {"Reason", std::to_string(reasonID)}}).Increment();
 
 		Job job = getCurrentJobWithRetry(jobid);
 
@@ -210,6 +231,10 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	for (int i = 0; i < data.size(); i++)
 	{
 		std::vector<std::string> dataSecondSplit = Utility::splitStringOn(data[i], FIELD_DELIMITER_CHAR);
+		if (dataSecondSplit.size() < 3)
+		{
+			return HTTPStatusCodes::clientError("Incorrect amount of arguments.");
+		}
 		std::string url = dataSecondSplit[0];
 		urls.push_back(url);
 		int priority = Utility::safeStoi(dataSecondSplit[1]);
@@ -240,20 +265,11 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	// Call to the database to upload jobs.
 	for (int i = 0; i < urls.size(); i++)
 	{
-		if (tryUploadJobWithRetry(urls[i], priorities[i], 0, timeouts[i]))
-		{
-			numberOfJobs += 1;
-		}
-		else
+		tryUploadJobWithRetry(urls[i], priorities[i], 0, timeouts[i]);
+		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
 		}
-	}
-
-	long long timeNow = Utility::getCurrentTimeSeconds();
-	if (timeNow - timeLastRecount > RECOUNT_WAIT_TIME)
-	{
-		numberOfJobs = database->getNumberOfJobs();
 	}
 
 	if (errno == 0)
@@ -369,90 +385,37 @@ std::string JobRequestHandler::getTopJobWithRetry()
 		}
 		return HTTPStatusCodes::serverError("Unable to get job from database.");
 	}
-	numberOfJobs -= 1;
 	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + topJob.jobid + FIELD_DELIMITER_CHAR + topJob.url +
 									FIELD_DELIMITER_CHAR + std::to_string(topJob.time) + FIELD_DELIMITER_CHAR +
 									std::to_string(topJob.timeout));
 }
 
-bool JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
+void JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
 {
-	int tries = 0;
-	database->uploadJob(url, priority, retries, timeout);
-	if (errno != 0)
-	{
-		while (tries < MAX_RETRIES)
-		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			database->uploadJob(url, priority, retries, timeout);
-			if (errno == 0)
-			{
-				return true;
-			}
-			tries++;
-		}
-		return false;
-	}
-	return true;
+	std::function<bool()> function = [url, priority, retries, timeout, this]() {
+		this->database->uploadJob(url, priority, retries, timeout, true);
+		return true;
+	};
+	Utility::queryWithRetry(function);
 }
 
 Job JobRequestHandler::getCurrentJobWithRetry(std::string jobid)
 {
-	int tries = 0;
-	Job currentJob = database->getCurrentJob(jobid);
-	if (errno != 0)
-	{
-		while (tries < MAX_RETRIES)
-		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			currentJob = database->getCurrentJob(jobid);
-			if (errno == 0)
-			{
-				return currentJob;
-			}
-			tries++;
-		}
-	}
-	return currentJob;
+	std::function<Job()> function = [jobid, this]() { return this->database->getCurrentJob(jobid); };
+	return Utility::queryWithRetry(function);
 }
 
 long long JobRequestHandler::addCurrentJobWithRetry(Job job)
 {
-	int tries = 0;
-	long long currentTime = database->addCurrentJob(job);
-	if (errno != 0)
-	{
-		while (tries < MAX_RETRIES)
-		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			currentTime = database->addCurrentJob(job);
-			if (errno == 0)
-			{
-				return currentTime;
-			}
-			tries++;
-		}
-	}
-	return currentTime;
+	std::function<long long()> function = [job, this]() { return this->database->addCurrentJob(job); };
+	return Utility::queryWithRetry(function);
 }
 
 void JobRequestHandler::addFailedJobWithRetry(FailedJob job)
 {
-	int tries = 0;
-	database->addFailedJob(job);
-	if (errno != 0)
-	{
-		while (tries < MAX_RETRIES)
-		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			database->addFailedJob(job);
-			if (errno == 0)
-			{
-				return;
-			}
-			tries++;
-		}
-		return;
-	}
-	return;
+	std::function<bool()> function = [job, this]() {
+		this->database->addFailedJob(job);
+		return true;
+	};
+	Utility::queryWithRetry(function);
 }

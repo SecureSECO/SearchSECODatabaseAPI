@@ -14,7 +14,6 @@ Utrecht University within the Software Project course.
 #define MIN_AMOUNT_JOBS 500
 #define MAX_RETRIES 3
 #define CRAWL_TIMEOUT_SECONDS 150
-#define RECOUNT_WAIT_TIME 600
 
 class TcpConnection;
 
@@ -106,11 +105,10 @@ public:
 	std::string handleCrawlDataRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
-	/// Variables describing the number of jobs in the jobqueue, the current crawlID
+	/// Variables describing the current crawlID
 	/// which is needed by the crawler to crawl a specific part of GitHub
 	/// and if there is currently a crawler working.
-	/// </summary>
-	int numberOfJobs;
+	/// </summary>	
 	int crawlID;
 	long long timeLastCrawl = -1;
 
@@ -121,6 +119,11 @@ public:
 	/// New crawlID.
 	/// </param>
 	void updateCrawlID(int id);
+
+	DatabaseConnection *getDatabaseConnection()
+	{
+		return database;
+	}
 
 private:
 	RAFTConsensus *raft;
@@ -148,7 +151,7 @@ private:
 	/// If it succeeds, it returns true.
 	/// If it fails, it returns false.
 	/// </summary>
-	bool tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
+	void tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
 
 	/// <summary>
 	/// Attempts to retrieve a match from the currentjobs table with a matching jobid.
@@ -169,6 +172,4 @@ private:
 	/// Adds a job with the given parameters to the failedjobs table with retry.
 	/// </summary>
 	void addFailedJobWithRetry(FailedJob job);
-
-	long long timeLastRecount = -1;
 };

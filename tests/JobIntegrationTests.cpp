@@ -43,11 +43,11 @@ TEST(JobDatabaseIntegrationTest, GetJobRequest)
 	std::string output = handler.handleRequest("gtjb", "", input, nullptr);
 	EXPECT_THAT(output, testing::StartsWith(HTTPStatusCodes::success(expectedOutput)));
 
-	std::string expectedOutput2 = "Spider" + fieldDelimiter + "https://github.com/caged/microsis";
+	std::string expectedOutput2 = "Spider" + fieldDelimiter + "2f78a799-0e18-4eb5-bd33-83718a3257d9" + fieldDelimiter + "https://github.com/caged/microsis";
 
 	// Check if the second output is as expected.
 	std::string output2 = handler.handleRequest("gtjb", "", input, nullptr);
-	ASSERT_EQ(output2, HTTPStatusCodes::success(expectedOutput2));
+	ASSERT_THAT(output2, testing::StartsWith(HTTPStatusCodes::success(expectedOutput2)));
 }
 
 // Test if job is succesfully uploaded and the numberOfJobs variable is increased
@@ -66,11 +66,11 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 
 	raftConsensus.start(&handler, {}, true);
 
-	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10";
+	std::string input = "https://github.com/mcostalba/Stockfish" + fieldDelimiter + "10" + fieldDelimiter + "99999";
 	std::string output = handler.handleRequest("upjb", "", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, &stats, TEST_IP, TEST_PORT);
-	int jobs = jhandler->numberOfJobs;
-	ASSERT_EQ(jobs, 3);
+	int jobs = jddatabase.getNumberOfJobs();
+	EXPECT_EQ(jobs, 3);
 
 	std::string input2 = "";
 	std::string expectedOutput2 = "Crawl" + fieldDelimiter + "0";
@@ -79,11 +79,10 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	std::string output2 = handler.handleRequest("gtjb", "", input2, nullptr);
 	EXPECT_THAT(output2, testing::StartsWith(HTTPStatusCodes::success(expectedOutput2)));
 
-	std::string expectedOutput3 = "Spider" + fieldDelimiter + "https://github.com/mcostalba/Stockfish";
-
 	// Check if the second output is as expected.
 	std::string output3 = handler.handleRequest("gtjb", "", input2, nullptr);
-	ASSERT_EQ(output3, HTTPStatusCodes::success(expectedOutput3));
+	EXPECT_THAT(output3, testing::StartsWith(HTTPStatusCodes::success("Spider" + fieldDelimiter)));
+	ASSERT_THAT(output3, testing::HasSubstr("https://github.com/mcostalba/Stockfish"));
 }
 
 // Test if multiple jobs get succesfully uploaded.
@@ -102,11 +101,11 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 
 	raftConsensus.start(&handler, {}, true);
 
-	std::string input = "https://github.com/HackerPoet/Chaos-Equations" + fieldDelimiter + "42" + entryDelimiter +
-						"https://github.com/Yiziwinnie/Home-Depot" + fieldDelimiter + "69";
+	std::string input = "https://github.com/HackerPoet/Chaos-Equations" + fieldDelimiter + "42" + fieldDelimiter + "99998" + entryDelimiter +
+						"https://github.com/Yiziwinnie/Home-Depot" + fieldDelimiter + "69" + fieldDelimiter + "99997";
 	std::string output = handler.handleRequest("upjb", "", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, &stats, TEST_IP, TEST_PORT);
-	int jobs = jhandler->numberOfJobs;
+	int jobs = jddatabase.getNumberOfJobs();
 	ASSERT_EQ(jobs, 4);
 }
 
@@ -126,7 +125,7 @@ TEST(JobDatabaseIntegrationTest, CrawlDataRequest)
 	raftConsensus.start(&handler, {}, true);
 
 	std::string input =
-		"100" + fieldDelimiter + "-1" + entryDelimiter + "" + entryDelimiter + "https://github.com/Yiziwinnie/Bike-Sharing-in-Boston" + fieldDelimiter + "420";
+		"100" + fieldDelimiter + "-1" + entryDelimiter + "" + entryDelimiter + "https://github.com/Yiziwinnie/Bike-Sharing-in-Boston" + fieldDelimiter + "420" + fieldDelimiter + "99996";
 	std::string output = handler.handleRequest("upcd", "", input, nullptr);
 
 	std::string input2 = "";

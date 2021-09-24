@@ -402,13 +402,13 @@ std::tuple<> DatabaseRequestHandler::addMethodWithRetry(MethodIn method, Project
 		this->database->addMethod(method, project, prevVersion, parserVersion, newProject);
 		return std::make_tuple();
 	};
-	return queryWithRetry<std::tuple<>>(function);
+	return Utility::queryWithRetry<std::tuple<>>(function);
 }
 
 std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 {
 	std::function<std::vector<MethodOut>()> function = [hash, this]() { return this->database->hashToMethods(hash); };
-	return queryWithRetry<std::vector<MethodOut>>(function);
+	return Utility::queryWithRetry<std::vector<MethodOut>>(function);
 }
 
 std::vector<MethodID> DatabaseRequestHandler::authorToMethodsWithRetry(AuthorID authorID)
@@ -416,5 +416,5 @@ std::vector<MethodID> DatabaseRequestHandler::authorToMethodsWithRetry(AuthorID 
 	std::function<std::vector<MethodID>()> function = [authorID, this]() {
 		return this->database->authorToMethods(authorID);
 	};
-	return queryWithRetry<std::vector<MethodID>>(function);
+	return Utility::queryWithRetry<std::vector<MethodID>>(function);
 }
