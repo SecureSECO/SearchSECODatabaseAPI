@@ -17,28 +17,38 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 
 include_directories(../external/include)
+include_directories(Database-API)
+include_directories(General)
+include_directories(JobDistribution)
 
 enable_testing()
 
 add_executable(
 	tests
-	Raft_test.cpp
-	GetIPs_test.cpp
-	Utility_test.cpp
-	HTTPStatus_test.cpp
-	RequestHandler_test.cpp
-	CheckRequest_test.cpp
-	UploadRequest_test.cpp
-	CheckUploadRequest_test.cpp
-	ExtractProjectsRequest_test.cpp
-	PrevProjectsRequest_test.cpp
-	AuthorRequest_test.cpp
-	IntegrationTests.cpp
-	JobRequestHandler_test.cpp
-	UploadJobRequest_test.cpp
-	GetJobRequest_test.cpp
-	CrawlDataRequest_test.cpp
-	JobIntegrationTests.cpp
+	Database-API/AuthorRequest_test.cpp
+	Database-API/CheckRequest_test.cpp
+	Database-API/CheckUploadRequest_test.cpp
+	Database-API/ExtractProjectsRequest_test.cpp
+	Database-API/IntegrationTests.cpp
+	Database-API/PrevProjectsRequest_test.cpp
+	Database-API/UploadRequest_test.cpp
+	Database-API/DatabaseMock.cpp
+	General/ConnectionMock.cpp
+	General/RequestHandlerMock.cpp
+	General/HTTPStatus_test.cpp
+	General/RequestHandler_test.cpp
+	General/Utility_test.cpp
+	JobDistribution/CrawlDataRequest_test.cpp
+	JobDistribution/GetIPs_test.cpp
+	JobDistribution/GetJobRequest_test.cpp
+	JobDistribution/JobIntegrationTests.cpp
+	JobDistribution/JobRequestHandler_test.cpp
+	JobDistribution/Raft_test.cpp
+	JobDistribution/UploadJobRequest_test.cpp
+	JobDistribution/UpdateJobRequest_test.cpp
+	JobDistribution/FinishJobRequest_test.cpp
+	JobDistribution/JDDatabaseMock.cpp
+	JobDistribution/RaftConsensusMock.cpp
 )
 target_link_libraries(
   tests
