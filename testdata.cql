@@ -246,4 +246,7 @@ INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VA
 (61c9d732-1f98-40af-b201-3b20fbf7a6db, 400000000000000, 'https://github.com/304471720/CSAPI', 1, 0, 42);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
 (2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1, 0, 100);
-
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(77b02074-8a8e-4193-ac11-53a83ae2ad0d, 200000000000000, 'https://github.com/eladrich/pixel2style2pixel', 1, 0, 42069);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(6bb4b5bf-119b-4323-a175-469132620a24, 100000000000000, 'https://github.com/mattermost/desktop', 1, 0, 69420);

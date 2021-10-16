@@ -7,12 +7,25 @@ Utrecht University within the Software Project course.
 #include "Definitions.h"
 #include "RequestHandler.h"
 #include "DatabaseMock.cpp"
+#include "StatisticsMock.cpp"
 #include "JDDatabaseMock.cpp"
 #include "RaftConsensusMock.cpp"
 #include "HTTPStatus.h"
 #include "Utility.h"
 
 #include <gtest/gtest.h>
+
+MATCHER_P(failedjobequal, job, "")
+{
+	return arg.jobid == job.jobid && arg.time == job.time && arg.timeout == job.timeout &&
+		   arg.priority == job.priority && arg.url == job.url && arg.retries == job.retries &&
+		   arg.reasonID == job.reasonID && arg.reasonData == job.reasonData;
+}
+
+ACTION_P(setErrno, error)
+{
+	errno = error;
+}
 
 TEST(FinishJobRequest, Success)
 {
@@ -21,10 +34,11 @@ TEST(FinishJobRequest, Success)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 	
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -35,12 +49,12 @@ TEST(FinishJobRequest, Success)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 	
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -54,10 +68,11 @@ TEST(FinishJobRequest, Failure)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -68,12 +83,14 @@ TEST(FinishJobRequest, Failure)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 10, "Project already known.")).WillOnce(testing::Return(true));
+	FailedJob failedJob = FailedJob(job, 10, "Project already known.");
+
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(failedJob))).Times(1);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -87,10 +104,11 @@ TEST(FinishJobRequest, DeficientArguments)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -101,12 +119,12 @@ TEST(FinishJobRequest, DeficientArguments)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -120,10 +138,11 @@ TEST(FinishJobRequest, IncorrectJobTime)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -134,12 +153,12 @@ TEST(FinishJobRequest, IncorrectJobTime)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?abc?0?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?abc?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -153,10 +172,11 @@ TEST(FinishJobRequest, IncorrectReasonID)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -167,12 +187,12 @@ TEST(FinishJobRequest, IncorrectReasonID)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?reason?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?reason?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -186,10 +206,11 @@ TEST(FinishJobRequest, UnknownJob)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "";
@@ -200,12 +221,12 @@ TEST(FinishJobRequest, UnknownJob)
 	job.url = "";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob("58451e62-1794-4f03-8ae4-21fb42670f73")).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -219,10 +240,11 @@ TEST(FinishJobRequest, EarlyJob)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -233,12 +255,12 @@ TEST(FinishJobRequest, EarlyJob)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?2?0?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?2?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -252,10 +274,11 @@ TEST(FinishJobRequest, LateJob)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
@@ -266,12 +289,12 @@ TEST(FinishJobRequest, LateJob)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 0, "")).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -285,26 +308,27 @@ TEST(FinishJobRequest, FailedJobFailure)
 	
 	MockJDDatabase jddatabase;
 	MockDatabase database;
+	MockStatistics stats;
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
+	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
 	Job job;
 	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
-	job.time = 2;
+	job.time = 0;
 	job.timeout = 69;
 	job.priority = 100;
 	job.retries = 0;
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.\n";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(Job));
+	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(FailedJob(job, 10, "Project already known.")).WillOnce(testing::SetErrnoAndReturn(1, true));
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 10, "Project already known.")))).Times(3).WillRepeatedly(setErrno(1));
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 

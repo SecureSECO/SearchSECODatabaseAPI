@@ -13,6 +13,12 @@ Utrecht University within the Software Project course.
 
 #include <gtest/gtest.h>
 
+MATCHER_P(jobEqual, job, "")
+{
+	return arg.jobid == job.jobid && arg.time == job.time && arg.timeout == job.timeout &&
+		   arg.priority == job.priority && arg.url == job.url && arg.retries == job.retries;
+}
+
 // Test for a single correct job.
 TEST(UpdateJobRequest, CorrectJob)
 {
@@ -40,7 +46,7 @@ TEST(UpdateJobRequest, CorrectJob)
 
 	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return(job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, addCurrentJob(job)).WillOnce(testing::Return(690000));
+	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).WillOnce(testing::Return(690000));
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -69,7 +75,7 @@ TEST(UpdateJobRequest, UnknownJob)
 
 	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return (job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, addCurrentJob(job)).Times(0);
+	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -103,7 +109,7 @@ TEST(UpdateJobRequest, IncorrectJob)
 
 	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return (job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, addCurrentJob(job)).Times(0);
+	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 

@@ -58,7 +58,7 @@ public:
 	/// <summary>
 	/// Adds a job to the failedjobs table.
 	/// </summary>
-	void addFailedJob(FailedJob job);
+	virtual void addFailedJob(FailedJob job);
 
 	/// <summary>
 	/// Returns the amount of jobs in the jobs table.
