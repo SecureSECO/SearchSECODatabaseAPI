@@ -143,6 +143,45 @@ void DatabaseConnection::deleteTopJob(CassUuid id, cass_int64_t priority)
 	cass_future_free(queryFuture);
 }
 
+long long DatabaseConnection::getCurrentJobTime(std::string jobid)
+{
+	errno = 0;
+	CassStatement *query = cass_prepared_bind(preparedGetCurrentJob);
+	CassUuid id;
+	cass_uuid_from_string(jobid.c_str(), &id);
+
+	cass_statement_bind_uuid_by_name(query, "jobid", id);
+
+	CassFuture *resultFuture = cass_session_execute(connection, query);
+
+	if (cass_future_error_code(resultFuture) == CASS_OK)
+	{
+		// Retrieve the result.
+		const CassResult *result = cass_future_get_result(resultFuture);
+		if (cass_result_row_count(result) >= 1)
+		{
+			const CassRow *row = cass_result_first_row(result);
+			long long time = DatabaseUtility::getInt64(row, "time");
+			cass_statement_free(query);
+			cass_future_free(resultFuture);
+			return time;
+		}
+		return -1;
+	}
+	else
+	{
+		// An error occurred, which is handled below.
+		const char *message;
+		size_t messageLength;
+		cass_future_error_message(resultFuture, &message, &messageLength);
+		fprintf(stderr, "Unable to get number of jobs: '%.*s'\n", (int)messageLength, message);
+		cass_statement_free(query);
+		cass_future_free(resultFuture);
+		errno = ENETUNREACH;
+		return -1;
+	}
+}
+
 long long DatabaseConnection::addCurrentJob(Job job)
 {
 	CassUuid jobid;

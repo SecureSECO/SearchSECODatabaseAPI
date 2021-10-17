@@ -144,7 +144,7 @@ private:
 	/// If it succeeds, it returns the url of the top job.
 	/// If it fails, it returns an error message.
 	/// </summary>
-	std::string getTopJobWithRetry();
+	Job getTopJobWithRetry();
 
 	/// <summary>
 	/// Tries to upload a job to the database, if it fails it retries like above.
@@ -152,6 +152,15 @@ private:
 	/// If it fails, it returns false.
 	/// </summary>
 	void tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
+
+	/// <summary>
+	/// Attempts to retrieve the time of a match from the currentjobs table with a matching jobid.
+	/// </summary>
+	/// <param name="jobid">The jobid to match on.</param>
+	/// <returns>
+	/// The time of the job. Returns -1 if job is unknown or an error occured.
+	/// </returns>
+	long long getCurrentJobTimeWithRetry(std::string jobid);
 
 	/// <summary>
 	/// Attempts to retrieve a match from the currentjobs table with a matching jobid.

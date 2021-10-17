@@ -51,6 +51,14 @@ public:
 	virtual Job getCurrentJob(std::string jobid);
 
 	/// <summary>
+	/// Retrieves the time of a job with matching jobid in the currentjobs table.
+	/// </summary>
+	/// <returns>
+	/// The time of the job. Returns -1 if job is unknown or an error occured.
+	/// </returns>
+	virtual long long getCurrentJobTime(std::string jobid);
+
+	/// <summary>
 	/// Adds a job to the currentjobs table.
 	/// </summary>
 	virtual long long addCurrentJob(Job job);

@@ -52,6 +52,7 @@ TEST(FinishJobRequest, Success)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 	
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
+	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
 	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
@@ -86,6 +87,7 @@ TEST(FinishJobRequest, Failure)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
+	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 
 	FailedJob failedJob = FailedJob(job, 10, "Project already known.");
@@ -122,9 +124,10 @@ TEST(FinishJobRequest, DeficientArguments)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJobTime(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -156,9 +159,10 @@ TEST(FinishJobRequest, IncorrectJobTime)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?abc?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJobTime(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -190,9 +194,10 @@ TEST(FinishJobRequest, IncorrectReasonID)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?reason?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJobTime(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -212,21 +217,14 @@ TEST(FinishJobRequest, UnknownJob)
 
 	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
-	Job job;
-	job.jobid = "";
-	job.time = 0;
-	job.timeout = 0;
-	job.priority = 0;
-	job.retries = 0;
-	job.url = "";
-
 	std::string requestType = "fnjb";
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob("58451e62-1794-4f03-8ae4-21fb42670f73")).WillOnce(testing::Return(job));
+	EXPECT_CALL(jddatabase, getCurrentJobTime("58451e62-1794-4f03-8ae4-21fb42670f73")).WillOnce(testing::Return(-1));
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -246,21 +244,14 @@ TEST(FinishJobRequest, EarlyJob)
 
 	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
-	Job job;
-	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
-	job.time = 0;
-	job.timeout = 69;
-	job.priority = 100;
-	job.retries = 0;
-	job.url = "https://github.com/zavg/linux-0.01";
-
 	std::string requestType = "fnjb";
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?2?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
+	EXPECT_CALL(jddatabase, getCurrentJobTime("58451e62-1794-4f03-8ae4-21fb42670f73")).WillOnce(testing::Return(0));
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -280,21 +271,14 @@ TEST(FinishJobRequest, LateJob)
 
 	handler.initialize(&database, &jddatabase, &raftConsensus, &stats);
 
-	Job job;
-	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
-	job.time = 2;
-	job.timeout = 69;
-	job.priority = 100;
-	job.retries = 0;
-	job.url = "https://github.com/zavg/linux-0.01";
-
 	std::string requestType = "fnjb";
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?0?Success.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
+	EXPECT_CALL(jddatabase, getCurrentJobTime("58451e62-1794-4f03-8ae4-21fb42670f73")).WillOnce(testing::Return(2));
+	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -326,9 +310,10 @@ TEST(FinishJobRequest, FailedJobFailure)
 	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
+	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 10, "Project already known.")))).Times(3).WillRepeatedly(setErrno(1));
+	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 10, "Project already known.")))).Times(MAX_RETRIES + 1).WillRepeatedly(setErrno(1));
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 

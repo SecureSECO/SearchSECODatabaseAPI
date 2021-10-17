@@ -44,6 +44,7 @@ TEST(UpdateJobRequest, CorrectJob)
 	job.retries = 0;
 	job.url = "https://github.com/zavg/linux-0.01";
 
+	EXPECT_CALL(jddatabase, getCurrentJobTime("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return(job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).WillOnce(testing::Return(690000));
@@ -70,12 +71,9 @@ TEST(UpdateJobRequest, UnknownJob)
 	std::string requestType = "udjb";
 	std::string request = "5d514d6e-2f23-fee7-b378-feda84ec123f" + fieldDelimiter + "420000";
 
-	Job job;
-	job.jobid = "";
-
-	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return (job));
+	EXPECT_CALL(jddatabase, getCurrentJobTime("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return(-1));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).Times(0);
+	EXPECT_CALL(jddatabase, addCurrentJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -99,17 +97,9 @@ TEST(UpdateJobRequest, IncorrectJob)
 	std::string requestType = "udjb";
 	std::string request = "5d514d6e-2f23-fee7-b378-feda84ec123f" + fieldDelimiter + "420000";
 
-	Job job;
-	job.jobid = "5d514d6e-2f23-fee7-b378-feda84ec123f";
-	job.time = 690000;
-	job.timeout = 69;
-	job.priority = 100;
-	job.retries = 0;
-	job.url = "https://github.com/zavg/linux-0.01";
-
-	EXPECT_CALL(jddatabase, getCurrentJob("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return (job));
+	EXPECT_CALL(jddatabase, getCurrentJobTime("5d514d6e-2f23-fee7-b378-feda84ec123f")).WillOnce(testing::Return(690000));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, addCurrentJob(jobEqual(job))).Times(0);
+	EXPECT_CALL(jddatabase, addCurrentJob(testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 

@@ -21,6 +21,7 @@ public:
 	MOCK_METHOD(void, uploadJob, (std::string url, long long priority, int retries, long long timeout, bool newJob), ());
 	MOCK_METHOD(Job, getTopJob, (), ());
 	MOCK_METHOD(Job, getCurrentJob, (std::string jobid), ());
+	MOCK_METHOD(long long, getCurrentJobTime, (std::string jobid), ());
 	MOCK_METHOD(long long, addCurrentJob, (Job job), ());
 	MOCK_METHOD(void, addFailedJob, (FailedJob job), ());
 	MOCK_METHOD(int, getNumberOfJobs, (), ());

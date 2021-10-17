@@ -70,7 +70,7 @@ TEST(JobDatabaseIntegrationTest, UploadJobRequest)
 	std::string output = handler.handleRequest("upjb", "", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, &stats, TEST_IP, TEST_PORT);
 	int jobs = jddatabase.getNumberOfJobs();
-	EXPECT_EQ(jobs, 3);
+	EXPECT_EQ(jobs, 5);
 
 	std::string input2 = "";
 	std::string expectedOutput2 = "Crawl" + fieldDelimiter + "0";
@@ -106,7 +106,7 @@ TEST(JobDatabaseIntegrationTest, UploadMulitpleJobs)
 	std::string output = handler.handleRequest("upjb", "", input, nullptr);
 	JobRequestHandler *jhandler = new JobRequestHandler(&raftConsensus, &handler, &jddatabase, &stats, TEST_IP, TEST_PORT);
 	int jobs = jddatabase.getNumberOfJobs();
-	ASSERT_EQ(jobs, 4);
+	ASSERT_EQ(jobs, 6);
 }
 
 // Test if crawl data is handled succesfully.
@@ -276,7 +276,7 @@ TEST(JobDatabaseIntegrationTest, FinishJobRequestFailure)
 
 	// Take an actual job.
 	std::string output2 = handler.handleRequest("gtjb", "", input, nullptr);
-	ASSERT_THAT(output2, testing::StartsWith(HTTPStatusCodes::success("")));
+	ASSERT_THAT(output2, testing::StartsWith(HTTPStatusCodes::success("Spider")));
 
 	std::vector<std::string> args2 = Utility::splitStringOn(output2, FIELD_DELIMITER_CHAR);
 

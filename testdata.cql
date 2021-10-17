@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS jobs.failedjobs
 	url text,
 	retries int,
 	reasonID int,
-	readonData text,
+	reasonData text,
 	PRIMARY KEY ((jobid), time) 
 )
 WITH CLUSTERING ORDER BY (time DESC);
@@ -247,6 +247,6 @@ INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VA
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
 (2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1, 0, 100);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
-(77b02074-8a8e-4193-ac11-53a83ae2ad0d, 200000000000000, 'https://github.com/eladrich/pixel2style2pixel', 1, 0, 42069);
+(77b02074-8a8e-4193-ac11-53a83ae2ad0d, 600000000000000, 'https://github.com/eladrich/pixel2style2pixel', 1, 0, 42069);
 INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
-(6bb4b5bf-119b-4323-a175-469132620a24, 100000000000000, 'https://github.com/mattermost/desktop', 1, 0, 69420);
+(6bb4b5bf-119b-4323-a175-469132620a24, 700000000000000, 'https://github.com/mattermost/desktop', 1, 0, 69420);

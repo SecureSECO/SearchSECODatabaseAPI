@@ -61,11 +61,18 @@ std::string JobRequestHandler::handleGetJobRequest(std::string request, std::str
 			alreadyCrawling = false;
 		}
 		// Check if number of jobs is enough to provide the top job.
-		if (database->getNumberOfJobs() >= MIN_AMOUNT_JOBS || (alreadyCrawling == true && database->getNumberOfJobs() >= 1))
+		if (database->getNumberOfJobs() >= MIN_AMOUNT_JOBS ||
+			(alreadyCrawling == true && database->getNumberOfJobs() >= 1))
 		{
-			std::string job = getTopJobWithRetry();
+			Job job = getTopJobWithRetry();
 			jobmtx.unlock();
-			return job;
+			if (errno != 0)
+			{
+				return HTTPStatusCodes::serverError("Unable to get job from database.");
+			}
+			return HTTPStatusCodes::success(
+				std::string("Spider") + FIELD_DELIMITER_CHAR + job.jobid + FIELD_DELIMITER_CHAR + job.url +
+				FIELD_DELIMITER_CHAR + std::to_string(job.time) + FIELD_DELIMITER_CHAR + std::to_string(job.timeout));
 		}
 		// If the number of jobs is not high enough, the job is to crawl for more jobs.
 		else if (alreadyCrawling == false)
@@ -109,10 +116,10 @@ std::string JobRequestHandler::handleUpdateJobRequest(std::string request, std::
 			return HTTPStatusCodes::clientError("Incorrect job time.");
 		}
 
-		Job job = getCurrentJobWithRetry(jobid);
+		long long time = getCurrentJobTimeWithRetry(jobid);
 
 		// If job was not present in currentjobs (or an error was thrown),
-		if (job.jobid == "")
+		if (time == -1)
 		{
 			// a newer job was already given out and finished. Signal this to the worker.
 			std::cout << "Received unknown job with ID: " << jobid << std::endl;
@@ -121,17 +128,19 @@ std::string JobRequestHandler::handleUpdateJobRequest(std::string request, std::
 		}
 
 		// Check if a newer version of the job is currently busy.
-		if (jobTime < job.time)
+		if (jobTime < time)
 		{
 			return HTTPStatusCodes::clientError("Job not currently expected.");
 		}
-		else if (jobTime > job.time)
+		else if (jobTime > time)
 		{
 			std::cout << "Received job was newer than newest job. (" << std::to_string(jobTime) << " > "
-					  << std::to_string(job.time) << ")" << std::endl
-					  << "JobID: " << job.jobid << std::endl;
+					  << std::to_string(time) << ")" << std::endl
+					  << "JobID: " << jobid << std::endl;
 			return HTTPStatusCodes::clientError("Job not currently expected.");
 		}
+
+		Job job = getCurrentJobWithRetry(jobid);
 
 		// Update timeout timer in currentjobs table.
 		long long newTime = addCurrentJobWithRetry(job);
@@ -152,7 +161,6 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 			return HTTPStatusCodes::clientError("Incorrect amount of arguments.");
 		}
 		std::string jobid = splitted[0];
-		std::cout << "Finishing job: " << jobid << std::endl;
 		long long jobTime = Utility::safeStoll(splitted[1]);
 		if (errno != 0)
 		{
@@ -167,10 +175,10 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 
 		stats->jobCounter->Add({{"Node", stats->myIP}, {"Client", client}, {"Reason", std::to_string(reasonID)}}).Increment();
 
-		Job job = getCurrentJobWithRetry(jobid);
+		long long time = getCurrentJobTimeWithRetry(jobid);
 
 		// If job was not present in currentjobs (or an error was thrown),
-		if (job.jobid == "")
+		if (time == -1)
 		{
 			// a newer job was already given out and finished. Signal this to the worker.
 			std::cout << "Received unknown job with ID: " << jobid << std::endl;
@@ -179,26 +187,28 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 		}
 
 		// Check if a newer version of the job is currently busy.
-		if (jobTime < job.time)
+		if (jobTime < time)
 		{
 			return HTTPStatusCodes::clientError("Job not currently expected.");
 		}
-		else if (jobTime > job.time)
+		else if (jobTime > time)
 		{
 			std::cout << "Received job was newer than newest job. (" << std::to_string(jobTime) << " > "
-					  << std::to_string(job.time) << ")" << std::endl
-					  << "JobID: " << job.jobid << std::endl;
+					  << std::to_string(time) << ")" << std::endl
+					  << "JobID: " << jobid << std::endl;
 			return HTTPStatusCodes::clientError("Job not currently expected.");
 		}
+
+		Job job = getCurrentJobWithRetry(jobid);
 
 		// Check if the worker failed to complete the job.
 		if (reasonID != 0)
 		{
-			addFailedJobWithRetry(FailedJob(job, reasonID, reasonData));
+			FailedJob failedJob(job, reasonID, reasonData);
+			addFailedJobWithRetry(failedJob);
 
 			if (errno != 0)
 			{
-				std::cout << "Could not store failed job: " << data << std::endl;
 				return HTTPStatusCodes::serverError("Job could not be added to failed jobs list.");
 			}
 
@@ -365,29 +375,10 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 	errno = 0;
 }
 
-std::string JobRequestHandler::getTopJobWithRetry()
+Job JobRequestHandler::getTopJobWithRetry()
 {
-	Job topJob = database->getTopJob();
-	int tries = 0;
-	if (errno != 0)
-	{
-		while (tries < MAX_RETRIES)
-		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			topJob = database->getTopJob();
-			if (errno == 0)
-			{
-				return HTTPStatusCodes::success(
-					std::string("Spider") + FIELD_DELIMITER_CHAR + topJob.jobid + FIELD_DELIMITER_CHAR + topJob.url +
-					FIELD_DELIMITER_CHAR + std::to_string(topJob.time) + FIELD_DELIMITER_CHAR + std::to_string(topJob.timeout));
-			}
-			tries++;
-		}
-		return HTTPStatusCodes::serverError("Unable to get job from database.");
-	}
-	return HTTPStatusCodes::success(std::string("Spider") + FIELD_DELIMITER_CHAR + topJob.jobid + FIELD_DELIMITER_CHAR + topJob.url +
-									FIELD_DELIMITER_CHAR + std::to_string(topJob.time) + FIELD_DELIMITER_CHAR +
-									std::to_string(topJob.timeout));
+	std::function<Job()> function = [this]() { return this->database->getTopJob(); };
+	return Utility::queryWithRetry(function);
 }
 
 void JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
@@ -397,6 +388,12 @@ void JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int
 		return true;
 	};
 	Utility::queryWithRetry(function);
+}
+
+long long JobRequestHandler::getCurrentJobTimeWithRetry(std::string jobid)
+{
+	std::function<long long()> function = [jobid, this]() { return this->database->getCurrentJobTime(jobid); };
+	return Utility::queryWithRetry(function);
 }
 
 Job JobRequestHandler::getCurrentJobWithRetry(std::string jobid)
