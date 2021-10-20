@@ -109,7 +109,6 @@ std::string JobRequestHandler::handleUpdateJobRequest(std::string request, std::
 			return HTTPStatusCodes::clientError("Incorrect amount if arguments. Expected job id and time.");
 		}
 		std::string jobid = splitted[0];
-		std::cout << "Updating job: " << jobid << std::endl;
 		long long jobTime = Utility::safeStoll(splitted[1]);
 		if (errno != 0)
 		{
