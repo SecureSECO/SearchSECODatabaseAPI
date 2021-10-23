@@ -75,8 +75,11 @@ public:
 	std::string handleGetJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
-	/// 
+	/// Handles the request to update the job time.
 	/// </summary>
+	/// <returns>
+	/// The new time of the job.
+	/// </returns>
 	std::string handleUpdateJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
