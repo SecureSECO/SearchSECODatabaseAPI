@@ -20,7 +20,8 @@ enum StatFamily
 	reqCount,
 	methCount,
 	langCount,
-	reqTime
+	jobCount,
+	reqTime	
 };
 
 /// <summary>
@@ -56,6 +57,7 @@ class Statistics
 	prometheus::Family<prometheus::Counter> *requestCounter;
 	prometheus::Family<prometheus::Counter> *methodCounter;
 	prometheus::Family<prometheus::Counter> *languageCounter;
+	prometheus::Family<prometheus::Counter> *jobCounter;
 	prometheus::Family<prometheus::Gauge> *latestRequest;
 
 	// The ip of this node for identifying the node in the statistics.

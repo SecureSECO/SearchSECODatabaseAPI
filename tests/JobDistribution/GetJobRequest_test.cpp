@@ -25,7 +25,7 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(3));
+	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(4).WillRepeatedly(testing::Return(3));
 	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";
@@ -43,12 +43,20 @@ TEST(GetJobRequest, NotEnoughJobsTest)
 	std::string input(inputChars.begin(), inputChars.end());
 	EXPECT_THAT(result, testing::StartsWith(HTTPStatusCodes::success(input)));
 
-	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
+	Job job;
+	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
+	job.time = 0;
+	job.timeout = 69;
+	job.priority = 100;
+	job.retries = 0;
+	job.url = "https://github.com/zavg/linux-0.01";
+
+	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return(job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result2 = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> input2Chars = {};
-	Utility::appendBy(input2Chars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
+	Utility::appendBy(input2Chars, {"Spider", "58451e62-1794-4f03-8ae4-21fb42670f73", "https://github.com/zavg/linux-0.01", "0", "69"}, FIELD_DELIMITER_CHAR,
 					  ENTRY_DELIMITER_CHAR);
 	input2Chars.pop_back();
 
@@ -68,18 +76,28 @@ TEST(GetJobRequest, EnoughJobsTest)
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(550));
+	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(2).WillRepeatedly(testing::Return(550));
 	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";
 	std::string request = "";
 
-	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return("https://github.com/zavg/linux-0.01"));
+	Job job;
+	job.jobid = "58451e62-1794-4f03-8ae4-21fb42670f73";
+	job.time = 0;
+	job.timeout = 69;
+	job.priority = 100;
+	job.retries = 0;
+	job.url = "https://github.com/zavg/linux-0.01";
+
+	EXPECT_CALL(jddatabase, getTopJob()).WillOnce(testing::Return(job));
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
 	std::vector<char> inputChars = {};
-	Utility::appendBy(inputChars, {"Spider", "https://github.com/zavg/linux-0.01"}, FIELD_DELIMITER_CHAR,
+	Utility::appendBy(
+		inputChars, {"Spider", "58451e62-1794-4f03-8ae4-21fb42670f73", "https://github.com/zavg/linux-0.01", "0", "69"},
+		FIELD_DELIMITER_CHAR,
 					  ENTRY_DELIMITER_CHAR);
 	inputChars.pop_back();
 
@@ -99,7 +117,7 @@ TEST(GetJobRequest, NoJobsTest)
 	MockRaftConsensus raftConsensus;
 	RequestHandler handler;
 
-	EXPECT_CALL(jddatabase, getNumberOfJobs()).WillOnce(testing::Return(0));
+	EXPECT_CALL(jddatabase, getNumberOfJobs()).Times(4).WillRepeatedly(testing::Return(0));
 	handler.initialize(&database, &jddatabase, &raftConsensus, nullptr);
 
 	std::string requestType = "gtjb";

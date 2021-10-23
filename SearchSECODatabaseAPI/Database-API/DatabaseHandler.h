@@ -12,7 +12,6 @@ Utrecht University within the Software Project course.
 
 #define IP "cassandra"
 #define DBPORT 8002
-#define MAX_THREADS 16
 #define HASHES_INSERT_MAX 1000
 
 using namespace types;
@@ -186,44 +185,9 @@ private:
 	CassUuid createAuthorIfNotExists(Author author);
 
 	/// <summary>
-	/// Retrieves a string in a column and some row.
-	/// </summary>
-	/// <param name="row"> The corresponding row. </param>
-	/// <param name="column"> The corresponding column. </param>
-	std::string getString(const CassRow *row, const char *column);
-
-	/// <summary>
-	/// Retrieves a 32-bit integer from a row.
-	/// </summary>
-	/// <param name="row"> The corresponding row. </param>
-	/// <param name="column"> The corresponding column. </param>
-	int getInt32(const CassRow *row, const char *column);
-
-	/// <summary>
-	/// Retrieves a 64-bit integer from a row.
-	/// </summary>
-	/// <param name="row"> The corresponding row. </param>
-	/// <param name="column"> The corresponding column. </param>
-	long long getInt64(const CassRow *row, const char *column);
-
-	/// <summary>
-	/// Retrieves a UUID from a row and converts it to a string.
-	/// </summary>
-	/// <param name="row"> The corresponding row. </param>
-	/// <param name="column"> The corresponding column. </param>
-	std::string getUUID(const CassRow *row, const char *column);
-
-	/// <summary>
 	/// Create the prepared statements to be executed later.
 	/// </summary>
 	void setPreparedStatements();
-
-	/// <summary>
-	/// Prepares a specified statement (query) to be executed later.
-	/// </summary>
-	/// <param name="query"> A string containing the CQL-query to be executed later. </param>
-	/// <returns> The constant prepared statement that allows us to execute the query given as input. </returns>
-	const CassPrepared *prepareStatement(std::string query);
 
 	/// <summary>
 	/// The connection with the database.

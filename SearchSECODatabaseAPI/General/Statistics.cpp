@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <unistd.h>
 #include <prometheus/counter.h>
@@ -33,6 +34,9 @@ void Statistics::Initialize()
 						   .Name("api_languages_byte_total")
 						   .Help("Bytes of languages encountered.")
 						   .Register(*registry);
+
+	jobCounter =
+		&prometheus::BuildCounter().Name("api_finished_jobs_total").Help("Number of finished jobs.").Register(*registry);
 
 	latestRequest = &prometheus::BuildGauge()
 						 .Name("api_request_time_seconds")
@@ -80,6 +84,10 @@ void Statistics::readFromFile(std::string file)
 			{
 				current = methCount;
 			}
+			else if (line == "#jobCount")
+			{
+				current = jobCount;
+			}
 			else if (line == "#languageCount")
 			{
 				current = langCount;
@@ -110,6 +118,11 @@ void Statistics::readFromFile(std::string file)
 					->Add({{"Node", lineSplitted[2]}, {"Client", lineSplitted[0]}, {"Language", lineSplitted[1]}})
 					.Increment(Utility::safeStod(lineSplitted[3]));
 				break;
+			case jobCount:
+				jobCounter
+					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Reason", lineSplitted[2]}})
+					.Increment(Utility::safeStod(lineSplitted[3]));
+				break;
 			case reqTime:
 				latestRequest
 					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Request", lineSplitted[2]}})
@@ -125,6 +138,73 @@ void Statistics::readFromFile(std::string file)
 
 void Statistics::writeToFile(std::string file)
 {
+	std::stringstream fileData;
+	
+	fileData << "#requestCount\n";
+
+	std::vector<prometheus::MetricFamily> family = requestCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#methodCount\n";
+
+	family = methodCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#jobCount\n";
+
+	family = jobCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#languageCount\n";
+
+	family = languageCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#requestTime\n";
+
+	family = latestRequest->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.gauge.value) << "\n";
+		}
+	}
+
 	std::ofstream fileHandler;
 	fileHandler.open(file);
 
@@ -133,58 +213,8 @@ void Statistics::writeToFile(std::string file)
 		std::cout << "Unable to open statistics file." << std::endl;
 		return;
 	}
-	
-	fileHandler << "#requestCount\n";
 
-	std::vector<prometheus::MetricFamily> family = requestCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#methodCount\n";
-
-	family = methodCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#languageCount\n";
-
-	family = languageCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#requestTime\n";
-
-	family = latestRequest->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.gauge.value) << "\n";
-		}
-	}
+	fileHandler << fileData.str();
 
 	fileHandler.close();
 }

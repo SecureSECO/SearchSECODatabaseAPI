@@ -8,4 +8,4 @@ Utrecht University within the Software Project course.
 
 #define FIELD_DELIMITER_CHAR '?'
 #define ENTRY_DELIMITER_CHAR '\n'
-#define RETRY_SLEEP 1000000
+#define MAX_THREADS 16

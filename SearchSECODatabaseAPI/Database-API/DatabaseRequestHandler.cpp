@@ -36,5 +36,5 @@ std::tuple<> DatabaseRequestHandler::connectWithRetry(std::string ip, int port)
 		this->database->connect(ip, port);
 		return std::make_tuple();
 	};
-	return queryWithRetry<std::tuple<>>(function);
+	return Utility::queryWithRetry<std::tuple<>>(function);
 }

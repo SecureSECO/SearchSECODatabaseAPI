@@ -94,6 +94,7 @@ void RAFTConsensus::start(RequestHandler* requestHandler,
 	if (leader) 
 	{
 		new std::thread(&RAFTConsensus::heartbeatSender, this);
+		new std::thread(&DatabaseConnection::updateCurrentJobs, requestHandler->getJobRequestHandler()->getDatabaseConnection());
 	}
 	else 
 	{
@@ -181,10 +182,10 @@ void RAFTConsensus::listenForHeartbeat()
 {
 	while (!stop) 
 	{
+		std::string data;
 		try 
 		{
-			std::string data = networkhandler->receiveData();
-			handleHeartbeat(data);
+			data = networkhandler->receiveData();			
 		}
 		catch(std::exception const& ex) 
 		{
@@ -206,6 +207,7 @@ void RAFTConsensus::listenForHeartbeat()
 				throw std::runtime_error("Could not connect with the new leader.");
 			}
 		}
+		handleHeartbeat(data);
 	}
 }
 
@@ -254,7 +256,7 @@ void RAFTConsensus::handleHeartbeat(std::string heartbeat)
 	int crawlid = Utility::safeStoi(hbSplitted[0]);
 	if (errno == 0) 
 	{
-		requestHandler->getJobRequestHandler()->updateCrawlID(crawlid);
+		requestHandler->getJobRequestHandler()->crawlID = crawlid;
 	}
 	else 
 	{

@@ -4,13 +4,10 @@ Utrecht University within the Software Project course.
 © Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
-#include "Types.h"
-
+#include "RAFTConsensus.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
-
-using namespace types;
 
 /// <summary>
 /// Handles interaction with database.

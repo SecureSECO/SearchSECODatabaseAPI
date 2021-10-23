@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "DatabaseHandler.h"
 #include "Utility.h"
+#include "DatabaseUtility.h"
 
 #include <iostream>
 #include <string>
@@ -200,7 +201,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 		if (cass_result_row_count(result) >= 1)
 		{
 			const CassRow *row = cass_result_first_row(result);
-			author = Author(getString(row, "name"), getString(row, "mail"));
+			author = Author(DatabaseUtility::getString(row, "name"), DatabaseUtility::getString(row, "mail"));
 		}
 
 		cass_result_free(result);
@@ -245,14 +246,14 @@ ProjectOut DatabaseHandler::getProject(const CassRow *row)
 	ProjectOut project;
 
 	// Retrieve the values of the variables in the row.
-	project.projectID = getInt64(row, "projectID");
-	project.version = getInt64(row, "versiontime");
-	project.versionHash = getString(row, "versionHash");
-	project.license = getString(row, "license");
-	project.name = getString(row, "name");
-	project.url = getString(row, "url");
-	project.ownerID = getUUID(row, "ownerid");
-	project.parserVersion = getInt64(row, "parserversion");
+	project.projectID = DatabaseUtility::getInt64(row, "projectID");
+	project.version = DatabaseUtility::getInt64(row, "versiontime");
+	project.versionHash = DatabaseUtility::getString(row, "versionHash");
+	project.license = DatabaseUtility::getString(row, "license");
+	project.name = DatabaseUtility::getString(row, "name");
+	project.url = DatabaseUtility::getString(row, "url");
+	project.ownerID = DatabaseUtility::getUUID(row, "ownerid");
+	project.parserVersion = DatabaseUtility::getInt64(row, "parserversion");
 
 	const CassValue *set = cass_row_get_column_by_name(row, "hashes");
 	CassIterator *iterator = cass_iterator_from_collection(set);
@@ -281,16 +282,16 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 	MethodOut method;
 
 	// Retrieve the values of the variables in the row.
-	method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
-	method.methodName = getString(row, "name");
-	method.fileLocation = getString(row, "file");
-	method.lineNumber = getInt32(row, "lineNumber");
-	method.projectID = getInt64(row, "projectID");
-	method.startVersion = getInt64(row, "startversiontime");
-	method.startVersionHash = getString(row, "startversionhash");
-	method.endVersion = getInt64(row, "endversiontime");
-	method.endVersionHash = getString(row, "endversionhash");
-	method.parserVersion = getInt64(row, "parserversion");
+	method.hash = Utility::uuidStringToHash(DatabaseUtility::getUUID(row, "method_hash"));
+	method.methodName = DatabaseUtility::getString(row, "name");
+	method.fileLocation = DatabaseUtility::getString(row, "file");
+	method.lineNumber = DatabaseUtility::getInt32(row, "lineNumber");
+	method.projectID = DatabaseUtility::getInt64(row, "projectID");
+	method.startVersion = DatabaseUtility::getInt64(row, "startversiontime");
+	method.startVersionHash = DatabaseUtility::getString(row, "startversionhash");
+	method.endVersion = DatabaseUtility::getInt64(row, "endversiontime");
+	method.endVersionHash = DatabaseUtility::getString(row, "endversionhash");
+	method.parserVersion = DatabaseUtility::getInt64(row, "parserversion");
 
 	const CassValue *set = cass_row_get_column_by_name(row, "authors");
 	CassIterator *iterator = cass_iterator_from_collection(set);
@@ -318,45 +319,10 @@ MethodID DatabaseHandler::getMethodID(const CassRow *row)
 	MethodID method;
 
 	// Retrieve the values of the variables in the row.
-	method.hash = Utility::uuidStringToHash(getUUID(row, "hash"));
-	method.projectID = getInt64(row, "projectid");
-	method.startVersion = getInt64(row, "startversiontime");
-	method.fileLocation = getString(row, "file");
+	method.hash = Utility::uuidStringToHash(DatabaseUtility::getUUID(row, "hash"));
+	method.projectID = DatabaseUtility::getInt64(row, "projectid");
+	method.startVersion = DatabaseUtility::getInt64(row, "startversiontime");
+	method.fileLocation = DatabaseUtility::getString(row, "file");
 
 	return method;
-}
-
-std::string DatabaseHandler::getString(const CassRow *row, const char *column)
-{
-	const char *result;
-	size_t len;
-	const CassValue *value = cass_row_get_column_by_name(row, column);
-	cass_value_get_string(value, &result, &len);
-	return std::string(result, len);
-}
-
-int DatabaseHandler::getInt32(const CassRow *row, const char *column)
-{
-	cass_int32_t result;
-	const CassValue *value = cass_row_get_column_by_name(row, column);
-	cass_value_get_int32(value, &result);
-	return result;
-}
-
-long long DatabaseHandler::getInt64(const CassRow *row, const char *column)
-{
-	cass_int64_t result;
-	const CassValue *value = cass_row_get_column_by_name(row, column);
-	cass_value_get_int64(value, &result);
-	return result;
-}
-
-std::string DatabaseHandler::getUUID(const CassRow *row, const char *column)
-{
-	char result[CASS_UUID_STRING_LENGTH];
-	CassUuid authorID;
-	const CassValue *value = cass_row_get_column_by_name(row, column);
-	cass_value_get_uuid(value, &authorID);
-	cass_uuid_string(authorID, result);
-	return result;
 }

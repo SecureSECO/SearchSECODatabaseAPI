@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "DatabaseHandler.h"
 #include "Utility.h"
+#include "DatabaseUtility.h"
 
 #include <iostream>
 #include <string>
@@ -180,13 +181,13 @@ void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, Met
 	{
 		const CassRow *row = cass_iterator_get_row(iterator);
 
-		long long endVersion = getInt64(row, "endVersionTime");
+		long long endVersion = DatabaseUtility::getInt64(row, "endVersionTime");
 		if (endVersion == prevVersion)
 		{
 			// The method is in fact part of an unchanged file,
 			// so we update the details regarding the method.
 			newMethod = false;
-			long long startVersion = getInt64(row, "startVersionTime");
+			long long startVersion = DatabaseUtility::getInt64(row, "startVersionTime");
 			updateMethod(method, project, startVersion);
 		}
 	}
@@ -374,16 +375,16 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 	{
 		const CassRow *row = cass_iterator_get_row(iterator);
 
-		long long endVersion = getInt64(row, "endVersionTime");
+		long long endVersion = DatabaseUtility::getInt64(row, "endVersionTime");
 
 		if (endVersion == prevVersion)
 		{
-			long long startVersion = getInt64(row, "startversiontime");
+			long long startVersion = DatabaseUtility::getInt64(row, "startversiontime");
 			MethodIn method;
-			method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
-			method.fileLocation = getString(row, "file");
-			method.lineNumber = getInt32(row, "lineNumber");
-			method.methodName = getString(row, "name");
+			method.hash = Utility::uuidStringToHash(DatabaseUtility::getUUID(row, "method_hash"));
+			method.fileLocation = DatabaseUtility::getString(row, "file");
+			method.lineNumber = DatabaseUtility::getInt32(row, "lineNumber");
+			method.methodName = DatabaseUtility::getString(row, "name");
 			updateMethod(method, project, startVersion);
 			hashes.push_back(method.hash);
 		}
