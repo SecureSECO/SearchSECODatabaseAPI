@@ -5,8 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
-        working-directory: ${{github.workspace}}/dependencies
         run: |
+             mkdir dependencies
+             cd dependencies
              apt-get -y update
              apt-get -y dist-upgrade
              apt-get -y install gcc g++ cmake autoconf dpkg wget git
