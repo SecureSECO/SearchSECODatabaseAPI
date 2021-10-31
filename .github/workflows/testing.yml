@@ -23,7 +23,8 @@ jobs:
              sudo dpkg -i libuv1_1.35.0-1_amd64.deb
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
-             sudo apt-get -y -qq install openjdk-8-jdk python
+             sudo apt-get -y -qq install curl python
+             sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install Cassandra
         run: |
              wget -nv https://dlcdn.apache.org/cassandra/3.11.11/apache-cassandra-3.11.11-bin.tar.gz
@@ -59,7 +60,8 @@ jobs:
              sudo dpkg -i libuv1_1.35.0-1_amd64.deb
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
-             sudo apt-get -y -qq install openjdk-8-jdk python
+             sudo apt-get -y -qq install curl python
+             sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install clang
         run: sudo apt-get -y -qq install clang clang-tidy clang-format
       - name: Run linting
