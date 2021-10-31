@@ -154,7 +154,7 @@ private:
 	/// If it succeeds, it returns true.
 	/// If it fails, it returns false.
 	/// </summary>
-	void tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout);
+	void tryUploadJobWithRetry(Job job, bool newMethod);
 
 	/// <summary>
 	/// Attempts to retrieve the time of a match from the currentjobs table with a matching jobid.

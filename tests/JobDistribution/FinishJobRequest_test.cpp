@@ -22,6 +22,12 @@ MATCHER_P(failedjobequal, job, "")
 		   arg.reasonID == job.reasonID && arg.reasonData == job.reasonData;
 }
 
+MATCHER_P(jobequal, job, "")
+{
+	return arg.jobid == job.jobid && arg.timeout == job.timeout && arg.priority == job.priority && arg.url == job.url &&
+		   arg.retries == job.retries;
+}
+
 ACTION_P(setErrno, error)
 {
 	errno = error;
@@ -55,7 +61,8 @@ TEST(FinishJobRequest, Success)
 	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
-	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 0, "")))).Times(0);
+	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -93,6 +100,8 @@ TEST(FinishJobRequest, Failure)
 	FailedJob failedJob = FailedJob(job, 10, "Project already known.");
 
 	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(failedJob))).Times(1);
+	job.retries++;
+	EXPECT_CALL(jddatabase, uploadJob(jobequal(job), false)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -128,6 +137,7 @@ TEST(FinishJobRequest, DeficientArguments)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -163,6 +173,7 @@ TEST(FinishJobRequest, IncorrectJobTime)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -198,6 +209,7 @@ TEST(FinishJobRequest, IncorrectReasonID)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -225,6 +237,7 @@ TEST(FinishJobRequest, UnknownJob)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -252,6 +265,7 @@ TEST(FinishJobRequest, EarlyJob)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -279,6 +293,7 @@ TEST(FinishJobRequest, LateJob)
 	EXPECT_CALL(jddatabase, getCurrentJob(testing::_)).Times(0);
 	
 	EXPECT_CALL(jddatabase, addFailedJob(testing::_)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 
@@ -314,6 +329,7 @@ TEST(FinishJobRequest, FailedJobFailure)
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 	
 	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(FailedJob(job, 10, "Project already known.")))).Times(MAX_RETRIES + 1).WillRepeatedly(setErrno(1));
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 

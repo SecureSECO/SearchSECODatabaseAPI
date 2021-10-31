@@ -211,6 +211,16 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 				return HTTPStatusCodes::serverError("Job could not be added to failed jobs list.");
 			}
 
+			if (job.retries < MAX_JOB_RETRIES)
+			{
+				job.retries++;
+				tryUploadJobWithRetry(job, false);
+				if (errno != 0)
+				{
+					return HTTPStatusCodes::serverError("Job could not be re-added to the jobsqueue.");
+				}
+			}
+
 			return HTTPStatusCodes::success("Job failed succesfully.");
 		}
 		else
@@ -274,7 +284,8 @@ std::string JobRequestHandler::handleUploadJobRequest(std::string request, std::
 	// Call to the database to upload jobs.
 	for (int i = 0; i < urls.size(); i++)
 	{
-		tryUploadJobWithRetry(urls[i], priorities[i], 0, timeouts[i]);
+		Job job("", timeouts[i], priorities[i], urls[i], 0);
+		tryUploadJobWithRetry(job, true);
 		if (errno != 0)
 		{
 			return HTTPStatusCodes::serverError("Unable to add job " + std::to_string(i) + " to database.");
@@ -380,10 +391,10 @@ Job JobRequestHandler::getTopJobWithRetry()
 	return Utility::queryWithRetry(function);
 }
 
-void JobRequestHandler::tryUploadJobWithRetry(std::string url, int priority, int retries, long long timeout)
+void JobRequestHandler::tryUploadJobWithRetry(Job job, bool newMethod)
 {
-	std::function<bool()> function = [url, priority, retries, timeout, this]() {
-		this->database->uploadJob(url, priority, retries, timeout, true);
+	std::function<bool()> function = [job, newMethod, this]() {
+		this->database->uploadJob(job, newMethod);
 		return true;
 	};
 	Utility::queryWithRetry(function);

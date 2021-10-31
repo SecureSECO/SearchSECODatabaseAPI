@@ -21,6 +21,15 @@ namespace jobTypes
 		long long priority;
 		std::string url;
 		int retries;
+
+		Job(std::string jobid, long long timeout, long long priority, std::string url, int retries)
+			: jobid(jobid), timeout(timeout), priority(priority), url(url), retries(retries)
+		{
+		}
+
+		Job()
+		{
+		}
 	};
 
 	/// <summary>

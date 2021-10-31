@@ -33,7 +33,7 @@ public:
 	/// Adds a job to the database given the url to a repository and a priority, 
 	/// together with number of previous tries and a timeout.
 	/// </summary>
-	virtual void uploadJob(std::string url, long long priority, int retries, long long timeout, bool newJob);
+	virtual void uploadJob(Job job, bool newJob);
 
 	/// <summary>
 	/// Retrieves the url of the first job in the jobs table and returns it.
@@ -136,6 +136,7 @@ private:
 	const CassPrepared *preparedAddFailedJob;
 	const CassPrepared *preparedAmountOfJobs;
 	const CassPrepared *preparedUploadJob;
+	const CassPrepared *preparedUploadRetryJob;
 	const CassPrepared *preparedCrawlID;
 	const CassPrepared *preparedUpdateCrawlID;
 };

@@ -48,6 +48,10 @@ void DatabaseConnection::setPreparedStatements()
 		connection,
 		"INSERT INTO jobs.jobsqueue (constant, jobid, priority, url, retries, timeout) VALUES (1, uuid(), ?, ?, ?, ?)");
 
+	preparedUploadRetryJob = DatabaseUtility::prepareStatement(
+		connection,
+		"INSERT INTO jobs.jobsqueue (constant, jobid, priority, url, retries, timeout) VALUES (1, ?, ?, ?, ?, ?)");
+
 	preparedAmountOfJobs =
 		DatabaseUtility::prepareStatement(connection, "SELECT COUNT(*) FROM jobs.jobsqueue WHERE constant = 1");
 
@@ -404,26 +408,31 @@ void DatabaseConnection::setCrawlID(int id)
 	}
 }
 
-void DatabaseConnection::uploadJob(std::string url, long long priority, int retries, long long timeout, bool newJob)
+void DatabaseConnection::uploadJob(Job job, bool newJob)
 {
 	errno = 0;
-	CassStatement *query = cass_prepared_bind(preparedUploadJob);
+	CassStatement *query;
 
 	long long resultPriority;
 	if (newJob)
 	{
+		query = cass_prepared_bind(preparedUploadJob);
 		long long currentTime = Utility::getCurrentTimeMilliSeconds();
-		resultPriority = currentTime - priority;
+		resultPriority = currentTime - job.priority;
 	}
 	else
 	{
-		resultPriority = priority;
+		query = cass_prepared_bind(preparedUploadRetryJob);
+		resultPriority = job.priority;
+		CassUuid jobid;
+		cass_uuid_from_string(job.jobid.c_str(), &jobid);
+		cass_statement_bind_uuid_by_name(query, "jobid", jobid);
 	}
 	
 	cass_statement_bind_int64_by_name(query, "priority", resultPriority);
-	cass_statement_bind_string_by_name(query, "url", url.c_str());
-	cass_statement_bind_int32_by_name(query, "retries", retries);
-	cass_statement_bind_int64_by_name(query, "timeout", timeout);
+	cass_statement_bind_string_by_name(query, "url", job.url.c_str());
+	cass_statement_bind_int32_by_name(query, "retries", job.retries);
+	cass_statement_bind_int64_by_name(query, "timeout", job.timeout);
 
 	CassFuture *queryFuture = cass_session_execute(connection, query);
 
@@ -493,7 +502,8 @@ void DatabaseConnection::updateCurrentJob(CassUuid jobid, Job job, long long cur
 		deleteCurrentJob(jobid);
 		if (job.retries < MAX_JOB_RETRIES)
 		{
-			uploadJob(job.url, job.priority, job.retries + 1, job.timeout, false);
+			job.retries++;
+			uploadJob(job, false);
 		}
 	}
 }
