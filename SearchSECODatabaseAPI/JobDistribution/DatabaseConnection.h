@@ -13,7 +13,7 @@ Utrecht University within the Software Project course.
 #define IP "cassandra"
 #define DBPORT 8002
 #define UPDATE_JOBS_TIMEOUT 300000000 // 5 minutes.
-#define MAX_JOB_RETRIES 3
+#define MAX_JOB_RETRIES 1
 #define RECOUNT_WAIT_TIME 600
 
 using namespace jobTypes;
