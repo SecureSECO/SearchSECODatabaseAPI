@@ -1,4 +1,6 @@
 # Database API
+![Testing](https://github.com/SecureSECO/SearchSECODatabaseAPI/actions/workflows/testing.yml/badge.svg)
+
 The database API is responsible for handling the communication between the controller and the database.
 
 # Installation

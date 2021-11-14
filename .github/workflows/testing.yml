@@ -1,0 +1,70 @@
+name: Testing pipeline
+on: [push]
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: joschi/setup-jdk@v2
+        with:
+          java-version: '8'
+      - name: Install dependencies
+        run: |
+             mkdir dependencies
+             cd dependencies
+             sudo apt-get -y -qq update
+             sudo apt-get -y -qq dist-upgrade
+             sudo apt-get -y -qq install gcc g++ cmake autoconf dpkg wget git
+             sudo apt-get -y -qq install libboost-all-dev
+             wget -nv http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
+             sudo dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
+             sudo apt-get -y -qq install libssl-dev libkrb5-dev zlib1g
+             wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
+             sudo dpkg -i libuv1_1.35.0-1_amd64.deb
+             wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
+             sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
+             sudo apt-get -y -qq install curl libcurl4-openssl-dev python
+             sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
+      - name: Install Cassandra
+        run: |
+             wget -nv https://dlcdn.apache.org/cassandra/3.11.11/apache-cassandra-3.11.11-bin.tar.gz
+             tar xzf apache-cassandra-3.11.11-bin.tar.gz
+      - name: Tests
+        run: |
+             rm -rf apache-cassandra-3.11.11/data
+             apache-cassandra-3.11.11/bin/cassandra -R
+             sleep 20
+             apache-cassandra-3.11.11/bin/cqlsh -f ./testdata.cql
+             rm -rf database_build
+             mkdir database_build
+             cd database_build
+             cmake ..
+             cmake --build .
+             ./tests/tests --gtest_output="xml:report.xml"
+  Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+             mkdir dependencies
+             cd dependencies
+             sudo apt-get -y -qq update
+             sudo apt-get -y -qq dist-upgrade
+             sudo apt-get -y -qq install gcc g++ cmake autoconf dpkg wget git
+             sudo apt-get -y -qq install libboost-all-dev
+             wget -nv http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb
+             sudo dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb
+             sudo apt-get -y -qq install libssl-dev libkrb5-dev zlib1g
+             wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
+             sudo dpkg -i libuv1_1.35.0-1_amd64.deb
+             wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
+             sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
+             sudo apt-get -y -qq install curl python
+             sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
+      - name: Install clang
+        run: sudo apt-get -y -qq install clang clang-tidy clang-format
+      - name: Run linting
+        run: |
+             clang-tidy SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -- -Iexternal/include/ -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ 
+             clang SearchSECODatabaseAPI/Database-API/*.cpp SearchSECODatabaseAPI/General/*.cpp SearchSECODatabaseAPI/JobDistribution/*.cpp -Iexternal/include/ -ISearchSECODatabaseAPI/Database-API/ -ISearchSECODatabaseAPI/General/ -ISearchSECODatabaseAPI/JobDistribution/ -fsyntax-only
