@@ -45,6 +45,12 @@ void DatabaseHandler::setPreparedStatements()
 					"startversionhash, endversiontime, endversionhash, name, lineNumber, authors, "
 					"parserversion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
+	// Prepare query used to insert a vulnerable method into the database.
+	insertVulnMethod = DatabaseUtility::prepareStatement(
+		connection, "INSERT INTO projectdata.methods (method_hash, projectID, startversiontime, file, "
+					"startversionhash, endversiontime, endversionhash, name, lineNumber, authors, "
+					"parserversion, vulnCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
 	// Prepare query used to update a method in the database.
 	updateMethods = DatabaseUtility::prepareStatement(
 		connection, "UPDATE projectdata.methods SET endVersionTime = ?, endVersionHash = ?, name = ?, "

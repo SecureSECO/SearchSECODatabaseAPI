@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS projectData.methods
   lineNumber int,
   authors set<UUID>,
   parserversion bigint,
+  vulnCode text,
   PRIMARY KEY ((method_hash), projectID, file, startVersionTime)
 )
 WITH CLUSTERING ORDER BY (projectID ASC, file ASC, startVersionTime DESC);

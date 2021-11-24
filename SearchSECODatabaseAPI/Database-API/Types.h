@@ -53,6 +53,7 @@ namespace types
 		std::string methodName;
 		File fileLocation;
 		int lineNumber;
+		std::string vulnCode;
 		std::vector<Author> authors;
 	};
 
@@ -72,6 +73,7 @@ namespace types
 		std::string endVersionHash;
 		std::string methodName;
 		int lineNumber;
+		std::string vulnCode;
 		std::vector<AuthorID> authorIDs;
 		long long parserVersion;
 	};
