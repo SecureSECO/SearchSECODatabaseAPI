@@ -199,7 +199,15 @@ void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, Met
 void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long parserVersion)
 {
 	errno = 0;
-	CassStatement *query = cass_prepared_bind(insertMethod);
+	CassStatement *query;
+	if (method.vulnCode != "")
+	{
+		query = cass_prepared_bind(insertVulnMethod);
+	}
+	else
+	{
+		query = cass_prepared_bind(insertMethod);
+	}
 
 	// Bind the variables in the statement.
 	CassUuid uuid;
@@ -214,6 +222,10 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 	cass_statement_bind_int64_by_name(query, "parserversion", parserVersion);
+	if (method.vulnCode != "")
+	{
+		cass_statement_bind_string_by_name(query, "vulnCode", method.vulnCode.c_str());
+	}
 
 	int size = method.authors.size();
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);

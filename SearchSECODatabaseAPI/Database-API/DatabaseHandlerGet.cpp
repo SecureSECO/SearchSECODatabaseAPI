@@ -292,6 +292,7 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 	method.endVersion = DatabaseUtility::getInt64(row, "endversiontime");
 	method.endVersionHash = DatabaseUtility::getString(row, "endversionhash");
 	method.parserVersion = DatabaseUtility::getInt64(row, "parserversion");
+	method.vulnCode = DatabaseUtility::getString(row, "vulncode");
 
 	const CassValue *set = cass_row_get_column_by_name(row, "authors");
 	CassIterator *iterator = cass_iterator_from_collection(set);

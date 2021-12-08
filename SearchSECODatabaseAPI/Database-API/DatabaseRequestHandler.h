@@ -39,7 +39,7 @@ public:
 	///  prevVersion'\n'
 	///  unchangedfile1?unchangedfile2?...?unchangedfileM'\n'
 	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?<other authors>'\n'<method2_data>'\n'...'\n'<methodN_data>".
+	///  method1_author1_name?method1_author1_mail?<other authors>?vulnCode'\n'<method2_data>'\n'...'\n'<methodN_data>".
 	/// If you want to upload a new project, the second and third row
 	/// containing prevVersion and the unchanged files, can be left empty.
 	/// </param>
@@ -56,7 +56,7 @@ public:
 	/// <returns>
 	/// The methods which contain hashes equal to one within the request. A method is presented as follows:
 	/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
-	///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+	///  method_name?file?lineNumber?parserVersion?vulnCode?authorTotal?authorID_1?...?authorID_N".
 	/// Separated methods are separated by '\n'.
 	/// </returns>
 	std::string handleCheckRequest(std::string request);
@@ -68,7 +68,7 @@ public:
 	/// <returns>
 	/// The methods which contain hashes equal to one within the request. A method is presented as follows:
 	/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
-	///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+	///  method_name?file?lineNumber?parserVersion?vulnCode?authorTotal?authorID_1?...?authorID_N".
 	/// Separated methods are separated by '\n'.
 	/// </returns>
 	std::string handleCheckRequest(std::vector<Hash> hashes);
@@ -81,13 +81,13 @@ public:
 	/// The request made by the user, having the following format:
 	/// "projectID?version?versionHash?license?project_name?url?owner_name?owner_mail?parserVersion'\n'
 	///  method1_hash?method1_name?method1_fileLocation?method1_lineNumber?method1_numberOfAuthors?
-	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail'\n'
+	///  method1_author1_name?method1_author1_mail?...?method1_authorM_name?method1_authorM_mail?vulnCode'\n'
 	///  <method2_data>'\n'...'\n'<methodN_data>".
 	/// </param>
 	/// <returns>
 	/// The methods which contain hashes equal to one within the request. A method is presented as follows:
 	/// "method_hash?projectID?startVersion?startVersionHash?endVersion?endVersionHash?
-	///  method_name?file?lineNumber?parserVersion?authorTotal?authorID_1?...?authorID_N".
+	///  method_name?file?lineNumber?parserVersion?vulnCode?authorTotal?authorID_1?...?authorID_N".
 	/// Separated methods are separated by '\n'.
 	/// </returns>
 	std::string handleCheckUploadRequest(std::string request, std::string client);

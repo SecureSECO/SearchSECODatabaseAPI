@@ -203,6 +203,7 @@ private:
 	const CassPrepared *insertProject;
 	const CassPrepared *addHashesToProject;
 	const CassPrepared *insertMethod;
+	const CassPrepared *insertVulnMethod;
 	const CassPrepared *updateMethods;
 	const CassPrepared *updateUnchangedMethods;
 	const CassPrepared *selectMethod;
