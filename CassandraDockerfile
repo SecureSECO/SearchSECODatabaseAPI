@@ -1,6 +1,3 @@
-FROM cassandra:3.11
-RUN apt-get -y update && \
-	apt-get -y install wget && \
-	cd /opt/cassandra/lib && \
-	wget https://github.com/instaclustr/cassandra-exporter/releases/download/v0.9.10/cassandra-exporter-agent-0.9.10.jar
+FROM cassandra:4.0
+RUN apt-get -y update
 COPY ./conf /etc/cassandra

@@ -79,6 +79,10 @@ std::string DatabaseUtility::getString(const CassRow *row, const char *column)
 	const char *result;
 	size_t len;
 	const CassValue *value = cass_row_get_column_by_name(row, column);
+	if (cass_value_is_null(value))
+	{
+		return "";
+	}
 	cass_value_get_string(value, &result, &len);
 	return std::string(result, len);
 }
