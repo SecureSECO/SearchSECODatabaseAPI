@@ -19,7 +19,7 @@ CassSession *DatabaseUtility::connect(std::string ip, int port, std::string keys
 	// Add contact points.
 	cass_cluster_set_contact_points(cluster, ip.c_str());
 	cass_cluster_set_port(cluster, port);
-	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V3);
+	cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
 	cass_cluster_set_consistency(cluster, CASS_CONSISTENCY_QUORUM);
 	cass_cluster_set_num_threads_io(cluster, MAX_THREADS);
 

@@ -332,6 +332,7 @@ CassFuture *DatabaseHandler::executeSelectUnchangedMethodsQuery(std::vector<Hash
 																std::vector<std::string> files, ProjectIn project)
 {
 	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
 
 	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, hashes.size());
