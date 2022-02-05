@@ -103,6 +103,11 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request, std
 		{
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i-2) + ".");
 		}
+
+		if (method.vulnCode != "")
+		{
+			stats->vulnCounter->Add({{"Node", stats->myIP}, {"Client", client}}).Increment();
+		}
 		
 		++extensionOccurences[getExtension(method.fileLocation)];
 		methodQueue.push(method);

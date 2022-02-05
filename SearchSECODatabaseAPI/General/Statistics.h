@@ -59,6 +59,7 @@ class Statistics
 	prometheus::Family<prometheus::Counter> *languageCounter;
 	prometheus::Family<prometheus::Counter> *jobCounter;
 	prometheus::Family<prometheus::Gauge> *latestRequest;
+	prometheus::Family<prometheus::Counter> *vulnCounter;
 
 	// The ip of this node for identifying the node in the statistics.
 	std::string myIP;

@@ -35,13 +35,20 @@ void Statistics::Initialize()
 						   .Help("Bytes of languages encountered.")
 						   .Register(*registry);
 
-	jobCounter =
-		&prometheus::BuildCounter().Name("api_finished_jobs_total").Help("Number of finished jobs.").Register(*registry);
+	jobCounter = &prometheus::BuildCounter()
+					  .Name("api_finished_jobs_total")
+					  .Help("Number of finished jobs.")
+					  .Register(*registry);
 
 	latestRequest = &prometheus::BuildGauge()
 						 .Name("api_request_time_seconds")
 						 .Help("The latest time a request has been received.")
 						 .Register(*registry);
+
+	vulnCounter = &prometheus::BuildCounter()
+					   .Name("api_vulnerabilities_total")
+					   .Help("Number of vulnerabilities.")
+					   .Register(*registry);
 
 	// Ask the exposer to scrape the registry on incoming HTTP requests.
 	exposer->RegisterCollectable(registry);

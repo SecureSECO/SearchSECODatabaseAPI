@@ -458,6 +458,7 @@ void DatabaseConnection::updateCurrentJobs()
 	{
 		usleep(UPDATE_JOBS_TIMEOUT);
 		CassStatement *query = cass_prepared_bind(preparedGetCurrentJobs);
+		cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 		CassFuture *resultFuture = cass_session_execute(connection, query);
 
 		if (cass_future_error_code(resultFuture) == CASS_OK)
