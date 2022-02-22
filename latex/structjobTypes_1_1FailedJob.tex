@@ -1,0 +1,73 @@
+\hypertarget{structjobTypes_1_1FailedJob}{}\doxysection{job\+Types\+::Failed\+Job Struct Reference}
+\label{structjobTypes_1_1FailedJob}\index{jobTypes::FailedJob@{jobTypes::FailedJob}}
+
+
+Mirrors an entry of the failedjobs table in the database. Difference with \mbox{\hyperlink{structjobTypes_1_1Job}{Job}} is the addition of a reason\+ID and reason\+Data, to indicate a reason for failure.  
+
+
+
+
+{\ttfamily \#include $<$Job\+Types.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structjobTypes_1_1FailedJob_a9317d45b142ec9b34be037f0e71ed170}{Failed\+Job}} (\mbox{\hyperlink{structjobTypes_1_1Job}{Job}} job, int reason\+ID, std\+::string reason\+Data)
+\begin{DoxyCompactList}\small\item\em Constructs a failed job given a normal job and the reason. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a2f90fe0a57dfe060eb7449b46a5bfdd1}\label{structjobTypes_1_1FailedJob_a2f90fe0a57dfe060eb7449b46a5bfdd1}} 
+std\+::string {\bfseries jobid}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a5c0aa4e1075f7b5dc01f2eec212d30a5}\label{structjobTypes_1_1FailedJob_a5c0aa4e1075f7b5dc01f2eec212d30a5}} 
+long long {\bfseries time}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_ae19756a6709658f150534f9f40d92b33}\label{structjobTypes_1_1FailedJob_ae19756a6709658f150534f9f40d92b33}} 
+long long {\bfseries timeout}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a3170207732a18dd32acc8c76e88928c0}\label{structjobTypes_1_1FailedJob_a3170207732a18dd32acc8c76e88928c0}} 
+long long {\bfseries priority}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a5eea92fbdab138b87ad2b31c33c6d8fc}\label{structjobTypes_1_1FailedJob_a5eea92fbdab138b87ad2b31c33c6d8fc}} 
+std\+::string {\bfseries url}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a85e4a7d389a1023f516e2c9eeff8d325}\label{structjobTypes_1_1FailedJob_a85e4a7d389a1023f516e2c9eeff8d325}} 
+int {\bfseries retries}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_aede09efed7be4a289b5f1200070cd61e}\label{structjobTypes_1_1FailedJob_aede09efed7be4a289b5f1200070cd61e}} 
+int {\bfseries reason\+ID}
+\item 
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a17f94d992f08b6a1933fdce540a74e92}\label{structjobTypes_1_1FailedJob_a17f94d992f08b6a1933fdce540a74e92}} 
+std\+::string {\bfseries reason\+Data}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Mirrors an entry of the failedjobs table in the database. Difference with \mbox{\hyperlink{structjobTypes_1_1Job}{Job}} is the addition of a reason\+ID and reason\+Data, to indicate a reason for failure. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{structjobTypes_1_1FailedJob_a9317d45b142ec9b34be037f0e71ed170}\label{structjobTypes_1_1FailedJob_a9317d45b142ec9b34be037f0e71ed170}} 
+\index{jobTypes::FailedJob@{jobTypes::FailedJob}!FailedJob@{FailedJob}}
+\index{FailedJob@{FailedJob}!jobTypes::FailedJob@{jobTypes::FailedJob}}
+\doxysubsubsection{\texorpdfstring{FailedJob()}{FailedJob()}}
+{\footnotesize\ttfamily job\+Types\+::\+Failed\+Job\+::\+Failed\+Job (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structjobTypes_1_1Job}{Job}}}]{job,  }\item[{int}]{reason\+ID,  }\item[{std\+::string}]{reason\+Data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructs a failed job given a normal job and the reason. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job} & The job this failed job is based on. \\
+\hline
+{\em reason\+ID} & The id of the failure reason. \\
+\hline
+{\em reason\+Data} & The data of the reason. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/Job\+Types.\+h\end{DoxyCompactItemize}

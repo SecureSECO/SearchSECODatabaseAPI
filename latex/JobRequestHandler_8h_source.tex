@@ -1,0 +1,78 @@
+\hypertarget{JobRequestHandler_8h_source}{}\doxysection{Job\+Request\+Handler.\+h}
+\label{JobRequestHandler_8h_source}\index{SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h@{SearchSECODatabaseAPI/JobDistribution/JobRequestHandler.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{This program has been developed by students from the bachelor Computer Science at}}
+\DoxyCodeLine{3 \textcolor{comment}{Utrecht University within the Software Project course.}}
+\DoxyCodeLine{4 \textcolor{comment}{© Copyright Utrecht University (Department of Information and Computing Sciences)}}
+\DoxyCodeLine{5 \textcolor{comment}{*/}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include "{}DatabaseConnection.h"{}}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#include "{}RAFTConsensus.h"{}}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include <boost/shared\_ptr.hpp>}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#define MIN\_AMOUNT\_JOBS 500}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#define MAX\_RETRIES 3}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define CRAWL\_TIMEOUT\_SECONDS 150}}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{keyword}{class }\mbox{\hyperlink{classTcpConnection}{TcpConnection}};}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{keyword}{class }\mbox{\hyperlink{classJobRequestHandler}{JobRequestHandler}}}
+\DoxyCodeLine{21 \{}
+\DoxyCodeLine{22 \textcolor{keyword}{public}:}
+\DoxyCodeLine{26     \mbox{\hyperlink{classJobRequestHandler_a77899407adbdb4e810fc5be6e2adf365}{JobRequestHandler}}(\mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} *raft, \mbox{\hyperlink{classRequestHandler}{RequestHandler}} *requestHandler, \mbox{\hyperlink{classDatabaseConnection}{DatabaseConnection}} *database, \mbox{\hyperlink{classStatistics}{Statistics}} *stats,}
+\DoxyCodeLine{27                     std::string ip, \textcolor{keywordtype}{int} port);}
+\DoxyCodeLine{28 }
+\DoxyCodeLine{32     std::string \mbox{\hyperlink{classJobRequestHandler_a16aac53bf7abeb8be6470e9da42308f9}{handleConnectRequest}}(boost::shared\_ptr<TcpConnection> connection, std::string request);}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{37     std::string \mbox{\hyperlink{classJobRequestHandler_a31d7a97accb3ae5d25c59e737d0fc76f}{handleGetIPsRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{38 }
+\DoxyCodeLine{50     std::string \mbox{\hyperlink{classJobRequestHandler_a55400334766fd323b1429af238a98fcd}{handleUploadJobRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{51 }
+\DoxyCodeLine{63     std::string \mbox{\hyperlink{classJobRequestHandler_a55400334766fd323b1429af238a98fcd}{handleUploadJobRequest}}(std::string request, std::string client, std::vector<std::string> data);}
+\DoxyCodeLine{64 }
+\DoxyCodeLine{75     std::string \mbox{\hyperlink{classJobRequestHandler_ab3f1ee004c1a02fac08cb10a4c9557bc}{handleGetJobRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{76 }
+\DoxyCodeLine{83     std::string \mbox{\hyperlink{classJobRequestHandler_a8dbed97a2b955587369dad8f85bf5f99}{handleUpdateJobRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{84 }
+\DoxyCodeLine{96     std::string \mbox{\hyperlink{classJobRequestHandler_ab80708f74747392b813844ca6883941a}{handleFinishJobRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{97 }
+\DoxyCodeLine{108     std::string \mbox{\hyperlink{classJobRequestHandler_ae991cc11c08b351a859e3b2f45a266c8}{handleCrawlDataRequest}}(std::string request, std::string client, std::string data);}
+\DoxyCodeLine{109 }
+\DoxyCodeLine{115     \textcolor{keywordtype}{int} \mbox{\hyperlink{classJobRequestHandler_ab7bb933c0f252238c8fb64d3271a015c}{crawlID}};}
+\DoxyCodeLine{116     \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} timeLastCrawl = -\/1;}
+\DoxyCodeLine{117 }
+\DoxyCodeLine{124     \textcolor{keywordtype}{void} \mbox{\hyperlink{classJobRequestHandler_a7dbe12935d388c44d765d4f328422ce8}{updateCrawlID}}(\textcolor{keywordtype}{int} \textcolor{keywordtype}{id});}
+\DoxyCodeLine{125 }
+\DoxyCodeLine{126     \mbox{\hyperlink{classDatabaseConnection}{DatabaseConnection}} *getDatabaseConnection()}
+\DoxyCodeLine{127     \{}
+\DoxyCodeLine{128         \textcolor{keywordflow}{return} database;}
+\DoxyCodeLine{129     \}}
+\DoxyCodeLine{130 }
+\DoxyCodeLine{131 \textcolor{keyword}{private}:}
+\DoxyCodeLine{132     \mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} *raft;}
+\DoxyCodeLine{133     \mbox{\hyperlink{classRequestHandler}{RequestHandler}} *requestHandler;}
+\DoxyCodeLine{134     \mbox{\hyperlink{classDatabaseConnection}{DatabaseConnection}} *database;}
+\DoxyCodeLine{135     \mbox{\hyperlink{classStatistics}{Statistics}} *stats;}
+\DoxyCodeLine{136     std::mutex jobmtx;}
+\DoxyCodeLine{137 }
+\DoxyCodeLine{143     \textcolor{keywordtype}{void} connectWithRetry(std::string ip, \textcolor{keywordtype}{int} port);}
+\DoxyCodeLine{144 }
+\DoxyCodeLine{150     \mbox{\hyperlink{structjobTypes_1_1Job}{Job}} getTopJobWithRetry();}
+\DoxyCodeLine{151 }
+\DoxyCodeLine{157     \textcolor{keywordtype}{void} tryUploadJobWithRetry(\mbox{\hyperlink{structjobTypes_1_1Job}{Job}} job, \textcolor{keywordtype}{bool} newMethod);}
+\DoxyCodeLine{158 }
+\DoxyCodeLine{166     \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} getCurrentJobTimeWithRetry(std::string jobid);}
+\DoxyCodeLine{167 }
+\DoxyCodeLine{176     \mbox{\hyperlink{structjobTypes_1_1Job}{Job}} getCurrentJobWithRetry(std::string jobid);}
+\DoxyCodeLine{177 }
+\DoxyCodeLine{181     \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} addCurrentJobWithRetry(\mbox{\hyperlink{structjobTypes_1_1Job}{Job}} job);}
+\DoxyCodeLine{182 }
+\DoxyCodeLine{186     \textcolor{keywordtype}{void} addFailedJobWithRetry(\mbox{\hyperlink{structjobTypes_1_1FailedJob}{FailedJob}} job);}
+\DoxyCodeLine{187 \};}
+
+\end{DoxyCode}

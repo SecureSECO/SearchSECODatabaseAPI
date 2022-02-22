@@ -1,0 +1,99 @@
+\hypertarget{md5_8h_source}{}\doxysection{md5.\+h}
+\label{md5_8h_source}\index{SearchSECODatabaseAPI/General/md5/md5.h@{SearchSECODatabaseAPI/General/md5/md5.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/* MD5}}
+\DoxyCodeLine{2 \textcolor{comment}{ converted to C++ class by Frank Thilo (thilo@unix-\/ag.org)}}
+\DoxyCodeLine{3 \textcolor{comment}{ for bzflag (http://www.bzflag.org)}}
+\DoxyCodeLine{4 \textcolor{comment}{}}
+\DoxyCodeLine{5 \textcolor{comment}{   based on:}}
+\DoxyCodeLine{6 \textcolor{comment}{}}
+\DoxyCodeLine{7 \textcolor{comment}{   md5.h and md5.c}}
+\DoxyCodeLine{8 \textcolor{comment}{   reference implementation of RFC 1321}}
+\DoxyCodeLine{9 \textcolor{comment}{}}
+\DoxyCodeLine{10 \textcolor{comment}{   Copyright (C) 1991-\/2, RSA Data Security, Inc. Created 1991. All}}
+\DoxyCodeLine{11 \textcolor{comment}{rights reserved.}}
+\DoxyCodeLine{12 \textcolor{comment}{}}
+\DoxyCodeLine{13 \textcolor{comment}{License to copy and use this software is granted provided that it}}
+\DoxyCodeLine{14 \textcolor{comment}{is identified as the "{}RSA Data Security, Inc. MD5 Message-\/Digest}}
+\DoxyCodeLine{15 \textcolor{comment}{Algorithm"{} in all material mentioning or referencing this software}}
+\DoxyCodeLine{16 \textcolor{comment}{or this function.}}
+\DoxyCodeLine{17 \textcolor{comment}{}}
+\DoxyCodeLine{18 \textcolor{comment}{License is also granted to make and use derivative works provided}}
+\DoxyCodeLine{19 \textcolor{comment}{that such works are identified as "{}derived from the RSA Data}}
+\DoxyCodeLine{20 \textcolor{comment}{Security, Inc. MD5 Message-\/Digest Algorithm"{} in all material}}
+\DoxyCodeLine{21 \textcolor{comment}{mentioning or referencing the derived work.}}
+\DoxyCodeLine{22 \textcolor{comment}{}}
+\DoxyCodeLine{23 \textcolor{comment}{RSA Data Security, Inc. makes no representations concerning either}}
+\DoxyCodeLine{24 \textcolor{comment}{the merchantability of this software or the suitability of this}}
+\DoxyCodeLine{25 \textcolor{comment}{software for any particular purpose. It is provided "{}as is"{}}}
+\DoxyCodeLine{26 \textcolor{comment}{without express or implied warranty of any kind.}}
+\DoxyCodeLine{27 \textcolor{comment}{}}
+\DoxyCodeLine{28 \textcolor{comment}{These notices must be retained in any copies of any part of this}}
+\DoxyCodeLine{29 \textcolor{comment}{documentation and/or software.}}
+\DoxyCodeLine{30 \textcolor{comment}{}}
+\DoxyCodeLine{31 \textcolor{comment}{*/}}
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{preprocessor}{\#ifndef BZF\_MD5\_H}}
+\DoxyCodeLine{34 \textcolor{preprocessor}{\#define BZF\_MD5\_H}}
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{preprocessor}{\#include <cstring>}}
+\DoxyCodeLine{37 \textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{38 }
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 \textcolor{comment}{// a small class for calculating MD5 hashes of strings or byte arrays}}
+\DoxyCodeLine{41 \textcolor{comment}{// it is not meant to be fast or secure}}
+\DoxyCodeLine{42 \textcolor{comment}{//}}
+\DoxyCodeLine{43 \textcolor{comment}{// usage: 1) feed it blocks of uchars with update()}}
+\DoxyCodeLine{44 \textcolor{comment}{//      2) finalize()}}
+\DoxyCodeLine{45 \textcolor{comment}{//      3) get hexdigest() string}}
+\DoxyCodeLine{46 \textcolor{comment}{//      or}}
+\DoxyCodeLine{47 \textcolor{comment}{//      MD5(std::string).hexdigest()}}
+\DoxyCodeLine{48 \textcolor{comment}{//}}
+\DoxyCodeLine{49 \textcolor{comment}{// assumes that char is 8 bit and int is 32 bit}}
+\DoxyCodeLine{50 \textcolor{keyword}{class }\mbox{\hyperlink{classMD5}{MD5}}}
+\DoxyCodeLine{51 \{}
+\DoxyCodeLine{52 \textcolor{keyword}{public}:}
+\DoxyCodeLine{53     \textcolor{keyword}{typedef} \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} size\_type; \textcolor{comment}{// must be 32bit}}
+\DoxyCodeLine{54 }
+\DoxyCodeLine{55     \mbox{\hyperlink{classMD5}{MD5}}();}
+\DoxyCodeLine{56     \mbox{\hyperlink{classMD5}{MD5}}(\textcolor{keyword}{const} std::string\& text);}
+\DoxyCodeLine{57     \textcolor{keywordtype}{void} update(\textcolor{keyword}{const} \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{char}* buf, size\_type length);}
+\DoxyCodeLine{58     \textcolor{keywordtype}{void} update(\textcolor{keyword}{const} \textcolor{keywordtype}{char}* buf, size\_type length);}
+\DoxyCodeLine{59     \mbox{\hyperlink{classMD5}{MD5}}\& finalize();}
+\DoxyCodeLine{60     std::string hexdigest() \textcolor{keyword}{const};}
+\DoxyCodeLine{61     \textcolor{keyword}{friend} std::ostream\& operator<<(std::ostream\&, \mbox{\hyperlink{classMD5}{MD5}} md5);}
+\DoxyCodeLine{62 }
+\DoxyCodeLine{63 \textcolor{keyword}{private}:}
+\DoxyCodeLine{64     \textcolor{keywordtype}{void} init();}
+\DoxyCodeLine{65     \textcolor{keyword}{typedef} \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{char} uint1; \textcolor{comment}{//  8bit}}
+\DoxyCodeLine{66     \textcolor{keyword}{typedef} \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} uint4;  \textcolor{comment}{// 32bit}}
+\DoxyCodeLine{67     \textcolor{keyword}{enum} \{ blocksize = 64 \}; \textcolor{comment}{// VC6 won't eat a const static int here}}
+\DoxyCodeLine{68 }
+\DoxyCodeLine{69     \textcolor{keywordtype}{void} transform(\textcolor{keyword}{const} uint1 block[blocksize]);}
+\DoxyCodeLine{70     \textcolor{keyword}{static} \textcolor{keywordtype}{void} decode(uint4 output[], \textcolor{keyword}{const} uint1 input[], size\_type len);}
+\DoxyCodeLine{71     \textcolor{keyword}{static} \textcolor{keywordtype}{void} encode(uint1 output[], \textcolor{keyword}{const} uint4 input[], size\_type len);}
+\DoxyCodeLine{72 }
+\DoxyCodeLine{73     \textcolor{keywordtype}{bool} finalized;}
+\DoxyCodeLine{74     uint1 buffer[blocksize]; \textcolor{comment}{// bytes that didn't fit in last 64 byte chunk}}
+\DoxyCodeLine{75     uint4 count[2];   \textcolor{comment}{// 64bit counter for number of bits (lo, hi)}}
+\DoxyCodeLine{76     uint4 state[4];   \textcolor{comment}{// digest so far}}
+\DoxyCodeLine{77     uint1 digest[16]; \textcolor{comment}{// the result}}
+\DoxyCodeLine{78 }
+\DoxyCodeLine{79     \textcolor{comment}{// low level logic operations}}
+\DoxyCodeLine{80     \textcolor{keyword}{static} \textcolor{keyword}{inline} uint4 F(uint4 x, uint4 y, uint4 z);}
+\DoxyCodeLine{81     \textcolor{keyword}{static} \textcolor{keyword}{inline} uint4 G(uint4 x, uint4 y, uint4 z);}
+\DoxyCodeLine{82     \textcolor{keyword}{static} \textcolor{keyword}{inline} uint4 H(uint4 x, uint4 y, uint4 z);}
+\DoxyCodeLine{83     \textcolor{keyword}{static} \textcolor{keyword}{inline} uint4 I(uint4 x, uint4 y, uint4 z);}
+\DoxyCodeLine{84     \textcolor{keyword}{static} \textcolor{keyword}{inline} uint4 rotate\_left(uint4 x, \textcolor{keywordtype}{int} n);}
+\DoxyCodeLine{85     \textcolor{keyword}{static} \textcolor{keyword}{inline} \textcolor{keywordtype}{void} FF(uint4\& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);}
+\DoxyCodeLine{86     \textcolor{keyword}{static} \textcolor{keyword}{inline} \textcolor{keywordtype}{void} GG(uint4\& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);}
+\DoxyCodeLine{87     \textcolor{keyword}{static} \textcolor{keyword}{inline} \textcolor{keywordtype}{void} HH(uint4\& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);}
+\DoxyCodeLine{88     \textcolor{keyword}{static} \textcolor{keyword}{inline} \textcolor{keywordtype}{void} II(uint4\& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);}
+\DoxyCodeLine{89 \};}
+\DoxyCodeLine{90 }
+\DoxyCodeLine{91 std::string md5(\textcolor{keyword}{const} std::string str);}
+\DoxyCodeLine{92 }
+\DoxyCodeLine{93 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

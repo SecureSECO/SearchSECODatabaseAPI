@@ -1,0 +1,66 @@
+\hypertarget{Utility_8h_source}{}\doxysection{Utility.\+h}
+\label{Utility_8h_source}\index{SearchSECODatabaseAPI/General/Utility.h@{SearchSECODatabaseAPI/General/Utility.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{This program has been developed by students from the bachelor Computer Science at}}
+\DoxyCodeLine{3 \textcolor{comment}{Utrecht University within the Software Project course.}}
+\DoxyCodeLine{4 \textcolor{comment}{© Copyright Utrecht University (Department of Information and Computing Sciences)}}
+\DoxyCodeLine{5 \textcolor{comment}{*/}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{10 \textcolor{preprocessor}{\#include <functional>}}
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include <math.h>}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include <unistd.h>}}
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#define MAX\_RETRIES 3}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#define RETRY\_SLEEP 1000000}}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{20 \textcolor{keyword}{class }\mbox{\hyperlink{classUtility}{Utility}}}
+\DoxyCodeLine{21 \{}
+\DoxyCodeLine{22 \textcolor{keyword}{public}:}
+\DoxyCodeLine{35     \textcolor{keyword}{static} \textcolor{keywordtype}{int} \mbox{\hyperlink{classUtility_acb53ddfa6b4220414f764955237d289e}{safeStoi}}(std::string str);}
+\DoxyCodeLine{36 }
+\DoxyCodeLine{49     \textcolor{keyword}{static} \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} \mbox{\hyperlink{classUtility_ab875c26eb0c52b178861bb474d8666b0}{safeStoll}}(std::string str);}
+\DoxyCodeLine{50 }
+\DoxyCodeLine{63     \textcolor{keyword}{static} \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} \mbox{\hyperlink{classUtility_a8a6a795506078ebc22672059bd0c616e}{safeStod}}(std::string str);}
+\DoxyCodeLine{64 }
+\DoxyCodeLine{71     \textcolor{keyword}{static} \textcolor{keywordtype}{void} \mbox{\hyperlink{classUtility_a87fa483dc8dc51929d59c1332eddfe61}{appendBy}}(std::vector<char> \&result, std::string word, \textcolor{keywordtype}{char} delimiter);}
+\DoxyCodeLine{72 }
+\DoxyCodeLine{81     \textcolor{keyword}{static} \textcolor{keywordtype}{void} \mbox{\hyperlink{classUtility_a87fa483dc8dc51929d59c1332eddfe61}{appendBy}}(std::vector<char> \&result, std::vector<std::string> words, \textcolor{keywordtype}{char} wordSeparator, \textcolor{keywordtype}{char} endChar);}
+\DoxyCodeLine{82 }
+\DoxyCodeLine{89     \textcolor{keyword}{static} std::vector<std::string> \mbox{\hyperlink{classUtility_a726dc75525de999caf5211408ef68368}{splitStringOn}}(std::string str, \textcolor{keywordtype}{char} delimiter);}
+\DoxyCodeLine{90 }
+\DoxyCodeLine{96     \textcolor{keyword}{static} std::string \mbox{\hyperlink{classUtility_ac4c74b04aaf0fdf03163c306f9f02ae7}{hashToUUIDString}}(std::string hash);}
+\DoxyCodeLine{97 }
+\DoxyCodeLine{103     \textcolor{keyword}{static} std::string \mbox{\hyperlink{classUtility_ac4a171348cee9f3435159816d68aaab0}{uuidStringToHash}}(std::string uuid);}
+\DoxyCodeLine{104 }
+\DoxyCodeLine{108     \textcolor{keyword}{static} \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} \mbox{\hyperlink{classUtility_aa838d8ebe143810bdc3db4be4b007695}{getCurrentTimeSeconds}}();}
+\DoxyCodeLine{109 }
+\DoxyCodeLine{113     \textcolor{keyword}{static} \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} \mbox{\hyperlink{classUtility_a4ceca3279d63f3990e1958dd62252394}{getCurrentTimeMilliSeconds}}();}
+\DoxyCodeLine{114 }
+\DoxyCodeLine{123     \textcolor{keyword}{template} <\textcolor{keyword}{class} T> \textcolor{keyword}{static} T \mbox{\hyperlink{classUtility_a08b7f78295dac77478c0f1d9c08844a7}{queryWithRetry}}(std::function<T()> query)}
+\DoxyCodeLine{124     \{}
+\DoxyCodeLine{125         errno = 0;}
+\DoxyCodeLine{126         \textcolor{keywordtype}{int} retries = 0;}
+\DoxyCodeLine{127         T items;}
+\DoxyCodeLine{128         \textcolor{keywordflow}{do}}
+\DoxyCodeLine{129         \{}
+\DoxyCodeLine{130             items = query();}
+\DoxyCodeLine{131             \textcolor{keywordflow}{if} (errno != 0 \&\& errno != ERANGE)}
+\DoxyCodeLine{132             \{}
+\DoxyCodeLine{133                 usleep(pow(2, retries) * RETRY\_SLEEP);}
+\DoxyCodeLine{134                 retries++;}
+\DoxyCodeLine{135             \}}
+\DoxyCodeLine{136         \} \textcolor{keywordflow}{while} (errno != 0 \&\& errno != ERANGE \&\& retries <= MAX\_RETRIES);}
+\DoxyCodeLine{137         \textcolor{keywordflow}{if} (retries > MAX\_RETRIES)}
+\DoxyCodeLine{138         \{}
+\DoxyCodeLine{139             errno = ENETUNREACH;}
+\DoxyCodeLine{140         \}}
+\DoxyCodeLine{141         \textcolor{keywordflow}{return} items;}
+\DoxyCodeLine{142     \};}
+\DoxyCodeLine{143 \};}
+
+\end{DoxyCode}

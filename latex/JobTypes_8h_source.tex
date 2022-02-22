@@ -1,0 +1,56 @@
+\hypertarget{JobTypes_8h_source}{}\doxysection{Job\+Types.\+h}
+\label{JobTypes_8h_source}\index{SearchSECODatabaseAPI/JobDistribution/JobTypes.h@{SearchSECODatabaseAPI/JobDistribution/JobTypes.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{This program has been developed by students from the bachelor Computer Science at}}
+\DoxyCodeLine{3 \textcolor{comment}{Utrecht University within the Software Project course.}}
+\DoxyCodeLine{4 \textcolor{comment}{© Copyright Utrecht University (Department of Information and Computing Sciences)}}
+\DoxyCodeLine{5 \textcolor{comment}{*/}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10 \textcolor{keyword}{namespace }jobTypes}
+\DoxyCodeLine{11 \{}
+\DoxyCodeLine{15     \textcolor{keyword}{struct }\mbox{\hyperlink{structjobTypes_1_1Job}{Job}}}
+\DoxyCodeLine{16     \{}
+\DoxyCodeLine{17       \textcolor{keyword}{public}:}
+\DoxyCodeLine{18         std::string jobid;}
+\DoxyCodeLine{19         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} time;}
+\DoxyCodeLine{20         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} timeout;}
+\DoxyCodeLine{21         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} priority;}
+\DoxyCodeLine{22         std::string url;}
+\DoxyCodeLine{23         \textcolor{keywordtype}{int} retries;}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25         \mbox{\hyperlink{structjobTypes_1_1Job}{Job}}(std::string jobid, \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} timeout, \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} priority, std::string url, \textcolor{keywordtype}{int} retries)}
+\DoxyCodeLine{26             : jobid(jobid), timeout(timeout), priority(priority), url(url), retries(retries)}
+\DoxyCodeLine{27         \{}
+\DoxyCodeLine{28         \}}
+\DoxyCodeLine{29 }
+\DoxyCodeLine{30         \mbox{\hyperlink{structjobTypes_1_1Job}{Job}}()}
+\DoxyCodeLine{31         \{}
+\DoxyCodeLine{32         \}}
+\DoxyCodeLine{33     \};}
+\DoxyCodeLine{34 }
+\DoxyCodeLine{40     \textcolor{keyword}{struct }\mbox{\hyperlink{structjobTypes_1_1FailedJob}{FailedJob}}}
+\DoxyCodeLine{41     \{}
+\DoxyCodeLine{42       \textcolor{keyword}{public}:}
+\DoxyCodeLine{43         std::string jobid;}
+\DoxyCodeLine{44         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} time;}
+\DoxyCodeLine{45         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} timeout;}
+\DoxyCodeLine{46         \textcolor{keywordtype}{long} \textcolor{keywordtype}{long} priority;}
+\DoxyCodeLine{47         std::string url;}
+\DoxyCodeLine{48         \textcolor{keywordtype}{int} retries;}
+\DoxyCodeLine{49         \textcolor{keywordtype}{int} reasonID;}
+\DoxyCodeLine{50         std::string reasonData;}
+\DoxyCodeLine{51 }
+\DoxyCodeLine{58         \mbox{\hyperlink{structjobTypes_1_1FailedJob_a9317d45b142ec9b34be037f0e71ed170}{FailedJob}}(\mbox{\hyperlink{structjobTypes_1_1Job}{Job}} job, \textcolor{keywordtype}{int} reasonID, std::string reasonData)}
+\DoxyCodeLine{59             : jobid(job.jobid), time(job.time), timeout(job.timeout), priority(job.priority), url(job.url),}
+\DoxyCodeLine{60               retries(job.retries), reasonID(reasonID), reasonData(reasonData)}
+\DoxyCodeLine{61         \{}
+\DoxyCodeLine{62         \}}
+\DoxyCodeLine{63     \};}
+\DoxyCodeLine{64 \} \textcolor{comment}{// namespace jobTypes}}
+
+\end{DoxyCode}

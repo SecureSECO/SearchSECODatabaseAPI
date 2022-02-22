@@ -1,0 +1,4 @@
+<map id="types::ProjectIn" name="types::ProjectIn">
+<area shape="rect" id="node1" title="Represents the relevant data of a project when it is put into the database." alt="" coords="5,95,116,121"/>
+<area shape="rect" id="node2" href="$structtypes_1_1Author.html" title="Represents the data of an author." alt="" coords="12,5,109,32"/>
+</map>

@@ -1,0 +1,172 @@
+\hypertarget{classJobRequestHandler}{}\doxysection{Job\+Request\+Handler Class Reference}
+\label{classJobRequestHandler}\index{JobRequestHandler@{JobRequestHandler}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classJobRequestHandler_a77899407adbdb4e810fc5be6e2adf365}\label{classJobRequestHandler_a77899407adbdb4e810fc5be6e2adf365}} 
+{\bfseries Job\+Request\+Handler} (\mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} $\ast$raft, \mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$request\+Handler, \mbox{\hyperlink{classDatabaseConnection}{Database\+Connection}} $\ast$database, \mbox{\hyperlink{classStatistics}{Statistics}} $\ast$stats, std\+::string ip, int port)
+\begin{DoxyCompactList}\small\item\em Constructor method. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classJobRequestHandler_a16aac53bf7abeb8be6470e9da42308f9}\label{classJobRequestHandler_a16aac53bf7abeb8be6470e9da42308f9}} 
+std\+::string {\bfseries handle\+Connect\+Request} (boost\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classTcpConnection}{Tcp\+Connection}} $>$ connection, std\+::string request)
+\begin{DoxyCompactList}\small\item\em Handles request from new node to connect to the network. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classJobRequestHandler_a31d7a97accb3ae5d25c59e737d0fc76f}\label{classJobRequestHandler_a31d7a97accb3ae5d25c59e737d0fc76f}} 
+std\+::string {\bfseries handle\+Get\+IPs\+Request} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles request for the ip adresses in the network. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_a55400334766fd323b1429af238a98fcd}{handle\+Upload\+Job\+Request}} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles request to upload one or more jobs with their priorities. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_a59a3468eb0a4395fdb29bb40bed193ff}{handle\+Upload\+Job\+Request}} (std\+::string request, std\+::string client, std\+::vector$<$ std\+::string $>$ data)
+\begin{DoxyCompactList}\small\item\em Handles request to upload one or more jobs with their priorities. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_ab3f1ee004c1a02fac08cb10a4c9557bc}{handle\+Get\+Job\+Request}} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles request to give the top job from the queue. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_a8dbed97a2b955587369dad8f85bf5f99}{handle\+Update\+Job\+Request}} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles the request to update the job time. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_ab80708f74747392b813844ca6883941a}{handle\+Finish\+Job\+Request}} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles request to indicate the worker is finished with a job, successfully or not. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classJobRequestHandler_ae991cc11c08b351a859e3b2f45a266c8}{handle\+Crawl\+Data\+Request}} (std\+::string request, std\+::string client, std\+::string data)
+\begin{DoxyCompactList}\small\item\em Handles request to upload crawl data to the job queue. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classJobRequestHandler_a7dbe12935d388c44d765d4f328422ce8}{update\+Crawl\+ID}} (int id)
+\begin{DoxyCompactList}\small\item\em Updates the crawl\+ID when crawl data is uploaded to the database. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classJobRequestHandler_a8f5ac3bf5b502f949d4a7103f672d92c}\label{classJobRequestHandler_a8f5ac3bf5b502f949d4a7103f672d92c}} 
+\mbox{\hyperlink{classDatabaseConnection}{Database\+Connection}} $\ast$ {\bfseries get\+Database\+Connection} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classJobRequestHandler_ab7bb933c0f252238c8fb64d3271a015c}{crawl\+ID}}
+\begin{DoxyCompactList}\small\item\em Variables describing the current crawl\+ID which is needed by the crawler to crawl a specific part of Git\+Hub and if there is currently a crawler working. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classJobRequestHandler_af9fb346087b4d63550b884688e707aa9}\label{classJobRequestHandler_af9fb346087b4d63550b884688e707aa9}} 
+long long {\bfseries time\+Last\+Crawl} = -\/1
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classJobRequestHandler_ae991cc11c08b351a859e3b2f45a266c8}\label{classJobRequestHandler_ae991cc11c08b351a859e3b2f45a266c8}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleCrawlDataRequest@{handleCrawlDataRequest}}
+\index{handleCrawlDataRequest@{handleCrawlDataRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleCrawlDataRequest()}{handleCrawlDataRequest()}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Crawl\+Data\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles request to upload crawl data to the job queue. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Data is almost the same as in handle\+Upload\+Job\+Request, but now with an ID in front. Data format is\+: \char`\"{}id\textquotesingle{}\textbackslash{}n\textquotesingle{}url1?priority1\textquotesingle{}\textbackslash{}n\textquotesingle{}url2?priority2\textquotesingle{}\textbackslash{}n\textquotesingle{}...\char`\"{} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the result of handle\+Upload\+Request. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_ab80708f74747392b813844ca6883941a}\label{classJobRequestHandler_ab80708f74747392b813844ca6883941a}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleFinishJobRequest@{handleFinishJobRequest}}
+\index{handleFinishJobRequest@{handleFinishJobRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleFinishJobRequest()}{handleFinishJobRequest()}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Finish\+Job\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles request to indicate the worker is finished with a job, successfully or not. 
+
+\begin{DoxyReturn}{Returns}
+Response is \char`\"{}\+Job not currently expected.\char`\"{} if a newer version of the job was given out, or if the job is not known to have been given out. Reponse is \char`\"{}\+Job finished successfully\char`\"{} on success and \char`\"{}\+Job failed successfully\char`\"{} on a client-\/side failure, which was correctly handled and uploaded. For a client-\/side failure, when the database fails to upload the current job to the failedjobs table, \char`\"{}\+Job could not be added to failed jobs list.\char`\"{} is returned. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_ab3f1ee004c1a02fac08cb10a4c9557bc}\label{classJobRequestHandler_ab3f1ee004c1a02fac08cb10a4c9557bc}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleGetJobRequest@{handleGetJobRequest}}
+\index{handleGetJobRequest@{handleGetJobRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleGetJobRequest()}{handleGetJobRequest()}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Get\+Job\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles request to give the top job from the queue. 
+
+\begin{DoxyReturn}{Returns}
+Response is \char`\"{}\+Spider?url\char`\"{}, where url is the url of the first job in the database if there are enough in the database or if a crawler is already working. Response is \char`\"{}\+Crawl?crawl\+ID\char`\"{}, where crawl\+ID is the current crawl\+ID if the number of jobs is not enough and there is no crawler working. Response is \char`\"{}\+No\+Job\char`\"{} if there are no jobs and a crawler is already working. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_a8dbed97a2b955587369dad8f85bf5f99}\label{classJobRequestHandler_a8dbed97a2b955587369dad8f85bf5f99}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleUpdateJobRequest@{handleUpdateJobRequest}}
+\index{handleUpdateJobRequest@{handleUpdateJobRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleUpdateJobRequest()}{handleUpdateJobRequest()}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Update\+Job\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles the request to update the job time. 
+
+\begin{DoxyReturn}{Returns}
+The new time of the job. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_a55400334766fd323b1429af238a98fcd}\label{classJobRequestHandler_a55400334766fd323b1429af238a98fcd}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleUploadJobRequest@{handleUploadJobRequest}}
+\index{handleUploadJobRequest@{handleUploadJobRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleUploadJobRequest()}{handleUploadJobRequest()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Upload\+Job\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles request to upload one or more jobs with their priorities. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Consists of url and priority pairs, the url and priority are separated by the FIELD\+\_\+\+DELIMITER\+\_\+\+CHAR (\textquotesingle{}?\textquotesingle{}) and the pairs by the ENTRY\+\_\+\+DELIMITER\+\_\+\+CHAR (\textquotesingle{}~\newline
+\textquotesingle{}). Data format is \char`\"{}url1?priority1\textquotesingle{}\textbackslash{}n\textquotesingle{}url2?priority2\textquotesingle{}\textbackslash{}n\textquotesingle{}...\char`\"{} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Response to user whether the job(s) has/have been uploaded succesfully or not. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_a59a3468eb0a4395fdb29bb40bed193ff}\label{classJobRequestHandler_a59a3468eb0a4395fdb29bb40bed193ff}} 
+\index{JobRequestHandler@{JobRequestHandler}!handleUploadJobRequest@{handleUploadJobRequest}}
+\index{handleUploadJobRequest@{handleUploadJobRequest}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{handleUploadJobRequest()}{handleUploadJobRequest()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::string Job\+Request\+Handler\+::handle\+Upload\+Job\+Request (\begin{DoxyParamCaption}\item[{std\+::string}]{request,  }\item[{std\+::string}]{client,  }\item[{std\+::vector$<$ std\+::string $>$}]{data }\end{DoxyParamCaption})}
+
+
+
+Handles request to upload one or more jobs with their priorities. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Consists of url and priority pairs, the url and priority are separated by the FIELD\+\_\+\+DELIMITER\+\_\+\+CHAR (\textquotesingle{}?\textquotesingle{}) and the pairs by the ENTRY\+\_\+\+DELIMITER\+\_\+\+CHAR (\textquotesingle{}~\newline
+\textquotesingle{}). Data format is \char`\"{}url1?priority1\textquotesingle{}\textbackslash{}n\textquotesingle{}url2?priority2\textquotesingle{}\textbackslash{}n\textquotesingle{}...\char`\"{} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Response to user whether the job(s) has/have been uploaded succesfully or not. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classJobRequestHandler_a7dbe12935d388c44d765d4f328422ce8}\label{classJobRequestHandler_a7dbe12935d388c44d765d4f328422ce8}} 
+\index{JobRequestHandler@{JobRequestHandler}!updateCrawlID@{updateCrawlID}}
+\index{updateCrawlID@{updateCrawlID}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{updateCrawlID()}{updateCrawlID()}}
+{\footnotesize\ttfamily void Job\+Request\+Handler\+::update\+Crawl\+ID (\begin{DoxyParamCaption}\item[{int}]{id }\end{DoxyParamCaption})}
+
+
+
+Updates the crawl\+ID when crawl data is uploaded to the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & New crawl\+ID. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classJobRequestHandler_ab7bb933c0f252238c8fb64d3271a015c}\label{classJobRequestHandler_ab7bb933c0f252238c8fb64d3271a015c}} 
+\index{JobRequestHandler@{JobRequestHandler}!crawlID@{crawlID}}
+\index{crawlID@{crawlID}!JobRequestHandler@{JobRequestHandler}}
+\doxysubsubsection{\texorpdfstring{crawlID}{crawlID}}
+{\footnotesize\ttfamily int Job\+Request\+Handler\+::crawl\+ID}
+
+
+
+Variables describing the current crawl\+ID which is needed by the crawler to crawl a specific part of Git\+Hub and if there is currently a crawler working. 
+
+~\newline
+ 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/Job\+Request\+Handler.\+h\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/Job\+Request\+Handler.\+cpp\end{DoxyCompactItemize}

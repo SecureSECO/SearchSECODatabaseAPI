@@ -1,0 +1,54 @@
+\hypertarget{classConnectionHandler}{}\doxysection{Connection\+Handler Class Reference}
+\label{classConnectionHandler}\index{ConnectionHandler@{ConnectionHandler}}
+
+
+Handles connections with database.  
+
+
+
+
+{\ttfamily \#include $<$Connection\+Handler.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classConnectionHandler_af2ee3ca8e029cdf6e1fb9e50bfd0214f}{start\+Listen}} (\mbox{\hyperlink{classDatabaseHandler}{Database\+Handler}} $\ast$database\+Handler, \mbox{\hyperlink{classDatabaseConnection}{Database\+Connection}} $\ast$database\+Connection, \mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} $\ast$raft, \mbox{\hyperlink{classStatistics}{Statistics}} $\ast$stats, int port=PORT, \mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$handler=nullptr)
+\begin{DoxyCompactList}\small\item\em Starts listening for requests. Takes in a pointer to the database handler. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classConnectionHandler_a173cfe31c317d2e54e97c47bc5b3093d}\label{classConnectionHandler_a173cfe31c317d2e54e97c47bc5b3093d}} 
+\mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$ {\bfseries get\+Request\+Handler} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Handles connections with database. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classConnectionHandler_af2ee3ca8e029cdf6e1fb9e50bfd0214f}\label{classConnectionHandler_af2ee3ca8e029cdf6e1fb9e50bfd0214f}} 
+\index{ConnectionHandler@{ConnectionHandler}!startListen@{startListen}}
+\index{startListen@{startListen}!ConnectionHandler@{ConnectionHandler}}
+\doxysubsubsection{\texorpdfstring{startListen()}{startListen()}}
+{\footnotesize\ttfamily void Connection\+Handler\+::start\+Listen (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDatabaseHandler}{Database\+Handler}} $\ast$}]{database\+Handler,  }\item[{\mbox{\hyperlink{classDatabaseConnection}{Database\+Connection}} $\ast$}]{database\+Connection,  }\item[{\mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} $\ast$}]{raft,  }\item[{\mbox{\hyperlink{classStatistics}{Statistics}} $\ast$}]{stats,  }\item[{int}]{port = {\ttfamily PORT},  }\item[{\mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$}]{handler = {\ttfamily nullptr} }\end{DoxyParamCaption})}
+
+
+
+Starts listening for requests. Takes in a pointer to the database handler. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em database\+Handler} & Handles the connection with the database for the main keyspace. \\
+\hline
+{\em database\+Connection} & Handles the connection with the database for the job keyspace. \\
+\hline
+{\em raft} & The raft system for the job queue. \\
+\hline
+{\em port} & The port on which we will listen. \\
+\hline
+{\em handler} & The request handler that will be used. A new request handler will be made if the given request handler is a nullptr. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Search\+SECODatabase\+API/\+General/Connection\+Handler.\+h\item 
+Search\+SECODatabase\+API/\+General/Connection\+Handler.\+cpp\end{DoxyCompactItemize}

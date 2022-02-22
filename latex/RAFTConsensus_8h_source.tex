@@ -1,0 +1,109 @@
+\hypertarget{RAFTConsensus_8h_source}{}\doxysection{RAFTConsensus.\+h}
+\label{RAFTConsensus_8h_source}\index{SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h@{SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{This program has been developed by students from the bachelor Computer Science at}}
+\DoxyCodeLine{3 \textcolor{comment}{Utrecht University within the Software Project course.}}
+\DoxyCodeLine{4 \textcolor{comment}{© Copyright Utrecht University (Department of Information and Computing Sciences)}}
+\DoxyCodeLine{5 \textcolor{comment}{*/}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include "{}Networking.h"{}}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#include "{}Statistics.h"{}}}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include <boost/shared\_ptr.hpp>}}
+\DoxyCodeLine{13 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#include <prometheus/counter.h>}}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define RESPONSE\_OK "{}ok"{}}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#define HEARTBEAT\_TIME 1000000}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define LEADER\_DROPOUT\_WAIT\_TIME 1000000}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{keyword}{class }\mbox{\hyperlink{classTcpConnection}{TcpConnection}};}
+\DoxyCodeLine{22 \textcolor{keyword}{class }\mbox{\hyperlink{classRequestHandler}{RequestHandler}};}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{27 \textcolor{keyword}{struct }\mbox{\hyperlink{structConnection}{Connection}}}
+\DoxyCodeLine{28 \{}
+\DoxyCodeLine{29   \textcolor{keyword}{public}:}
+\DoxyCodeLine{30     boost::shared\_ptr<TcpConnection> connection;}
+\DoxyCodeLine{31     std::string ip;}
+\DoxyCodeLine{32     std::string port;}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34     \mbox{\hyperlink{structConnection}{Connection}}(boost::shared\_ptr<TcpConnection> conn, std::string ip, std::string port)}
+\DoxyCodeLine{35         : connection(conn), ip(ip), port(port)}
+\DoxyCodeLine{36     \{}
+\DoxyCodeLine{37     \}}
+\DoxyCodeLine{38 \};}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 \textcolor{keyword}{class }\mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}}}
+\DoxyCodeLine{41 \{}
+\DoxyCodeLine{42 \textcolor{keyword}{public}:}
+\DoxyCodeLine{43     \mbox{\hyperlink{classRAFTConsensus}{\string~RAFTConsensus}}();}
+\DoxyCodeLine{44 }
+\DoxyCodeLine{45     \mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}}(\mbox{\hyperlink{classStatistics}{Statistics}} *stats) : stats(stats)}
+\DoxyCodeLine{46     \{}
+\DoxyCodeLine{47     \}}
+\DoxyCodeLine{48 }
+\DoxyCodeLine{56     \textcolor{keywordtype}{void} \mbox{\hyperlink{classRAFTConsensus_ae2c006bcdbb3d9d1f84e4d55ad8342e5}{start}}(\mbox{\hyperlink{classRequestHandler}{RequestHandler}}* requestHandler, }
+\DoxyCodeLine{57         std::vector<std::pair<std::string, std::string>> ips, }
+\DoxyCodeLine{58         \textcolor{keywordtype}{bool} assumeLeader = \textcolor{keyword}{false});}
+\DoxyCodeLine{59 }
+\DoxyCodeLine{63     \textcolor{keyword}{virtual} \textcolor{keywordtype}{bool} \mbox{\hyperlink{classRAFTConsensus_a92e31bcb1e82e9e566dd4d38f2e6b048}{isLeader}}() \{ \textcolor{keywordflow}{return} leader; \};}
+\DoxyCodeLine{64 }
+\DoxyCodeLine{69     \textcolor{keyword}{virtual} std::string \mbox{\hyperlink{classRAFTConsensus_a545d8f4e90d690b2b5fb81a24454ad73}{passRequestToLeader}}(std::string requestType, std::string client, std::string request);}
+\DoxyCodeLine{70 }
+\DoxyCodeLine{80     \textcolor{keyword}{virtual} std::string \mbox{\hyperlink{classRAFTConsensus_a2b838ff3c957e55294604be68520c05f}{connectNewNode}}(boost::shared\_ptr<TcpConnection> connection, std::string request);}
+\DoxyCodeLine{81 }
+\DoxyCodeLine{86     \textcolor{keyword}{virtual} std::vector<std::pair<std::string, std::string>> \mbox{\hyperlink{classRAFTConsensus_a2bced18a10d94022b2cc67fbe7af8744}{getIps}}(std::string file = \textcolor{stringliteral}{"{}.env"{}});}
+\DoxyCodeLine{87 }
+\DoxyCodeLine{92     \textcolor{keyword}{virtual} std::vector<std::string> \mbox{\hyperlink{classRAFTConsensus_af65edcd4c78fa83824b1cd45753f853b}{getCurrentIPs}}();}
+\DoxyCodeLine{93 }
+\DoxyCodeLine{98     \textcolor{keyword}{virtual} std::string \mbox{\hyperlink{classRAFTConsensus_a82d93ab476424a745bd918a888af5259}{getMyIP}}()}
+\DoxyCodeLine{99     \{}
+\DoxyCodeLine{100         \textcolor{keywordflow}{return} myIp;}
+\DoxyCodeLine{101     \}}
+\DoxyCodeLine{102 }
+\DoxyCodeLine{103 \textcolor{keyword}{private}:}
+\DoxyCodeLine{109     \textcolor{keywordtype}{void} connectToLeader(std::vector<std::pair<std::string, std::string>> ips);}
+\DoxyCodeLine{110 }
+\DoxyCodeLine{111 }
+\DoxyCodeLine{116     \textcolor{keywordtype}{void} listenForHeartbeat();}
+\DoxyCodeLine{117 }
+\DoxyCodeLine{121     \textcolor{keywordtype}{void} handleHeartbeat(std::string heartbeat);}
+\DoxyCodeLine{122 }
+\DoxyCodeLine{130     \textcolor{keywordtype}{void} handleInitialData(std::vector<std::string> initialData);}
+\DoxyCodeLine{131 }
+\DoxyCodeLine{138     \textcolor{keywordtype}{void} tryConnectingWithIp(std::string \&ip, std::string \&port, std::string \&response);}
+\DoxyCodeLine{139 }
+\DoxyCodeLine{140 }
+\DoxyCodeLine{144     \textcolor{keywordtype}{void} heartbeatSender();}
+\DoxyCodeLine{145 }
+\DoxyCodeLine{149     std::string getHeartbeat();}
+\DoxyCodeLine{150 }
+\DoxyCodeLine{156     \textcolor{keywordtype}{void} listenForRequests(boost::shared\_ptr<TcpConnection> connection);}
+\DoxyCodeLine{157 }
+\DoxyCodeLine{163     \textcolor{keywordtype}{void} dropConnection(\textcolor{keywordtype}{int} i);}
+\DoxyCodeLine{164 }
+\DoxyCodeLine{168     std::string connectionToString(\mbox{\hyperlink{structConnection}{Connection}} connection);}
+\DoxyCodeLine{169 }
+\DoxyCodeLine{170     \textcolor{keywordtype}{bool} leader;}
+\DoxyCodeLine{171     \textcolor{keywordtype}{bool} stop = \textcolor{keyword}{false};}
+\DoxyCodeLine{172     \textcolor{keywordtype}{bool} started = \textcolor{keyword}{false};}
+\DoxyCodeLine{173     std::mutex mtx;}
+\DoxyCodeLine{174     \mbox{\hyperlink{classStatistics}{Statistics}} *stats;}
+\DoxyCodeLine{175 }
+\DoxyCodeLine{176     \textcolor{comment}{// Non-\/leader variables.}}
+\DoxyCodeLine{177     \mbox{\hyperlink{classNetworkHandler}{NetworkHandler}}* networkhandler;}
+\DoxyCodeLine{178     std::string leaderIp, leaderPort, myIp, myPort;}
+\DoxyCodeLine{179     std::vector<std::pair<std::string, std::string>> nonLeaderNodes;}
+\DoxyCodeLine{180 }
+\DoxyCodeLine{181     \textcolor{comment}{// Leader variables.}}
+\DoxyCodeLine{182     std::vector<Connection>* others;}
+\DoxyCodeLine{183     \mbox{\hyperlink{classRequestHandler}{RequestHandler}}* requestHandler;}
+\DoxyCodeLine{184     std::string nodeConnectionChange = \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{185 \};}
+
+\end{DoxyCode}

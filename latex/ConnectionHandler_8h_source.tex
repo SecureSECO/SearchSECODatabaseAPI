@@ -1,0 +1,98 @@
+\hypertarget{ConnectionHandler_8h_source}{}\doxysection{Connection\+Handler.\+h}
+\label{ConnectionHandler_8h_source}\index{SearchSECODatabaseAPI/General/ConnectionHandler.h@{SearchSECODatabaseAPI/General/ConnectionHandler.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{This program has been developed by students from the bachelor Computer Science at}}
+\DoxyCodeLine{3 \textcolor{comment}{Utrecht University within the Software Project course.}}
+\DoxyCodeLine{4 \textcolor{comment}{© Copyright Utrecht University (Department of Information and Computing Sciences)}}
+\DoxyCodeLine{5 \textcolor{comment}{*/}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include "{}RequestHandler.h"{}}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#include "{}RAFTConsensus.h"{}}}
+\DoxyCodeLine{10 \textcolor{preprocessor}{\#include "{}Statistics.h"{}}}
+\DoxyCodeLine{11 }
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#include <boost/shared\_ptr.hpp>}}
+\DoxyCodeLine{13 \textcolor{preprocessor}{\#include <boost/enable\_shared\_from\_this.hpp>}}
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#include <boost/asio.hpp>}}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define PORT 8003}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#define CONNECTION\_TIMEOUT 10000000 }\textcolor{comment}{// Timeout in microseconds.}}
+\DoxyCodeLine{18 }
+\DoxyCodeLine{19 \textcolor{keyword}{using} boost::asio::ip::tcp;}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{keyword}{class }\mbox{\hyperlink{classTcpServer}{TcpServer}};}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{26 \textcolor{keyword}{class }\mbox{\hyperlink{classConnectionHandler}{ConnectionHandler}}}
+\DoxyCodeLine{27 \{}
+\DoxyCodeLine{28 \textcolor{keyword}{public}:}
+\DoxyCodeLine{29     \mbox{\hyperlink{classConnectionHandler}{\string~ConnectionHandler}}();}
+\DoxyCodeLine{41     \textcolor{keywordtype}{void} \mbox{\hyperlink{classConnectionHandler_af2ee3ca8e029cdf6e1fb9e50bfd0214f}{startListen}}(\mbox{\hyperlink{classDatabaseHandler}{DatabaseHandler}}* databaseHandler, }
+\DoxyCodeLine{42         \mbox{\hyperlink{classDatabaseConnection}{DatabaseConnection}}* databaseConnection,}
+\DoxyCodeLine{43         \mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} *raft,}
+\DoxyCodeLine{44         \mbox{\hyperlink{classStatistics}{Statistics}} *stats,}
+\DoxyCodeLine{45         \textcolor{keywordtype}{int} port = PORT, }
+\DoxyCodeLine{46         \mbox{\hyperlink{classRequestHandler}{RequestHandler}} *handler = \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{47 }
+\DoxyCodeLine{48     \mbox{\hyperlink{classRequestHandler}{RequestHandler}}* getRequestHandler() \{ \textcolor{keywordflow}{return} handler; \};}
+\DoxyCodeLine{49 \textcolor{keyword}{private}:}
+\DoxyCodeLine{50     \mbox{\hyperlink{classRequestHandler}{RequestHandler}}* handler;}
+\DoxyCodeLine{51     \mbox{\hyperlink{classTcpServer}{TcpServer}}* server;}
+\DoxyCodeLine{52 \};}
+\DoxyCodeLine{53 }
+\DoxyCodeLine{54 \textcolor{keyword}{class }\mbox{\hyperlink{classTcpConnection}{TcpConnection}}}
+\DoxyCodeLine{55     : \textcolor{keyword}{public} boost::enable\_shared\_from\_this<TcpConnection>}
+\DoxyCodeLine{56 \{}
+\DoxyCodeLine{57 \textcolor{keyword}{public}:}
+\DoxyCodeLine{58     \textcolor{keyword}{typedef} boost::shared\_ptr<TcpConnection> pointer;}
+\DoxyCodeLine{59 }
+\DoxyCodeLine{63     \textcolor{keyword}{static} pointer \mbox{\hyperlink{classTcpConnection_a642333d1b7bcb70f1dbd01bb224f25a8}{create}}(boost::asio::io\_context\& ioContext);}
+\DoxyCodeLine{64 }
+\DoxyCodeLine{65     tcp::socket\& socket()}
+\DoxyCodeLine{66     \{}
+\DoxyCodeLine{67         \textcolor{keywordflow}{return} socket\_;}
+\DoxyCodeLine{68     \}}
+\DoxyCodeLine{69 }
+\DoxyCodeLine{73     \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} \mbox{\hyperlink{classTcpConnection_afcb5a29f685c8596e09ef52fc6d345ec}{sendData}}(\textcolor{keyword}{const} std::string \&data, boost::system::error\_code \&error);}
+\DoxyCodeLine{74 }
+\DoxyCodeLine{78     \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} \mbox{\hyperlink{classTcpConnection_ab32012aa22e4ca6a652f909d5a5d90a1}{start}}(\mbox{\hyperlink{classRequestHandler}{RequestHandler}} *handler, pointer thisPointer, \mbox{\hyperlink{classStatistics}{Statistics}} *stats);}
+\DoxyCodeLine{79 }
+\DoxyCodeLine{80 \textcolor{keyword}{protected}:}
+\DoxyCodeLine{85     \mbox{\hyperlink{classTcpConnection_aa94646072bdef65b4a3032c360f547e2}{TcpConnection}}(boost::asio::io\_context\& ioContext)}
+\DoxyCodeLine{86         : socket\_(ioContext)}
+\DoxyCodeLine{87     \{}
+\DoxyCodeLine{88     \}}
+\DoxyCodeLine{89 }
+\DoxyCodeLine{90 \textcolor{keyword}{private}:}
+\DoxyCodeLine{94     \textcolor{keywordtype}{void} readExpectedData(\textcolor{keywordtype}{int} \&size, std::vector<char> \&data, std::string \&totalData, }
+\DoxyCodeLine{95                           boost::system::error\_code \&error);}
+\DoxyCodeLine{96 }
+\DoxyCodeLine{97 }
+\DoxyCodeLine{98     tcp::socket socket\_;}
+\DoxyCodeLine{99     std::string message\_;}
+\DoxyCodeLine{100 \};}
+\DoxyCodeLine{101 }
+\DoxyCodeLine{102 \textcolor{keyword}{class }\mbox{\hyperlink{classTcpServer}{TcpServer}}}
+\DoxyCodeLine{103 \{}
+\DoxyCodeLine{104 \textcolor{keyword}{public}:}
+\DoxyCodeLine{105     \mbox{\hyperlink{classTcpServer}{TcpServer}}(boost::asio::io\_context \&ioContext, \mbox{\hyperlink{classDatabaseHandler}{DatabaseHandler}} *databaseHandler,}
+\DoxyCodeLine{106             \mbox{\hyperlink{classDatabaseConnection}{DatabaseConnection}} *databaseConnection, \mbox{\hyperlink{classRAFTConsensus}{RAFTConsensus}} *raft, \mbox{\hyperlink{classRequestHandler}{RequestHandler}} *handler, \textcolor{keywordtype}{int} port,}
+\DoxyCodeLine{107             \mbox{\hyperlink{classStatistics}{Statistics}} *stats);}
+\DoxyCodeLine{108 }
+\DoxyCodeLine{112     \textcolor{keywordtype}{void} \mbox{\hyperlink{classTcpServer_ada76e8005211cdac93cebc4a3f975aa0}{stop}}();}
+\DoxyCodeLine{113 }
+\DoxyCodeLine{114 \textcolor{keyword}{private}:}
+\DoxyCodeLine{118     \textcolor{keywordtype}{void} startAccept();}
+\DoxyCodeLine{119 }
+\DoxyCodeLine{124     \textcolor{keywordtype}{void} handleAccept(TcpConnection::pointer newConnection, \textcolor{keyword}{const} boost::system::error\_code\& error);}
+\DoxyCodeLine{125 }
+\DoxyCodeLine{126     boost::asio::io\_context\& ioContext\_;}
+\DoxyCodeLine{127     tcp::acceptor acceptor\_;}
+\DoxyCodeLine{128     \mbox{\hyperlink{classRequestHandler}{RequestHandler}}* handler;}
+\DoxyCodeLine{129     \mbox{\hyperlink{classStatistics}{Statistics}} *stats;}
+\DoxyCodeLine{130 }
+\DoxyCodeLine{131     \textcolor{keywordtype}{bool} stopped = \textcolor{keyword}{false};}
+\DoxyCodeLine{132 \};}
+
+\end{DoxyCode}

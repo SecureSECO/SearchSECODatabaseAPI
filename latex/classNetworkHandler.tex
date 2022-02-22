@@ -1,0 +1,76 @@
+\hypertarget{classNetworkHandler}{}\doxysection{Network\+Handler Class Reference}
+\label{classNetworkHandler}\index{NetworkHandler@{NetworkHandler}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classNetworkHandler_a231f33e619e364b83f64461ec205de34}{send\+Data}} (const char $\ast$data, int data\+Size)
+\begin{DoxyCompactList}\small\item\em Send data to the database. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classNetworkHandler_aa2d64edeb8cfe535b31f9d1c70636a8e}{send\+Data}} (std\+::string data)
+\begin{DoxyCompactList}\small\item\em Send data to the database. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classNetworkHandler_adc8db14cc851772f1dec4d6090b6dbaa}\label{classNetworkHandler_adc8db14cc851772f1dec4d6090b6dbaa}} 
+void {\bfseries open\+Connection} (std\+::string server, std\+::string port)
+\begin{DoxyCompactList}\small\item\em Opens a connection to the database. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{classNetworkHandler_abbb1d7a95ab3682ba0ea82795afa7463}{receive\+Data}} (bool stop\+On\+New\+Line=true)
+\begin{DoxyCompactList}\small\item\em Receives data from the other side of the connection. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classNetworkHandler_a26901334fb7e0608b671f245a5105c36}\label{classNetworkHandler_a26901334fb7e0608b671f245a5105c36}} 
+static \mbox{\hyperlink{classNetworkHandler}{Network\+Handler}} $\ast$ {\bfseries create\+Handler} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classNetworkHandler_abbb1d7a95ab3682ba0ea82795afa7463}\label{classNetworkHandler_abbb1d7a95ab3682ba0ea82795afa7463}} 
+\index{NetworkHandler@{NetworkHandler}!receiveData@{receiveData}}
+\index{receiveData@{receiveData}!NetworkHandler@{NetworkHandler}}
+\doxysubsubsection{\texorpdfstring{receiveData()}{receiveData()}}
+{\footnotesize\ttfamily std\+::string Network\+Handler\+::receive\+Data (\begin{DoxyParamCaption}\item[{bool}]{stop\+On\+New\+Line = {\ttfamily true} }\end{DoxyParamCaption})}
+
+
+
+Receives data from the other side of the connection. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em stop\+On\+New\+Line} & If true, will stop listning when encountering a new line. If false, will stop when the connection stops. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classNetworkHandler_a231f33e619e364b83f64461ec205de34}\label{classNetworkHandler_a231f33e619e364b83f64461ec205de34}} 
+\index{NetworkHandler@{NetworkHandler}!sendData@{sendData}}
+\index{sendData@{sendData}!NetworkHandler@{NetworkHandler}}
+\doxysubsubsection{\texorpdfstring{sendData()}{sendData()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void Network\+Handler\+::send\+Data (\begin{DoxyParamCaption}\item[{const char $\ast$}]{data,  }\item[{int}]{data\+Size }\end{DoxyParamCaption})}
+
+
+
+Send data to the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to be send.\\
+\hline
+{\em data\+Size} & The size of the data array in bytes.\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classNetworkHandler_aa2d64edeb8cfe535b31f9d1c70636a8e}\label{classNetworkHandler_aa2d64edeb8cfe535b31f9d1c70636a8e}} 
+\index{NetworkHandler@{NetworkHandler}!sendData@{sendData}}
+\index{sendData@{sendData}!NetworkHandler@{NetworkHandler}}
+\doxysubsubsection{\texorpdfstring{sendData()}{sendData()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void Network\+Handler\+::send\+Data (\begin{DoxyParamCaption}\item[{std\+::string}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Send data to the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to be send.\\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/Networking.\+h\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/Networking.\+cpp\end{DoxyCompactItemize}

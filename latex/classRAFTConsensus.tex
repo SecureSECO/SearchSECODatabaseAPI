@@ -1,0 +1,112 @@
+\hypertarget{classRAFTConsensus}{}\doxysection{RAFTConsensus Class Reference}
+\label{classRAFTConsensus}\index{RAFTConsensus@{RAFTConsensus}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classRAFTConsensus_afbc47259171471981c4019e64e33c994}\label{classRAFTConsensus_afbc47259171471981c4019e64e33c994}} 
+{\bfseries RAFTConsensus} (\mbox{\hyperlink{classStatistics}{Statistics}} $\ast$stats)
+\item 
+void \mbox{\hyperlink{classRAFTConsensus_ae2c006bcdbb3d9d1f84e4d55ad8342e5}{start}} (\mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$request\+Handler, std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ ips, bool assume\+Leader=false)
+\begin{DoxyCompactList}\small\item\em Starts RAFT. Will try to connect to a set list of IP\textquotesingle{}s where we assume the leaders are. If none of them respond, we will assume we are the first and assume the role of leader. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classRAFTConsensus_a92e31bcb1e82e9e566dd4d38f2e6b048}\label{classRAFTConsensus_a92e31bcb1e82e9e566dd4d38f2e6b048}} 
+virtual bool {\bfseries is\+Leader} ()
+\begin{DoxyCompactList}\small\item\em Returns true if this node is the leader in the network. \end{DoxyCompactList}\item 
+virtual std\+::string \mbox{\hyperlink{classRAFTConsensus_a545d8f4e90d690b2b5fb81a24454ad73}{pass\+Request\+To\+Leader}} (std\+::string request\+Type, std\+::string client, std\+::string request)
+\begin{DoxyCompactList}\small\item\em Will pass the given request on to the leader of the network. \end{DoxyCompactList}\item 
+virtual std\+::string \mbox{\hyperlink{classRAFTConsensus_a2b838ff3c957e55294604be68520c05f}{connect\+New\+Node}} (boost\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classTcpConnection}{Tcp\+Connection}} $>$ connection, std\+::string request)
+\begin{DoxyCompactList}\small\item\em Will handle a connect request by a new node that wants to join the network. If this node is the leader, we will add it to our list of connections. If we are not the leader, we will return the ip and port of the leader of the network. \end{DoxyCompactList}\item 
+virtual std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ \mbox{\hyperlink{classRAFTConsensus_a2bced18a10d94022b2cc67fbe7af8744}{get\+Ips}} (std\+::string file=\char`\"{}.env\char`\"{})
+\begin{DoxyCompactList}\small\item\em Reads the given file and gets the ips out of it. \end{DoxyCompactList}\item 
+virtual std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classRAFTConsensus_af65edcd4c78fa83824b1cd45753f853b}{get\+Current\+IPs}} ()
+\begin{DoxyCompactList}\small\item\em Returns the ips currently know to this api. \end{DoxyCompactList}\item 
+virtual std\+::string \mbox{\hyperlink{classRAFTConsensus_a82d93ab476424a745bd918a888af5259}{get\+My\+IP}} ()
+\begin{DoxyCompactList}\small\item\em Gets the ip of this node. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classRAFTConsensus_a2b838ff3c957e55294604be68520c05f}\label{classRAFTConsensus_a2b838ff3c957e55294604be68520c05f}} 
+\index{RAFTConsensus@{RAFTConsensus}!connectNewNode@{connectNewNode}}
+\index{connectNewNode@{connectNewNode}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{connectNewNode()}{connectNewNode()}}
+{\footnotesize\ttfamily std\+::string RAFTConsensus\+::connect\+New\+Node (\begin{DoxyParamCaption}\item[{boost\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classTcpConnection}{Tcp\+Connection}} $>$}]{connection,  }\item[{std\+::string}]{request }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Will handle a connect request by a new node that wants to join the network. If this node is the leader, we will add it to our list of connections. If we are not the leader, we will return the ip and port of the leader of the network. 
+
+\begin{DoxyReturn}{Returns}
+If we are the leader, we will return ok and the initial data. If we are not the leader, we will return the leader of the network. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classRAFTConsensus_af65edcd4c78fa83824b1cd45753f853b}\label{classRAFTConsensus_af65edcd4c78fa83824b1cd45753f853b}} 
+\index{RAFTConsensus@{RAFTConsensus}!getCurrentIPs@{getCurrentIPs}}
+\index{getCurrentIPs@{getCurrentIPs}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{getCurrentIPs()}{getCurrentIPs()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ RAFTConsensus\+::get\+Current\+IPs (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Returns the ips currently know to this api. 
+
+\begin{DoxyReturn}{Returns}
+List of ips with port. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classRAFTConsensus_a2bced18a10d94022b2cc67fbe7af8744}\label{classRAFTConsensus_a2bced18a10d94022b2cc67fbe7af8744}} 
+\index{RAFTConsensus@{RAFTConsensus}!getIps@{getIps}}
+\index{getIps@{getIps}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{getIps()}{getIps()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$ RAFTConsensus\+::get\+Ips (\begin{DoxyParamCaption}\item[{std\+::string}]{file = {\ttfamily \char`\"{}.env\char`\"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Reads the given file and gets the ips out of it. 
+
+\begin{DoxyReturn}{Returns}
+List of ips with port. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classRAFTConsensus_a82d93ab476424a745bd918a888af5259}\label{classRAFTConsensus_a82d93ab476424a745bd918a888af5259}} 
+\index{RAFTConsensus@{RAFTConsensus}!getMyIP@{getMyIP}}
+\index{getMyIP@{getMyIP}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{getMyIP()}{getMyIP()}}
+{\footnotesize\ttfamily virtual std\+::string RAFTConsensus\+::get\+My\+IP (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Gets the ip of this node. 
+
+\begin{DoxyReturn}{Returns}
+The own ip address. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classRAFTConsensus_a545d8f4e90d690b2b5fb81a24454ad73}\label{classRAFTConsensus_a545d8f4e90d690b2b5fb81a24454ad73}} 
+\index{RAFTConsensus@{RAFTConsensus}!passRequestToLeader@{passRequestToLeader}}
+\index{passRequestToLeader@{passRequestToLeader}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{passRequestToLeader()}{passRequestToLeader()}}
+{\footnotesize\ttfamily std\+::string RAFTConsensus\+::pass\+Request\+To\+Leader (\begin{DoxyParamCaption}\item[{std\+::string}]{request\+Type,  }\item[{std\+::string}]{client,  }\item[{std\+::string}]{request }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Will pass the given request on to the leader of the network. 
+
+\begin{DoxyReturn}{Returns}
+The string that the leader gives back. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classRAFTConsensus_ae2c006bcdbb3d9d1f84e4d55ad8342e5}\label{classRAFTConsensus_ae2c006bcdbb3d9d1f84e4d55ad8342e5}} 
+\index{RAFTConsensus@{RAFTConsensus}!start@{start}}
+\index{start@{start}!RAFTConsensus@{RAFTConsensus}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void RAFTConsensus\+::start (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classRequestHandler}{Request\+Handler}} $\ast$}]{request\+Handler,  }\item[{std\+::vector$<$ std\+::pair$<$ std\+::string, std\+::string $>$ $>$}]{ips,  }\item[{bool}]{assume\+Leader = {\ttfamily false} }\end{DoxyParamCaption})}
+
+
+
+Starts RAFT. Will try to connect to a set list of IP\textquotesingle{}s where we assume the leaders are. If none of them respond, we will assume we are the first and assume the role of leader. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em assume\+Leader} & If set to true, will skip the connect phase and assume that this node is the leader. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/RAFTConsensus.\+h\item 
+Search\+SECODatabase\+API/\+Job\+Distribution/RAFTConsensus.\+cpp\end{DoxyCompactItemize}
