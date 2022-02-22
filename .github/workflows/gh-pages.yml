@@ -1,0 +1,17 @@
+name: Testing pipeline
+
+on:
+    push:
+        branches:
+            - development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mattnotmitt/doxygen-action@v1.9.3
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
