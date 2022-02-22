@@ -1,7 +1,7 @@
 # Database API
 ![Testing](https://github.com/SecureSECO/SearchSECODatabaseAPI/actions/workflows/testing.yml/badge.svg)
 
-The database API is responsible for handling the communication between the controller and the database.
+The database API is responsible for handling the communication between the controller and the database. A reference documentation can be found [here](https://secureseco.github.io/SearchSECODatabaseAPI/).
 
 # Installation
 To install the program you should clone the git repository.
