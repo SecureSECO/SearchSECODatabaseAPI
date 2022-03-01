@@ -97,7 +97,7 @@ TEST(FinishJobRequest, Failure)
 	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
 	EXPECT_CALL(jddatabase, getCurrentJob(job.jobid)).WillOnce(testing::Return(job));
 
-	FailedJob failedJob = FailedJob(job, 10, "Project already known.");
+	FailedJob failedJob = FailedJob(job, 11, "Error downloading project.");
 
 	EXPECT_CALL(jddatabase, addFailedJob(failedjobequal(failedJob))).Times(1);
 	job.retries++;
