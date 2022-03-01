@@ -14,6 +14,7 @@ Utrecht University within the Software Project course.
 #define MIN_AMOUNT_JOBS 500
 #define MAX_RETRIES 3
 #define CRAWL_TIMEOUT_SECONDS 150
+#define NO_RETRY_REASONS {10}
 
 class TcpConnection;
 

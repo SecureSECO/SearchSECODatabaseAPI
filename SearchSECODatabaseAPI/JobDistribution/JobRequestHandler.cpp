@@ -10,6 +10,7 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 #include "JobTypes.h"
 #include <iostream>
+#include <set>
 
 using namespace jobTypes;
 
@@ -211,7 +212,8 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 				return HTTPStatusCodes::serverError("Job could not be added to failed jobs list.");
 			}
 
-			if (job.retries < MAX_JOB_RETRIES)
+			std::set<int> noRetryReasons = NO_RETRY_REASONS;
+			if (job.retries < MAX_JOB_RETRIES && noRetryReasons.find(reasonID) == noRetryReasons.end())
 			{
 				job.retries++;
 				tryUploadJobWithRetry(job, false);
