@@ -91,7 +91,7 @@ TEST(FinishJobRequest, Failure)
 	job.url = "https://github.com/zavg/linux-0.01";
 
 	std::string requestType = "fnjb";
-	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?10?Project already known.";
+	std::string request = "58451e62-1794-4f03-8ae4-21fb42670f73?0?11?Error downloading project.";
 
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 	EXPECT_CALL(jddatabase, getCurrentJobTime(job.jobid)).WillOnce(testing::Return(job.time));
