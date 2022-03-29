@@ -21,7 +21,8 @@ enum StatFamily
 	methCount,
 	langCount,
 	jobCount,
-	reqTime	
+	reqTime,
+	vulnCount
 };
 
 /// <summary>

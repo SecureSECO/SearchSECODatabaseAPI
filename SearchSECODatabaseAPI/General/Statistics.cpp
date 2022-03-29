@@ -103,10 +103,14 @@ void Statistics::readFromFile(std::string file)
 			{
 				current = reqTime;
 			}
+			else if (line == "#vulnerabilityCount")
+			{
+				current = vulnCount;
+			}
 			continue;
 		}
 		auto lineSplitted = Utility::splitStringOn(line, '?');
-		if (lineSplitted.size() >= 4)
+		if (lineSplitted.size() >= 3)
 		{
 			switch (current)
 			{
@@ -134,6 +138,10 @@ void Statistics::readFromFile(std::string file)
 				latestRequest
 					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Request", lineSplitted[2]}})
 					.Set(Utility::safeStod(lineSplitted[3]));
+				break;
+			case vulnCount:
+				vulnCounter->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}})
+					.Increment(Utility::safeStod(lineSplitted[2]));
 				break;
 			default:
 				break;
@@ -209,6 +217,19 @@ void Statistics::writeToFile(std::string file)
 		{
 			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
 						<< std::to_string(metric.gauge.value) << "\n";
+		}
+	}
+
+	fileData << "#vulnerabilityCount\n";
+
+	family = vulnCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?"
+					 << std::to_string(metric.counter.value) << "\n";
 		}
 	}
 
