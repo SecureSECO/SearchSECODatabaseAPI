@@ -1,5 +1,7 @@
 var classStatistics =
 [
+    [ "addRecentProject", "classStatistics.html#a1c3ac502af07b9e125d72ebdcfe0cd4b", null ],
+    [ "addRecentVulnerability", "classStatistics.html#a679466bb20deaa4af57170d45a08c7cf", null ],
     [ "Initialize", "classStatistics.html#a1cd01364284b046257cb05c8104eff80", null ],
     [ "readFromFile", "classStatistics.html#aaa737fdd83961b9911c64a6a13a83bd2", null ],
     [ "synchronize", "classStatistics.html#a96ee6487a130347282532a12d888e424", null ],
