@@ -28,12 +28,12 @@ jobs:
       - name: Install Cassandra
         run: |
              wget -nv https://dlcdn.apache.org/cassandra/4.0.4/apache-cassandra-4.0.4-bin.tar.gz
-             tar xzf apache-cassandra-4.0.3-bin.tar.gz
+             tar xzf apache-cassandra-4.0.4-bin.tar.gz
       - name: Tests
         run: |
-             apache-cassandra-4.0.3/bin/cassandra -R
+             apache-cassandra-4.0.4/bin/cassandra -R
              sleep 40
-             apache-cassandra-4.0.3/bin/cqlsh -f ./testdata.cql
+             apache-cassandra-4.0.4/bin/cqlsh -f ./testdata.cql
              rm -rf database_build
              mkdir database_build
              cd database_build
