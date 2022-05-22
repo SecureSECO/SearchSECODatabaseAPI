@@ -9,6 +9,7 @@ Utrecht University within the Software Project course.
 #include <prometheus/counter.h>
 #include <prometheus/exposer.h>
 #include <prometheus/registry.h>
+#include <queue>
 
 #define SYNCHRONIZE_DELAY 10000000 // 10 seconds.
 
@@ -22,7 +23,9 @@ enum StatFamily
 	langCount,
 	jobCount,
 	reqTime,
-	vulnCount
+	vulnCount,
+	recProj,
+	recVuln
 };
 
 /// <summary>
@@ -35,6 +38,18 @@ class Statistics
 	/// Initializes all statistics objects.
 	/// </summary>
 	virtual void Initialize();
+
+	/// <summary>
+	/// Add a recently added project.
+	/// </summary>
+	/// <param name="url"> The url of the project added.</param>
+	void addRecentProject(std::string url);
+
+	/// <summary>
+	/// Add a recently added vulnerability.
+	/// </summary>
+	/// <param name="vulnCode"> The vulnerability code of the vulnerability added.</param>
+	void addRecentVulnerability(std::string vulnCode);
 
 	/// <summary>
 	/// Regularly synchronizes the statistics to the passed file.
@@ -61,6 +76,8 @@ class Statistics
 	prometheus::Family<prometheus::Counter> *jobCounter;
 	prometheus::Family<prometheus::Gauge> *latestRequest;
 	prometheus::Family<prometheus::Counter> *vulnCounter;
+	prometheus::Family<prometheus::Gauge> *recentProjects;
+	prometheus::Family<prometheus::Gauge> *recentVulns;
 
 	// The ip of this node for identifying the node in the statistics.
 	std::string myIP;
@@ -74,4 +91,7 @@ class Statistics
 
 	// The registry that stores the families.
 	std::shared_ptr<prometheus::Registry> registry;
+
+	std::queue<prometheus::Gauge *> recentProjectsQueue;
+	std::queue<prometheus::Gauge *> recentVulnsQueue;
 };

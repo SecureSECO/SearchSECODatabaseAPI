@@ -227,6 +227,7 @@ std::string JobRequestHandler::handleFinishJobRequest(std::string request, std::
 		}
 		else
 		{
+			stats->addRecentProject(job.url);
 			return HTTPStatusCodes::success("Job finished succesfully.");
 		}
 	}

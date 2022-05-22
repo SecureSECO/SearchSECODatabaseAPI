@@ -107,6 +107,7 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request, std
 		if (method.vulnCode != "")
 		{
 			stats->vulnCounter->Add({{"Node", stats->myIP}, {"Client", client}}).Increment();
+			stats->addRecentVulnerability(method.vulnCode);
 		}
 		
 		++extensionOccurences[getExtension(method.fileLocation)];
