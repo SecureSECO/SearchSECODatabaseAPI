@@ -27,7 +27,7 @@ jobs:
              sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install Cassandra
         run: |
-             wget -nv https://dlcdn.apache.org/cassandra/4.0.3/apache-cassandra-4.0.3-bin.tar.gz
+             wget -nv https://dlcdn.apache.org/cassandra/4.0.4/apache-cassandra-4.0.4-bin.tar.gz
              tar xzf apache-cassandra-4.0.3-bin.tar.gz
       - name: Tests
         run: |
