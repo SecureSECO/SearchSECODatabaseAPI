@@ -123,6 +123,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 	if (!newProject)
 	{
 		CassStatement *query = cass_prepared_bind(selectMethod);
+		cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 
 		std::string hashUUID = Utility::hashToUUIDString(method.hash);
 

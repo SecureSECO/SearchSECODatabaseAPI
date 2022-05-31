@@ -59,6 +59,7 @@ std::vector<MethodOut> DatabaseHandler::hashToMethods(std::string hash)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectMethods);
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 
 	// To bind the hash as a UUID in the query, we have to convert it to a UUID first.
 	CassUuid uuid;
@@ -141,6 +142,7 @@ std::vector<MethodID> DatabaseHandler::authorToMethods(std::string authorID)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectMethodByAuthor);
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 
 	CassUuid uuid;
 	cass_uuid_from_string(authorID.c_str(), &uuid);
@@ -185,6 +187,7 @@ Author DatabaseHandler::idToAuthor(std::string id)
 {
 	errno = 0;
 	CassStatement *query = cass_prepared_bind(selectAuthorByID);
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 
 	CassUuid uuid;
 	cass_uuid_from_string(id.c_str(), &uuid);
