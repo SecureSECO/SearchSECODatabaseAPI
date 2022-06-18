@@ -78,14 +78,35 @@ void Statistics::addRecentProject(std::string url)
 
 void Statistics::addRecentVulnerability(std::string vulnCode)
 {
-	if (recentVulnsQueue.size() > 5)
+	if (recentVulns->Has({{"Node", myIP}, {"VulnCode", vulnCode}}))
 	{
-		recentVulns->Remove(recentVulnsQueue.front());
-		recentVulnsQueue.pop();
+		prometheus::Gauge *added = &recentVulns->Add({{"Node", myIP}, {"VulnCode", vulnCode}});
+		added->SetToCurrentTime();
+		std::queue<prometheus::Gauge *> newQueue = std::queue<prometheus::Gauge *>();
+		int size = recentVulnsQueue.size();
+		for (int i = 0; i < size; i++)
+		{
+			prometheus::Gauge *g = recentVulnsQueue.front();
+			recentVulnsQueue.pop();
+			if (g != added)
+			{
+				newQueue.push(g);
+			}
+		}
+		newQueue.push(added);
+		recentVulnsQueue = newQueue;
 	}
-	prometheus::Gauge *added = &recentVulns->Add({{"Node", myIP}, {"VulnCode", vulnCode}});
-	added->SetToCurrentTime();
-	recentVulnsQueue.push(added);
+	else
+	{
+		if (recentVulnsQueue.size() > 5)
+		{
+			recentVulns->Remove(recentVulnsQueue.front());
+			recentVulnsQueue.pop();
+		}
+		prometheus::Gauge *added = &recentVulns->Add({{"Node", myIP}, {"VulnCode", vulnCode}});
+		added->SetToCurrentTime();
+		recentVulnsQueue.push(added);
+	}
 }
 
 void Statistics::synchronize(std::string file)
