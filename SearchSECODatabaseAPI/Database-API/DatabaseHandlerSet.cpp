@@ -6,6 +6,7 @@ Utrecht University within the Software Project course.
 
 #include "DatabaseHandler.h"
 #include "Utility.h"
+#include "DatabaseUtility.h"
 
 #include <iostream>
 #include <string>
@@ -122,6 +123,7 @@ void DatabaseHandler::addMethod(MethodIn method, ProjectIn project, long long pr
 	if (!newProject)
 	{
 		CassStatement *query = cass_prepared_bind(selectMethod);
+		cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 
 		std::string hashUUID = Utility::hashToUUIDString(method.hash);
 
@@ -180,13 +182,13 @@ void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, Met
 	{
 		const CassRow *row = cass_iterator_get_row(iterator);
 
-		long long endVersion = getInt64(row, "endVersionTime");
+		long long endVersion = DatabaseUtility::getInt64(row, "endVersionTime");
 		if (endVersion == prevVersion)
 		{
 			// The method is in fact part of an unchanged file,
 			// so we update the details regarding the method.
 			newMethod = false;
-			long long startVersion = getInt64(row, "startVersionTime");
+			long long startVersion = DatabaseUtility::getInt64(row, "startVersionTime");
 			updateMethod(method, project, startVersion);
 		}
 	}
@@ -198,7 +200,15 @@ void DatabaseHandler::handleSelectMethodQueryResult(CassFuture *queryFuture, Met
 void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long parserVersion)
 {
 	errno = 0;
-	CassStatement *query = cass_prepared_bind(insertMethod);
+	CassStatement *query;
+	if (method.vulnCode != "")
+	{
+		query = cass_prepared_bind(insertVulnMethod);
+	}
+	else
+	{
+		query = cass_prepared_bind(insertMethod);
+	}
 
 	// Bind the variables in the statement.
 	CassUuid uuid;
@@ -213,6 +223,10 @@ void DatabaseHandler::addNewMethod(MethodIn method, ProjectIn project, long long
 	cass_statement_bind_string_by_name(query, "name", method.methodName.c_str());
 	cass_statement_bind_int32_by_name(query, "lineNumber", method.lineNumber);
 	cass_statement_bind_int64_by_name(query, "parserversion", parserVersion);
+	if (method.vulnCode != "")
+	{
+		cass_statement_bind_string_by_name(query, "vulnCode", method.vulnCode.c_str());
+	}
 
 	int size = method.authors.size();
 	CassCollection *authors = cass_collection_new(CASS_COLLECTION_TYPE_SET, size);
@@ -331,6 +345,7 @@ CassFuture *DatabaseHandler::executeSelectUnchangedMethodsQuery(std::vector<Hash
 																std::vector<std::string> files, ProjectIn project)
 {
 	CassStatement *query = cass_prepared_bind(selectUnchangedMethods);
+	cass_statement_set_consistency(query, CASS_CONSISTENCY_LOCAL_ONE);
 	cass_statement_bind_int64_by_name(query, "projectid", project.projectID);
 
 	CassCollection *hashesCollection = cass_collection_new(CASS_COLLECTION_TYPE_LIST, hashes.size());
@@ -374,16 +389,16 @@ std::vector<Hash> DatabaseHandler::handleSelectUnchangedMethodsResult(CassFuture
 	{
 		const CassRow *row = cass_iterator_get_row(iterator);
 
-		long long endVersion = getInt64(row, "endVersionTime");
+		long long endVersion = DatabaseUtility::getInt64(row, "endVersionTime");
 
 		if (endVersion == prevVersion)
 		{
-			long long startVersion = getInt64(row, "startversiontime");
+			long long startVersion = DatabaseUtility::getInt64(row, "startversiontime");
 			MethodIn method;
-			method.hash = Utility::uuidStringToHash(getUUID(row, "method_hash"));
-			method.fileLocation = getString(row, "file");
-			method.lineNumber = getInt32(row, "lineNumber");
-			method.methodName = getString(row, "name");
+			method.hash = Utility::uuidStringToHash(DatabaseUtility::getUUID(row, "method_hash"));
+			method.fileLocation = DatabaseUtility::getString(row, "file");
+			method.lineNumber = DatabaseUtility::getInt32(row, "lineNumber");
+			method.methodName = DatabaseUtility::getString(row, "name");
 			updateMethod(method, project, startVersion);
 			hashes.push_back(method.hash);
 		}

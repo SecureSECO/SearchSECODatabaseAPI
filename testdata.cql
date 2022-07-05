@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS projectData.methods
   lineNumber int,
   authors set<UUID>,
   parserversion bigint,
+  vulnCode text,
   PRIMARY KEY ((method_hash), projectID, file, startVersionTime)
 )
 WITH CLUSTERING ORDER BY (projectID ASC, file ASC, startVersionTime DESC);
@@ -61,9 +62,36 @@ CREATE TABLE IF NOT EXISTS jobs.jobsqueue
 	priority bigint,
 	url text,
 	constant int,
-	PRIMARY KEY ((constant), priority, jobid) 
-) 
+	retries int,
+	timeout bigint,
+	PRIMARY KEY ((constant), priority, jobid)
+)
 WITH CLUSTERING ORDER BY (priority ASC);
+
+CREATE TABLE IF NOT EXISTS jobs.currentjobs 
+(
+	jobid UUID,
+	time timestamp,
+	timeout bigint,
+	priority bigint,
+	url text,
+	retries int,	
+	PRIMARY KEY ((jobid)) 
+);
+
+CREATE TABLE IF NOT EXISTS jobs.failedjobs 
+(
+	jobid UUID,
+	time timestamp,
+	timeout bigint,
+	priority bigint,
+	url text,
+	retries int,
+	reasonID int,
+	reasonData text,
+	PRIMARY KEY ((jobid), time) 
+)
+WITH CLUSTERING ORDER BY (time DESC);
 
 CREATE TABLE IF NOT EXISTS jobs.variables 
 (
@@ -213,10 +241,13 @@ INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES
 INSERT INTO projectData.author_by_id (authorID, name, mail) VALUES 
 (41ab7373-8f24-4a03-83dc-621036d99f34, 'Author2', 'author2@mail.com');
 
-INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES 
-(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 500000000000000, 'https://github.com/zavg/linux-0.01', 1);
-INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(61c9d732-1f98-40af-b201-3b20fbf7a6db, 400000000000000, 'https://github.com/304471720/CSAPI', 1);
-INSERT INTO jobs.jobsqueue (jobid, priority, url, constant) VALUES
-(2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1);
-
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES 
+(5bcd0d08-ded0-4134-b165-1c7d0352c15e, 500000000000000, 'https://github.com/zavg/linux-0.01', 1, 0, 69);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(61c9d732-1f98-40af-b201-3b20fbf7a6db, 400000000000000, 'https://github.com/304471720/CSAPI', 1, 0, 42);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(2f78a799-0e18-4eb5-bd33-83718a3257d9, 300000000000000, 'https://github.com/caged/microsis', 1, 0, 100);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(77b02074-8a8e-4193-ac11-53a83ae2ad0d, 600000000000000, 'https://github.com/eladrich/pixel2style2pixel', 1, 0, 42069);
+INSERT INTO jobs.jobsqueue (jobid, priority, url, constant, retries, timeout) VALUES
+(6bb4b5bf-119b-4323-a175-469132620a24, 700000000000000, 'https://github.com/mattermost/desktop', 1, 0, 69420);

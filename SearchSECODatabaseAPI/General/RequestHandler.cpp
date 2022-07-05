@@ -48,6 +48,12 @@ std::string RequestHandler::handleRequest(std::string requestType, std::string c
 	case eGetTopJob:
 		result = jrh->handleGetJobRequest(requestType, client, request);
 		break;
+	case eUpdateJob:
+		result = jrh->handleUpdateJobRequest(requestType, client, request);
+		break;
+	case eFinishJob:
+		result = jrh->handleFinishJobRequest(requestType, client, request);
+		break;
 	case eExtractProjects:
 		result = dbrh->handleExtractProjectsRequest(request);
 		break;
@@ -113,6 +119,14 @@ ERequestType RequestHandler::getERequestType(std::string requestType)
 	else if (requestType == "gtjb")
 	{
 		return eGetTopJob;
+	}
+	else if (requestType == "udjb")
+	{
+		return eUpdateJob;
+	}
+	else if (requestType == "fnjb")
+	{
+		return eFinishJob;
 	}
 	else if (requestType == "extp")
 	{

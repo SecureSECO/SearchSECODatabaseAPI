@@ -65,7 +65,7 @@ TEST(CheckUploadRequest, OneRequestOneMatch)
 	Utility::appendBy(outputChars,
 					  {"a6aa62503e2ca3310e3a837502b80df5", "0", "0", "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "0",
 					   "dfa59d94e44092eddd3cfba13f032aaa035de3d0", "Method1", "MyProject/Method1.cpp", "1", "1",
-					   "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
+					   "", "1", "f1a028d7-3845-41df-bec1-2e16c49e4c35"},
 					  FIELD_DELIMITER_CHAR, ENTRY_DELIMITER_CHAR);
 	std::string output(outputChars.begin(), outputChars.end());
 

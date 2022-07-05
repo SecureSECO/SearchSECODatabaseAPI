@@ -13,6 +13,12 @@ Utrecht University within the Software Project course.
 
 #include <gtest/gtest.h>
 
+MATCHER_P(jobequal, job, "")
+{
+	return arg.jobid == job.jobid && arg.timeout == job.timeout && arg.priority == job.priority && arg.url == job.url &&
+		   arg.retries == job.retries;
+}
+
 // Test for a single correct job.
 TEST(UploadJobRequest, SingleJob)
 {
@@ -28,9 +34,11 @@ TEST(UploadJobRequest, SingleJob)
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + fieldDelimiter + "69";
 
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
+	Job job("", 69, 1, "https://github.com/zavg/linux-0.01", 0);
+
+	EXPECT_CALL(jddatabase, uploadJob(jobequal(job), true)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
@@ -54,12 +62,15 @@ TEST(UploadJobRequest, MultipleJobs)
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter +
-						  "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "2";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + fieldDelimiter + "69" + entryDelimiter +
+						  "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "2" + fieldDelimiter + "42";
 
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(1);
+	Job job1("", 69, 1, "https://github.com/zavg/linux-0.01", 0);
+	Job job2("", 42, 2, "https://github.com/nlohmann/json/issues/1573", 0);
+
+	EXPECT_CALL(jddatabase, uploadJob(jobequal(job1), true)).Times(1);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/nlohmann/json/issues/1573", 2)).Times(1);
+	EXPECT_CALL(jddatabase, uploadJob(jobequal(job2), true)).Times(1);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result, HTTPStatusCodes::success("Your job(s) has been succesfully added to the queue."));
@@ -81,9 +92,9 @@ TEST(UploadJobRequest, OneJobInvalidPriority)
 	std::string fieldDelimiter(1, FIELD_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "aaaaa";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "aaaaa" + fieldDelimiter + "69";
 
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 0)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
@@ -107,12 +118,11 @@ TEST(UploadJobRequest, MultipleJobsInvalidPriority)
 	std::string entryDelimiter(1, ENTRY_DELIMITER_CHAR);
 
 	std::string requestType = "upjb";
-	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + entryDelimiter +
-						  "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "aaaa";
+	std::string request = "https://github.com/zavg/linux-0.01" + fieldDelimiter + "1" + fieldDelimiter + "69" + entryDelimiter +
+						  "https://github.com/nlohmann/json/issues/1573" + fieldDelimiter + "aaaa" + fieldDelimiter + "42";
 
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/zavg/linux-0.01", 1)).Times(0);
+	EXPECT_CALL(jddatabase, uploadJob(testing::_, testing::_)).Times(0);
 	EXPECT_CALL(raftConsensus, isLeader()).WillOnce(testing::Return(true));
-	EXPECT_CALL(jddatabase, uploadJob("https://github.com/nlohmann/json/issues/1573", 0)).Times(0);
 
 	std::string result = handler.handleRequest(requestType, "", request, nullptr);
 	ASSERT_EQ(result,

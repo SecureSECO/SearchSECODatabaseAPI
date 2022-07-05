@@ -8,6 +8,7 @@ Utrecht University within the Software Project course.
 #include "Utility.h"
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <unistd.h>
 #include <prometheus/counter.h>
@@ -34,13 +35,78 @@ void Statistics::Initialize()
 						   .Help("Bytes of languages encountered.")
 						   .Register(*registry);
 
+	jobCounter = &prometheus::BuildCounter()
+					  .Name("api_finished_jobs_total")
+					  .Help("Number of finished jobs.")
+					  .Register(*registry);
+
 	latestRequest = &prometheus::BuildGauge()
 						 .Name("api_request_time_seconds")
 						 .Help("The latest time a request has been received.")
 						 .Register(*registry);
 
+	vulnCounter = &prometheus::BuildCounter()
+					   .Name("api_vulnerabilities_total")
+					   .Help("Number of vulnerabilities.")
+					   .Register(*registry);
+
+	recentProjects = &prometheus::BuildGauge()
+						 .Name("api_recent_projects_seconds")
+						 .Help("The latest projects that have been received.")
+						 .Register(*registry);
+
+	recentVulns = &prometheus::BuildGauge()
+						  .Name("api_recent_vulnerabilities_seconds")
+						  .Help("The latest vulnerabilities that have been received.")
+						  .Register(*registry);
+
 	// Ask the exposer to scrape the registry on incoming HTTP requests.
 	exposer->RegisterCollectable(registry);
+}
+
+void Statistics::addRecentProject(std::string url)
+{
+	if (recentProjectsQueue.size() > 5)
+	{
+		recentProjects->Remove(recentProjectsQueue.front());
+		recentProjectsQueue.pop();
+	}
+	prometheus::Gauge *added = &recentProjects->Add({{"Node", myIP}, {"Project", url}});
+	added->SetToCurrentTime();
+	recentProjectsQueue.push(added);
+}
+
+void Statistics::addRecentVulnerability(std::string vulnCode)
+{
+	if (recentVulns->Has({{"Node", myIP}, {"VulnCode", vulnCode}}))
+	{
+		prometheus::Gauge *added = &recentVulns->Add({{"Node", myIP}, {"VulnCode", vulnCode}});
+		added->SetToCurrentTime();
+		std::queue<prometheus::Gauge *> newQueue = std::queue<prometheus::Gauge *>();
+		int size = recentVulnsQueue.size();
+		for (int i = 0; i < size; i++)
+		{
+			prometheus::Gauge *g = recentVulnsQueue.front();
+			recentVulnsQueue.pop();
+			if (g != added)
+			{
+				newQueue.push(g);
+			}
+		}
+		newQueue.push(added);
+		recentVulnsQueue = newQueue;
+	}
+	else
+	{
+		if (recentVulnsQueue.size() > 5)
+		{
+			recentVulns->Remove(recentVulnsQueue.front());
+			recentVulnsQueue.pop();
+		}
+		prometheus::Gauge *added = &recentVulns->Add({{"Node", myIP}, {"VulnCode", vulnCode}});
+		added->SetToCurrentTime();
+		recentVulnsQueue.push(added);
+	}
 }
 
 void Statistics::synchronize(std::string file)
@@ -80,6 +146,10 @@ void Statistics::readFromFile(std::string file)
 			{
 				current = methCount;
 			}
+			else if (line == "#jobCount")
+			{
+				current = jobCount;
+			}
 			else if (line == "#languageCount")
 			{
 				current = langCount;
@@ -88,10 +158,22 @@ void Statistics::readFromFile(std::string file)
 			{
 				current = reqTime;
 			}
+			else if (line == "#vulnerabilityCount")
+			{
+				current = vulnCount;
+			}
+			else if (line == "#recentProjects")
+			{
+				current = recProj;
+			}
+			else if (line == "#recentVulns")
+			{
+				current = recVuln;
+			}
 			continue;
 		}
 		auto lineSplitted = Utility::splitStringOn(line, '?');
-		if (lineSplitted.size() >= 4)
+		if (lineSplitted.size() >= 3)
 		{
 			switch (current)
 			{
@@ -110,11 +192,36 @@ void Statistics::readFromFile(std::string file)
 					->Add({{"Node", lineSplitted[2]}, {"Client", lineSplitted[0]}, {"Language", lineSplitted[1]}})
 					.Increment(Utility::safeStod(lineSplitted[3]));
 				break;
+			case jobCount:
+				jobCounter
+					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Reason", lineSplitted[2]}})
+					.Increment(Utility::safeStod(lineSplitted[3]));
+				break;
 			case reqTime:
 				latestRequest
 					->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}, {"Request", lineSplitted[2]}})
 					.Set(Utility::safeStod(lineSplitted[3]));
 				break;
+			case vulnCount:
+				vulnCounter->Add({{"Node", lineSplitted[1]}, {"Client", lineSplitted[0]}})
+					.Increment(Utility::safeStod(lineSplitted[2]));
+				break;
+			case recProj:
+			{
+				prometheus::Gauge *added =
+					&recentProjects->Add({{"Node", lineSplitted[0]}, {"Project", lineSplitted[1]}});
+				added->Set(Utility::safeStod(lineSplitted[2]));
+				recentProjectsQueue.push(added);
+				break;
+			}
+			case recVuln:
+			{
+				prometheus::Gauge *added =
+					&recentVulns->Add({{"Node", lineSplitted[0]}, {"VulnCode", lineSplitted[1]}});
+				added->Set(Utility::safeStod(lineSplitted[2]));
+				recentVulnsQueue.push(added);
+				break;
+			}
 			default:
 				break;
 			}
@@ -125,6 +232,112 @@ void Statistics::readFromFile(std::string file)
 
 void Statistics::writeToFile(std::string file)
 {
+	std::stringstream fileData;
+	
+	fileData << "#requestCount\n";
+
+	std::vector<prometheus::MetricFamily> family = requestCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#methodCount\n";
+
+	family = methodCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#jobCount\n";
+
+	family = jobCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#languageCount\n";
+
+	family = languageCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#requestTime\n";
+
+	family = latestRequest->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
+						<< std::to_string(metric.gauge.value) << "\n";
+		}
+	}
+
+	fileData << "#vulnerabilityCount\n";
+
+	family = vulnCounter->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?"
+					 << std::to_string(metric.counter.value) << "\n";
+		}
+	}
+
+	fileData << "#recentProjects\n";
+
+	family = recentProjects->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?"
+					 << std::to_string(metric.gauge.value) << "\n";
+		}
+	}
+
+	fileData << "#recentVulns\n";
+
+	family = recentVulns->Collect();
+
+	if (family.size() >= 1)
+	{
+		for (prometheus::ClientMetric metric : family[0].metric)
+		{
+			fileData << metric.label[0].value << "?" << metric.label[1].value << "?"
+					 << std::to_string(metric.gauge.value) << "\n";
+		}
+	}
+
 	std::ofstream fileHandler;
 	fileHandler.open(file);
 
@@ -133,58 +346,8 @@ void Statistics::writeToFile(std::string file)
 		std::cout << "Unable to open statistics file." << std::endl;
 		return;
 	}
-	
-	fileHandler << "#requestCount\n";
 
-	std::vector<prometheus::MetricFamily> family = requestCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#methodCount\n";
-
-	family = methodCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#languageCount\n";
-
-	family = languageCounter->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.counter.value) << "\n";
-		}
-	}
-
-	fileHandler << "#requestTime\n";
-
-	family = latestRequest->Collect();
-
-	if (family.size() >= 1)
-	{
-		for (prometheus::ClientMetric metric : family[0].metric)
-		{
-			fileHandler << metric.label[0].value << "?" << metric.label[1].value << "?" << metric.label[2].value << "?"
-						<< std::to_string(metric.gauge.value) << "\n";
-		}
-	}
+	fileHandler << fileData.str();
 
 	fileHandler.close();
 }

@@ -91,7 +91,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 	{
 		// Non-integer line number.
 		return MethodIn();
-	}
+	}	
 
 	std::vector<Author> authors;
 	int numberOfAuthors = Utility::safeStoi(methodData[4]);
@@ -101,7 +101,7 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 		return MethodIn();
 	}
 
-	if (methodData.size() != METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
+	if (methodData.size() < METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
 	{
 		// Incorrect amount of parameters.
 		errno = EILSEQ;
@@ -114,6 +114,11 @@ MethodIn DatabaseRequestHandler::dataEntryToMethod(std::string dataEntry)
 		authors.push_back(author);
 	}
 	method.authors = authors;
+
+	if (methodData.size() > METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors)
+	{
+		method.vulnCode = methodData[METHOD_DATA_MIN_SIZE + 2 * numberOfAuthors];
+	}
 
 	return method;
 }
@@ -246,12 +251,13 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 		std::vector<AuthorID> authorIDs = lastMethod.authorIDs;
 		std::string authorTotal = std::to_string(authorIDs.size());
 		std::string parserVersion = std::to_string(lastMethod.parserVersion);
+		std::string vulnCode = lastMethod.vulnCode;
 
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
 		std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
 												 endVersion, endVersionHash, name,		   fileLocation,
-												 lineNumber, parserVersion,	 authorTotal};
+												 lineNumber, parserVersion,	 vulnCode,	   authorTotal};
 		dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
 
 		// Append 'chars' by the special dataElements separated by special characters.
@@ -402,13 +408,13 @@ std::tuple<> DatabaseRequestHandler::addMethodWithRetry(MethodIn method, Project
 		this->database->addMethod(method, project, prevVersion, parserVersion, newProject);
 		return std::make_tuple();
 	};
-	return queryWithRetry<std::tuple<>>(function);
+	return Utility::queryWithRetry<std::tuple<>>(function);
 }
 
 std::vector<MethodOut> DatabaseRequestHandler::hashToMethodsWithRetry(Hash hash)
 {
 	std::function<std::vector<MethodOut>()> function = [hash, this]() { return this->database->hashToMethods(hash); };
-	return queryWithRetry<std::vector<MethodOut>>(function);
+	return Utility::queryWithRetry<std::vector<MethodOut>>(function);
 }
 
 std::vector<MethodID> DatabaseRequestHandler::authorToMethodsWithRetry(AuthorID authorID)
@@ -416,5 +422,5 @@ std::vector<MethodID> DatabaseRequestHandler::authorToMethodsWithRetry(AuthorID 
 	std::function<std::vector<MethodID>()> function = [authorID, this]() {
 		return this->database->authorToMethods(authorID);
 	};
-	return queryWithRetry<std::vector<MethodID>>(function);
+	return Utility::queryWithRetry<std::vector<MethodID>>(function);
 }

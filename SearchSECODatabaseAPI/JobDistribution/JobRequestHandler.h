@@ -14,7 +14,7 @@ Utrecht University within the Software Project course.
 #define MIN_AMOUNT_JOBS 500
 #define MAX_RETRIES 3
 #define CRAWL_TIMEOUT_SECONDS 150
-#define RECOUNT_WAIT_TIME 600
+#define NO_RETRY_REASONS {10}
 
 class TcpConnection;
 
@@ -76,6 +76,27 @@ public:
 	std::string handleGetJobRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
+	/// Handles the request to update the job time.
+	/// </summary>
+	/// <returns>
+	/// The new time of the job.
+	/// </returns>
+	std::string handleUpdateJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
+	/// Handles request to indicate the worker is finished with a job, successfully or not.
+	/// </summary>
+	/// <returns>
+	/// Response is "Job not currently expected." if a newer version of the job was
+	/// given out, or if the job is not known to have been given out. Reponse is
+	/// "Job finished successfully" on success and "Job failed successfully" on 
+	/// a client-side failure, which was correctly handled and uploaded.
+	/// For a client-side failure, when the database fails to upload the current job
+	/// to the failedjobs table, "Job could not be added to failed jobs list." is returned.
+	/// </returns>
+	std::string handleFinishJobRequest(std::string request, std::string client, std::string data);
+
+	/// <summary>
 	/// Handles request to upload crawl data to the job queue.
 	/// </summary>
 	/// <param name="data">
@@ -88,11 +109,10 @@ public:
 	std::string handleCrawlDataRequest(std::string request, std::string client, std::string data);
 
 	/// <summary>
-	/// Variables describing the number of jobs in the jobqueue, the current crawlID
+	/// Variables describing the current crawlID
 	/// which is needed by the crawler to crawl a specific part of GitHub
 	/// and if there is currently a crawler working.
-	/// </summary>
-	int numberOfJobs;
+	/// </summary>	
 	int crawlID;
 	long long timeLastCrawl = -1;
 
@@ -103,6 +123,11 @@ public:
 	/// New crawlID.
 	/// </param>
 	void updateCrawlID(int id);
+
+	DatabaseConnection *getDatabaseConnection()
+	{
+		return database;
+	}
 
 private:
 	RAFTConsensus *raft;
@@ -123,14 +148,41 @@ private:
 	/// If it succeeds, it returns the url of the top job.
 	/// If it fails, it returns an error message.
 	/// </summary>
-	std::string getTopJobWithRetry();
+	Job getTopJobWithRetry();
 
 	/// <summary>
 	/// Tries to upload a job to the database, if it fails it retries like above.
 	/// If it succeeds, it returns true.
 	/// If it fails, it returns false.
 	/// </summary>
-	bool tryUploadJobWithRetry(std::string url, int priority);
+	void tryUploadJobWithRetry(Job job, bool newMethod);
 
-	long long timeLastRecount = -1;
+	/// <summary>
+	/// Attempts to retrieve the time of a match from the currentjobs table with a matching jobid.
+	/// </summary>
+	/// <param name="jobid">The jobid to match on.</param>
+	/// <returns>
+	/// The time of the job. Returns -1 if job is unknown or an error occured.
+	/// </returns>
+	long long getCurrentJobTimeWithRetry(std::string jobid);
+
+	/// <summary>
+	/// Attempts to retrieve a match from the currentjobs table with a matching jobid.
+	/// </summary>
+	/// <param name="jobid">The jobid to match on.</param>
+	/// <returns>
+	/// A Job object containing information on the current job. 
+	/// Returns a nullptr if no such job was found.
+	/// </returns>
+	Job getCurrentJobWithRetry(std::string jobid);
+
+	/// <summary>
+	/// Adds the given job to the currentjobs table.
+	/// </summary>
+	long long addCurrentJobWithRetry(Job job);
+
+	/// <summary>
+	/// Adds a job with the given parameters to the failedjobs table with retry.
+	/// </summary>
+	void addFailedJobWithRetry(FailedJob job);
 };

@@ -38,9 +38,29 @@ class MockStatistics : public Statistics
 							   .Help("Bytes of languages encountered.")
 							   .Register(*registry);
 
+		jobCounter = &prometheus::BuildCounter()
+						  .Name("api_finished_jobs_total")
+						  .Help("Number of finished jobs.")
+						  .Register(*registry);
+
 		latestRequest = &prometheus::BuildGauge()
 							 .Name("api_request_time_seconds")
 							 .Help("The latest time a request has been received.")
 							 .Register(*registry);
+
+		vulnCounter = &prometheus::BuildCounter()
+						   .Name("api_vulnerabilities_total")
+						   .Help("Number of vulnerabilities.")
+						   .Register(*registry);
+
+		recentProjects = &prometheus::BuildGauge()
+							  .Name("api_recent_projects_seconds")
+							  .Help("The latest projects that have been received.")
+							  .Register(*registry);
+
+		recentVulns = &prometheus::BuildGauge()
+						   .Name("api_recent_vulnerabilities_seconds")
+						   .Help("The latest vulnerabilities that have been received.")
+						   .Register(*registry);
 	}
 };

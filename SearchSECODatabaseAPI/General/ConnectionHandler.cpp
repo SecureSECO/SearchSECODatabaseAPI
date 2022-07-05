@@ -60,7 +60,7 @@ void TcpConnection::sendData(const std::string &data, boost::system::error_code 
 
 void TcpConnection::start(RequestHandler *handler, pointer thisPointer, Statistics *stats)
 {
-	
+
 	std::vector<char> request = std::vector<char>();
 	boost::system::error_code error;
 	size_t len;
@@ -80,8 +80,6 @@ void TcpConnection::start(RequestHandler *handler, pointer thisPointer, Statisti
 		return;
 	}
 
-	stats->requestCounter->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).Increment();
-	stats->latestRequest->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).SetToCurrentTime();
 	std::string length = header[2];
 	std::string totalData(request.begin() + len, request.end());
 
@@ -97,6 +95,9 @@ void TcpConnection::start(RequestHandler *handler, pointer thisPointer, Statisti
 			socket_, boost::asio::buffer(HTTPStatusCodes::clientError("Request body larger than expected.")), error);
 		return;
 	}
+
+	stats->requestCounter->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).Increment();
+	stats->latestRequest->Add({{"Node", stats->myIP}, {"Client", header[1]}, {"Request", header[0]}}).SetToCurrentTime();
 	std::vector<char> data(size);
 	readExpectedData(size, data, totalData, error);
 	std::string result = handler->handleRequest(header[0], header[1], totalData, thisPointer);

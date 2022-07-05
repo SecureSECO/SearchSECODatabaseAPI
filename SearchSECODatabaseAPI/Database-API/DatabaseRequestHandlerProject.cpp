@@ -103,6 +103,12 @@ std::string DatabaseRequestHandler::handleUploadRequest(std::string request, std
 		{
 			return HTTPStatusCodes::clientError("Error parsing method " + std::to_string(i-2) + ".");
 		}
+
+		if (method.vulnCode != "")
+		{
+			stats->vulnCounter->Add({{"Node", stats->myIP}, {"Client", client}}).Increment();
+			stats->addRecentVulnerability(method.vulnCode);
+		}
 		
 		++extensionOccurences[getExtension(method.fileLocation)];
 		methodQueue.push(method);
@@ -246,7 +252,7 @@ DatabaseRequestHandler::updateUnchangedFilesWithRetry(std::pair<std::vector<Hash
 	std::function<std::vector<Hash>()> function = [hash, file, project, prevVersion, this]() {
 		return this->database->updateUnchangedFiles(hash, file, project, prevVersion);
 	};
-	return queryWithRetry<std::vector<Hash>>(function);
+	return Utility::queryWithRetry<std::vector<Hash>>(function);
 }
 
 ProjectIn DatabaseRequestHandler::requestToProject(std::string request)
@@ -520,18 +526,18 @@ std::string DatabaseRequestHandler::projectsToString(std::vector<ProjectOut> pro
 bool DatabaseRequestHandler::tryUploadProjectWithRetry(ProjectIn project)
 {
 	std::function<bool()> function = [project, this]() { return this->database->addProject(project); };
-	return queryWithRetry<bool>(function);
+	return Utility::queryWithRetry<bool>(function);
 }
 
 ProjectOut DatabaseRequestHandler::searchForProjectWithRetry(ProjectID projectID, Version version)
 {
 	std::function<ProjectOut()> function = 
 		[projectID, version, this]() { return this->database->searchForProject(projectID, version); };
-	return queryWithRetry<ProjectOut>(function);
+	return Utility::queryWithRetry<ProjectOut>(function);
 }
 
 ProjectOut DatabaseRequestHandler::getPrevProjectWithRetry(ProjectID projectID)
 {
 	std::function<ProjectOut()> function = [projectID, this]() { return this->database->prevProject(projectID); };
-	return queryWithRetry<ProjectOut>(function);
+	return Utility::queryWithRetry<ProjectOut>(function);
 }

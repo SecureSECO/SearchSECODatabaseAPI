@@ -12,12 +12,13 @@ RUN apt-get -y update && \
 	wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb && \
 	dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb && \
 	apt-get -y install openjdk-8-jdk python && \
-	wget https://downloads.apache.org/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz && \
-	tar xzvf apache-cassandra-3.11.10-bin.tar.gz
+	wget https://dlcdn.apache.org/cassandra/4.0.1/apache-cassandra-4.0.1-bin.tar.gz && \
+	tar xzvf apache-cassandra-4.0.1-bin.tar.gz
 COPY . .
+#COPY ./conf apache-cassandra-4.0.1/conf
 RUN dpkg -i ./external/prometheus-cpp_0.12.3_amd64.deb
 RUN mkdir build && \
 	cd build && \
 	cmake -DCMAKE_BUILD_TYPE=Debug .. && \
 	cmake --build .
-ENTRYPOINT ["/bin/sh", "-c" , "apache-cassandra-3.11.10/bin/cassandra -R && sleep 15 && apache-cassandra-3.11.10/bin/cqlsh -f ./testdata.cql && cd build && make coverage"]
+ENTRYPOINT ["/bin/sh", "-c" , "apache-cassandra-4.0.1/bin/cassandra -R && sleep 60 && apache-cassandra-4.0.1/bin/cqlsh -f ./testdata.cql && cd build && make coverage"]
