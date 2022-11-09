@@ -45,7 +45,6 @@ add_library(Database-API-library
 	"SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.cpp" "SearchSECODatabaseAPI/JobDistribution/RAFTConsensus.h")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lboost_system")
 
 include_directories(external/include)
 target_link_libraries(Database-APIexe /usr/lib/x86_64-linux-gnu/libcassandra.so.2.15.3)
