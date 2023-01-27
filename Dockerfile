@@ -17,6 +17,9 @@ RUN apt-get -y update && \
 RUN apt-get -y install libuv1
 RUN apt-get -y install libuv1-dev
 
+RUN apt-get -y install gdb python3 python3-pip && \
+	pip3 install cqlsh
+	
 COPY . .
 RUN dpkg -i ./external/prometheus-cpp_0.12.3_amd64.deb
 RUN mkdir build && \
