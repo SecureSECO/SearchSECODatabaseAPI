@@ -6,6 +6,7 @@ The database API is responsible for handling the communication between the contr
 # Installation
 To install the program you should clone the git repository.
 
+
 ## Dependencies
 The database api code has the following dependencies:
 * Cassandra
@@ -18,16 +19,20 @@ For running the program using Docker you need the following dependencies install
 
 If you want to build the program locally in Linux you will need to perform the following commands to get the required dependencies:
 * `sudo apt-get install libboost-all-dev`
-* `wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.4_amd64.deb`
-* `sudo dpkg -i multiarch-support_2.27-3ubuntu1.4_amd64.deb`
+* `wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.6_amd64.deb`
+* `sudo dpkg -i multiarch-support_2.27-3ubuntu1.6_amd64.deb`
 * `apt-get install libssl-dev libkrb5-dev zlib1g`
 * `wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb`
 * `dpkg -i libuv1_1.35.0-1_amd64.deb`
+* `wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb`
+* `dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb`
 * `wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb`
 * `dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb`
 
 ## Building
 There are two different ways of building the program. You can simply run it using Docker, this is the easiest if you just want to run the program. The other way is to locally build the program using `cmake` on Linux.
+
+Note: The current version of the DatabaseAPI does not work on Apple Silicon Mac machines (M1/M2 chips). To build, use a machine running a processor with x86 Architecture. 
 
 ### Docker
 In order to start the program using Docker you should first set the variables in the `.env` file. The _LOC_ is for the location of the data to store, _SEEDS_ is for the IP-addresses of the nodes to connect to and the _IP_ is for the public IP-address of the current computer. In order to contact the rest of the database you should also open ports `8001` and `8002`. You can then start the program using `docker-compose up -d` in the main folder of the repository. This will automatically have your computer join the distributed database. After this the API should be listening on port `8003` for requests.
