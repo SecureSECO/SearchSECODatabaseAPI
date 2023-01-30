@@ -386,7 +386,7 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 				tries++;
 			}
 			std::cout<<"Job queue func."<<std::endl;
-			std::cout<<"Error number"<<errno<<std::endl;
+			std::cout<<"Error number: "<<errno<<std::endl;
 			throw "Unable to connect to database.";
 		}
 	}

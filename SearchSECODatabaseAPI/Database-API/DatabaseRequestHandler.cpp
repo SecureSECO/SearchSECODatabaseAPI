@@ -28,7 +28,7 @@ DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, Statis
 		if (errno != 0)
 		{	
 			std::cout<<"Still in database connection."<<std::endl;
-			std::cout<<"Error number"<<errno<<std::endl;
+			std::cout<<"Error number: "<<errno<<std::endl;
 			throw "Unable to connect to the database.";
 		}
 	}
