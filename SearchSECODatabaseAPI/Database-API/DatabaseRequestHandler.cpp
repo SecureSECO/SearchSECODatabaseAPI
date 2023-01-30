@@ -23,9 +23,18 @@ DatabaseRequestHandler::DatabaseRequestHandler(DatabaseHandler *database, Statis
 	this->database = database;
 	this->stats = stats;
 	connectWithRetry(ip, port);
-	if (errno != 0)
+	try
 	{
-		throw "Unable to connect to the database.";
+		if (errno != 0)
+		{	
+			std::cout<<"Still in database connection."<<std::endl;
+			std::cout<<"Error number: "<<errno<<std::endl;
+			throw "Unable to connect to the database.";
+		}
+	}
+	catch (const char *e)
+	{
+		std::cerr << e << std::endl;
 	}
 }
 

@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS projectData.author_by_id
 );
 
 CREATE KEYSPACE IF NOT EXISTS jobs
-WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1' : 1};
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
 	
 CREATE TABLE IF NOT EXISTS jobs.jobsqueue 
 (

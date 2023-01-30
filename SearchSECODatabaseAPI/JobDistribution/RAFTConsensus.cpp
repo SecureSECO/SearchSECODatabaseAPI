@@ -134,9 +134,17 @@ void RAFTConsensus::connectToLeader(std::vector<std::pair<std::string, std::stri
 
 void RAFTConsensus::handleInitialData(std::vector<std::string> initialData)
 {
-	if (initialData.size() < 3)
+	try
 	{
-		throw std::runtime_error("Incorrect initial data.");
+		if (initialData.size() < 3)
+		{
+			throw std::runtime_error("Incorrect initial data.");
+		}
+	}
+	catch (std::exception const& e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
 	}
 	myIp = initialData[1];
 	myPort = initialData[2];
@@ -162,11 +170,19 @@ void RAFTConsensus::tryConnectingWithIp(std::string &ip, std::string &port, std:
 	std::vector<std::string> receivedLeader = Utility::splitStringOn(response, FIELD_DELIMITER_CHAR);
 	if (receivedLeader[0] != RESPONSE_OK)
 	{
-		// If we get something which is not an OK, we will assume that it has send back the true leader.
-		if (receivedLeader.size() != 2)
+		try
 		{
-			throw std::runtime_error("Incorrect response from connect request. Size was " +
-									 std::to_string(receivedLeader.size()));
+			// If we get something which is not an OK, we will assume that it has send back the true leader.
+			if (receivedLeader.size() != 2)
+			{
+				throw std::runtime_error("Incorrect response from connect request. Size was " +
+										std::to_string(receivedLeader.size()));
+			}
+		}
+		catch (std::exception const& e)
+		{
+			std::cout << e.what() << std::endl;
+			return;
 		}
 		ip = receivedLeader[0];
 		port = receivedLeader[1];
@@ -202,9 +218,17 @@ void RAFTConsensus::listenForHeartbeat()
 			usleep(LEADER_DROPOUT_WAIT_TIME);
 			std::cout << "Attempt connection with new leader." << std::endl;
 			connectToLeader({newLeader});
-			if(leader) 
+			try
 			{
-				throw std::runtime_error("Could not connect with the new leader.");
+				if(leader) 
+				{
+					throw std::runtime_error("Could not connect with the new leader.");
+				}
+			}
+			catch(std::exception const& e) 
+			{
+				std::cout << e.what() << std::endl;
+				return;
 			}
 		}
 		handleHeartbeat(data);

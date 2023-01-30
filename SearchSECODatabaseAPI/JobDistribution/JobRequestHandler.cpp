@@ -1,7 +1,7 @@
 /*
 This program has been developed by students from the bachelor Computer Science at
 Utrecht University within the Software Project course.
-© Copyright Utrecht University (Department of Information and Computing Sciences)
+ï¿½ Copyright Utrecht University (Department of Information and Computing Sciences)
 */
 
 #include "JobRequestHandler.h"
@@ -371,19 +371,28 @@ void JobRequestHandler::connectWithRetry(std::string ip, int port)
 	errno = 0;
 	database->connect(ip, port);
 	int tries = 0;
-	if (errno != 0)
+	try
 	{
-		while (tries < MAX_RETRIES)
+		if (errno != 0)
 		{
-			usleep(pow(2, tries) * RETRY_SLEEP);
-			database->connect(ip, port);
-			if (errno == 0)
+			while (tries < MAX_RETRIES)
 			{
-				return;
+				usleep(pow(2, tries) * RETRY_SLEEP);
+				database->connect(ip, port);
+				if (errno == 0)
+				{
+					return;
+				}
+				tries++;
 			}
-			tries++;
+			std::cout<<"Job queue func."<<std::endl;
+			std::cout<<"Error number: "<<errno<<std::endl;
+			throw "Unable to connect to database.";
 		}
-		throw "Unable to connect to database.";
+	}
+	catch (const char* msg)
+	{
+		std::cerr << msg << std::endl;
 	}
 	errno = 0;
 }
