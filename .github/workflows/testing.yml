@@ -28,7 +28,7 @@ jobs:
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo apt-get -y -qq update
-             sudo apt-get -y -qq install curl libcurl4-openssl-dev python3
+             sudo apt-get -y -qq install curl libcurl4-openssl-dev python2
              sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install Cassandra
         run: |
@@ -65,7 +65,7 @@ jobs:
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo apt-get -y -qq update
-             sudo apt-get -y -qq install curl python3
+             sudo apt-get -y -qq install curl python2
              sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install clang
         run: sudo apt-get -y -qq install clang clang-tidy clang-format
