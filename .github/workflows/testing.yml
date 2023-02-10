@@ -25,20 +25,23 @@ jobs:
              sudo apt-get -y -qq install libssl-dev libkrb5-dev zlib1g
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
              sudo dpkg -i libuv1_1.35.0-1_amd64.deb
+             wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+             sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+             sudo apt-get -y -qq install libuv1 libuv1-dev
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo apt-get -y -qq update
-             sudo apt-get -y -qq install curl libcurl4-openssl-dev python2
+             sudo apt-get -y -qq install curl libcurl4-openssl-dev python2 python3
              sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install Cassandra
         run: |
-             wget -nv https://dlcdn.apache.org/cassandra/4.0.4/apache-cassandra-4.0.4-bin.tar.gz
-             tar xzf apache-cassandra-4.0.4-bin.tar.gz
+             wget -nv https://dlcdn.apache.org/cassandra/4.1.0/apache-cassandra-4.1.0-bin.tar.gz
+             tar xzf apache-cassandra-4.1.0-bin.tar.gz
       - name: Tests
         run: |
-             apache-cassandra-4.0.4/bin/cassandra -R
-             sleep 40
-             apache-cassandra-4.0.4/bin/cqlsh -f ./testdata.cql
+             apache-cassandra-4.1.0/bin/cassandra -R
+             sleep 100
+             apache-cassandra-4.1.0/bin/cqlsh -f ./testdata.cql
              rm -rf database_build
              mkdir database_build
              cd database_build
@@ -56,16 +59,19 @@ jobs:
              sudo apt-get -y -qq update
              sudo apt-get -y -qq dist-upgrade
              sudo apt-get -y -qq install gcc g++ cmake autoconf dpkg wget git
-             sudo apt-get -y -qq install libboost-all-dev
+             sudo apt-get -y -qq install libboost-all-dev libuv1 libuv1-dev
              wget -nv http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1.5_amd64.deb
              sudo dpkg -i multiarch-support_2.27-3ubuntu1.5_amd64.deb
              sudo apt-get -y -qq install libssl-dev libkrb5-dev zlib1g
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb
              sudo dpkg -i libuv1_1.35.0-1_amd64.deb
+             sudo apt-get -y -qq install libuv1 libuv1-dev
+             wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+             sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
              wget -nv https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb
              sudo apt-get -y -qq update
-             sudo apt-get -y -qq install curl python2
+             sudo apt-get -y -qq install curl python2 python3
              sudo dpkg -i ../external/prometheus-cpp_0.12.3_amd64.deb
       - name: Install clang
         run: sudo apt-get -y -qq install clang clang-tidy clang-format
