@@ -49,19 +49,23 @@ The Database API can then be started using `./Database-API/Database-API`.
 # Usage
 
 The database API can handle multiple different requests. Every request has a different four-letter identifier which should be specified in the input. After the identifier the length of the input data should be specified, this is the number of ASCII characters (so `\n` has a length of 1). Following this should be the input data in the specific format required by the request. The database API supports the following requests for uploading to and extracting from the database:
-* The `check` request can be used to check if a method or multiple methods are present in the database.
-* The `upload` request can be used to upload or update a project with its specified methods.
-* The `check upload` request can be used to match the input data to existing entries in the database, matches will show up on the command-line. After this, the project and methods will be added to the database.
-* The `extract projects` request can be used to retrieve the information of projects given their `projectID`.
-* The `get author` request can be used to get the name and email corresponding to an author ID.
-* The `get method by author` request can be used to get the methods that an author has worked on.
-* The `get previous project` request can be used to get the most recent project of a repository in the database.
+* The `check (chck)` request can be used to check if a method or multiple methods are present in the database.
+* The `upload (upld)` request can be used to upload or update a project with its specified methods.
+* The `check upload (chup)` request can be used to match the input data to existing entries in the database, matches will show up on the command-line. After this, the project and methods will be added to the database.
+* The `extract projects (extp)` request can be used to retrieve the information of projects given their `projectID`.
+* The `get author (idau)` request can be used to get the name and email corresponding to an author ID.
+* The `get method by author (aume)` request can be used to get the methods that an author has worked on.
+* The `get previous project (gppr)` request can be used to get the most recent project of a repository in the database.
 
 The API also supports the following requests for the job distribution system:
-* The `connect` request can be used to connect a new node to the network.
-* The `upload job` request can be used to upload multiple jobs to the jobsqueue.
-* The `upload crawl data` request can be used to both upload new jobs and update the crawl id.
-* The `get top job` request can be used to get a job.
+* The `connect (conn)` request can be used to connect a new node to the network.
+* The `upload job (upjb)` request can be used to upload multiple jobs to the jobsqueue.
+* The `upload crawl data (upcd)` request can be used to both upload new jobs and update the crawl id.
+* The `get top job (gtjb)` request can be used to get a job.
+
+The 4-letter identifier for each request is listed after the request name in parentheses.
+
+TODO: How to construct a request via a TCP client
 
 ### Stopping
 
