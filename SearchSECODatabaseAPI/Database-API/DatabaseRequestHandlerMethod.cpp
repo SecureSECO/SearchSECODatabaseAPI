@@ -252,12 +252,12 @@ std::string DatabaseRequestHandler::methodsToString(std::vector<MethodOut> metho
 		std::string authorTotal = std::to_string(authorIDs.size());
 		std::string parserVersion = std::to_string(lastMethod.parserVersion);
 		std::string vulnCode = lastMethod.vulnCode;
-
+		std::string license = lastMethod.license;
 		// We initialize dataElements, which consists of the hash, projectID, version, name, fileLocation, lineNumber,
 		// authorTotal and all the authorIDs.
 		std::vector<std::string> dataElements = {hash,		 projectID,		 startVersion, startVersionHash,
 												 endVersion, endVersionHash, name,		   fileLocation,
-												 lineNumber, parserVersion,	 vulnCode,	   authorTotal};
+												 lineNumber, parserVersion,	 vulnCode,	   license,		authorTotal};
 		dataElements.insert(std::end(dataElements), std::begin(authorIDs), std::end(authorIDs));
 
 		// Append 'chars' by the special dataElements separated by special characters.

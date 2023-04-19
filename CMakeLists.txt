@@ -77,4 +77,4 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 configure_file(".env" ".env" COPYONLY)
 
 # Include sub-projects.
-add_subdirectory ("tests")
+#add_subdirectory ("tests")

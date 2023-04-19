@@ -296,7 +296,12 @@ MethodOut DatabaseHandler::getMethod(const CassRow *row)
 	method.endVersionHash = DatabaseUtility::getString(row, "endversionhash");
 	method.parserVersion = DatabaseUtility::getInt64(row, "parserversion");
 	method.vulnCode = DatabaseUtility::getString(row, "vulncode");
+	
+	//fetch license of project from method.projectID
+	ProjectOut project = DatabaseHandler::searchForProject(method.projectID,method.endVersion);
+	method.license = project.license;
 
+	
 	const CassValue *set = cass_row_get_column_by_name(row, "authors");
 	CassIterator *iterator = cass_iterator_from_collection(set);
 	if (iterator)
