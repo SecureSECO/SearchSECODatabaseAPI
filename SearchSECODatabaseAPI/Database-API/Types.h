@@ -76,6 +76,7 @@ namespace types
 		std::string vulnCode;
 		std::vector<AuthorID> authorIDs;
 		long long parserVersion;
+		std::string license;
 	};
 
 	struct MethodID
