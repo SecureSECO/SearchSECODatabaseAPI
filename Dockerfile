@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
 	apt-get -y dist-upgrade && \
@@ -14,11 +14,11 @@ RUN apt-get -y update && \
 	wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.15.3/cassandra-cpp-driver_2.15.3-1_amd64.deb && \
 	dpkg -i cassandra-cpp-driver_2.15.3-1_amd64.deb 
 
-RUN apt-get -y install libuv1
-RUN apt-get -y install libuv1-dev
+#RUN apt-get -y install libuv1
+#RUN apt-get -y install libuv1-dev
 
-RUN apt-get -y install gdb python3 python3-pip && \
-	pip3 install cqlsh
+#RUN apt-get -y install gdb python3 python3-pip && \
+#	pip3 install cqlsh
 	
 COPY . .
 RUN dpkg -i ./external/prometheus-cpp_0.12.3_amd64.deb
